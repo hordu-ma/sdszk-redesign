@@ -163,14 +163,17 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import carousel1 from "../assets/carousel1.jpg";
+import carousel2 from "../assets/carousel2.jpg";
+import carousel3 from "../assets/carousel3.jpg";
 
 const router = useRouter();
 
 // 模拟数据
 const carouselItems = ref([
-  { id: 1, image: "/carousel1.jpg", title: "新闻1" },
-  { id: 2, image: "/carousel2.jpg", title: "新闻2" },
-  { id: 3, image: "/carousel3.jpg", title: "新闻3" },
+  { id: 1, image: carousel1, title: "新闻1" },
+  { id: 2, image: carousel2, title: "新闻2" },
+  { id: 3, image: carousel3, title: "新闻3" },
 ]);
 
 const centerNews = ref([
@@ -373,10 +376,16 @@ const handleLogin = () => {
   margin: 20px 0;
 }
 
+.carousel-container {
+  width: 100%;
+  height: 300px;
+}
+
 .carousel-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .center-news {
