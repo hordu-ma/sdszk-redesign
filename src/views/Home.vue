@@ -2,20 +2,22 @@
   <div class="home-container">
     <!-- 头部组件 -->
     <header class="header">
-      <div class="logo-container">
-        <img src="../assets/logo.png" alt="中心logo" class="logo" />
-        <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
-      </div>
-      <nav class="nav-menu">
-        <router-link to="/" class="nav-item">首页</router-link>
-        <router-link to="/about" class="nav-item">平台简介</router-link>
-        <router-link to="/news" class="nav-item">资讯中心</router-link>
-        <router-link to="/activities" class="nav-item">活动中心</router-link>
-        <router-link to="/resources" class="nav-item">资源中心</router-link>
-        <router-link to="/ai" class="nav-item">AI思政</router-link>
-      </nav>
-      <div class="login-section">
-        <el-button type="primary" @click="handleLogin">登录</el-button>
+      <div class="header-content">
+        <div class="logo-container">
+          <img src="../assets/logo.png" alt="中心logo" class="logo" />
+          <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
+        </div>
+        <nav class="nav-menu">
+          <router-link to="/" class="nav-item">首页</router-link>
+          <router-link to="/about" class="nav-item">平台简介</router-link>
+          <router-link to="/news" class="nav-item">资讯中心</router-link>
+          <router-link to="/activities" class="nav-item">活动中心</router-link>
+          <router-link to="/resources" class="nav-item">资源中心</router-link>
+          <router-link to="/ai" class="nav-item">AI思政</router-link>
+        </nav>
+        <div class="login-section">
+          <el-button type="primary" @click="handleLogin">登录</el-button>
+        </div>
       </div>
     </header>
 
@@ -181,24 +183,36 @@ const notices = ref([
   { id: 1, title: "重要通知1" },
   { id: 2, title: "重要通知2" },
   { id: 3, title: "重要通知3" },
+  { id: 4, title: "重要通知4" },
+  { id: 5, title: "重要通知5" },
+  { id: 6, title: "重要通知6" },
 ]);
 
 const policies = ref([
   { id: 1, title: "最新政策1" },
   { id: 2, title: "最新政策2" },
   { id: 3, title: "最新政策3" },
+  { id: 4, title: "最新政策4" },
+  { id: 5, title: "最新政策5" },
+  { id: 6, title: "最新政策6" },
 ]);
 
 const theories = ref([
   { id: 1, title: "理论研究1" },
   { id: 2, title: "理论研究2" },
   { id: 3, title: "理论研究3" },
+  { id: 4, title: "理论研究4" },
+  { id: 5, title: "理论研究5" },
+  { id: 6, title: "理论研究6" },
 ]);
 
 const researches = ref([
   { id: 1, title: "教学研究1" },
   { id: 2, title: "教学研究2" },
   { id: 3, title: "教学研究3" },
+  { id: 4, title: "教学研究4" },
+  { id: 5, title: "教学研究5" },
+  { id: 6, title: "教学研究6" },
 ]);
 
 const videos = ref([
@@ -245,19 +259,49 @@ const handleLogin = () => {
 </script>
 
 <style scoped>
+/*全局样式重置*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .home-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 0;
+  margin: 0;
+  position: relative;
 }
 
 .header {
   display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  left: 0;
+  right: 0;
+  background-color: #9a2314;
+}
+
+/* 内容区域限制宽度 */
+.header > div {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 40px;
+}
+
+.header-content {
+  max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
+  padding: 12px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .logo-container {
@@ -319,11 +363,16 @@ const handleLogin = () => {
 .platform-banner {
   width: 100%;
   margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .banner-img {
   width: 100%;
   height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 .news-section {
