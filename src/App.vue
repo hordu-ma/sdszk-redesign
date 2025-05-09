@@ -36,11 +36,16 @@ body {
 
 .app-container {
   min-height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
-  width: 100%;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 
 /* 响应式布局基础设置 */
@@ -78,5 +83,9 @@ header {
   background-color: #9a2314;
   color: #fff;
   margin: 0;
+  padding: 0;
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 </style>

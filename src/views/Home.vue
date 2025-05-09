@@ -266,31 +266,22 @@ const handleLogin = () => {
   box-sizing: border-box;
 }
 .home-container {
-  width: 100%;
+  width: 100vw;
   padding: 0;
   margin: 0;
   position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  overflow-x: hidden;
 }
 
 .header {
-  display: flex;
   width: 100%;
   margin: 0;
   padding: 0;
-  position: relative;
-  left: 0;
-  right: 0;
   background-color: #9a2314;
-}
-
-/* 内容区域限制宽度 */
-.header > div {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .header-content {
