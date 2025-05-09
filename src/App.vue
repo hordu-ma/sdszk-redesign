@@ -17,7 +17,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -45,11 +46,12 @@ a {
 }
 
 a:hover {
-  color: #409EFF;
+  color: #409eff;
 }
 
 /* 列表样式重置 */
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -57,5 +59,11 @@ ul, ol {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* header样式 */
+header {
+  background-color: #9a2314;
+  color: #fff;
 }
 </style>
