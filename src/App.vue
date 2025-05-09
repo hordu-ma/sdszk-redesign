@@ -65,5 +65,6 @@ img {
 header {
   background-color: #9a2314;
   color: #fff;
+  margin: 0;
 }
 </style>
