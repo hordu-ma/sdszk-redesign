@@ -256,41 +256,64 @@ const handleLogin = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 12px 40px;
   width: 100%;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
+  padding-right: 20px;
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
-  margin-right: 15px;
+  width: 50px;
+  height: 50px;
+  margin-right: 12px;
 }
 
 .center-name {
-  font-size: 24px;
-  color: #333;
+  font-size: 20px;
+  color: #fff;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .nav-menu {
   display: flex;
-  gap: 20px;
+  gap: 30px;
+  margin-right: auto;
+  margin-left: 60px;
 }
 
 .nav-item {
   text-decoration: none;
-  color: #333;
+  color: #fff;
   font-size: 16px;
-  padding: 5px 10px;
+  padding: 6px 0;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .nav-item:hover,
 .nav-item.router-link-active {
-  color: #409eff;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #fff;
+  transition: width 0.3s ease;
+}
+
+.nav-item:hover::after,
+.nav-item.router-link-active::after {
+  width: 100%;
 }
 
 .platform-banner {
@@ -394,5 +417,23 @@ const handleLogin = () => {
 .qrcode-img {
   width: 120px;
   height: 120px;
+}
+
+.login-section {
+  margin-left: 20px;
+}
+
+.login-section :deep(.el-button) {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #fff;
+  padding: 8px 24px;
+  transition: all 0.3s ease;
+}
+
+.login-section :deep(.el-button:hover) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  color: #fff;
 }
 </style>
