@@ -4,7 +4,7 @@
     <header class="header">
       <div class="header-content">
         <div class="logo-container">
-          <img src="../assets/logo.png" alt="中心logo" class="logo" />
+          <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
           <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
         </div>
         <nav class="nav-menu">
@@ -15,13 +15,19 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  <router-link to="/news/center" class="dropdown-link">中心动态</router-link>
+                  <router-link to="/news/center" class="dropdown-link"
+                    >中心动态</router-link
+                  >
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <router-link to="/news/notice" class="dropdown-link">通知公告</router-link>
+                  <router-link to="/news/notice" class="dropdown-link"
+                    >通知公告</router-link
+                  >
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <router-link to="/news/policy" class="dropdown-link">政策文件</router-link>
+                  <router-link to="/news/policy" class="dropdown-link"
+                    >政策文件</router-link
+                  >
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -32,13 +38,19 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  <router-link to="/resources/theory" class="dropdown-link">理论研究</router-link>
+                  <router-link to="/resources/theory" class="dropdown-link"
+                    >理论研究</router-link
+                  >
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <router-link to="/resources/teaching" class="dropdown-link">教学前沿</router-link>
+                  <router-link to="/resources/teaching" class="dropdown-link"
+                    >教学前沿</router-link
+                  >
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <router-link to="/resources/video" class="dropdown-link">思政短视频</router-link>
+                  <router-link to="/resources/video" class="dropdown-link"
+                    >思政短视频</router-link
+                  >
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -54,7 +66,11 @@
     <!-- 平台宣传图组件 -->
     <div class="platform-banner">
       <router-link to="/ai">
-        <img src="../assets/banner.jpg" alt="平台宣传图" class="banner-img" />
+        <img
+          src="../assets/images/banner.jpg"
+          alt="平台宣传图"
+          class="banner-img"
+        />
       </router-link>
     </div>
 
@@ -161,6 +177,7 @@
           class="school-logo"
         >
           <img :src="school.logo" :alt="school.name" />
+          <p class="school-name">{{ school.name }}</p>
         </a>
       </div>
     </div>
@@ -193,9 +210,15 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import carousel1 from "../assets/carousel1.jpg";
-import carousel2 from "../assets/carousel2.jpg";
-import carousel3 from "../assets/carousel3.jpg";
+import carousel1 from "../assets/images/carousel1.jpg";
+import carousel2 from "../assets/images/carousel2.jpg";
+import carousel3 from "../assets/images/carousel3.jpg";
+import school1Logo from "../assets/images/schools/school1.png";
+import school2Logo from "../assets/images/schools/school2.png";
+import school3Logo from "../assets/images/schools/school3.png";
+import school4Logo from "../assets/images/schools/school4.png";
+import school5Logo from "../assets/images/schools/school5.png";
+import school6Logo from "../assets/images/schools/school6.png";
 
 const router = useRouter();
 
@@ -249,35 +272,125 @@ const researches = ref([
 ]);
 
 const videos = ref([
-  { id: 1, title: "思政视频1", url: "/video1.mp4", poster: "/poster1.jpg" },
-  { id: 2, title: "思政视频2", url: "/video2.mp4", poster: "/poster2.jpg" },
-  { id: 3, title: "思政视频3", url: "/video3.mp4", poster: "/poster3.jpg" },
+  {
+    id: 1,
+    title: "思政课程创新实践",
+    url: "../assets/videos/video1.mp4",
+    poster: "../assets/images/posters/poster1.jpg",
+  },
+  {
+    id: 2,
+    title: "红色教育示范课",
+    url: "../assets/videos/video2.mp4",
+    poster: "../assets/images/posters/poster2.jpg",
+  },
+  {
+    id: 3,
+    title: "思政理论实践探索",
+    url: "../assets/videos/video3.mp4",
+    poster: "../assets/images/posters/poster3.jpg",
+  },
+  {
+    id: 4,
+    title: "党史教育专题课",
+    url: "../assets/videos/video4.mp4",
+    poster: "../assets/images/posters/poster4.jpg",
+  },
+  {
+    id: 5,
+    title: "思政实践教学案例",
+    url: "../assets/videos/video5.mp4",
+    poster: "../assets/images/posters/poster5.jpg",
+  },
+  {
+    id: 6,
+    title: "教学方法创新讲座",
+    url: "../assets/videos/video6.mp4",
+    poster: "../assets/images/posters/poster6.jpg",
+  },
 ]);
 
 const teachers = ref([
-  { id: 1, name: "教师1", title: "教授", avatar: "/teacher1.jpg" },
-  { id: 2, name: "教师2", title: "副教授", avatar: "/teacher2.jpg" },
-  { id: 3, name: "教师3", title: "讲师", avatar: "/teacher3.jpg" },
+  {
+    id: 1,
+    name: "张教授",
+    title: "特聘教授",
+    avatar: "../assets/images/teachers/teacher1.jpg",
+    description: "思政理论教育专家",
+  },
+  {
+    id: 2,
+    name: "李教授",
+    title: "教授",
+    avatar: "../assets/images/teachers/teacher2.jpg",
+    description: "马克思主义理论研究",
+  },
+  {
+    id: 3,
+    name: "王教授",
+    title: "教授",
+    avatar: "../assets/images/teachers/teacher3.jpg",
+    description: "党史教育研究",
+  },
+  {
+    id: 4,
+    name: "刘教授",
+    title: "副教授",
+    avatar: "../assets/images/teachers/teacher4.jpg",
+    description: "思想政治教育",
+  },
+  {
+    id: 5,
+    name: "陈教授",
+    title: "副教授",
+    avatar: "../assets/images/teachers/teacher5.jpg",
+    description: "当代中国研究",
+  },
+  {
+    id: 6,
+    name: "孙教授",
+    title: "副教授",
+    avatar: "../assets/images/teachers/teacher6.jpg",
+    description: "思政教育创新",
+  },
 ]);
 
 const schools = ref([
   {
     id: 1,
-    name: "学校1",
-    logo: "/school1.jpg",
-    website: "http://school1.edu.cn",
+    name: "山东大学",
+    logo: school1Logo,
+    website: "http://www.sdu.edu.cn",
   },
   {
     id: 2,
-    name: "学校2",
-    logo: "/school2.jpg",
-    website: "http://school2.edu.cn",
+    name: "中国海洋大学",
+    logo: school2Logo,
+    website: "http://www.ouc.edu.cn",
   },
   {
     id: 3,
-    name: "学校3",
-    logo: "/school3.jpg",
-    website: "http://school3.edu.cn",
+    name: "山东师范大学",
+    logo: school3Logo,
+    website: "http://www.sdnu.edu.cn",
+  },
+  {
+    id: 4,
+    name: "济南大学",
+    logo: school4Logo,
+    website: "http://www.ujn.edu.cn",
+  },
+  {
+    id: 5,
+    name: "青岛大学",
+    logo: school5Logo,
+    website: "http://www.qdu.edu.cn",
+  },
+  {
+    id: 6,
+    name: "山东理工大学",
+    logo: school6Logo,
+    website: "http://www.sdut.edu.cn",
   },
 ]);
 
@@ -476,9 +589,11 @@ const handleLogin = () => {
 
 .news-section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  margin: 20px 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 0;
 }
 
 .carousel-container {
@@ -496,11 +611,14 @@ const handleLogin = () => {
 .center-news {
   padding: 20px;
   background: #f5f7fa;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .news-list {
   list-style: none;
   padding: 0;
+  margin-top: 15px;
 }
 
 .news-item {
@@ -522,6 +640,13 @@ const handleLogin = () => {
   background: #fff;
   border: 1px solid #eee;
   border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.info-block:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .video-section,
@@ -531,18 +656,128 @@ const handleLogin = () => {
 }
 
 .video-grid,
-.teachers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
+.teachers-grid,
 .school-logos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px 20px;
+  margin: 30px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.video-card,
+.teacher-card,
+.school-logo {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.video-card:hover,
+.teacher-card:hover,
+.school-logo:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 视频卡片样式 */
+.video-card {
+  position: relative;
+}
+
+.video-title {
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  background: rgba(154, 35, 20, 0.02);
+}
+
+/* 教师卡片样式 */
+.teacher-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.teacher-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  object-fit: cover;
+  border: 3px solid rgba(154, 35, 20, 0.1);
+}
+
+.teacher-card h4 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.teacher-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0;
+}
+
+/* 学校logo样式 */
+.school-logo {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background: #fff;
+  height: 100px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.school-logo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(154, 35, 20, 0.02);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.school-logo:hover::after {
+  transform: translateX(0);
+}
+
+.school-logo img {
+  width: 120px;
+  height: 60px;
+  object-fit: contain;
+  margin-right: 20px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.school-logo .school-name {
+  font-size: 18px;
+  color: #333;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin: 0;
+  line-height: 1.4;
+  flex-grow: 1;
+  text-align: left;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+}
+
+.school-logo:hover img {
+  transform: scale(1.05);
+}
+
+.school-logo:hover .school-name {
+  color: #9a2314;
 }
 
 .footer {
@@ -589,5 +824,33 @@ const handleLogin = () => {
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
   color: #fff;
+}
+
+.section-title,
+.info-block h3,
+.video-section h3,
+.teachers-section h3,
+.community-section h3 {
+  font-family: "STZhongsong", "Microsoft YaHei", "PingFang SC",
+    "Hiragino Sans GB", "Heiti SC", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  padding: 10px 15px;
+  background: rgba(154, 35, 20, 0.05);
+  border-left: 4px solid #9a2314;
+  margin-bottom: 20px;
+  border-radius: 0 4px 4px 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.section-title:hover,
+.info-block h3:hover,
+.video-section h3:hover,
+.teachers-section h3:hover,
+.community-section h3:hover {
+  background: rgba(154, 35, 20, 0.08);
+  transform: translateX(5px);
 }
 </style>
