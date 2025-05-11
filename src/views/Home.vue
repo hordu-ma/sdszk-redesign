@@ -85,7 +85,15 @@
       </div>
       <!-- 中心动态部分 -->
       <div class="center-news">
-        <h2 class="section-title">中心动态</h2>
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-newspaper header-icon"></i>
+            <span class="title-text">中心动态</span>
+            <router-link to="/news/center" class="more-link">
+              更多<i class="fas fa-angle-right"></i>
+            </router-link>
+          </h3>
+        </div>
         <div class="news-container">
           <div v-for="news in centerNews" :key="news.id" class="news-item">
             <a :href="news.url" target="_blank" class="news-link">
@@ -103,42 +111,110 @@
     <!-- 四个信息板块 -->
     <div class="info-section">
       <div class="info-block notice">
-        <h3>通知公告</h3>
-        <ul>
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-bullhorn header-icon"></i>
+            <span class="title-text">通知公告</span>
+            <router-link to="/news/notice" class="more-link">
+              更多<i class="fas fa-angle-right"></i>
+            </router-link>
+          </h3>
+        </div>
+        <ul class="styled-list">
           <li v-for="notice in notices" :key="notice.id">
-            <router-link :to="`/news/notice/${notice.id}`">{{
-              notice.title
-            }}</router-link>
+            <a :href="notice.url" target="_blank" class="info-link">
+              <div class="info-content">
+                <div class="info-header">
+                  <span class="info-title">{{ notice.title }}</span>
+                </div>
+                <div class="info-footer">
+                  <span class="info-date">发布日期：{{ notice.date }}</span>
+                  <span class="info-unit">{{ notice.unit }}</span>
+                </div>
+              </div>
+            </a>
           </li>
         </ul>
       </div>
       <div class="info-block policy">
-        <h3>政策文件</h3>
-        <ul>
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-file-alt header-icon"></i>
+            <span class="title-text">政策文件</span>
+            <router-link to="/news/policy" class="more-link">
+              更多<i class="fas fa-angle-right"></i>
+            </router-link>
+          </h3>
+        </div>
+        <ul class="styled-list">
           <li v-for="policy in policies" :key="policy.id">
-            <router-link :to="`/news/policy/${policy.id}`">{{
-              policy.title
-            }}</router-link>
+            <a :href="policy.url" target="_blank" class="info-link">
+              <div class="info-content">
+                <div class="info-header">
+                  <span class="info-title">{{ policy.title }}</span>
+                </div>
+                <div class="info-footer">
+                  <span class="info-date">发布日期：{{ policy.date }}</span>
+                  <span class="info-unit">{{ policy.unit }}</span>
+                </div>
+              </div>
+            </a>
           </li>
         </ul>
       </div>
       <div class="info-block theory">
-        <h3>理论前沿</h3>
-        <ul>
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-book header-icon"></i>
+            <span class="title-text">理论前沿</span>
+            <router-link to="/resources/theory" class="more-link">
+              更多<i class="fas fa-angle-right"></i>
+            </router-link>
+          </h3>
+        </div>
+        <ul class="styled-list">
           <li v-for="theory in theories" :key="theory.id">
-            <router-link :to="`/resources/theory/${theory.id}`">{{
-              theory.title
-            }}</router-link>
+            <a :href="theory.url" target="_blank" class="info-link">
+              <div class="info-content">
+                <div class="info-header">
+                  <span class="info-title">{{ theory.title }}</span>
+                </div>
+                <div class="info-footer">
+                  <span class="info-author">{{ theory.author }}</span>
+                  <span class="info-affiliation">{{ theory.affiliation }}</span>
+                  <span class="info-date">发布日期：{{ theory.date }}</span>
+                </div>
+              </div>
+            </a>
           </li>
         </ul>
       </div>
       <div class="info-block teaching">
-        <h3>教学研究</h3>
-        <ul>
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-chalkboard-teacher header-icon"></i>
+            <span class="title-text">教学研究</span>
+            <router-link to="/resources/teaching" class="more-link">
+              更多<i class="fas fa-angle-right"></i>
+            </router-link>
+          </h3>
+        </div>
+        <ul class="styled-list">
           <li v-for="research in researches" :key="research.id">
-            <router-link :to="`/resources/research/${research.id}`">{{
-              research.title
-            }}</router-link>
+            <a :href="research.url" target="_blank" class="info-link">
+              <div class="info-content">
+                <div class="info-header">
+                  <span class="info-title">{{ research.title }}</span>
+                </div>
+                <div class="info-footer">
+                  <span class="info-author">{{ research.author }}</span>
+                  <span class="info-affiliation">{{
+                    research.affiliation
+                  }}</span>
+                  <span class="info-date">发布日期：{{ research.date }}</span>
+                </div>
+              </div>
+            </a>
           </li>
         </ul>
       </div>
@@ -282,39 +358,195 @@ const centerNews = ref([
 ]);
 
 const notices = ref([
-  { id: 1, title: "重要通知1" },
-  { id: 2, title: "重要通知2" },
-  { id: 3, title: "重要通知3" },
-  { id: 4, title: "重要通知4" },
-  { id: 5, title: "重要通知5" },
-  { id: 6, title: "重要通知6" },
+  {
+    id: 1,
+    title: "关于组织开展2025年度山东省高校示范马克思主义学院建设项目评估的通知",
+    date: "2025-05-10",
+    url: "https://www.sdszk.cn/home/information/item/1/156",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 2,
+    title: "关于开展2025年度山东省高校思想政治工作精品项目申报工作的通知",
+    date: "2025-05-08",
+    url: "https://www.sdszk.cn/home/information/item/1/155",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 3,
+    title: "关于举办山东省高校思政课教师教学创新大赛的通知",
+    date: "2025-05-05",
+    url: "https://www.sdszk.cn/home/information/item/1/154",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 4,
+    title: "关于开展2025年度高校思政课教师示范培训的通知",
+    date: "2025-05-03",
+    url: "https://www.sdszk.cn/home/information/item/1/153",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 5,
+    title: "2025年山东省高校思政课建设研究课题申报指南",
+    date: "2025-04-30",
+    url: "https://www.sdszk.cn/home/information/item/1/152",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 6,
+    title: "关于开展2025年度思政课教学质量提升工程项目评选的通知",
+    date: "2025-04-28",
+    url: "https://www.sdszk.cn/home/information/item/1/151",
+    unit: "山东省教育厅",
+  },
 ]);
 
 const policies = ref([
-  { id: 1, title: "最新政策1" },
-  { id: 2, title: "最新政策2" },
-  { id: 3, title: "最新政策3" },
-  { id: 4, title: "最新政策4" },
-  { id: 5, title: "最新政策5" },
-  { id: 6, title: "最新政策6" },
+  {
+    id: 1,
+    title: "教育部关于加强新时代高校思想政治理论课建设的指导意见",
+    date: "2025-05-09",
+    url: "https://www.sdszk.cn/home/information/item/3/89",
+    unit: "教育部",
+  },
+  {
+    id: 2,
+    title: "关于深化新时代学校思想政治理论课改革创新的若干意见",
+    date: "2025-05-07",
+    url: "https://www.sdszk.cn/home/information/item/3/88",
+    unit: "教育部",
+  },
+  {
+    id: 3,
+    title: "山东省教育厅关于加强高校思政课教师队伍建设的实施方案",
+    date: "2025-05-04",
+    url: "https://www.sdszk.cn/home/information/item/3/87",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 4,
+    title: "关于实施高校思政课教学质量提升工程的通知",
+    date: "2025-05-02",
+    url: "https://www.sdszk.cn/home/information/item/3/86",
+    unit: "教育部",
+  },
+  {
+    id: 5,
+    title: "山东省高校思政课改革创新实施细则",
+    date: "2025-04-29",
+    url: "https://www.sdszk.cn/home/information/item/3/85",
+    unit: "山东省教育厅",
+  },
+  {
+    id: 6,
+    title: "关于加强新时代高校思想政治工作的实施意见",
+    date: "2025-04-27",
+    url: "https://www.sdszk.cn/home/information/item/3/84",
+    unit: "教育部",
+  },
 ]);
 
 const theories = ref([
-  { id: 1, title: "理论研究1" },
-  { id: 2, title: "理论研究2" },
-  { id: 3, title: "理论研究3" },
-  { id: 4, title: "理论研究4" },
-  { id: 5, title: "理论研究5" },
-  { id: 6, title: "理论研究6" },
+  {
+    id: 1,
+    title: "习近平新时代中国特色社会主义思想的理论逻辑与实践创新",
+    date: "2025-05-10",
+    url: "https://www.sdszk.cn/home/resources/item/1/156",
+    author: "李明",
+    affiliation: "山东大学马克思主义学院",
+  },
+  {
+    id: 2,
+    title: "论新时代大中小学思政课一体化建设的路径创新",
+    date: "2025-05-08",
+    url: "https://www.sdszk.cn/home/resources/item/1/155",
+    author: "王华",
+    affiliation: "山东师范大学马克思主义学院",
+  },
+  {
+    id: 3,
+    title: "中国共产党百年党史教育的经验与启示",
+    date: "2025-05-05",
+    url: "https://www.sdszk.cn/home/resources/item/1/154",
+    author: "张丽",
+    affiliation: "青岛大学马克思主义学院",
+  },
+  {
+    id: 4,
+    title: "新时代思政课教学改革创新研究",
+    date: "2025-05-03",
+    url: "https://www.sdszk.cn/home/resources/item/1/153",
+    author: "刘强",
+    affiliation: "济南大学马克思主义学院",
+  },
+  {
+    id: 5,
+    title: "大思政课视域下的课程思政建设研究",
+    date: "2025-04-30",
+    url: "https://www.sdszk.cn/home/resources/item/1/152",
+    author: "陈红",
+    affiliation: "山东理工大学马克思主义学院",
+  },
+  {
+    id: 6,
+    title: "新时代爱国主义教育的理论与实践探索",
+    date: "2025-04-28",
+    url: "https://www.sdszk.cn/home/resources/item/1/151",
+    author: "孙伟",
+    affiliation: "中国海洋大学马克思主义学院",
+  },
 ]);
 
 const researches = ref([
-  { id: 1, title: "教学研究1" },
-  { id: 2, title: "教学研究2" },
-  { id: 3, title: "教学研究3" },
-  { id: 4, title: "教学研究4" },
-  { id: 5, title: "教学研究5" },
-  { id: 6, title: "教学研究6" },
+  {
+    id: 1,
+    title: "山东高校思政课一体化建设的创新实践与经验总结",
+    date: "2025-05-09",
+    url: "https://www.sdszk.cn/home/resources/item/2/89",
+    author: "张华",
+    affiliation: "山东师范大学",
+  },
+  {
+    id: 2,
+    title: "基于信息技术的思政课教学模式改革研究",
+    date: "2025-05-07",
+    url: "https://www.sdszk.cn/home/resources/item/2/88",
+    author: "李明",
+    affiliation: "山东大学",
+  },
+  {
+    id: 3,
+    title: "新时代大中小学思政课一体化建设的实践探索",
+    date: "2025-05-04",
+    url: "https://www.sdszk.cn/home/resources/item/2/87",
+    author: "王华",
+    affiliation: "青岛大学",
+  },
+  {
+    id: 4,
+    title: "思政课教学中的案例教学方法创新研究",
+    date: "2025-05-02",
+    url: "https://www.sdszk.cn/home/resources/item/2/86",
+    author: "刘强",
+    affiliation: "济南大学",
+  },
+  {
+    id: 5,
+    title: "新媒体环境下思政课教学改革与创新",
+    date: "2025-04-29",
+    url: "https://www.sdszk.cn/home/resources/item/2/85",
+    author: "陈红",
+    affiliation: "山东理工大学",
+  },
+  {
+    id: 6,
+    title: "大中小学思政课一体化教材体系建设研究",
+    date: "2025-04-27",
+    url: "https://www.sdszk.cn/home/resources/item/2/84",
+    author: "孙伟",
+    affiliation: "中国海洋大学",
+  },
 ]);
 
 const videos = ref([
@@ -659,20 +891,71 @@ const handleLogin = () => {
 }
 
 .center-news {
-  padding: 20px;
+  padding: 0;
   height: 400px;
   display: flex;
   flex-direction: column;
+}
+
+.center-news .block-header {
+  margin-bottom: 20px;
+}
+
+.center-news .block-header h3 {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #9a2314, #c44836);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 0;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  position: relative;
+}
+
+.center-news .block-header .header-icon {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.center-news .block-header .title-text {
+  flex: 1;
+  text-align: center;
+}
+
+.center-news .block-header .more-link {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease;
+  margin-left: auto;
+}
+
+.center-news .block-header .more-link:hover {
+  opacity: 0.8;
+  color: white;
+}
+
+.center-news .block-header .more-link i {
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+}
+
+.center-news .block-header .more-link:hover i {
+  transform: translateX(3px);
 }
 
 .news-container {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 20px;
   flex: 1;
   overflow-y: auto;
   padding-right: 10px;
+  padding: 0 10px;
 }
 
 .news-container::-webkit-scrollbar {
@@ -722,6 +1005,9 @@ const handleLogin = () => {
   color: #333;
   margin-bottom: 8px;
   line-height: 1.4;
+  text-align: left;
+  display: block;
+  word-break: break-word;
 }
 
 .news-summary {
@@ -745,23 +1031,178 @@ const handleLogin = () => {
 
 .info-section {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin: 20px 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin: 30px auto;
+  max-width: 1200px;
+  padding: 0 20px;
 }
 
 .info-block {
-  padding: 20px;
+  padding: 25px;
   background: #fff;
   border: 1px solid #eee;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
-.info-block:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.info-block .block-header {
+  margin-bottom: 20px;
+}
+
+.info-block .block-header h3 {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #9a2314, #c44836);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 0;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  position: relative;
+}
+
+.info-block .header-icon {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.info-block .title-text {
+  flex: 1;
+}
+
+.info-block .more-link {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.info-block .more-link:hover {
+  opacity: 0.8;
+}
+
+.info-block .more-link i {
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+}
+
+.info-block .more-link:hover i {
+  transform: translateX(3px);
+}
+
+.info-block .styled-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-block .styled-list li {
+  position: relative;
+  padding: 16px 0 16px 20px;
+  border-bottom: 1px dashed #e5e5e5;
+}
+
+.info-block .styled-list li:last-child {
+  border-bottom: none;
+}
+
+.info-block .styled-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 24px;
+  width: 6px;
+  height: 6px;
+  background: #9a2314;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.info-block .styled-list li:hover::before {
+  transform: scale(1.5);
+  background: #c44836;
+}
+
+.info-block .info-link {
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.info-title {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #333;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: block;
+  word-break: break-word;
+}
+
+.info-block .info-link:hover .info-title {
+  color: #9a2314;
+  transform: translateX(5px);
+}
+
+.info-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  color: #999;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.info-date {
+  color: inherit;
+}
+
+.info-unit {
+  color: inherit;
+}
+
+.info-author {
+  color: #9a2314;
+  font-weight: 500;
+}
+
+.info-affiliation {
+  color: #666;
+}
+
+.info-block ul li a.info-link:hover {
+  transform: translateX(5px);
+}
+
+.info-block ul li a.info-link:hover .info-title {
+  color: #9a2314;
+}
+
+.info-block ul li a.info-link:hover .info-unit,
+.info-block ul li a.info-link:hover .info-summary,
+.info-block ul li a.info-link:hover .info-date,
+.info-block ul li a.info-link:hover .info-affiliation {
+  color: #666;
 }
 
 .video-section,
