@@ -77,20 +77,26 @@
     <!-- 新闻轮播和中心动态区域 -->
     <div class="news-section">
       <div class="carousel-container">
-        <el-carousel height="300px">
+        <el-carousel height="400px">
           <el-carousel-item v-for="item in carouselItems" :key="item.id">
             <img :src="item.image" :alt="item.title" class="carousel-img" />
           </el-carousel-item>
         </el-carousel>
       </div>
+      <!-- 中心动态部分 -->
       <div class="center-news">
-        <h3 class="section-title">中心动态</h3>
-        <ul class="news-list">
-          <li v-for="news in centerNews" :key="news.id" class="news-item">
-            <router-link :to="`/news/${news.id}`">{{ news.title }}</router-link>
-            <span class="news-date">{{ news.date }}</span>
-          </li>
-        </ul>
+        <h2 class="section-title">中心动态</h2>
+        <div class="news-container">
+          <div v-for="news in centerNews" :key="news.id" class="news-item">
+            <a :href="news.url" target="_blank" class="news-link">
+              <div class="news-content">
+                <h3 class="news-title">{{ news.title }}</h3>
+                <p class="news-summary">{{ news.summary }}</p>
+                <span class="news-date">{{ news.date }}</span>
+              </div>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -210,9 +216,28 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import VideoPlayer from "../components/VideoPlayer.vue";
 import carousel1 from "../assets/images/carousel1.jpg";
 import carousel2 from "../assets/images/carousel2.jpg";
 import carousel3 from "../assets/images/carousel3.jpg";
+import video1 from "../assets/videos/video1.mp4";
+import video2 from "../assets/videos/video2.mp4";
+import video3 from "../assets/videos/video3.mp4";
+import video4 from "../assets/videos/video4.mp4";
+import video5 from "../assets/videos/video5.mp4";
+import video6 from "../assets/videos/video6.mp4";
+import poster1 from "../assets/images/posters/poster1.jpg";
+import poster2 from "../assets/images/posters/poster2.jpg";
+import poster3 from "../assets/images/posters/poster3.jpg";
+import poster4 from "../assets/images/posters/poster4.jpg";
+import poster5 from "../assets/images/posters/poster5.jpg";
+import poster6 from "../assets/images/posters/poster6.jpg";
+import teacher1 from "../assets/images/teachers/teacher1.jpg";
+import teacher2 from "../assets/images/teachers/teacher2.jpg";
+import teacher3 from "../assets/images/teachers/teacher3.jpg";
+import teacher4 from "../assets/images/teachers/teacher4.jpg";
+import teacher5 from "../assets/images/teachers/teacher5.jpg";
+import teacher6 from "../assets/images/teachers/teacher6.jpg";
 import school1Logo from "../assets/images/schools/school1.png";
 import school2Logo from "../assets/images/schools/school2.png";
 import school3Logo from "../assets/images/schools/school3.png";
@@ -230,9 +255,30 @@ const carouselItems = ref([
 ]);
 
 const centerNews = ref([
-  { id: 1, title: "中心最新动态1", date: "2024-01-20" },
-  { id: 2, title: "中心最新动态2", date: "2024-01-19" },
-  { id: 3, title: "中心最新动态3", date: "2024-01-18" },
+  {
+    id: 1,
+    title: "校际协同，星辰引航：'星空下的思政课'开讲",
+    date: "2025-04-29",
+    url: "https://www.sdszk.cn/home/information/item/2/87",
+    summary:
+      "青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办'星空下的思政课'大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。把思政课堂与文化实践教学有机结合，推动大中小学一体化课程思政是青岛理工大学近年来着力开展的重点工作，物理作为贯穿大中小学的科学教育，是实现大中小学一体化课程思政的重要课程载体。",
+  },
+  {
+    id: 2,
+    title: "菏泽家政职业学院组织开展大中小学乡村振兴劳动教育实践活动",
+    date: "2025-04-26",
+    url: "https://www.sdszk.cn/home/information/item/2/85",
+    summary:
+      "菏泽家政职业学院依托菏泽市大中小学思政课一体化建设共同体平台，组织大中小学学生走进全国文明村、全国乡村治理示范村——单县龙王庙镇刘土城村，开展了以'劳动铸魂 青春筑梦'为主题的乡村振兴劳动教育实践活动。",
+  },
+  {
+    id: 3,
+    title: "济宁市新时代学校思政课建设推进会召开",
+    date: "2025-04-20",
+    url: "https://www.sdszk.cn/home/information/item/2/84",
+    summary:
+      "济宁市新时代学校思政课建设推进会召开，市委常委、宣传部部长董冰出席并讲话，副市长宫晓芳主持会议。",
+  },
 ]);
 
 const notices = ref([
@@ -275,38 +321,38 @@ const videos = ref([
   {
     id: 1,
     title: "思政课程创新实践",
-    url: "../assets/videos/video1.mp4",
-    poster: "../assets/images/posters/poster1.jpg",
+    url: video1,
+    poster: poster1,
   },
   {
     id: 2,
     title: "红色教育示范课",
-    url: "../assets/videos/video2.mp4",
-    poster: "../assets/images/posters/poster2.jpg",
+    url: video2,
+    poster: poster2,
   },
   {
     id: 3,
     title: "思政理论实践探索",
-    url: "../assets/videos/video3.mp4",
-    poster: "../assets/images/posters/poster3.jpg",
+    url: video3,
+    poster: poster3,
   },
   {
     id: 4,
     title: "党史教育专题课",
-    url: "../assets/videos/video4.mp4",
-    poster: "../assets/images/posters/poster4.jpg",
+    url: video4,
+    poster: poster4,
   },
   {
     id: 5,
     title: "思政实践教学案例",
-    url: "../assets/videos/video5.mp4",
-    poster: "../assets/images/posters/poster5.jpg",
+    url: video5,
+    poster: poster5,
   },
   {
     id: 6,
     title: "教学方法创新讲座",
-    url: "../assets/videos/video6.mp4",
-    poster: "../assets/images/posters/poster6.jpg",
+    url: video6,
+    poster: poster6,
   },
 ]);
 
@@ -315,42 +361,42 @@ const teachers = ref([
     id: 1,
     name: "张教授",
     title: "特聘教授",
-    avatar: "../assets/images/teachers/teacher1.jpg",
+    avatar: teacher1,
     description: "思政理论教育专家",
   },
   {
     id: 2,
     name: "李教授",
     title: "教授",
-    avatar: "../assets/images/teachers/teacher2.jpg",
+    avatar: teacher2,
     description: "马克思主义理论研究",
   },
   {
     id: 3,
     name: "王教授",
     title: "教授",
-    avatar: "../assets/images/teachers/teacher3.jpg",
+    avatar: teacher3,
     description: "党史教育研究",
   },
   {
     id: 4,
     name: "刘教授",
     title: "副教授",
-    avatar: "../assets/images/teachers/teacher4.jpg",
+    avatar: teacher4,
     description: "思想政治教育",
   },
   {
     id: 5,
     name: "陈教授",
     title: "副教授",
-    avatar: "../assets/images/teachers/teacher5.jpg",
+    avatar: teacher5,
     description: "当代中国研究",
   },
   {
     id: 6,
     name: "孙教授",
     title: "副教授",
-    avatar: "../assets/images/teachers/teacher6.jpg",
+    avatar: teacher6,
     description: "思政教育创新",
   },
 ]);
@@ -590,15 +636,19 @@ const handleLogin = () => {
 .news-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
+  gap: 30px;
   margin: 0 auto;
-  max-width: 100%;
-  padding: 0;
+  max-width: 1200px;
+  padding: 30px 20px;
+  align-items: start;
+  background: #f5f7fa;
 }
 
 .carousel-container {
   width: 100%;
-  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .carousel-img {
@@ -610,22 +660,87 @@ const handleLogin = () => {
 
 .center-news {
   padding: 20px;
-  background: #f5f7fa;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
-.news-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 15px;
+.news-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.news-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.news-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.news-container::-webkit-scrollbar-thumb {
+  background: #9a2314;
+  border-radius: 3px;
+}
+
+.news-container::-webkit-scrollbar-thumb:hover {
+  background: #7a1c10;
 }
 
 .news-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.news-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 16px;
+}
+
+.news-content {
+  position: relative;
+}
+
+.news-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.news-summary {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.news-date {
+  font-size: 13px;
+  color: #999;
+  display: block;
 }
 
 .info-section {
@@ -686,41 +801,88 @@ const handleLogin = () => {
 /* 视频卡片样式 */
 .video-card {
   position: relative;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .video-title {
-  padding: 10px;
+  padding: 12px 15px;
   font-size: 16px;
   font-weight: 500;
   text-align: center;
-  background: rgba(154, 35, 20, 0.02);
+  color: #333;
+  background: #fff;
+  border-top: 1px solid rgba(154, 35, 20, 0.1);
+}
+
+.video-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(154, 35, 20, 0.15);
 }
 
 /* 教师卡片样式 */
 .teacher-card {
   text-align: center;
-  padding: 20px;
+  padding: 25px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.teacher-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #9a2314;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.teacher-card:hover::after {
+  transform: translateX(0);
 }
 
 .teacher-avatar {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   object-fit: cover;
-  border: 3px solid rgba(154, 35, 20, 0.1);
+  border: 4px solid rgba(154, 35, 20, 0.1);
+  transition: all 0.3s ease;
+  background: #f5f5f5;
+}
+
+.teacher-card:hover .teacher-avatar {
+  border-color: rgba(154, 35, 20, 0.3);
+  transform: scale(1.05);
 }
 
 .teacher-card h4 {
-  font-size: 18px;
+  font-size: 20px;
   color: #333;
   margin-bottom: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.teacher-card:hover h4 {
+  color: #9a2314;
 }
 
 .teacher-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
   margin: 5px 0;
+  line-height: 1.4;
 }
 
 /* 学校logo样式 */
