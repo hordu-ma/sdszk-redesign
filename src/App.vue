@@ -1,11 +1,12 @@
 <template>
   <div class="app-container">
+    <Header />
     <router-view />
   </div>
 </template>
 
 <script setup>
-// App root component
+import Header from "./components/Header.vue";
 </script>
 
 <style>

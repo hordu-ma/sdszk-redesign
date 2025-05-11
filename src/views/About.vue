@@ -1,13 +1,5 @@
 <template>
   <div class="about-container">
-    <!-- 页面标题区域 -->
-    <div class="about-header">
-      <div class="header-content">
-        <h1>平台简介</h1>
-        <div class="header-line"></div>
-      </div>
-    </div>
-
     <!-- 主要内容区域 -->
     <div class="about-content">
       <!-- 中心介绍 -->
@@ -109,34 +101,8 @@
 .about-container {
   width: 100%;
   background: #f5f7fa;
-  min-height: 100vh;
-}
-
-.about-header {
-  background: linear-gradient(to right, #9a2314, #c44836);
-  padding: 40px 0;
-  color: white;
-  text-align: center;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.header-content h1 {
-  font-size: 32px;
-  font-weight: bold;
-  margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
-}
-
-.header-line {
-  width: 60px;
-  height: 3px;
-  background: white;
-  margin: 15px auto;
+  min-height: calc(100vh - 64px);
+  padding-top: 30px;
 }
 
 .about-content {
