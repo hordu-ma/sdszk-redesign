@@ -157,6 +157,12 @@ const closeMobileMenu = () => {
   height: 40px;
 }
 
+@media screen and (max-width: 768px) {
+  .nav-menu {
+    display: none;
+  }
+}
+
 .nav-item {
   text-decoration: none;
   color: #fff;
@@ -366,6 +372,11 @@ const closeMobileMenu = () => {
     border-radius: 4px;
     order: -1;
     margin-right: 10px;
+    cursor: pointer;
+  }
+
+  .mobile-menu-button i {
+    font-size: 20px;
   }
 
   .menu-container {
@@ -373,17 +384,19 @@ const closeMobileMenu = () => {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     pointer-events: none;
     z-index: 1000;
+    visibility: hidden;
   }
 
   .menu-container.menu-open {
     pointer-events: auto;
+    visibility: visible;
   }
 
   .mobile-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -392,6 +405,7 @@ const closeMobileMenu = () => {
     backdrop-filter: blur(4px);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 1000;
     pointer-events: none;
   }
 
@@ -400,32 +414,32 @@ const closeMobileMenu = () => {
     pointer-events: auto;
   }
 
-  .nav-menu {
-    position: absolute;
+  .menu-container .nav-menu {
+    position: fixed;
     top: 0;
-    left: 0;
+    left: -220px;
     width: 220px;
     height: 100%;
     background-color: #8a1f11;
     padding: 60px 12px 20px;
-    transform: translateX(-100%);
     transition: transform 0.3s ease;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
+    z-index: 1001;
+    transform: translateX(0);
   }
 
   .menu-open .nav-menu {
-    transform: translateX(0);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    transform: translateX(220px);
   }
 
   .mobile-menu-close {
-    position: absolute;
+    position: fixed;
     top: 12px;
-    right: 12px;
-    z-index: 2;
+    left: 180px;
+    z-index: 1002;
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -435,10 +449,15 @@ const closeMobileMenu = () => {
     justify-content: center;
     color: white;
     cursor: pointer;
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 0.3s ease;
   }
 
   .menu-open .mobile-menu-close {
     display: flex;
+    opacity: 1;
+    transform: translateX(220px);
   }
 
   .nav-item {
