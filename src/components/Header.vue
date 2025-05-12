@@ -9,16 +9,68 @@
         <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
       </div>
-      <!-- 导航菜单容器 -->
-      <div class="menu-container" :class="{ 'menu-open': mobileMenuOpen }">
+      <!-- 桌面端导航菜单 -->
+      <nav class="desktop-nav">
+        <router-link to="/" class="nav-item">首页</router-link>
+        <router-link to="/about" class="nav-item">平台简介</router-link>
+        <el-dropdown trigger="hover" class="nav-dropdown">
+          <router-link to="/news" class="nav-item">资讯中心</router-link>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item>
+                <router-link to="/news/center" class="dropdown-link"
+                  >中心动态</router-link
+                >
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <router-link to="/news/notice" class="dropdown-link"
+                  >通知公告</router-link
+                >
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <router-link to="/news/policy" class="dropdown-link"
+                  >政策文件</router-link
+                >
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <router-link to="/activities" class="nav-item">活动中心</router-link>
+        <el-dropdown trigger="hover" class="nav-dropdown">
+          <router-link to="/resources" class="nav-item">资源中心</router-link>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item>
+                <router-link to="/resources/theory" class="dropdown-link"
+                  >理论研究</router-link
+                >
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <router-link to="/resources/teaching" class="dropdown-link"
+                  >教学前沿</router-link
+                >
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <router-link to="/resources/video" class="dropdown-link"
+                  >思政短视频</router-link
+                >
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <router-link to="/ai" class="nav-item">AI思政</router-link>
+      </nav>
+
+      <!-- 移动端菜单容器 -->
+      <div class="mobile-menu" :class="{ 'menu-open': mobileMenuOpen }">
         <!-- 移动端遮罩层 -->
         <div class="mobile-overlay" @click="closeMobileMenu"></div>
         <!-- 移动端关闭按钮 -->
         <div class="mobile-menu-close" @click="closeMobileMenu">
           <i class="fas fa-times"></i>
         </div>
-        <!-- 导航菜单 -->
-        <nav class="nav-menu">
+        <!-- 移动端导航菜单 -->
+        <nav class="mobile-nav">
           <router-link to="/" class="nav-item" @click="closeMobileMenu"
             >首页</router-link
           >
@@ -157,8 +209,18 @@ const closeMobileMenu = () => {
   height: 40px;
 }
 
+/* Desktop styles for nav items */
+.desktop-nav {
+  display: flex;
+  gap: 30px;
+  margin-right: auto;
+  margin-left: 60px;
+  align-items: center;
+  height: 40px;
+}
+
 @media screen and (max-width: 768px) {
-  .nav-menu {
+  .desktop-nav {
     display: none;
   }
 }
@@ -379,7 +441,7 @@ const closeMobileMenu = () => {
     font-size: 20px;
   }
 
-  .menu-container {
+  .mobile-menu {
     position: fixed;
     top: 0;
     left: 0;
@@ -390,7 +452,7 @@ const closeMobileMenu = () => {
     visibility: hidden;
   }
 
-  .menu-container.menu-open {
+  .mobile-menu.menu-open {
     pointer-events: auto;
     visibility: visible;
   }
@@ -414,7 +476,7 @@ const closeMobileMenu = () => {
     pointer-events: auto;
   }
 
-  .menu-container .nav-menu {
+  .mobile-nav {
     position: fixed;
     top: 0;
     left: -220px;
@@ -423,15 +485,14 @@ const closeMobileMenu = () => {
     background-color: #8a1f11;
     padding: 60px 12px 20px;
     transition: transform 0.3s ease;
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
     z-index: 1001;
-    transform: translateX(0);
   }
 
-  .menu-open .nav-menu {
+  .menu-open .mobile-nav {
     transform: translateX(220px);
   }
 
