@@ -638,14 +638,9 @@ const handleLogin = () => {
   box-sizing: border-box;
 }
 .home-container {
-  width: 100vw;
-  padding: 0;
-  margin: 0;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  max-width: 100%;
+  padding: 0 1rem;
+  margin: 0 auto;
   overflow-x: hidden;
 }
 
@@ -815,17 +810,17 @@ const handleLogin = () => {
 
 .news-section {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem auto;
   max-width: 1200px;
-  padding: 30px 20px;
-  align-items: start;
-  background: #f5f7fa;
+  padding: 0 1rem;
 }
 
 .carousel-container {
   width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -839,6 +834,9 @@ const handleLogin = () => {
 }
 
 .center-news {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
   height: 400px;
   display: flex;
@@ -1383,6 +1381,40 @@ const handleLogin = () => {
 }
 
 @media (max-width: 768px) {
+  .news-section {
+    grid-template-columns: 1fr;
+  }
+
+  .info-section {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+
+  .video-grid,
+  .teachers-grid,
+  .school-logos {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .block-header h3 {
+    font-size: 1.2rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .news-title {
+    font-size: 1rem;
+  }
+
+  .news-summary {
+    font-size: 0.9rem;
+  }
+
+  .video-title {
+    font-size: 0.9rem;
+  }
+
   .footer-content {
     flex-direction: column;
     align-items: center;
@@ -1401,6 +1433,83 @@ const handleLogin = () => {
 
   .qrcode {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 0;
+  }
+
+  .news-section,
+  .info-section,
+  .video-grid,
+  .teachers-grid,
+  .school-logos {
+    margin: 1rem auto;
+  }
+
+  .carousel-container {
+    border-radius: 0;
+  }
+
+  .el-carousel {
+    height: 200px !important;
+  }
+
+  .el-carousel__item {
+    height: 200px !important;
+  }
+
+  .carousel-img {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .video-card {
+    margin: 0 1rem;
+  }
+
+  .teacher-card,
+  .school-logo {
+    margin: 0 1rem;
+  }
+
+  .block-header {
+    margin: 0 1rem;
+  }
+
+  .teachers-grid,
+  .school-logos {
+    grid-template-columns: 1fr;
+  }
+
+  .video-card {
+    width: 100%;
+  }
+
+  .carousel-container {
+    margin-bottom: 0.5rem;
+  }
+
+  .el-carousel {
+    height: 200px !important;
+  }
+
+  .news-wrapper {
+    padding: 0.5rem;
+  }
+
+  .date-block {
+    padding: 0.5rem;
+  }
+
+  .news-content {
+    padding: 0.5rem;
+  }
+
+  .block-header {
+    padding: 0.5rem;
   }
 }
 

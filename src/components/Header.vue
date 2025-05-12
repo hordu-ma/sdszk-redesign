@@ -1,13 +1,30 @@
 <template>
   <header class="header">
     <div class="header-content">
+      <!-- 移动端菜单按钮 -->
+      <div class="mobile-menu-button" @click="toggleMobileMenu">
+        <i class="fas fa-bars"></i>
+      </div>
+      <!-- 添加关闭按钮 -->
+      <div
+        class="mobile-menu-close"
+        :class="{ show: mobileMenuOpen }"
+        @click="closeMobileMenu"
+      >
+        <i class="fas fa-times"></i>
+      </div>
       <div class="logo-container">
         <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
       </div>
-      <nav class="nav-menu">
-        <router-link to="/" class="nav-item">首页</router-link>
-        <router-link to="/about" class="nav-item">平台简介</router-link>
+      <!-- 导航菜单 -->
+      <nav :class="['nav-menu', { 'mobile-menu-open': mobileMenuOpen }]">
+        <router-link to="/" class="nav-item" @click="closeMobileMenu"
+          >首页</router-link
+        >
+        <router-link to="/about" class="nav-item" @click="closeMobileMenu"
+          >平台简介</router-link
+        >
         <el-dropdown trigger="hover" class="nav-dropdown">
           <router-link to="/news" class="nav-item">资讯中心</router-link>
           <template #dropdown>
@@ -64,12 +81,28 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
+import { ref } from "vue";
 
 const router = useRouter();
 const route = useRoute();
+const mobileMenuOpen = ref(false);
 
 const handleLogin = () => {
   router.push("/login");
+};
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+  if (mobileMenuOpen.value) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+};
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+  document.body.style.overflow = "";
 };
 </script>
 
@@ -260,5 +293,232 @@ const handleLogin = () => {
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
   color: #fff;
+}
+
+.mobile-menu-button {
+  display: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+  order: -1; /* 确保它在最左边 */
+  margin-right: 10px;
+}
+
+.mobile-menu-close {
+  display: none;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1001;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-close.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media screen and (max-width: 768px) {
+  .header-content {
+    padding: 8px 15px;
+  }
+
+  .center-name {
+    font-size: 14px;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-container {
+    flex: 1;
+    justify-content: center;
+    padding-right: 40px; /* 为了平衡左侧菜单按钮的宽度 */
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .mobile-menu-button i {
+    font-size: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-menu-button:active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .mobile-menu-close {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 75%; /* 减小菜单宽度 */
+    height: 100vh;
+    background-color: #8a1f11; /* 稍深的背景色 */
+    padding: 70px 15px 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    flex-direction: column;
+    gap: 10px;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    overflow-y: auto;
+  }
+
+  .nav-menu.mobile-menu-open {
+    transform: translateX(0);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 菜单打开时的遮罩 */
+  .nav-menu.mobile-menu-open::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 75%; /* 与菜单宽度对应 */
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  .nav-item {
+    font-size: 16px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover {
+    transform: none;
+    font-size: inherit;
+    box-shadow: none;
+  }
+
+  .nav-item:active {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(0.98);
+  }
+
+  .nav-dropdown {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .nav-dropdown :deep(.el-dropdown) {
+    width: 100%;
+  }
+
+  .nav-dropdown :deep(.el-dropdown-menu) {
+    width: calc(100% - 30px);
+    margin: 5px 15px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-dropdown :deep(.el-dropdown-menu__item) {
+    color: white;
+  }
+
+  .dropdown-link {
+    color: rgba(255, 255, 255, 0.9);
+    padding: 12px 15px;
+    font-size: 15px;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+  }
+
+  .dropdown-link:active {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .login-section {
+    display: none;
+  }
+
+  /* 添加背景遮罩 */
+  .nav-menu::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: -1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .nav-menu.mobile-menu-open::before {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* 调整下拉菜单在移动端的样式 */
+  .dropdown-link {
+    color: white;
+    padding: 12px 15px;
+    font-size: 15px;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+  }
+
+  .dropdown-link:active {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* 添加菜单顶部关闭按钮区域 */
+  .nav-menu::after {
+    content: "菜单";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 75%;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }
 </style>
