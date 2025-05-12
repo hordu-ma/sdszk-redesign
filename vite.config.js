@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/sdszk-redesign/", // 添加这行，设置为你的仓库名称
+  base: "/sdszk-redesign/",
   plugins: [vue()],
   resolve: {
     alias: {
@@ -15,14 +15,32 @@ export default defineConfig({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: true,
-    rollupOptions: {
-      output: {
-        // 确保资源使用相对路径
-        assetFileNames: "assets/[name].[hash][extname]",
-        chunkFileNames: "assets/[name].[hash].js",
-        entryFileNames: "assets/[name].[hash].js",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
       },
     },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            "vue",
+            "vue-router",
+            "pinia",
+            "ant-design-vue",
+            "element-plus",
+            "axios",
+            "quill",
+          ],
+        },
+        entryFileNames: "[name].[hash].js",
+        chunkFileNames: "[name].[hash].js",
+        assetFileNames: "[name].[hash].[ext]",
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     port: 5178,
