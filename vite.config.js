@@ -4,6 +4,7 @@ import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/sdszk-redesign/', // 添加这行，设置为你的仓库名称
   plugins: [vue()],
   resolve: {
     alias: {
