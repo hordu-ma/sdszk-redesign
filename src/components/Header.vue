@@ -2,9 +2,10 @@
   <header class="header">
     <div class="header-content">
       <!-- 移动端菜单按钮 -->
-      <div class="mobile-menu-button" @click="toggleMobileMenu">
+      <button class="mobile-menu-trigger" @click="toggleMenu">
+        <span class="sr-only">打开菜单</span>
         <i class="fas fa-bars"></i>
-      </div>
+      </button>
       <div class="logo-container">
         <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
@@ -62,74 +63,24 @@
       </nav>
 
       <!-- 移动端菜单容器 -->
-      <div class="mobile-menu" :class="{ 'menu-open': mobileMenuOpen }">
+      <div class="mobile-menu" :class="{ 'menu-open': isMenuOpen }">
         <!-- 移动端遮罩层 -->
-        <div class="mobile-overlay" @click="closeMobileMenu"></div>
+        <div class="mobile-overlay" @click="closeMenu"></div>
         <!-- 移动端关闭按钮 -->
-        <div class="mobile-menu-close" @click="closeMobileMenu">
+        <button class="mobile-menu-close" @click="closeMenu">
+          <span class="sr-only">关闭菜单</span>
           <i class="fas fa-times"></i>
-        </div>
+        </button>
         <!-- 移动端导航菜单 -->
         <nav class="mobile-nav">
-          <router-link to="/" class="nav-item" @click="closeMobileMenu"
-            >首页</router-link
-          >
-          <router-link to="/about" class="nav-item" @click="closeMobileMenu"
-            >平台简介</router-link
-          >
-          <el-dropdown trigger="hover" class="nav-dropdown">
-            <router-link to="/news" class="nav-item">资讯中心</router-link>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>
-                  <router-link to="/news/center" class="dropdown-link"
-                    >中心动态</router-link
-                  >
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <router-link to="/news/notice" class="dropdown-link"
-                    >通知公告</router-link
-                  >
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <router-link to="/news/policy" class="dropdown-link"
-                    >政策文件</router-link
-                  >
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
           <router-link
-            to="/activities"
-            class="nav-item"
-            @click="closeMobileMenu"
-            >活动中心</router-link
+            v-for="item in menuItems"
+            :key="item.path"
+            :to="item.path"
+            @click="closeMenu"
           >
-          <el-dropdown trigger="hover" class="nav-dropdown">
-            <router-link to="/resources" class="nav-item">资源中心</router-link>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>
-                  <router-link to="/resources/theory" class="dropdown-link"
-                    >理论研究</router-link
-                  >
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <router-link to="/resources/teaching" class="dropdown-link"
-                    >教学前沿</router-link
-                  >
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <router-link to="/resources/video" class="dropdown-link"
-                    >思政短视频</router-link
-                  >
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <router-link to="/ai" class="nav-item" @click="closeMobileMenu"
-            >AI思政</router-link
-          >
+            {{ item.name }}
+          </router-link>
         </nav>
       </div>
       <div class="login-section">
@@ -145,19 +96,28 @@ import { ref } from "vue";
 
 const router = useRouter();
 const route = useRoute();
-const mobileMenuOpen = ref(false);
+const isMenuOpen = ref(false);
+
+const menuItems = [
+  { path: "/", name: "首页" },
+  { path: "/about", name: "平台简介" },
+  { path: "/news", name: "资讯中心" },
+  { path: "/activities", name: "活动中心" },
+  { path: "/resources", name: "资源中心" },
+  { path: "/ai", name: "AI思政" },
+];
 
 const handleLogin = () => {
   router.push("/login");
 };
 
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value;
-  document.body.style.overflow = mobileMenuOpen.value ? "hidden" : "";
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+  document.body.style.overflow = isMenuOpen.value ? "hidden" : "";
 };
 
-const closeMobileMenu = () => {
-  mobileMenuOpen.value = false;
+const closeMenu = () => {
+  isMenuOpen.value = false;
   document.body.style.overflow = "";
 };
 </script>
@@ -367,55 +327,129 @@ const closeMobileMenu = () => {
   color: #fff;
 }
 
-.mobile-menu-button {
-  display: none;
-  font-size: 24px;
-  color: white;
-  cursor: pointer;
-  padding: 10px;
-  z-index: 1000;
-  order: -1; /* 确保它在最左边 */
-  margin-right: 10px;
+/* 移动端菜单相关样式 */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 999;
+  pointer-events: none;
 }
 
-.mobile-menu-close {
-  display: none;
+.mobile-menu.menu-open {
+  pointer-events: auto;
+}
+
+.mobile-overlay {
   position: fixed;
-  top: 15px;
-  right: 15px;
-  z-index: 1001;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1000;
 }
 
-.mobile-menu-close.show {
+.menu-open .mobile-overlay {
   opacity: 1;
   visibility: visible;
 }
 
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: #8a1f11;
+  padding: 60px 20px 20px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.menu-open .mobile-nav {
+  transform: translateX(0);
+}
+
+.mobile-menu-trigger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+  z-index: 998;
+}
+
+.mobile-menu-trigger:hover,
+.mobile-menu-trigger:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-menu-close {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1002;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.menu-open .mobile-menu-close {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-menu-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
 @media screen and (max-width: 768px) {
   .header-content {
-    padding: 8px 15px;
+    padding: 8px 16px;
     position: relative;
   }
 
   .center-name {
     font-size: 14px;
+    text-align: center;
   }
 
   .logo {
     width: 40px;
     height: 40px;
+    margin-right: 8px;
   }
 
   .logo-container {
@@ -424,133 +458,37 @@ const closeMobileMenu = () => {
     padding-right: 40px;
   }
 
-  .mobile-menu-button {
+  .mobile-menu-trigger {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
     order: -1;
     margin-right: 10px;
-    cursor: pointer;
   }
 
-  .mobile-menu-button i {
+  .mobile-menu-trigger i {
     font-size: 20px;
   }
 
-  .mobile-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 1000;
-    visibility: hidden;
-  }
-
-  .mobile-menu.menu-open {
-    pointer-events: auto;
-    visibility: visible;
-  }
-
-  .mobile-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 1000;
-    pointer-events: none;
-  }
-
-  .menu-open .mobile-overlay {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .mobile-nav {
-    position: fixed;
-    top: 0;
-    left: -220px;
-    width: 220px;
-    height: 100%;
-    background-color: #8a1f11;
-    padding: 60px 12px 20px;
-    transition: transform 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-    z-index: 1001;
-  }
-
-  .menu-open .mobile-nav {
-    transform: translateX(220px);
-  }
-
-  .mobile-menu-close {
-    position: fixed;
-    top: 12px;
-    left: 180px;
-    z-index: 1002;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    opacity: 0;
-    transform: translateX(-100%);
-    transition: all 0.3s ease;
-  }
-
-  .menu-open .mobile-menu-close {
-    display: flex;
-    opacity: 1;
-    transform: translateX(220px);
-  }
-
-  .nav-item {
-    font-size: 15px;
-    padding: 12px 15px;
+  .mobile-nav .nav-item {
+    font-size: 16px;
+    padding: 14px 16px;
     margin: 2px 0;
-    border-radius: 6px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.08);
     width: 100%;
     text-align: left;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .nav-dropdown {
-    width: 100%;
+  .mobile-nav .nav-item:hover,
+  .mobile-nav .nav-item.router-link-active {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
   }
 
-  .nav-dropdown :deep(.el-dropdown) {
-    width: 100%;
-    display: block;
-  }
-
-  .nav-dropdown :deep(.el-dropdown-menu) {
-    width: calc(100% - 16px);
-    margin: 4px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-  }
-
-  .dropdown-link {
-    color: rgba(255, 255, 255, 0.9);
-    padding: 10px 15px;
-    font-size: 14px;
+  .mobile-nav .nav-item::after {
+    display: none;
   }
 
   .login-section {
