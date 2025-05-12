@@ -5,73 +5,81 @@
       <div class="mobile-menu-button" @click="toggleMobileMenu">
         <i class="fas fa-bars"></i>
       </div>
-      <!-- 添加关闭按钮 -->
-      <div
-        class="mobile-menu-close"
-        :class="{ show: mobileMenuOpen }"
-        @click="closeMobileMenu"
-      >
-        <i class="fas fa-times"></i>
-      </div>
       <div class="logo-container">
         <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
       </div>
-      <!-- 导航菜单 -->
-      <nav :class="['nav-menu', { 'mobile-menu-open': mobileMenuOpen }]">
-        <router-link to="/" class="nav-item" @click="closeMobileMenu"
-          >首页</router-link
-        >
-        <router-link to="/about" class="nav-item" @click="closeMobileMenu"
-          >平台简介</router-link
-        >
-        <el-dropdown trigger="hover" class="nav-dropdown">
-          <router-link to="/news" class="nav-item">资讯中心</router-link>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item>
-                <router-link to="/news/center" class="dropdown-link"
-                  >中心动态</router-link
-                >
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <router-link to="/news/notice" class="dropdown-link"
-                  >通知公告</router-link
-                >
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <router-link to="/news/policy" class="dropdown-link"
-                  >政策文件</router-link
-                >
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <router-link to="/activities" class="nav-item">活动中心</router-link>
-        <el-dropdown trigger="hover" class="nav-dropdown">
-          <router-link to="/resources" class="nav-item">资源中心</router-link>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item>
-                <router-link to="/resources/theory" class="dropdown-link"
-                  >理论研究</router-link
-                >
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <router-link to="/resources/teaching" class="dropdown-link"
-                  >教学前沿</router-link
-                >
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <router-link to="/resources/video" class="dropdown-link"
-                  >思政短视频</router-link
-                >
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <router-link to="/ai" class="nav-item">AI思政</router-link>
-      </nav>
+      <!-- 导航菜单容器 -->
+      <div class="menu-container" :class="{ 'menu-open': mobileMenuOpen }">
+        <!-- 移动端遮罩层 -->
+        <div class="mobile-overlay" @click="closeMobileMenu"></div>
+        <!-- 移动端关闭按钮 -->
+        <div class="mobile-menu-close" @click="closeMobileMenu">
+          <i class="fas fa-times"></i>
+        </div>
+        <!-- 导航菜单 -->
+        <nav class="nav-menu">
+          <router-link to="/" class="nav-item" @click="closeMobileMenu"
+            >首页</router-link
+          >
+          <router-link to="/about" class="nav-item" @click="closeMobileMenu"
+            >平台简介</router-link
+          >
+          <el-dropdown trigger="hover" class="nav-dropdown">
+            <router-link to="/news" class="nav-item">资讯中心</router-link>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>
+                  <router-link to="/news/center" class="dropdown-link"
+                    >中心动态</router-link
+                  >
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <router-link to="/news/notice" class="dropdown-link"
+                    >通知公告</router-link
+                  >
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <router-link to="/news/policy" class="dropdown-link"
+                    >政策文件</router-link
+                  >
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <router-link
+            to="/activities"
+            class="nav-item"
+            @click="closeMobileMenu"
+            >活动中心</router-link
+          >
+          <el-dropdown trigger="hover" class="nav-dropdown">
+            <router-link to="/resources" class="nav-item">资源中心</router-link>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>
+                  <router-link to="/resources/theory" class="dropdown-link"
+                    >理论研究</router-link
+                  >
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <router-link to="/resources/teaching" class="dropdown-link"
+                    >教学前沿</router-link
+                  >
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <router-link to="/resources/video" class="dropdown-link"
+                    >思政短视频</router-link
+                  >
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <router-link to="/ai" class="nav-item" @click="closeMobileMenu"
+            >AI思政</router-link
+          >
+        </nav>
+      </div>
       <div class="login-section">
         <el-button type="primary" @click="handleLogin">登录</el-button>
       </div>
@@ -93,11 +101,7 @@ const handleLogin = () => {
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
-  if (mobileMenuOpen.value) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
+  document.body.style.overflow = mobileMenuOpen.value ? "hidden" : "";
 };
 
 const closeMobileMenu = () => {
@@ -334,6 +338,7 @@ const closeMobileMenu = () => {
 @media screen and (max-width: 768px) {
   .header-content {
     padding: 8px 15px;
+    position: relative;
   }
 
   .center-name {
@@ -359,77 +364,81 @@ const closeMobileMenu = () => {
     height: 40px;
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
+    order: -1;
+    margin-right: 10px;
   }
 
-  .nav-menu {
-    position: fixed;
-    top: 0;
-    left: -250px; /* 初始状态完全隐藏 */
-    width: 250px;
-    height: 100vh;
-    background-color: #8a1f11;
-    padding: 60px 12px 20px;
-    flex-direction: column;
-    gap: 8px;
-    transition: transform 0.3s ease;
-    z-index: 999;
-    overflow-y: auto;
-    transform: translateX(0);
-    visibility: hidden; /* 初始状态隐藏 */
-    opacity: 0;
-  }
-
-  .nav-menu.mobile-menu-open {
-    transform: translateX(250px);
-    visibility: visible;
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-  }
-
-  /* 遮罩层样式 */
-  .nav-menu::before {
-    content: "";
+  .menu-container {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: -1;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
   }
 
-  .nav-menu.mobile-menu-open::before {
+  .menu-container.menu-open {
+    pointer-events: auto;
+  }
+
+  .mobile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .menu-open .mobile-overlay {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100%;
+    background-color: #8a1f11;
+    padding: 60px 12px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  .menu-open .nav-menu {
+    transform: translateX(0);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   }
 
   .mobile-menu-close {
-    position: fixed;
+    position: absolute;
     top: 12px;
-    left: 200px;
-    z-index: 1001;
-    width: 36px;
-    height: 36px;
+    right: 12px;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.15);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transform: translateX(-100%);
-    opacity: 0;
     color: white;
-    transition: all 0.3s ease;
+    cursor: pointer;
   }
 
-  .nav-menu.mobile-menu-open + .mobile-menu-close {
-    transform: translateX(0);
-    opacity: 1;
+  .menu-open .mobile-menu-close {
+    display: flex;
   }
 
   .nav-item {
