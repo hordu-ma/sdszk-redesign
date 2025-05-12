@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/sdszk-redesign/', // 添加这行，设置为你的仓库名称
+  base: "/sdszk-redesign/", // 添加这行，设置为你的仓库名称
   plugins: [vue()],
   resolve: {
     alias: {
@@ -15,6 +15,14 @@ export default defineConfig({
     outDir: "dist",
     assetsDir: "assets",
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        // 确保资源使用相对路径
+        assetFileNames: "assets/[name].[hash][extname]",
+        chunkFileNames: "assets/[name].[hash].js",
+        entryFileNames: "assets/[name].[hash].js",
+      },
+    },
   },
   server: {
     port: 5178,
