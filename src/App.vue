@@ -27,7 +27,9 @@ body {
   padding: 0;
   width: 100%;
   min-width: 100%;
+  min-height: 100vh;
   overflow-x: hidden;
+  background-color: #f4f5f7;
 }
 
 body {
@@ -35,22 +37,18 @@ body {
     "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #333;
   line-height: 1.6;
 }
 
 .app-container {
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  background-color: #f4f5f7;
 }
 
 /* 响应式布局基础设置 */

@@ -4,7 +4,6 @@ import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/sdszk-redesign/",
   plugins: [vue()],
   resolve: {
     alias: {
@@ -14,6 +13,24 @@ export default defineConfig({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: false,
+    sourcemap: true,
+  },
+  server: {
+    port: 5178,
+    host: true,
+    open: true,
+    cors: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+    },
+    hmr: {
+      overlay: false,
+      host: "localhost",
+    },
   },
 });

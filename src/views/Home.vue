@@ -638,10 +638,12 @@ const handleLogin = () => {
   box-sizing: border-box;
 }
 .home-container {
-  max-width: 100%;
-  padding: 0 1rem;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
-  overflow-x: hidden;
+  padding: 0;
+  background-color: #f4f5f7;
+  overflow: hidden;
 }
 
 .header {
@@ -798,39 +800,50 @@ const handleLogin = () => {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .banner-img {
   width: 100%;
   height: auto;
+  max-height: 400px;
+  object-fit: cover;
   display: block;
-  margin: 0;
-  padding: 0;
 }
 
 .news-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 2rem auto;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  padding: 24px;
+  margin: 0 auto;
   max-width: 1200px;
-  padding: 0 1rem;
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .news-section {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .carousel-container {
+    margin-bottom: 16px;
+  }
 }
 
 .carousel-container {
   width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .carousel-img {
   width: 100%;
-  height: 100%;
+  height: 400px;
   object-fit: cover;
-  display: block;
 }
 
 .center-news {
@@ -841,6 +854,10 @@ const handleLogin = () => {
   height: 400px;
   display: flex;
   flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .center-news .section-header {
@@ -957,28 +974,30 @@ const handleLogin = () => {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .info-block .block-header {
   margin-bottom: 20px;
+  background: #9a2314;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin: 0;
 }
 
 .info-block .block-header h3 {
   display: flex;
   align-items: center;
-  background: linear-gradient(to right, #9a2314, #c44836);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 4px;
+  color: #fff;
   margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
-  font-size: 20px;
-  position: relative;
+  font-size: 18px;
 }
 
 .info-block .header-icon {
   margin-right: 10px;
-  font-size: 18px;
 }
 
 .info-block .title-text {
@@ -986,25 +1005,21 @@ const handleLogin = () => {
 }
 
 .info-block .more-link {
-  color: white;
-  text-decoration: none;
+  margin-left: auto;
+  color: #fff;
   font-size: 14px;
   display: flex;
   align-items: center;
-  transition: opacity 0.3s ease;
+  opacity: 0.8;
+  transition: opacity 0.3s;
 }
 
 .info-block .more-link:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .info-block .more-link i {
-  margin-left: 5px;
-  transition: transform 0.3s ease;
-}
-
-.info-block .more-link:hover i {
-  transform: translateX(3px);
+  margin-left: 4px;
 }
 
 .info-block .styled-list {

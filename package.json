@@ -12,10 +12,15 @@
     "update": "npm run build && npm run deploy"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^6.1.0",
     "@element-plus/icons-vue": "^2.3.1",
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "ant-design-vue": "^3.2.20",
     "axios": "^1.9.0",
     "element-plus": "^2.3.12",
     "pinia": "^3.0.2",
+    "pinia-plugin-persistedstate": "^4.3.0",
+    "quill": "^2.0.3",
     "vue": "^3.2.47",
     "vue-router": "^4.5.1"
   },
