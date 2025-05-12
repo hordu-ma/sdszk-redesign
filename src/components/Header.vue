@@ -371,104 +371,48 @@ const closeMobileMenu = () => {
   }
 
   .mobile-menu-close {
+    position: fixed;
+    top: 15px;
+    left: 230px; /* 位于菜单右侧 */
+    z-index: 1001;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    color: white;
+  }
+
+  .nav-menu.mobile-menu-open + .mobile-menu-close {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .mobile-menu-close i {
+    font-size: 20px;
   }
 
   .nav-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 75%; /* 减小菜单宽度 */
-    height: 100vh;
-    background-color: #8a1f11; /* 稍深的背景色 */
+    width: 280px; /* 减小菜单宽度，约为手机屏幕的3/4 */
+    background-color: #8a1f11;
     padding: 70px 15px 20px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    flex-direction: column;
-    gap: 10px;
     transform: translateX(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 999;
-    overflow-y: auto;
+    transition: transform 0.3s ease;
   }
 
   .nav-menu.mobile-menu-open {
     transform: translateX(0);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   }
 
-  /* 菜单打开时的遮罩 */
-  .nav-menu.mobile-menu-open::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 75%; /* 与菜单宽度对应 */
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-  }
-
-  .nav-item {
-    font-size: 16px;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    background-color: rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-    width: 100%;
-    text-align: left;
-  }
-
-  .nav-item:hover {
-    transform: none;
-    font-size: inherit;
-    box-shadow: none;
-  }
-
-  .nav-item:active {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: scale(0.98);
-  }
-
-  .nav-dropdown {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-
-  .nav-dropdown :deep(.el-dropdown) {
-    width: 100%;
-  }
-
-  .nav-dropdown :deep(.el-dropdown-menu) {
-    width: calc(100% - 30px);
-    margin: 5px 15px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  .nav-dropdown :deep(.el-dropdown-menu__item) {
-    color: white;
-  }
-
-  .dropdown-link {
-    color: rgba(255, 255, 255, 0.9);
-    padding: 12px 15px;
-    font-size: 15px;
-    border-radius: 6px;
-    transition: all 0.25s ease;
-  }
-
-  .dropdown-link:active {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .login-section {
-    display: none;
-  }
-
-  /* 添加背景遮罩 */
+  /* 修改遮罩样式 */
   .nav-menu::before {
     content: "";
     position: fixed;
@@ -477,12 +421,10 @@ const closeMobileMenu = () => {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     z-index: -1;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: all 0.3s ease;
   }
 
   .nav-menu.mobile-menu-open::before {
@@ -490,17 +432,26 @@ const closeMobileMenu = () => {
     visibility: visible;
   }
 
-  /* 调整下拉菜单在移动端的样式 */
-  .dropdown-link {
-    color: white;
-    padding: 12px 15px;
+  /* 优化菜单项样式 */
+  .nav-item {
     font-size: 15px;
+    padding: 12px 15px;
+    margin: 4px 0;
     border-radius: 6px;
-    transition: all 0.25s ease;
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .dropdown-link:active {
-    background-color: rgba(255, 255, 255, 0.12);
+  .nav-dropdown :deep(.el-dropdown-menu) {
+    width: calc(100% - 20px);
+    margin: 4px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+  }
+
+  .dropdown-link {
+    color: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    font-size: 14px;
   }
 
   /* 添加菜单顶部关闭按钮区域 */
