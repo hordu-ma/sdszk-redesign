@@ -189,39 +189,59 @@ const handleLogin = () => {
 }
 
 .nav-dropdown :deep(.el-dropdown-menu) {
-  background-color: #fff;
+  background-color: #faf0f0;
   border: none;
-  padding: 0;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  padding: 5px 0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(154, 35, 20, 0.15);
+  min-width: 160px;
+  margin-top: 5px;
 }
 
 .nav-dropdown :deep(.el-dropdown-menu__item) {
   padding: 0;
   line-height: normal;
-}
-
-.nav-dropdown :deep(.el-dropdown-menu__item:hover) {
-  background-color: rgba(154, 35, 20, 0.05);
+  position: relative;
 }
 
 .nav-dropdown :deep(.el-dropdown-menu__item:not(:last-child)) {
   border-bottom: 1px solid rgba(154, 35, 20, 0.1);
 }
 
+.nav-dropdown :deep(.el-dropdown-menu__item:hover) {
+  background: linear-gradient(
+    to right,
+    rgba(154, 35, 20, 0.1),
+    rgba(154, 35, 20, 0.05)
+  );
+}
+
 .dropdown-link {
   display: block;
-  padding: 12px 20px;
-  color: #9a2314;
+  padding: 12px 24px;
+  color: #4a2219;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .dropdown-link:hover {
   color: #9a2314;
-  opacity: 0.8;
+  padding-left: 28px;
+  background-color: rgba(154, 35, 20, 0.03);
+}
+
+.dropdown-link:hover::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #9a2314;
 }
 
 .login-section {

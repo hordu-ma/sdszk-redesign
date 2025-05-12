@@ -34,10 +34,19 @@
         <div class="news-container">
           <div v-for="news in centerNews" :key="news.id" class="news-item">
             <a :href="news.url" target="_blank" class="news-link">
-              <div class="news-content">
-                <h3 class="news-title">{{ news.title }}</h3>
-                <p class="news-summary">{{ news.summary }}</p>
-                <span class="news-date">{{ news.date }}</span>
+              <div class="news-wrapper">
+                <div class="date-block">
+                  <span class="day">{{ news.date.split("-")[2] }}</span>
+                  <span class="month-year"
+                    >{{ news.date.split("-")[1] }}/{{
+                      news.date.split("-")[0].slice(2)
+                    }}</span
+                  >
+                </div>
+                <div class="news-content">
+                  <h3 class="news-title">{{ news.title }}</h3>
+                  <p class="news-summary">{{ news.summary }}</p>
+                </div>
               </div>
             </a>
           </div>
@@ -159,7 +168,12 @@
 
     <!-- 思政短视频组件 -->
     <div class="video-section">
-      <h3>思政短视频</h3>
+      <div class="block-header">
+        <h3>
+          <i class="fas fa-video header-icon"></i>
+          <span class="title-text">思政短视频</span>
+        </h3>
+      </div>
       <div class="video-grid">
         <div v-for="video in videos" :key="video.id" class="video-card">
           <video-player :src="video.url" :poster="video.poster" />
@@ -170,7 +184,12 @@
 
     <!-- 十佳百优思政教师组件 -->
     <div class="teachers-section">
-      <h3>"十佳百优"思政教师</h3>
+      <div class="block-header">
+        <h3>
+          <i class="fas fa-user-tie header-icon"></i>
+          <span class="title-text">十佳百优思政教师</span>
+        </h3>
+      </div>
       <div class="teachers-grid">
         <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
           <img
@@ -186,7 +205,12 @@
 
     <!-- 一体化共同体组件 -->
     <div class="community-section">
-      <h3>一体化共同体</h3>
+      <div class="block-header">
+        <h3>
+          <i class="fas fa-university header-icon"></i>
+          <span class="title-text">一体化共同体</span>
+        </h3>
+      </div>
       <div class="school-logos">
         <a
           v-for="school in schools"
@@ -200,29 +224,6 @@
         </a>
       </div>
     </div>
-
-    <!-- 底部组件 -->
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="links">
-          <h4>相关链接</h4>
-          <div class="link-grid">
-            <a
-              v-for="link in relatedLinks"
-              :key="link.id"
-              :href="link.url"
-              target="_blank"
-            >
-              {{ link.name }}
-            </a>
-          </div>
-        </div>
-        <div class="qrcode">
-          <img src="../assets/qrcode.jpg" alt="微信公众号" class="qrcode-img" />
-          <p>扫码关注公众号</p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -612,6 +613,16 @@ const schools = ref([
 const relatedLinks = ref([
   { id: 1, name: "教育部", url: "http://www.moe.gov.cn" },
   { id: 2, name: "山东省教育厅", url: "http://edu.shandong.gov.cn" },
+  {
+    id: 3,
+    name: "北京高校思想政治理论课高精尖创新中心",
+    url: "http://www.bjcipt.org/",
+  },
+  {
+    id: 4,
+    name: "山东师范大学马克思主义学院",
+    url: "http://www.marx.sdnu.edu.cn/index.htm",
+  },
 ]);
 
 const handleLogin = () => {
@@ -834,11 +845,11 @@ const handleLogin = () => {
   flex-direction: column;
 }
 
-.center-news .block-header {
+.center-news .section-header {
   margin-bottom: 20px;
 }
 
-.center-news .block-header h3 {
+.center-news .section-header h2 {
   display: flex;
   align-items: center;
   background: linear-gradient(to right, #9a2314, #c44836);
@@ -849,40 +860,6 @@ const handleLogin = () => {
   font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
   font-size: 20px;
   position: relative;
-}
-
-.center-news .block-header .header-icon {
-  margin-right: 10px;
-  font-size: 18px;
-}
-
-.center-news .block-header .title-text {
-  flex: 1;
-  text-align: center;
-}
-
-.center-news .block-header .more-link {
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  transition: opacity 0.3s ease;
-  margin-left: auto;
-}
-
-.center-news .block-header .more-link:hover {
-  opacity: 0.8;
-  color: white;
-}
-
-.center-news .block-header .more-link i {
-  margin-left: 5px;
-  transition: transform 0.3s ease;
-}
-
-.center-news .block-header .more-link:hover i {
-  transform: translateX(3px);
 }
 
 .news-container {
@@ -1320,32 +1297,111 @@ const handleLogin = () => {
   color: #9a2314;
 }
 
-.footer {
-  background: #f5f7fa;
-  padding: 40px 0;
-  margin-top: 40px;
+.footer-section {
+  background: linear-gradient(to bottom, #f8f9fa, #e4e7ed);
+  padding: 30px 0;
+  margin-top: 30px;
+  border-top: 1px solid rgba(154, 35, 20, 0.1);
 }
 
 .footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 60px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+}
+
+.links {
+  flex: 1;
+}
+
+.links h4 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  position: relative;
+  padding-left: 12px;
+}
+
+.links h4::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 18px;
+  background: #9a2314;
+  border-radius: 2px;
 }
 
 .link-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 15px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.footer-section .footer-link {
+  color: #666;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.footer-section .footer-link:hover {
+  color: #9a2314;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(154, 35, 20, 0.1);
+  transform: translateY(-2px);
 }
 
 .qrcode {
   text-align: center;
+  margin-left: 60px;
 }
 
 .qrcode-img {
   width: 120px;
   height: 120px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qrcode p {
+  color: #666;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+  }
+
+  .links {
+    margin-right: 0;
+    margin-bottom: 30px;
+    width: 100%;
+  }
+
+  .link-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qrcode {
+    margin-left: 0;
+  }
 }
 
 .login-section {
@@ -1390,7 +1446,24 @@ const handleLogin = () => {
 .video-section h3:hover,
 .teachers-section h3:hover,
 .community-section h3:hover {
-  background: rgba(154, 35, 20, 0.08);
-  transform: translateX(5px);
+  background: linear-gradient(to right, #8a1f11, #b33f2e);
+  transform: none;
+}
+
+/* 统一标题栏样式 */
+.center-news .block-header h3,
+.video-section h3,
+.teachers-section h3,
+.community-section h3 {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #9a2314, #c44836);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 0;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  position: relative;
 }
 </style>

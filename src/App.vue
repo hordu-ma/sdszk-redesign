@@ -2,14 +2,18 @@
   <div class="app-container">
     <Header />
     <router-view />
+    <FooterLinks />
   </div>
 </template>
 
 <script setup>
 import Header from "./components/Header.vue";
+import FooterLinks from "./components/FooterLinks.vue";
 </script>
 
 <style>
+@import "./styles/components.css";
+
 /* 全局样式 */
 * {
   margin: 0;
