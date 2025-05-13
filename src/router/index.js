@@ -2,11 +2,18 @@ import { createRouter, createWebHistory } from "vue-router";
 import adminRoutes from "./adminRoutes";
 import { useUserStore } from "../stores/user";
 
-// 获取基础路径，与vite.config.js中的base保持一致
-const base = import.meta.env.BASE_URL || "/";
+// 获取基础路径，根据环境变量或meta信息确定
+const getBase = () => {
+  // 检查是否有环境变量
+  if (import.meta.env.VITE_BASE_URL) {
+    return import.meta.env.VITE_BASE_URL;
+  }
+  // 否则使用默认的BASE_URL
+  return import.meta.env.BASE_URL || "/";
+};
 
 const router = createRouter({
-  history: createWebHistory(base),
+  history: createWebHistory(getBase()),
   routes: [
     {
       path: "/",

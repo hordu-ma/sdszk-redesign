@@ -5,9 +5,12 @@ import { resolve } from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  // 根据环境设置不同的基础路径
-  // preview命令使用根路径，生产环境（GitHub Pages）使用子路径
-  const base = command === "build" ? "/sdszk-redesign/" : "/";
+  // 根据命令和模式设置不同的基础路径
+  // 在preview模式下使用根路径，生产环境（GitHub Pages）使用子路径
+  let base = "/";
+  if (command === "build" && mode !== "preview") {
+    base = "/sdszk-redesign/";
+  }
 
   return {
     base,
@@ -68,6 +71,13 @@ export default defineConfig(({ command, mode }) => {
         overlay: false,
         host: "localhost",
       },
+    },
+    // 添加preview配置
+    preview: {
+      port: 4173,
+      strictPort: true,
+      host: true,
+      cors: true,
     },
   };
 });

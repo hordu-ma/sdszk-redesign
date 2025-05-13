@@ -3,8 +3,15 @@
     <!-- 根据路由判断是否显示前台布局 -->
     <template v-if="!isAdminRoute">
       <Header />
-      <router-view />
+      <div class="main-content">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
       <FooterLinks />
+      <BackToTop />
     </template>
     <!-- 管理后台直接显示路由内容 -->
     <template v-else>
@@ -18,6 +25,7 @@ import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Header from "./components/Header.vue";
 import FooterLinks from "./components/FooterLinks.vue";
+import BackToTop from "./components/BackToTop.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -49,7 +57,22 @@ body {
   padding: 0;
   width: 100%;
   min-width: 100%;
-  min-height: 100vh;
+}
+
+/* 添加平滑滚动和边缘过渡效果 */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain; /* 防止iOS上的弹性滚动 */
+  -webkit-overflow-scrolling: touch; /* 在iOS设备上平滑滚动 */
+}
+
+/* 主内容区域样式，为固定头部留出空间 */
+.main-content {
+  margin-top: 74px; /* 与header初始高度一致 */
+  min-height: calc(100vh - 74px);
+  will-change: transform; /* 优化渲染性能 */
+  transform: translateZ(0); /* 触发硬件加速 */
   overflow-x: hidden;
   background-color: #f4f5f7;
 }
@@ -113,5 +136,33 @@ header {
   width: 100%;
   position: relative;
   z-index: 1;
+}
+
+/* 页面过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    transform: none;
+  }
 }
 </style>

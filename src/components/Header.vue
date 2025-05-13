@@ -1,5 +1,9 @@
 <template>
-  <header class="header">
+  <header
+    class="header"
+    :class="{ 'header-scrolled': isScrolled }"
+    :data-visible="isHeaderVisible"
+  >
     <div class="header-content">
       <!-- 移动端菜单按钮 -->
       <button class="mobile-menu-trigger" @click="toggleMenu">
@@ -73,14 +77,29 @@
         </button>
         <!-- 移动端导航菜单 -->
         <nav class="mobile-nav">
-          <router-link
+          <div
             v-for="item in menuItems"
             :key="item.path"
-            :to="item.path"
-            @click="closeMenu"
+            class="mobile-nav-item"
           >
-            {{ item.name }}
-          </router-link>
+            <router-link
+              :to="item.path"
+              @click="item.children ? null : closeMenu"
+            >
+              {{ item.name }}
+              <i v-if="item.children" class="fas fa-chevron-down"></i>
+            </router-link>
+            <div v-if="item.children" class="mobile-submenu">
+              <router-link
+                v-for="child in item.children"
+                :key="child.path"
+                :to="child.path"
+                @click="closeMenu"
+              >
+                {{ child.name }}
+              </router-link>
+            </div>
+          </div>
         </nav>
       </div>
       <div class="login-section">
@@ -92,18 +111,43 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 
 const router = useRouter();
 const route = useRoute();
 const isMenuOpen = ref(false);
+// 添加滚动状态变量
+const isScrolled = ref(false);
+// 添加导航栏可见状态
+const isHeaderVisible = ref(true);
+// 上一次滚动位置
+const lastScrollY = ref(0);
+// 定时器用于防抖
+let scrollTimer = null;
 
+// 拓展的菜单项
 const menuItems = [
   { path: "/", name: "首页" },
   { path: "/about", name: "平台简介" },
-  { path: "/news", name: "资讯中心" },
+  {
+    path: "/news",
+    name: "资讯中心",
+    children: [
+      { path: "/news/center", name: "中心动态" },
+      { path: "/news/notice", name: "通知公告" },
+      { path: "/news/policy", name: "政策文件" },
+    ],
+  },
   { path: "/activities", name: "活动中心" },
-  { path: "/resources", name: "资源中心" },
+  {
+    path: "/resources",
+    name: "资源中心",
+    children: [
+      { path: "/resources/theory", name: "理论研究" },
+      { path: "/resources/teaching", name: "教学前沿" },
+      { path: "/resources/video", name: "思政短视频" },
+    ],
+  },
   { path: "/ai", name: "AI思政" },
 ];
 
@@ -120,6 +164,58 @@ const closeMenu = () => {
   isMenuOpen.value = false;
   document.body.style.overflow = "";
 };
+
+// 检测页面滚动
+const handleScroll = () => {
+  // 当滚动超过50px时，设置isScrolled为true
+  isScrolled.value = window.scrollY > 50;
+
+  // 处理自动隐藏逻辑
+  if (window.scrollY < 50) {
+    // 在顶部时总是显示
+    isHeaderVisible.value = true;
+  } else {
+    // 根据滚动方向决定是否显示
+    const currentScrollY = window.scrollY;
+    if (currentScrollY < lastScrollY.value) {
+      // 向上滚动，显示导航
+      isHeaderVisible.value = true;
+    } else if (currentScrollY > lastScrollY.value + 10) {
+      // 向下滚动超过10px，隐藏导航
+      isHeaderVisible.value = false;
+    }
+    lastScrollY.value = currentScrollY;
+  }
+
+  // 防抖功能：停止滚动2秒后显示导航
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    isHeaderVisible.value = true;
+  }, 2000);
+};
+
+// 监听路由变化，在路由切换时显示头部
+watch(
+  () => route.path,
+  () => {
+    isHeaderVisible.value = true;
+    isMenuOpen.value = false; // 关闭移动菜单
+    document.body.style.overflow = "";
+  }
+);
+
+// 组件挂载时添加滚动监听
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+  // 初始检查一次滚动状态
+  handleScroll();
+});
+
+// 组件卸载时移除滚动监听
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+  clearTimeout(scrollTimer);
+});
 </script>
 
 <style scoped>
@@ -128,6 +224,44 @@ const closeMenu = () => {
   margin: 0;
   padding: 0;
   background-color: #9a2314;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* 确保导航栏在最上层 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 74px; /* 初始高度 */
+  transform: translateY(0);
+}
+
+/* 自动隐藏效果 */
+.header:not(.header-scrolled) {
+  transform: translateY(0) !important;
+}
+
+/* 滚动时导航栏隐藏 */
+.header.header-scrolled:not([data-visible="true"]) {
+  transform: translateY(-100%);
+}
+
+/* 通过JS控制可见性 */
+.header[data-visible="true"] {
+  transform: translateY(0);
+}
+
+/* 滚动时导航栏样式变化 */
+.header-scrolled {
+  background-color: rgba(122, 29, 16, 0.95); /* 半透明背景 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  height: 64px; /* 滚动后变小 */
+  backdrop-filter: blur(10px); /* 毛玻璃效果 */
+}
+
+/* 隐藏导航栏 */
+.header-hidden {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
 }
 
 .header-content {
@@ -139,6 +273,13 @@ const closeMenu = () => {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+  transition: padding 0.3s ease;
+  height: 100%;
+}
+
+/* 滚动时头部内容的样式变化 */
+.header-scrolled .header-content {
+  padding: 8px 40px;
 }
 
 .logo-container {
@@ -151,6 +292,7 @@ const closeMenu = () => {
   width: 50px;
   height: 50px;
   margin-right: 12px;
+  transition: all 0.3s ease;
 }
 
 .center-name {
@@ -158,6 +300,18 @@ const closeMenu = () => {
   color: #fff;
   font-weight: 500;
   white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+/* 滚动时Logo和站点名称变小 */
+.header-scrolled .logo {
+  width: 42px;
+  height: 42px;
+  margin-right: 10px;
+}
+
+.header-scrolled .center-name {
+  font-size: 18px;
 }
 
 .nav-menu {
@@ -196,6 +350,12 @@ const closeMenu = () => {
   line-height: 28px;
   transform: translateY(0);
   box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+}
+
+/* 滚动状态下的导航项 */
+.header-scrolled .nav-item {
+  font-size: 15px;
+  line-height: 24px;
 }
 
 /* 为非下拉菜单的导航项添加悬停效果 */
@@ -327,33 +487,38 @@ const closeMenu = () => {
   color: #fff;
 }
 
-/* 移动端菜单相关样式 */
+/* 移动端导航优化 */
 .mobile-menu {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  right: -100%;
+  width: 280px;
   height: 100vh;
-  z-index: 999;
-  pointer-events: none;
+  background-color: #9a2314;
+  z-index: 2000;
+  transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow-y: auto;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-menu.menu-open {
-  pointer-events: auto;
+  right: 0;
 }
 
 .mobile-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(3px);
+  z-index: 1500;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  z-index: 1000;
+  transition: opacity 0.3s ease;
 }
 
 .menu-open .mobile-overlay {
@@ -361,89 +526,95 @@ const closeMenu = () => {
   visibility: visible;
 }
 
-.mobile-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 280px;
-  height: 100vh;
-  background-color: #8a1f11;
-  padding: 60px 20px 20px;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  z-index: 1001;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.menu-open .mobile-nav {
-  transform: translateX(0);
-}
-
-.mobile-menu-trigger {
-  display: none;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  position: relative;
-  z-index: 998;
-}
-
-.mobile-menu-trigger:hover,
-.mobile-menu-trigger:active {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
 .mobile-menu-close {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 1002;
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
   border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2100;
+  padding: 10px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(2px);
-}
-
-.menu-open .mobile-menu-close {
-  opacity: 1;
-  visibility: visible;
+  transition: background-color 0.3s;
 }
 
 .mobile-menu-close:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 80px 30px 30px;
+  gap: 20px;
+}
+
+.mobile-nav a {
+  color: #fff;
+  font-size: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.mobile-nav a:hover,
+.mobile-nav a.router-link-active {
+  padding-left: 10px;
+  color: #ffcc80;
+}
+
+.mobile-submenu {
+  margin-top: 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-submenu a {
+  padding: 10px 0;
+  font-size: 16px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* 移动菜单触发按钮 */
+.mobile-menu-trigger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
 }
 
 @media screen and (max-width: 768px) {
+  .mobile-menu-trigger {
+    display: flex;
+  }
+
   .header-content {
-    padding: 8px 16px;
-    position: relative;
+    padding: 12px 20px;
+    justify-content: space-between;
   }
 
   .center-name {
-    font-size: 14px;
-    text-align: center;
+    font-size: 16px;
   }
 
   .logo {
@@ -453,46 +624,7 @@ const closeMenu = () => {
   }
 
   .logo-container {
-    flex: 1;
-    justify-content: center;
-    padding-right: 40px;
-  }
-
-  .mobile-menu-trigger {
-    display: flex;
-    order: -1;
-    margin-right: 10px;
-  }
-
-  .mobile-menu-trigger i {
-    font-size: 20px;
-  }
-
-  .mobile-nav .nav-item {
-    font-size: 16px;
-    padding: 14px 16px;
-    margin: 2px 0;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    width: 100%;
-    text-align: left;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .mobile-nav .nav-item:hover,
-  .mobile-nav .nav-item.router-link-active {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateX(4px);
-  }
-
-  .mobile-nav .nav-item::after {
-    display: none;
-  }
-
-  .login-section {
-    display: none;
+    padding-right: 0;
   }
 }
 </style>

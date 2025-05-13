@@ -187,7 +187,7 @@
       <div class="block-header">
         <h3>
           <i class="fas fa-user-tie header-icon"></i>
-          <span class="title-text">十佳百优思政教师</span>
+          <span class="title-text">"十佳百优"思政教师</span>
         </h3>
       </div>
       <div class="teachers-grid">
@@ -997,11 +997,12 @@ const handleLogin = () => {
 }
 
 .info-block .header-icon {
-  margin-right: 10px;
+  margin-right: 15px; /* 增加图标与文字的间距 */
 }
 
 .info-block .title-text {
   flex: 1;
+  padding-left: 2px; /* 为文本添加少量左内边距 */
 }
 
 .info-block .more-link {
@@ -1413,6 +1414,18 @@ const handleLogin = () => {
     padding: 0 1rem;
   }
 
+  /* 移动端标题图标间距调整 */
+  .info-block .header-icon {
+    margin-right: 12px; /* 移动端稍微减少间距 */
+  }
+
+  .center-news .header-icon,
+  .video-section .header-icon,
+  .teachers-section .header-icon,
+  .community-section .header-icon {
+    margin-right: 14px; /* 移动端调整图标间距 */
+  }
+
   .block-header h3 {
     font-size: 1.2rem;
     padding: 0.8rem 1rem;
@@ -1451,6 +1464,27 @@ const handleLogin = () => {
   }
 }
 
+@media (max-width: 600px) {
+  .center-news .header-icon,
+  .video-section .header-icon,
+  .teachers-section .header-icon,
+  .community-section .header-icon {
+    margin-right: 15px; /* 在小屏幕上稍微减少间距 */
+  }
+
+  .block-header h3 {
+    font-size: 18px; /* 小屏幕上减小标题尺寸 */
+  }
+
+  .block-header {
+    padding: 10px 15px; /* 减少内边距，使空间更紧凑 */
+  }
+
+  .more-link {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 480px) {
   .home-container {
     padding: 0;
@@ -1462,6 +1496,28 @@ const handleLogin = () => {
   .teachers-grid,
   .school-logos {
     margin: 1rem auto;
+  }
+
+  /* 小屏幕设备上图标间距调整 */
+  .info-block .header-icon {
+    margin-right: 10px; /* 小屏幕上进一步缩小间距 */
+    font-size: 14px; /* 减小图标尺寸 */
+  }
+
+  .center-news .header-icon,
+  .video-section .header-icon,
+  .teachers-section .header-icon,
+  .community-section .header-icon {
+    margin-right: 12px; /* 小屏幕上调整间距 */
+    font-size: 14px; /* 减小图标尺寸 */
+  }
+
+  .info-block .title-text,
+  .center-news .title-text,
+  .video-section .title-text,
+  .teachers-section .title-text,
+  .community-section .title-text {
+    font-size: 16px; /* 小屏幕上减小标题文字大小 */
   }
 
   .carousel-container {
@@ -1589,5 +1645,123 @@ const handleLogin = () => {
   font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
   font-size: 20px;
   position: relative;
+}
+
+/* 专门为中心动态和其他主要区块的图标增加间距 */
+.center-news .header-icon,
+.video-section .header-icon,
+.teachers-section .header-icon,
+.community-section .header-icon {
+  margin-right: 18px; /* 较大的间距，确保图标与文字分离清晰 */
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto; /* 防止图标被挤压 */
+}
+
+.center-news .title-text,
+.video-section .title-text,
+.teachers-section .title-text,
+.community-section .title-text {
+  padding-left: 3px; /* 文本轻微左缩进，增强阅读体验 */
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1; /* 确保文本占据剩余空间 */
+  white-space: nowrap; /* 防止文本换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 文本溢出显示省略号 */
+}
+
+/* 浏览器兼容性样式 */
+.block-header h3 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+/* 确保图标与文字垂直对齐 */
+.header-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.block-header:hover .header-icon {
+  transform: scale(1.1) rotate(5deg);
+  color: #ffcc80;
+}
+
+.title-text {
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.block-header:hover .title-text {
+  color: #ffcc80;
+}
+
+/* 解决Firefox中的图标对齐问题 */
+@-moz-document url-prefix() {
+  .header-icon {
+    position: relative;
+    top: 1px;
+  }
+}
+
+/* 特定栏目标题居中显示 */
+.video-section .block-header h3,
+.teachers-section .block-header h3,
+.community-section .block-header h3 {
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 40px;
+  display: flex;
+  justify-content: center;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+/* 图标和文本作为一个整体集中在标题栏中间 */
+.video-section .block-header h3 .header-icon,
+.teachers-section .block-header h3 .header-icon,
+.community-section .block-header h3 .header-icon {
+  margin-right: 18px;
+  flex-shrink: 0;
+}
+
+/* 这三个栏目不需要使用flex:1自动拉伸，让它们保持原始宽度 */
+.video-section .block-header h3 .title-text,
+.teachers-section .block-header h3 .title-text,
+.community-section .block-header h3 .title-text {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 确保父容器支持正确的布局 */
+.video-section .block-header,
+.teachers-section .block-header,
+.community-section .block-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* 特定栏目标题图标和文字动画效果优化 */
+.video-section .block-header:hover h3,
+.teachers-section .block-header:hover h3,
+.community-section .block-header:hover h3 {
+  transform: scale(1.05);
+}
+
+.video-section .header-icon,
+.teachers-section .header-icon,
+.community-section .header-icon {
+  transition: transform 0.3s ease, color 0.3s ease;
 }
 </style>
