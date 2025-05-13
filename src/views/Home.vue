@@ -170,8 +170,13 @@
     <div class="video-section">
       <div class="block-header">
         <h3>
-          <i class="fas fa-video header-icon"></i>
-          <span class="title-text">思政短视频</span>
+          <div class="title-container">
+            <i class="fas fa-video header-icon"></i>
+            <span class="title-text">思政短视频</span>
+          </div>
+          <router-link to="/resources/videos" class="more-link">
+            更多<i class="fas fa-angle-right"></i>
+          </router-link>
         </h3>
       </div>
       <div class="video-grid">
@@ -186,8 +191,13 @@
     <div class="teachers-section">
       <div class="block-header">
         <h3>
-          <i class="fas fa-user-tie header-icon"></i>
-          <span class="title-text">"十佳百优"思政教师</span>
+          <div class="title-container">
+            <i class="fas fa-user-tie header-icon"></i>
+            <span class="title-text">"十佳百优"思政教师</span>
+          </div>
+          <router-link to="/teachers" class="more-link">
+            更多<i class="fas fa-angle-right"></i>
+          </router-link>
         </h3>
       </div>
       <div class="teachers-grid">
@@ -208,8 +218,13 @@
     <div class="community-section">
       <div class="block-header">
         <h3>
-          <i class="fas fa-university header-icon"></i>
-          <span class="title-text">一体化共同体</span>
+          <div class="title-container">
+            <i class="fas fa-university header-icon"></i>
+            <span class="title-text">一体化共同体</span>
+          </div>
+          <router-link to="/community" class="more-link">
+            更多<i class="fas fa-angle-right"></i>
+          </router-link>
         </h3>
       </div>
       <div class="school-logos">
@@ -1723,7 +1738,7 @@ const handleLogin = () => {
   }
 }
 
-/* 特定栏目标题居中显示 */
+/* 特定栏目标题栏样式 */
 .video-section .block-header h3,
 .teachers-section .block-header h3,
 .community-section .block-header h3 {
@@ -1731,13 +1746,27 @@ const handleLogin = () => {
   max-width: 1200px;
   padding: 12px 40px;
   display: flex;
-  justify-content: center;
+  align-items: center;
   border-radius: 4px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   margin: 0 auto;
+  background: #9a2314;
+  position: relative;
 }
 
-/* 图标和文本作为一个整体集中在标题栏中间 */
+/* 图标和文字容器 */
+.video-section .block-header h3 .title-container,
+.teachers-section .block-header h3 .title-container,
+.community-section .block-header h3 .title-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* 图标样式 */
 .video-section .block-header h3 .header-icon,
 .teachers-section .block-header h3 .header-icon,
 .community-section .block-header h3 .header-icon {
@@ -1745,12 +1774,36 @@ const handleLogin = () => {
   flex-shrink: 0;
 }
 
-/* 这三个栏目不需要使用flex:1自动拉伸，让它们保持原始宽度 */
+/* 标题文本样式 */
 .video-section .block-header h3 .title-text,
 .teachers-section .block-header h3 .title-text,
 .community-section .block-header h3 .title-text {
-  flex: 0 0 auto;
   white-space: nowrap;
+}
+
+/* 更多链接样式 */
+.video-section .block-header h3 .more-link,
+.teachers-section .block-header h3 .more-link,
+.community-section .block-header h3 .more-link {
+  margin-left: auto;
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.video-section .block-header h3 .more-link:hover,
+.teachers-section .block-header h3 .more-link:hover,
+.community-section .block-header h3 .more-link:hover {
+  opacity: 1;
+}
+
+.video-section .block-header h3 .more-link i,
+.teachers-section .block-header h3 .more-link i,
+.community-section .block-header h3 .more-link i {
+  margin-left: 4px;
 }
 
 /* 确保父容器支持正确的布局 */
@@ -1758,7 +1811,6 @@ const handleLogin = () => {
 .teachers-section .block-header,
 .community-section .block-header {
   display: flex;
-  justify-content: center;
   margin-bottom: 20px;
 }
 
