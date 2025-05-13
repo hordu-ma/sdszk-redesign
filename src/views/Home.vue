@@ -33,7 +33,7 @@
         </div>
         <div class="news-container">
           <div v-for="news in centerNews" :key="news.id" class="news-item">
-            <a :href="news.url" target="_blank" class="news-link">
+            <router-link :to="`/news/detail/${news.id}`" class="news-link">
               <div class="news-wrapper">
                 <div class="date-block">
                   <span class="day">{{ news.date.split("-")[2] }}</span>
@@ -48,7 +48,7 @@
                   <p class="news-summary">{{ news.summary }}</p>
                 </div>
               </div>
-            </a>
+            </router-link>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@
         </div>
         <ul class="styled-list">
           <li v-for="notice in notices" :key="notice.id">
-            <a :href="notice.url" target="_blank" class="info-link">
+            <router-link :to="`/news/detail/${notice.id}`" class="info-link">
               <div class="info-content">
                 <div class="info-header">
                   <span class="info-title">{{ notice.title }}</span>
@@ -78,7 +78,7 @@
                   <span class="info-unit">{{ notice.unit }}</span>
                 </div>
               </div>
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -94,7 +94,7 @@
         </div>
         <ul class="styled-list">
           <li v-for="policy in policies" :key="policy.id">
-            <a :href="policy.url" target="_blank" class="info-link">
+            <router-link :to="`/news/detail/${policy.id}`" class="info-link">
               <div class="info-content">
                 <div class="info-header">
                   <span class="info-title">{{ policy.title }}</span>
@@ -104,7 +104,7 @@
                   <span class="info-unit">{{ policy.unit }}</span>
                 </div>
               </div>
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -120,7 +120,7 @@
         </div>
         <ul class="styled-list">
           <li v-for="theory in theories" :key="theory.id">
-            <a :href="theory.url" target="_blank" class="info-link">
+            <router-link :to="`/news/detail/${theory.id}`" class="info-link">
               <div class="info-content">
                 <div class="info-header">
                   <span class="info-title">{{ theory.title }}</span>
@@ -131,7 +131,7 @@
                   <span class="info-date">发布日期：{{ theory.date }}</span>
                 </div>
               </div>
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -147,7 +147,7 @@
         </div>
         <ul class="styled-list">
           <li v-for="research in researches" :key="research.id">
-            <a :href="research.url" target="_blank" class="info-link">
+            <router-link :to="`/news/detail/${research.id}`" class="info-link">
               <div class="info-content">
                 <div class="info-header">
                   <span class="info-title">{{ research.title }}</span>
@@ -160,7 +160,7 @@
                   <span class="info-date">发布日期：{{ research.date }}</span>
                 </div>
               </div>
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
