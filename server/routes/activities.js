@@ -9,31 +9,33 @@ import {
   togglePublishStatus,
   toggleFeaturedStatus,
   getUpcomingActivities,
-  updateAttendeeCount,
 } from "../controllers/activityController.js";
-import { protect, restrictTo } from "../middleware/authMiddleware.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 公开路由
+// 获取活动列表
 router.get("/", getActivityList);
-router.get("/upcoming", getUpcomingActivities);
+
+// 获取单个活动
 router.get("/:id", getActivityById);
 
-// 需要登录的路由
-router.use(protect);
+// 创建新活动
+router.post("/", authenticateToken, createActivity);
 
-// 需要编辑权限的路由
-router.use(restrictTo("admin", "editor"));
-router.post("/", createActivity);
-router.patch("/:id", updateActivity);
-router.delete("/:id", restrictTo("admin"), deleteActivity);
+// 更新活动
+router.put("/:id", authenticateToken, updateActivity);
 
-// 发布状态和精选状态切换
-router.patch("/:id/publish", togglePublishStatus);
-router.patch("/:id/feature", restrictTo("admin"), toggleFeaturedStatus);
+// 删除活动
+router.delete("/:id", authenticateToken, deleteActivity);
 
-// 更新参与者数量
-router.patch("/:id/attendees", updateAttendeeCount);
+// 切换发布状态
+router.patch("/:id/publish", authenticateToken, togglePublishStatus);
+
+// 切换推荐状态
+router.patch("/:id/featured", authenticateToken, toggleFeaturedStatus);
+
+// 获取即将开始的活动
+router.get("/upcoming", getUpcomingActivities);
 
 export default router;

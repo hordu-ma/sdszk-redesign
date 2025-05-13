@@ -1,9 +1,12 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import adminRoutes from "./adminRoutes";
 import { useUserStore } from "../stores/user";
 
+// 获取基础路径，与vite.config.js中的base保持一致
+const base = import.meta.env.BASE_URL || "/";
+
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(base),
   routes: [
     {
       path: "/",

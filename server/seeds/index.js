@@ -6,11 +6,6 @@ import News from "../models/News.js";
 import Resource from "../models/Resource.js";
 import Activity from "../models/Activity.js";
 import SiteSetting from "../models/SiteSetting.js";
-ed.js - 数据库初始种子文件;
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import User from "../models/User.js";
-import News from "../models/News.js";
 
 // 加载环境变量
 dotenv.config();

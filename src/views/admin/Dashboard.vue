@@ -7,8 +7,8 @@
             <div class="card-title"><user-outlined /> 用户总数</div>
           </template>
           <div class="card-content">
-            <div class="number">2,674</div>
-            <div class="desc">较昨日 +12</div>
+            <div class="number">{{ overview.users.total }}</div>
+            <div class="desc">今日新增 {{ overview.users.today }}</div>
           </div>
         </a-card>
       </a-col>
@@ -18,101 +18,145 @@
             <div class="card-title"><file-text-outlined /> 文章总数</div>
           </template>
           <div class="card-content">
-            <div class="number">156</div>
-            <div class="desc">较昨日 +3</div>
+            <div class="number">{{ overview.news.total }}</div>
+            <div class="desc">今日新增 {{ overview.news.today }}</div>
           </div>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card>
           <template #title>
-            <div class="card-title"><folder-outlined /> 资源数量</div>
+            <div class="card-title"><folder-outlined /> 资源总数</div>
           </template>
           <div class="card-content">
-            <div class="number">432</div>
-            <div class="desc">较昨日 +5</div>
+            <div class="number">{{ overview.resources.total }}</div>
+            <div class="desc">今日新增 {{ overview.resources.today }}</div>
           </div>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card>
           <template #title>
-            <div class="card-title"><calendar-outlined /> 近期活动</div>
+            <div class="card-title"><calendar-outlined /> 活动总数</div>
           </template>
           <div class="card-content">
-            <div class="number">8</div>
-            <div class="desc">本月进行中</div>
+            <div class="number">{{ overview.activities.total }}</div>
+            <div class="desc">今日新增 {{ overview.activities.today }}</div>
           </div>
         </a-card>
       </a-col>
     </a-row>
 
-    <a-card style="margin-top: 16px">
-      <template #title>最新动态</template>
-      <template #extra>
-        <a-radio-group v-model:value="timeRange" button-style="solid">
-          <a-radio-button value="week">本周</a-radio-button>
-          <a-radio-button value="month">本月</a-radio-button>
-          <a-radio-button value="year">全年</a-radio-button>
-        </a-radio-group>
-      </template>
-      <a-timeline>
-        <a-timeline-item v-for="item in activities" :key="item.id">
-          <template #dot>
-            <component :is="item.icon" style="font-size: 16px" />
+    <a-row :gutter="16" class="mt-4">
+      <a-col :span="16">
+        <a-card title="活动趋势">
+          <template v-if="!loading">
+            <v-chart :option="chartOption" autoresize />
           </template>
-          <div class="timeline-content">
-            <div class="timeline-title">{{ item.title }}</div>
-            <div class="timeline-time">{{ item.time }}</div>
-            <div class="timeline-desc">{{ item.description }}</div>
-          </div>
-        </a-timeline-item>
-      </a-timeline>
-    </a-card>
+          <a-spin v-else />
+        </a-card>
+      </a-col>
+      <a-col :span="8">
+        <a-card title="最近活动">
+          <a-list
+            :loading="loading"
+            :data-source="recentActivities"
+            class="recent-activities"
+          >
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <div class="activity-item">
+                  <div class="activity-title">{{ item.action }}</div>
+                  <div class="activity-meta">
+                    <span>{{ item.user.username }}</span>
+                    <span>{{ formatDate(item.createdAt) }}</span>
+                  </div>
+                </div>
+              </a-list-item>
+            </template>
+          </a-list>
+        </a-card>
+      </a-col>
+    </a-row>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useDashboardStore } from "@/stores/dashboard";
 import {
   UserOutlined,
   FileTextOutlined,
   FolderOutlined,
   CalendarOutlined,
 } from "@ant-design/icons-vue";
+import VChart from "vue-echarts";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { LineChart } from "echarts/charts";
+import {
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
+} from "echarts/components";
+import { formatDate } from "@/utils/date";
 
-const timeRange = ref("week");
-
-const activities = ref([
-  {
-    id: 1,
-    title: "更新了思政课教学资源",
-    time: "2023-05-10 14:30",
-    description: "上传了新的教学课件和教案资料，涉及马克思主义基本原理等内容。",
-    icon: FolderOutlined,
-  },
-  {
-    id: 2,
-    title: "发布了新的通知公告",
-    time: "2023-05-09 16:45",
-    description: "关于举办2023年度思政课教学创新大赛的通知已发布。",
-    icon: FileTextOutlined,
-  },
-  {
-    id: 3,
-    title: "新增用户注册",
-    time: "2023-05-09 10:20",
-    description: "今日新增注册教师用户12名，已完成身份认证。",
-    icon: UserOutlined,
-  },
-  {
-    id: 4,
-    title: "活动报名开始",
-    time: "2023-05-08 09:00",
-    description: "大中小学思政课一体化建设研讨会报名通道已开启。",
-    icon: CalendarOutlined,
-  },
+// 注册 ECharts 必要组件
+use([
+  CanvasRenderer,
+  LineChart,
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
 ]);
+
+const dashboardStore = useDashboardStore();
+const loading = computed(() => dashboardStore.loading);
+const overview = computed(() => dashboardStore.overview);
+const activityTrend = computed(() => dashboardStore.activityTrend);
+const recentActivities = computed(() => dashboardStore.recentActivities);
+
+// 图表配置
+const chartOption = computed(() => ({
+  tooltip: {
+    trigger: "axis",
+  },
+  grid: {
+    left: "3%",
+    right: "4%",
+    bottom: "3%",
+    containLabel: true,
+  },
+  xAxis: {
+    type: "category",
+    boundaryGap: false,
+    data: activityTrend.value.map((item) => item._id),
+  },
+  yAxis: {
+    type: "value",
+  },
+  series: [
+    {
+      name: "活动数",
+      type: "line",
+      data: activityTrend.value.map((item) => item.count),
+      areaStyle: {},
+      smooth: true,
+    },
+  ],
+}));
+
+// 初始化数据
+onMounted(async () => {
+  try {
+    await Promise.all([
+      dashboardStore.fetchOverview(),
+      dashboardStore.fetchRecentActivities(),
+    ]);
+  } catch (error) {
+    console.error("加载仪表盘数据失败:", error);
+  }
+});
 </script>
 
 <style scoped>
@@ -124,45 +168,54 @@ const activities = ref([
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.85);
 }
 
 .card-content {
   text-align: center;
-  padding: 8px 0;
 }
 
-.card-content .number {
+.number {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: bold;
   color: #1890ff;
-}
-
-.card-content .desc {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-top: 4px;
-}
-
-.timeline-content {
   margin-bottom: 8px;
 }
 
-.timeline-title {
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.85);
+.desc {
+  color: #666;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.recent-activities {
+  height: 400px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  width: 100%;
+}
+
+.activity-title {
+  font-weight: 500;
   margin-bottom: 4px;
 }
 
-.timeline-time {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 4px;
+.activity-meta {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  justify-content: space-between;
 }
 
-.timeline-desc {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
+:deep(.ant-card-body) {
+  padding: 16px;
+}
+
+.v-chart {
+  width: 100%;
+  height: 400px;
 }
 </style>

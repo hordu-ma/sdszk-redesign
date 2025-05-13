@@ -28,6 +28,8 @@ body {
   min-width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
+  display: flex; /* 使用flex布局确保内容能充满整个高度 */
+  flex-direction: column;
 }
 
 h1 {

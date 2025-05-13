@@ -1,6 +1,6 @@
 // user.js - 用户状态管理
 import { defineStore } from "pinia";
-import axios from "axios";
+import api from "@/utils/api";
 import router from "../router";
 
 export const useUserStore = defineStore("user", {
@@ -48,193 +48,87 @@ export const useUserStore = defineStore("user", {
   },
 
   actions: {
-    /**
-     * 登录
-     * @param {Object} credentials - 登录凭证
-     * @param {string} credentials.username - 用户名
-     * @param {string} credentials.password - 密码
-     * @param {string} credentials.captcha - 验证码
-     * @param {boolean} credentials.remember - 是否记住登录状态
-     * @returns {Promise<boolean>} 登录成功返回true，否则返回false
-     */
     async login(credentials) {
       try {
-        const response = await axios.post("/api/auth/login", credentials);
+        const response = await api.post("/api/auth/login", credentials);
+        const { token, user, expiresIn } = response;
 
-        const { token, user, expiresIn } = response.data;
-
-        if (!token || !user) {
-          throw new Error("登录失败，服务器返回数据异常");
-        }
-
-        // 计算过期时间
-        const expirationTime =
-          new Date().getTime() + (expiresIn || 24 * 60 * 60 * 1000);
-
-        // 存储认证信息
-        this.token = token;
-        this.userInfo = user;
-        this.loginExpiration = expirationTime.toString();
-
-        // 本地存储
-        localStorage.setItem("admin_token", token);
-        localStorage.setItem("admin_user_info", JSON.stringify(user));
-        localStorage.setItem(
-          "admin_login_expiration",
-          expirationTime.toString()
-        );
-
-        // 记住用户名
-        if (credentials.remember) {
-          localStorage.setItem("admin_username", credentials.username);
-        } else {
-          localStorage.removeItem("admin_username");
-        }
-
-        // 配置axios默认请求头，添加token
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        // 设置token和用户信息
+        this.setToken(token);
+        this.setUserInfo(user);
+        this.setLoginExpiration(expiresIn);
 
         return true;
       } catch (error) {
         console.error("登录失败:", error);
-
-        // 清除认证信息
-        this.logout();
-
-        const errorMessage = error.response?.data?.message || error.message;
-        throw new Error(errorMessage);
+        throw error;
       }
     },
 
-    /**
-     * 注销登录
-     */
     async logout() {
       try {
-        // 调用登出API
-        if (this.isLoggedIn) {
-          await axios.post("/api/auth/logout");
-        }
+        await api.post("/api/auth/logout");
       } catch (error) {
-        console.error("注销API调用失败:", error);
+        console.error("登出请求失败:", error);
       } finally {
-        // 清除状态
-        this.token = "";
-        this.userInfo = null;
-        this.loginExpiration = null;
-
-        // 清除本地存储
-        localStorage.removeItem("admin_token");
-        localStorage.removeItem("admin_user_info");
-        localStorage.removeItem("admin_login_expiration");
-
-        // 清除请求头
-        delete axios.defaults.headers.common["Authorization"];
-
-        // 跳转到登录页
-        router.push({ name: "AdminLogin" });
+        this.clearUserData();
+        router.push("/admin/login");
       }
     },
 
-    /**
-     * 刷新用户信息
-     */
-    async refreshUserInfo() {
+    async fetchUserInfo() {
       try {
-        if (!this.isLoggedIn) {
-          return false;
-        }
+        const response = await api.get("/api/users/profile");
+        this.setUserInfo(response.data);
+        return response.data;
+      } catch (error) {
+        console.error("获取用户信息失败:", error);
+        throw error;
+      }
+    },
 
-        const response = await axios.get("/api/users/me");
-        const userData = response.data.data;
-
-        if (userData) {
-          this.userInfo = userData;
-          localStorage.setItem("admin_user_info", JSON.stringify(userData));
-          return true;
-        }
-
-        return false;
+    async updateProfile(userData) {
+      try {
+        const response = await api.put("/api/users/profile", userData);
+        this.setUserInfo(response.data);
+        return response.data;
       } catch (error) {
         console.error("更新用户信息失败:", error);
-
-        // 如果是未授权错误，则登出
-        if (error.response?.status === 401) {
-          this.logout();
-        }
-
-        return false;
+        throw error;
       }
     },
 
-    /**
-     * 验证当前会话
-     */
-    async validateSession() {
-      try {
-        if (!this.isLoggedIn) {
-          return false;
-        }
-
-        const response = await axios.get("/api/auth/validate");
-        return response.data.valid === true;
-      } catch (error) {
-        console.error("会话验证失败:", error);
-
-        // 如果是未授权错误，则登出
-        if (error.response?.status === 401) {
-          this.logout();
-        }
-
-        return false;
-      }
+    setToken(token) {
+      this.token = token;
+      localStorage.setItem("admin_token", token);
     },
 
-    /**
-     * 更新用户密码
-     */
-    async updatePassword({ currentPassword, newPassword }) {
-      try {
-        const response = await axios.post("/api/users/password", {
-          currentPassword,
-          newPassword,
-        });
+    setUserInfo(userInfo) {
+      this.userInfo = userInfo;
+      localStorage.setItem("admin_user_info", JSON.stringify(userInfo));
+    },
 
-        return response.data.success === true;
-      } catch (error) {
-        console.error("密码更新失败:", error);
-        const errorMessage = error.response?.data?.message || error.message;
-        throw new Error(errorMessage);
+    setLoginExpiration(expiresIn) {
+      const expirationTime = new Date().getTime() + expiresIn * 1000;
+      this.loginExpiration = expirationTime;
+      localStorage.setItem("admin_login_expiration", expirationTime);
+    },
+
+    clearUserData() {
+      this.token = "";
+      this.userInfo = null;
+      this.loginExpiration = null;
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_user_info");
+      localStorage.removeItem("admin_login_expiration");
+    },
+
+    // 权限检查
+    checkPermission(permission) {
+      if (!this.userInfo || !this.userInfo.permissions) {
+        return false;
       }
+      return this.userInfo.permissions.includes(permission);
     },
   },
 });
-
-// axios拦截器配置
-export const setupAxiosInterceptors = (store) => {
-  axios.interceptors.request.use(
-    (config) => {
-      // 如果已登录，添加token到请求头
-      if (store.isLoggedIn) {
-        config.headers.Authorization = `Bearer ${store.token}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
-
-  axios.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      // 处理401未授权错误
-      if (error.response?.status === 401) {
-        store.logout();
-      }
-      return Promise.reject(error);
-    }
-  );
-};

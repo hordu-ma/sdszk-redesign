@@ -8,6 +8,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import { v4 as uuidv4 } from "uuid";
 
 // 路由导入
 import newsRoutes from "./routes/news.js";
@@ -18,6 +21,7 @@ import resourceRoutes from "./routes/resources.js";
 import activityRoutes from "./routes/activities.js";
 import settingRoutes from "./routes/settings.js";
 import activityLogRoutes from "./routes/activityLogs.js";
+import dashboardRoutes from "./routes/dashboard.js";
 
 // 加载环境变量
 dotenv.config();
@@ -35,6 +39,32 @@ const limiter = rateLimit({
   message: "从此IP发送了太多请求，请一小时后再试",
 });
 
+// Session 配置
+app.use(
+  session({
+    genid: function () {
+      return uuidv4(); // 使用UUID生成会话ID
+    },
+    secret: process.env.SESSION_SECRET || "sdszk-secret",
+    resave: false, // 避免在每次请求时都重新保存会话
+    saveUninitialized: false, // 只在会话被修改后保存
+    rolling: true, // 在每个响应上重设cookie过期时间
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 24 * 60 * 60, // 1 day
+      touchAfter: 1 * 60, // 减少更新会话的时间间隔 (1分钟)
+    }),
+    cookie: {
+      secure: false, // 开发环境禁用secure
+      httpOnly: true,
+      sameSite: "lax", // 开发环境使用lax
+      maxAge: 30 * 60 * 1000, // 减少到30分钟，足够完成登录过程
+      path: "/",
+    },
+    name: "sdszk.sid", // 自定义cookie名称
+  })
+);
+
 // 中间件配置
 app.use("/api", limiter); // 应用速率限制到所有API路由
 app.use(express.json({ limit: "10mb" }));
@@ -42,11 +72,41 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:8080"
-        : ["https://sdszk-app.example.com"],
+    origin: function (origin, callback) {
+      // 允许来自多个前端开发端口的请求
+      const allowedOrigins = [
+        "http://localhost:5180",
+        "http://localhost:5182",
+        "http://localhost:5179",
+        "http://localhost:5178",
+        "http://localhost:5173", // Vite默认端口
+        "http://localhost:5174",
+        "http://localhost:5175",
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
+
+      // 记录请求来源
+      console.log("收到跨域请求:", { origin });
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("不允许的跨域访问:", origin);
+        callback(null, false);
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cookie",
+      "X-Requested-With",
+    ],
+    exposedHeaders: ["set-cookie", "Set-Cookie"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 3600, // 预检请求的缓存时间（秒）
   })
 );
 app.use(
@@ -66,8 +126,6 @@ const connectDB = async () => {
     const conn = await mongoose.connect(
       process.env.MONGODB_URI || "mongodb://localhost:27017/sdszk",
       {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       }
@@ -104,6 +162,7 @@ app.use("/api/resources", resourceRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/logs", activityLogRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // 处理未找到的路由
 app.all("*", (req, res) => {

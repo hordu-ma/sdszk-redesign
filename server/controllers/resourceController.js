@@ -393,3 +393,144 @@ export const incrementDownloadCount = async (req, res) => {
     });
   }
 };
+
+// 获取资源统计信息
+export const getResourceStats = async (req, res) => {
+  try {
+    const stats = {
+      totalCount: await Resource.countDocuments(),
+      categoryCount: {},
+      featuredCount: await Resource.countDocuments({ featured: true }),
+    };
+
+    // 按类别统计
+    const categoryStats = await Resource.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    categoryStats.forEach((stat) => {
+      stats.categoryCount[stat._id] = stat.count;
+    });
+
+    res.json({
+      status: "success",
+      data: stats,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
+// 批量删除资源
+export const batchDeleteResources = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "请提供要删除的资源ID列表",
+      });
+    }
+
+    // 查找要删除的资源
+    const resources = await Resource.find({ _id: { $in: ids } });
+
+    if (resources.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "未找到指定的资源",
+      });
+    }
+
+    // 执行删除操作
+    await Resource.deleteMany({ _id: { $in: ids } });
+
+    // 记录批量删除活动
+    await ActivityLog.logActivity({
+      userId: req.user._id,
+      username: req.user.username,
+      action: "batch_delete",
+      entityType: "resource",
+      details: {
+        count: resources.length,
+        resourceTitles: resources.map((r) => r.title),
+      },
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+    });
+
+    res.json({
+      status: "success",
+      message: `成功删除 ${resources.length} 个资源`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
+// 批量更新资源
+export const batchUpdateResources = async (req, res) => {
+  try {
+    const { ids, ...updateData } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "请提供要更新的资源ID列表",
+      });
+    }
+
+    // 更新前查找资源
+    const resources = await Resource.find({ _id: { $in: ids } });
+
+    if (resources.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "未找到指定的资源",
+      });
+    }
+
+    // 设置更新者
+    updateData.updatedBy = req.user._id;
+
+    // 执行批量更新
+    await Resource.updateMany({ _id: { $in: ids } }, { $set: updateData });
+
+    // 记录批量更新活动
+    await ActivityLog.logActivity({
+      userId: req.user._id,
+      username: req.user.username,
+      action: "batch_update",
+      entityType: "resource",
+      details: {
+        count: resources.length,
+        resourceTitles: resources.map((r) => r.title),
+        updatedFields: Object.keys(updateData),
+      },
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+    });
+
+    res.json({
+      status: "success",
+      message: `成功更新 ${resources.length} 个资源`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};

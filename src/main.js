@@ -4,9 +4,10 @@ import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import ElementPlus from "element-plus";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
-// 样式导入
-import "element-plus/dist/index.css";
+// 样式导入 - 修改导入顺序确保样式正确应用
 import "./style.css";
+import "element-plus/dist/index.css";
+import "./styles/preview-fix.css"; // 添加预览模式修复样式
 
 import App from "./App.vue";
 import router from "./router";

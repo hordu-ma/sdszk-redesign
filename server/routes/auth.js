@@ -5,9 +5,13 @@ import {
   register,
   protect,
   restrictTo,
+  generateCaptcha,
 } from "../controllers/authController.js";
 
 const router = express.Router();
+
+// 获取验证码
+router.get("/captcha", generateCaptcha);
 
 // 登录路由
 router.post("/login", login);

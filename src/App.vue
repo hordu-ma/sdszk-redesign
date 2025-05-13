@@ -1,14 +1,36 @@
 <template>
   <div class="app-container">
-    <Header />
-    <router-view />
-    <FooterLinks />
+    <!-- 根据路由判断是否显示前台布局 -->
+    <template v-if="!isAdminRoute">
+      <Header />
+      <router-view />
+      <FooterLinks />
+    </template>
+    <!-- 管理后台直接显示路由内容 -->
+    <template v-else>
+      <router-view />
+    </template>
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Header from "./components/Header.vue";
 import FooterLinks from "./components/FooterLinks.vue";
+
+const route = useRoute();
+const router = useRouter();
+const isAdminRoute = computed(() => route.path.startsWith("/admin"));
+
+// 处理GitHub Pages的路由重定向
+onMounted(() => {
+  const redirect = sessionStorage.getItem("redirect");
+  if (redirect) {
+    sessionStorage.removeItem("redirect");
+    router.push(redirect);
+  }
+});
 </script>
 
 <style>
@@ -49,6 +71,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f4f5f7;
+  overflow-x: hidden; /* 防止水平滚动 */
 }
 
 /* 响应式布局基础设置 */

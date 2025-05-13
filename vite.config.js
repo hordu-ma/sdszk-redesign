@@ -5,7 +5,9 @@ import { resolve } from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const base = env.VITE_PUBLIC_PATH || "/sdszk-redesign/";
+  // 根据环境设置不同的基础路径
+  // preview命令使用根路径，生产环境（GitHub Pages）使用子路径
+  const base = command === "build" ? "/sdszk-redesign/" : "/";
 
   return {
     base,
@@ -15,14 +17,17 @@ export default defineConfig(({ command, mode }) => {
         "@": resolve(__dirname, "src"),
       },
     },
+    publicDir: "public", // 确保静态资源目录正确
     build: {
       outDir: "dist",
       assetsDir: "assets",
       sourcemap: true,
       minify: "terser",
+      cssCodeSplit: true, // 确保CSS正确分离
+      assetsInlineLimit: 4096, // 小于4kb的资源将内联为base64
       terserOptions: {
         compress: {
-          drop_console: true,
+          drop_console: false, // 保留console以便调试
           drop_debugger: true,
         },
       },

@@ -6,32 +6,33 @@ import {
   createResource,
   updateResource,
   deleteResource,
-  togglePublishStatus,
   toggleFeaturedStatus,
-  getFeaturedResources,
-  getCategoryResources,
+  getResourceStats,
+  batchDeleteResources,
+  batchUpdateResources,
 } from "../controllers/resourceController.js";
-import { protect, restrictTo } from "../middleware/authMiddleware.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // 公开路由
 router.get("/", getResourceList);
-router.get("/featured", getFeaturedResources);
-router.get("/category/:category", getCategoryResources);
 router.get("/:id", getResourceById);
 
-// 需要登录的路由
-router.use(protect);
+// 需要认证的路由
+router.use(authenticateToken);
 
-// 需要编辑权限的路由
-router.use(restrictTo("admin", "editor"));
+// 获取资源统计信息
+router.get("/stats/overview", getResourceStats);
+
+// 批量操作路由
+router.post("/batch-delete", batchDeleteResources);
+router.post("/batch-update", batchUpdateResources);
+
+// 资源 CRUD 路由
 router.post("/", createResource);
-router.patch("/:id", updateResource);
-router.delete("/:id", restrictTo("admin"), deleteResource);
-
-// 发布状态切换
-router.patch("/:id/publish", togglePublishStatus);
-router.patch("/:id/feature", restrictTo("admin"), toggleFeaturedStatus);
+router.put("/:id", updateResource);
+router.delete("/:id", deleteResource);
+router.patch("/:id/featured", toggleFeaturedStatus);
 
 export default router;
