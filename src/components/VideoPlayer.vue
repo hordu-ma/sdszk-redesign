@@ -1,23 +1,26 @@
 <template>
   <div class="video-player">
     <video
+      ref="videoRef"
       :src="src"
       :poster="poster"
       class="video"
       controls
       preload="none"
-      @click="togglePlay"
+      @play="onPlay"
+      @pause="onPause"
+      @ended="onEnded"
     >
       您的浏览器不支持 HTML5 视频播放
     </video>
-    <div class="play-overlay" v-show="!isPlaying">
+    <div class="play-overlay" v-show="!isPlaying" @click="playVideo">
       <el-icon class="play-icon"><video-play /></el-icon>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { VideoPlay } from "@element-plus/icons-vue";
 
 const props = defineProps({
@@ -31,17 +34,27 @@ const props = defineProps({
   },
 });
 
+const videoRef = ref(null);
 const isPlaying = ref(false);
 
-const togglePlay = (event) => {
-  const video = event.target;
-  if (video.paused) {
-    video.play();
-    isPlaying.value = true;
-  } else {
-    video.pause();
-    isPlaying.value = false;
+// 播放视频
+const playVideo = () => {
+  if (videoRef.value) {
+    videoRef.value.play();
   }
+};
+
+// 视频事件处理函数
+const onPlay = () => {
+  isPlaying.value = true;
+};
+
+const onPause = () => {
+  isPlaying.value = false;
+};
+
+const onEnded = () => {
+  isPlaying.value = false;
 };
 </script>
 
