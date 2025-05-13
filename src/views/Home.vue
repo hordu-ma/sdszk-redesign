@@ -199,6 +199,7 @@
           />
           <h4>{{ teacher.name }}</h4>
           <p>{{ teacher.title }}</p>
+          <p class="teacher-institution">{{ teacher.description }}</p>
         </div>
       </div>
     </div>
@@ -529,45 +530,45 @@ const videos = ref([
 const teachers = ref([
   {
     id: 1,
-    name: "张教授",
-    title: "特聘教授",
+    name: "王岳喜",
+    title: "教授",
     avatar: teacher1,
-    description: "思政理论教育专家",
+    description: "山东商业职业技术学院",
   },
   {
     id: 2,
-    name: "李教授",
-    title: "教授",
+    name: "高继文",
+    title: "二级教授",
     avatar: teacher2,
-    description: "马克思主义理论研究",
+    description: "山东师范大学",
   },
   {
     id: 3,
-    name: "王教授",
-    title: "教授",
+    name: "渠月",
+    title: "正高级教师",
     avatar: teacher3,
-    description: "党史教育研究",
+    description: "山东省教科院",
   },
   {
     id: 4,
-    name: "刘教授",
-    title: "副教授",
+    name: "张淑琴",
+    title: "校长",
     avatar: teacher4,
-    description: "思想政治教育",
+    description: "临沂北城小学",
   },
   {
     id: 5,
-    name: "陈教授",
-    title: "副教授",
+    name: "朱海英",
+    title: "特级教师",
     avatar: teacher5,
-    description: "当代中国研究",
+    description: "邹平市第一实验小学",
   },
   {
     id: 6,
-    name: "孙教授",
-    title: "副教授",
+    name: "宋侃侃",
+    title: "教师",
     avatar: teacher6,
-    description: "思政教育创新",
+    description: "枣庄市第十五中学",
   },
 ]);
 
@@ -1201,6 +1202,8 @@ const handleLogin = () => {
   background: #fff;
   position: relative;
   overflow: hidden;
+  height: auto; /* 确保高度自适应内容 */
+  min-height: 300px; /* 设置最小高度 */
 }
 
 .teacher-card::after {
@@ -1252,6 +1255,13 @@ const handleLogin = () => {
   color: #666;
   margin: 5px 0;
   line-height: 1.4;
+}
+
+.teacher-card .teacher-institution {
+  font-size: 14px;
+  color: #888;
+  margin-top: 5px;
+  font-style: italic;
 }
 
 /* 学校logo样式 */
