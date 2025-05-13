@@ -85,6 +85,7 @@
             <router-link
               :to="item.path"
               @click="item.children ? null : closeMenu"
+              class="mobile-nav-link"
             >
               {{ item.name }}
               <i v-if="item.children" class="fas fa-chevron-down"></i>
@@ -95,6 +96,7 @@
                 :key="child.path"
                 :to="child.path"
                 @click="closeMenu"
+                class="mobile-submenu-link"
               >
                 {{ child.name }}
               </router-link>
@@ -275,6 +277,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   transition: padding 0.3s ease;
   height: 100%;
+  position: relative;
 }
 
 /* 滚动时头部内容的样式变化 */
@@ -471,6 +474,8 @@ onUnmounted(() => {
 
 .login-section {
   margin-left: 20px;
+  position: relative;
+  z-index: 1001; /* 确保登录按钮在点击上下文中有较高的z-index */
 }
 
 .login-section :deep(.el-button) {
@@ -485,6 +490,29 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.1);
   border-color: #fff;
   color: #fff;
+}
+
+/* 移动菜单触发按钮 */
+.mobile-menu-trigger {
+  display: none;
+  background-color: #9a2314; /* 与header背景相同的红色 */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #fff;
+  font-size: 16px; /* 减小图标大小 */
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  width: 32px; /* 减小整体尺寸 */
+  height: 32px; /* 减小整体尺寸，与登录按钮高度一致 */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin-right: 8px; /* 右侧与logo保持协调的间距 */
+}
+
+.mobile-menu-trigger:hover {
+  background-color: rgba(154, 35, 20, 0.8); /* 保持红色调但稍微有变化 */
+  border-color: #fff;
 }
 
 /* 移动端导航优化 */
@@ -519,11 +547,13 @@ onUnmounted(() => {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .menu-open .mobile-overlay {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .mobile-menu-close {
@@ -554,7 +584,11 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding: 80px 30px 30px;
-  gap: 20px;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2001;
 }
 
 .mobile-nav a {
@@ -564,6 +598,9 @@ onUnmounted(() => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: block;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 2002;
+  text-decoration: none;
 }
 
 .mobile-nav a:hover,
@@ -577,35 +614,85 @@ onUnmounted(() => {
   padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
+  position: relative;
+  z-index: 2002;
 }
 
 .mobile-submenu a {
-  padding: 10px 0;
+  padding: 10px 5px;
   font-size: 16px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 2003;
 }
 
-/* 移动菜单触发按钮 */
-.mobile-menu-trigger {
-  display: none;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+.mobile-nav-item {
+  position: relative;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.mobile-nav-link,
+.mobile-submenu-link {
+  position: relative;
+  z-index: 2003;
+  width: 100%;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
+}
+
+.mobile-nav-link i {
+  margin-left: 10px;
+}
+
+/* 确保透明遮罩与点击区域不冲突 */
+.menu-open .mobile-menu {
+  z-index: 2001; /* 高于遮罩层 */
+  position: relative; /* 确保元素不被遮罩层覆盖 */
+}
+
+/* 修复移动端视图 */
+@media screen and (max-width: 480px) {
+  .header {
+    height: 64px;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+  }
+
+  .center-name {
+    font-size: 13px;
+    max-width: calc(100vw - 180px);
+  }
+
+  .login-section :deep(.el-button) {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .mobile-menu-trigger {
+    display: flex;
+    position: relative;
+    z-index: 1001;
+    margin-left: 5px; /* 增加与左侧边界的距离 */
+    width: 28px; /* 在更小屏幕上进一步缩小尺寸 */
+    height: 28px;
+    font-size: 14px;
+  }
 }
 
 @media screen and (max-width: 768px) {
   .mobile-menu-trigger {
     display: flex;
+    position: relative;
+    z-index: 1001;
+    margin-left: 8px; /* 增加与左侧边界的距离 */
   }
 
   .header-content {
@@ -614,17 +701,31 @@ onUnmounted(() => {
   }
 
   .center-name {
-    font-size: 16px;
+    font-size: 14px;
+    max-width: calc(100vw - 200px);
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .logo {
-    width: 40px;
-    height: 40px;
-    margin-right: 8px;
+    width: 36px;
+    height: 36px;
+    margin-right: 6px;
   }
 
   .logo-container {
     padding-right: 0;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .login-section {
+    margin-left: 10px;
+  }
+
+  .login-section :deep(.el-button) {
+    padding: 6px 12px;
+    font-size: 14px;
   }
 }
 </style>
