@@ -19,43 +19,64 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+<script lang="ts">
+import { ref, defineComponent } from "vue";
 import { VideoPlay } from "@element-plus/icons-vue";
 
-const props = defineProps({
-  src: {
-    type: String,
-    required: true,
+export interface VideoPlayerProps {
+  src: string;
+  poster: string;
+}
+
+export default defineComponent({
+  name: "VideoPlayer",
+  components: {
+    VideoPlay,
   },
-  poster: {
-    type: String,
-    required: true,
+  props: {
+    src: {
+      type: String,
+      required: true,
+    },
+    poster: {
+      type: String,
+      required: true,
+    },
+  },
+  setup() {
+    const videoRef = ref<HTMLVideoElement | null>(null);
+    const isPlaying = ref(false);
+
+    // 播放视频
+    const playVideo = () => {
+      if (videoRef.value) {
+        videoRef.value.play();
+      }
+    };
+
+    // 视频事件处理函数
+    const onPlay = () => {
+      isPlaying.value = true;
+    };
+
+    const onPause = () => {
+      isPlaying.value = false;
+    };
+
+    const onEnded = () => {
+      isPlaying.value = false;
+    };
+
+    return {
+      videoRef,
+      isPlaying,
+      playVideo,
+      onPlay,
+      onPause,
+      onEnded,
+    };
   },
 });
-
-const videoRef = ref(null);
-const isPlaying = ref(false);
-
-// 播放视频
-const playVideo = () => {
-  if (videoRef.value) {
-    videoRef.value.play();
-  }
-};
-
-// 视频事件处理函数
-const onPlay = () => {
-  isPlaying.value = true;
-};
-
-const onPause = () => {
-  isPlaying.value = false;
-};
-
-const onEnded = () => {
-  isPlaying.value = false;
-};
 </script>
 
 <style scoped>
@@ -64,7 +85,7 @@ const onEnded = () => {
   width: 100%;
   height: 0;
   padding-bottom: 56.25%; /* 16:9 宽高比 */
-  background: #000;
+  background: var(--background-dark, #000);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -99,7 +120,13 @@ const onEnded = () => {
 
 .play-icon {
   font-size: 48px;
-  color: #fff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  color: white;
+  opacity: 0.9;
+  transition: transform 0.3s ease;
+}
+
+.play-overlay:hover .play-icon {
+  transform: scale(1.1);
+  opacity: 1;
 }
 </style>

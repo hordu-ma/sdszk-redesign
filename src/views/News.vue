@@ -265,7 +265,11 @@ const handlePageChange = (page) => {
   min-width: 80px;
   width: 80px;
   height: 80px;
-  background: #9a2314;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-color-light) 100%
+  );
   color: white;
   display: flex;
   flex-direction: column;

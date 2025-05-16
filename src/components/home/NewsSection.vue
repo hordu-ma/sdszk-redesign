@@ -7,24 +7,19 @@
         </el-carousel-item>
       </el-carousel>
     </div>
-    <!-- 中心动态部分 -->
     <div class="center-news">
-      <div class="block-header">
-        <h3>
-          <i class="fas fa-newspaper header-icon"></i>
-          <span class="title-text">中心动态</span>
-          <router-link to="/news/center" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
-          </router-link>
-        </h3>
-      </div>
+      <BlockHeader
+        title="中心动态"
+        icon-class="fa-newspaper"
+        more-link="/news/center"
+      />
       <div class="news-container">
         <div v-for="news in centerNews" :key="news.id" class="news-item">
           <router-link :to="`/news/detail/${news.id}`" class="news-link">
             <div class="news-wrapper">
               <div class="date-block">
-                <span class="day">{{ news.date.split("-")[2] }}</span>
-                <span class="month-year">{{ news.date.split("-")[1] }}/{{ news.date.split("-")[0].slice(2) }}</span>
+                <span class="day">{{ formatDay(news.date) }}</span>
+                <span class="month-year">{{ formatMonthYear(news.date) }}</span>
               </div>
               <div class="news-content">
                 <h3 class="news-title">{{ news.title }}</h3>
@@ -38,26 +33,41 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, defineComponent } from "vue";
+import { default as BlockHeader } from "../common/BlockHeader.vue";
 import carousel1 from "../../assets/images/carousel1.jpg";
 import carousel2 from "../../assets/images/carousel2.jpg";
 import carousel3 from "../../assets/images/carousel3.jpg";
 
-const carouselItems = ref([
+interface CarouselItem {
+  id: number;
+  image: string;
+  title: string;
+}
+
+interface NewsItem {
+  id: number;
+  title: string;
+  date: string;
+  url: string;
+  summary: string;
+}
+
+const carouselItems = ref<CarouselItem[]>([
   { id: 1, image: carousel1, title: "新闻1" },
   { id: 2, image: carousel2, title: "新闻2" },
   { id: 3, image: carousel3, title: "新闻3" },
 ]);
 
-const centerNews = ref([
+const centerNews = ref<NewsItem[]>([
   {
     id: 1,
     title: "校际协同，星辰引航：'星空下的思政课'开讲",
     date: "2025-04-29",
     url: "https://www.sdszk.cn/home/information/item/2/87",
     summary:
-      "青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办'星空下的思政课'大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。把思政课堂与文化实践教学有机结合，推动大中小学一体化课程思政是青岛理工大学近年来着力开展的重点工作，物理作为贯穿大中小学的科学教育，是实现大中小学一体化课程思政的重要课程载体。",
+      "青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办'星空下的思政课'大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。",
   },
   {
     id: 2,
@@ -76,6 +86,12 @@ const centerNews = ref([
       "济宁市新时代学校思政课建设推进会召开，市委常委、宣传部部长董冰出席并讲话，副市长宫晓芳主持会议。",
   },
 ]);
+
+const formatDay = (date: string): string => date.split("-")[2];
+const formatMonthYear = (date: string): string => {
+  const parts = date.split("-");
+  return `${parts[1]}/${parts[0].slice(2)}`;
+};
 </script>
 
 <style scoped>
@@ -90,7 +106,7 @@ const centerNews = ref([
   width: 100%;
   overflow: hidden;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
 }
 
 .carousel-img {
@@ -107,55 +123,10 @@ const centerNews = ref([
   height: 400px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--background-color);
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
   overflow: hidden;
-}
-
-.block-header {
-  margin-bottom: 20px;
-}
-
-.block-header h3 {
-  display: flex;
-  align-items: center;
-  background: linear-gradient(to right, #9a2314, #c44836);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 4px;
-  margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
-  font-size: 20px;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.block-header h3:hover {
-  transform: scale(1.02);
-  background: linear-gradient(to right, #c44836, #9a2314);
-}
-
-.header-icon {
-  margin-right: 8px;
-}
-
-.more-link {
-  margin-left: auto;
-  font-size: 14px;
-  color: white;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  transition: opacity 0.3s ease;
-}
-
-.more-link:hover {
-  opacity: 0.8;
-}
-
-.more-link i {
-  margin-left: 4px;
 }
 
 .news-container {
@@ -172,23 +143,23 @@ const centerNews = ref([
 }
 
 .news-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track-color, #f1f1f1);
   border-radius: 3px;
 }
 
 .news-container::-webkit-scrollbar-thumb {
-  background: #9a2314;
+  background: var(--primary-color);
   border-radius: 3px;
 }
 
 .news-container::-webkit-scrollbar-thumb:hover {
-  background: #7a1c10;
+  background: var(--primary-color-dark);
 }
 
 .news-item {
-  background: #ffffff;
+  background: var(--background-color);
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-shadow-sm);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -207,7 +178,7 @@ const centerNews = ref([
 
 .news-wrapper:hover {
   transform: translateX(5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .date-block {
@@ -217,8 +188,9 @@ const centerNews = ref([
   justify-content: center;
   min-width: 60px;
   padding: 8px;
-  background: linear-gradient(to bottom, #9a2314, #c44836);
+  background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
   border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.2);
   color: white;
 }
 
@@ -242,27 +214,29 @@ const centerNews = ref([
   margin: 0 0 8px;
   font-size: 16px;
   font-weight: 500;
-  color: #303133;
+  color: var(--text-color);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   transition: color 0.3s ease;
 }
 
 .news-wrapper:hover .news-title {
-  color: #9a2314;
+  color: var(--primary-color);
 }
 
 .news-summary {
   margin: 0;
   font-size: 14px;
-  color: #909399;
+  color: var(--text-secondary);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
 </style>
