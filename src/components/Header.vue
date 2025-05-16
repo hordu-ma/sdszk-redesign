@@ -47,17 +47,17 @@
             <el-dropdown-menu>
               <el-dropdown-item>
                 <router-link to="/resources/theory" class="dropdown-link"
-                  >理论研究</router-link
+                  >文献资料</router-link
                 >
               </el-dropdown-item>
               <el-dropdown-item>
                 <router-link to="/resources/teaching" class="dropdown-link"
-                  >教学前沿</router-link
+                  >教学研究</router-link
                 >
               </el-dropdown-item>
               <el-dropdown-item>
                 <router-link to="/resources/video" class="dropdown-link"
-                  >思政短视频</router-link
+                  >影像思政</router-link
                 >
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -145,9 +145,9 @@ const menuItems = [
     path: "/resources",
     name: "资源中心",
     children: [
-      { path: "/resources/theory", name: "理论研究" },
-      { path: "/resources/teaching", name: "教学前沿" },
-      { path: "/resources/video", name: "思政短视频" },
+      { path: "/resources/theory", name: "文献资料" },
+      { path: "/resources/teaching", name: "教学研究" },
+      { path: "/resources/video", name: "影像思政" },
     ],
   },
   { path: "/ai", name: "AI思政" },

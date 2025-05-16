@@ -1,180 +1,25 @@
 <template>
   <div class="home-container">
-    <!-- 平台宣传图组件 -->
-    <div class="platform-banner">
-      <router-link to="/ai">
-        <img
-          src="../assets/images/banner.jpg"
-          alt="平台宣传图"
-          class="banner-img"
-        />
-      </router-link>
-    </div>
+    <banner-section />
 
-    <!-- 新闻轮播和中心动态区域 -->
-    <div class="news-section">
-      <div class="carousel-container">
-        <el-carousel height="400px">
-          <el-carousel-item v-for="item in carouselItems" :key="item.id">
-            <img :src="item.image" :alt="item.title" class="carousel-img" />
-          </el-carousel-item>
-        </el-carousel>
-      </div>
-      <!-- 中心动态部分 -->
-      <div class="center-news">
-        <div class="block-header">
-          <h3>
-            <i class="fas fa-newspaper header-icon"></i>
-            <span class="title-text">中心动态</span>
-            <router-link to="/news/center" class="more-link">
-              更多<i class="fas fa-angle-right"></i>
-            </router-link>
-          </h3>
-        </div>
-        <div class="news-container">
-          <div v-for="news in centerNews" :key="news.id" class="news-item">
-            <router-link :to="`/news/detail/${news.id}`" class="news-link">
-              <div class="news-wrapper">
-                <div class="date-block">
-                  <span class="day">{{ news.date.split("-")[2] }}</span>
-                  <span class="month-year"
-                    >{{ news.date.split("-")[1] }}/{{
-                      news.date.split("-")[0].slice(2)
-                    }}</span
-                  >
-                </div>
-                <div class="news-content">
-                  <h3 class="news-title">{{ news.title }}</h3>
-                  <p class="news-summary">{{ news.summary }}</p>
-                </div>
-              </div>
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <news-section />
 
-    <!-- 四个信息板块 -->
-    <div class="info-section">
-      <div class="info-block notice">
-        <div class="block-header">
-          <h3>
-            <i class="fas fa-bullhorn header-icon"></i>
-            <span class="title-text">通知公告</span>
-            <router-link to="/news/notice" class="more-link">
-              更多<i class="fas fa-angle-right"></i>
-            </router-link>
-          </h3>
-        </div>
-        <ul class="styled-list">
-          <li v-for="notice in notices" :key="notice.id">
-            <router-link :to="`/news/detail/${notice.id}`" class="info-link">
-              <div class="info-content">
-                <div class="info-header">
-                  <span class="info-title">{{ notice.title }}</span>
-                </div>
-                <div class="info-footer">
-                  <span class="info-date">发布日期：{{ notice.date }}</span>
-                  <span class="info-unit">{{ notice.unit }}</span>
-                </div>
-              </div>
-            </router-link>
-          </li>
-        </ul>
-      </div>
-      <div class="info-block policy">
-        <div class="block-header">
-          <h3>
-            <i class="fas fa-file-alt header-icon"></i>
-            <span class="title-text">政策文件</span>
-            <router-link to="/news/policy" class="more-link">
-              更多<i class="fas fa-angle-right"></i>
-            </router-link>
-          </h3>
-        </div>
-        <ul class="styled-list">
-          <li v-for="policy in policies" :key="policy.id">
-            <router-link :to="`/news/detail/${policy.id}`" class="info-link">
-              <div class="info-content">
-                <div class="info-header">
-                  <span class="info-title">{{ policy.title }}</span>
-                </div>
-                <div class="info-footer">
-                  <span class="info-date">发布日期：{{ policy.date }}</span>
-                  <span class="info-unit">{{ policy.unit }}</span>
-                </div>
-              </div>
-            </router-link>
-          </li>
-        </ul>
-      </div>
-      <div class="info-block theory">
-        <div class="block-header">
-          <h3>
-            <i class="fas fa-book header-icon"></i>
-            <span class="title-text">理论前沿</span>
-            <router-link to="/resources/theory" class="more-link">
-              更多<i class="fas fa-angle-right"></i>
-            </router-link>
-          </h3>
-        </div>
-        <ul class="styled-list">
-          <li v-for="theory in theories" :key="theory.id">
-            <router-link :to="`/news/detail/${theory.id}`" class="info-link">
-              <div class="info-content">
-                <div class="info-header">
-                  <span class="info-title">{{ theory.title }}</span>
-                </div>
-                <div class="info-footer">
-                  <span class="info-author">{{ theory.author }}</span>
-                  <span class="info-affiliation">{{ theory.affiliation }}</span>
-                  <span class="info-date">发布日期：{{ theory.date }}</span>
-                </div>
-              </div>
-            </router-link>
-          </li>
-        </ul>
-      </div>
-      <div class="info-block teaching">
-        <div class="block-header">
-          <h3>
-            <i class="fas fa-chalkboard-teacher header-icon"></i>
-            <span class="title-text">教学研究</span>
-            <router-link to="/resources/teaching" class="more-link">
-              更多<i class="fas fa-angle-right"></i>
-            </router-link>
-          </h3>
-        </div>
-        <ul class="styled-list">
-          <li v-for="research in researches" :key="research.id">
-            <router-link :to="`/news/detail/${research.id}`" class="info-link">
-              <div class="info-content">
-                <div class="info-header">
-                  <span class="info-title">{{ research.title }}</span>
-                </div>
-                <div class="info-footer">
-                  <span class="info-author">{{ research.author }}</span>
-                  <span class="info-affiliation">{{
-                    research.affiliation
-                  }}</span>
-                  <span class="info-date">发布日期：{{ research.date }}</span>
-                </div>
-              </div>
-            </router-link>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <info-section
+      :notices="notices"
+      :policies="policies"
+      :theories="theories"
+      :researches="researches"
+    />
 
-    <!-- 思政短视频组件 -->
+    <!-- 影像思政组件 -->
     <div class="video-section">
       <div class="block-header">
         <h3>
           <div class="title-container">
             <i class="fas fa-video header-icon"></i>
-            <span class="title-text">思政短视频</span>
+            <span class="title-text">影像思政</span>
           </div>
-          <router-link to="/resources/videos" class="more-link">
+          <router-link to="/resources/video" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
@@ -247,9 +92,9 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import VideoPlayer from "../components/VideoPlayer.vue";
-import carousel1 from "../assets/images/carousel1.jpg";
-import carousel2 from "../assets/images/carousel2.jpg";
-import carousel3 from "../assets/images/carousel3.jpg";
+import NewsSection from "../components/home/NewsSection.vue";
+import InfoSection from "../components/home/InfoSection.vue";
+import BannerSection from "../components/home/BannerSection.vue";
 import video1 from "../assets/videos/video1.mp4";
 import video2 from "../assets/videos/video2.mp4";
 import video3 from "../assets/videos/video3.mp4";
@@ -259,6 +104,71 @@ import video6 from "../assets/videos/video6.mp4";
 import poster1 from "../assets/images/posters/poster1.jpg";
 import poster2 from "../assets/images/posters/poster2.jpg";
 import poster3 from "../assets/images/posters/poster3.jpg";
+
+// 示例数据
+const notices = ref([
+  {
+    id: 1,
+    title: "关于开展2023年度思政课教学研究项目申报工作的通知",
+    date: "2023-09-15",
+    unit: "思政课程部",
+  },
+  {
+    id: 2,
+    title: "2023年秋季学期思政课教研活动安排",
+    date: "2023-09-10",
+    unit: "教务处",
+  },
+]);
+
+const policies = ref([
+  {
+    id: 3,
+    title: "关于加强新时代大中小学思政课一体化建设的指导意见",
+    date: "2023-08-20",
+    unit: "教育部",
+  },
+  {
+    id: 4,
+    title: "思政课改革创新实施方案（2023-2025）",
+    date: "2023-08-15",
+    unit: "省教育厅",
+  },
+]);
+
+const theories = ref([
+  {
+    id: 5,
+    title: "新时代思政课教学方法创新研究",
+    author: "张教授",
+    affiliation: "北京师范大学",
+    date: "2023-09-01",
+  },
+  {
+    id: 6,
+    title: "大中小学思政课一体化协同育人机制探索",
+    author: "李教授",
+    affiliation: "华东师范大学",
+    date: "2023-08-25",
+  },
+]);
+
+const researches = ref([
+  {
+    id: 7,
+    title: "思政课程与课程思政协同育人实践研究",
+    author: "王教授",
+    affiliation: "复旦大学",
+    date: "2023-09-05",
+  },
+  {
+    id: 8,
+    title: "中小学思政课教学资源开发与应用",
+    author: "刘教授",
+    affiliation: "华中师范大学",
+    date: "2023-08-30",
+  },
+]);
 import poster4 from "../assets/images/posters/poster4.jpg";
 import poster5 from "../assets/images/posters/poster5.jpg";
 import poster6 from "../assets/images/posters/poster6.jpg";
@@ -278,230 +188,6 @@ import school6Logo from "../assets/images/schools/school6.png";
 const router = useRouter();
 
 // 模拟数据
-const carouselItems = ref([
-  { id: 1, image: carousel1, title: "新闻1" },
-  { id: 2, image: carousel2, title: "新闻2" },
-  { id: 3, image: carousel3, title: "新闻3" },
-]);
-
-const centerNews = ref([
-  {
-    id: 1,
-    title: "校际协同，星辰引航：'星空下的思政课'开讲",
-    date: "2025-04-29",
-    url: "https://www.sdszk.cn/home/information/item/2/87",
-    summary:
-      "青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办'星空下的思政课'大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。把思政课堂与文化实践教学有机结合，推动大中小学一体化课程思政是青岛理工大学近年来着力开展的重点工作，物理作为贯穿大中小学的科学教育，是实现大中小学一体化课程思政的重要课程载体。",
-  },
-  {
-    id: 2,
-    title: "菏泽家政职业学院组织开展大中小学乡村振兴劳动教育实践活动",
-    date: "2025-04-26",
-    url: "https://www.sdszk.cn/home/information/item/2/85",
-    summary:
-      "菏泽家政职业学院依托菏泽市大中小学思政课一体化建设共同体平台，组织大中小学学生走进全国文明村、全国乡村治理示范村——单县龙王庙镇刘土城村，开展了以'劳动铸魂 青春筑梦'为主题的乡村振兴劳动教育实践活动。",
-  },
-  {
-    id: 3,
-    title: "济宁市新时代学校思政课建设推进会召开",
-    date: "2025-04-20",
-    url: "https://www.sdszk.cn/home/information/item/2/84",
-    summary:
-      "济宁市新时代学校思政课建设推进会召开，市委常委、宣传部部长董冰出席并讲话，副市长宫晓芳主持会议。",
-  },
-]);
-
-const notices = ref([
-  {
-    id: 1,
-    title: "关于组织开展2025年度山东省高校示范马克思主义学院建设项目评估的通知",
-    date: "2025-05-10",
-    url: "https://www.sdszk.cn/home/information/item/1/156",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 2,
-    title: "关于开展2025年度山东省高校思想政治工作精品项目申报工作的通知",
-    date: "2025-05-08",
-    url: "https://www.sdszk.cn/home/information/item/1/155",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 3,
-    title: "关于举办山东省高校思政课教师教学创新大赛的通知",
-    date: "2025-05-05",
-    url: "https://www.sdszk.cn/home/information/item/1/154",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 4,
-    title: "关于开展2025年度高校思政课教师示范培训的通知",
-    date: "2025-05-03",
-    url: "https://www.sdszk.cn/home/information/item/1/153",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 5,
-    title: "2025年山东省高校思政课建设研究课题申报指南",
-    date: "2025-04-30",
-    url: "https://www.sdszk.cn/home/information/item/1/152",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 6,
-    title: "关于开展2025年度思政课教学质量提升工程项目评选的通知",
-    date: "2025-04-28",
-    url: "https://www.sdszk.cn/home/information/item/1/151",
-    unit: "山东省教育厅",
-  },
-]);
-
-const policies = ref([
-  {
-    id: 1,
-    title: "教育部关于加强新时代高校思想政治理论课建设的指导意见",
-    date: "2025-05-09",
-    url: "https://www.sdszk.cn/home/information/item/3/89",
-    unit: "教育部",
-  },
-  {
-    id: 2,
-    title: "关于深化新时代学校思想政治理论课改革创新的若干意见",
-    date: "2025-05-07",
-    url: "https://www.sdszk.cn/home/information/item/3/88",
-    unit: "教育部",
-  },
-  {
-    id: 3,
-    title: "山东省教育厅关于加强高校思政课教师队伍建设的实施方案",
-    date: "2025-05-04",
-    url: "https://www.sdszk.cn/home/information/item/3/87",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 4,
-    title: "关于实施高校思政课教学质量提升工程的通知",
-    date: "2025-05-02",
-    url: "https://www.sdszk.cn/home/information/item/3/86",
-    unit: "教育部",
-  },
-  {
-    id: 5,
-    title: "山东省高校思政课改革创新实施细则",
-    date: "2025-04-29",
-    url: "https://www.sdszk.cn/home/information/item/3/85",
-    unit: "山东省教育厅",
-  },
-  {
-    id: 6,
-    title: "关于加强新时代高校思想政治工作的实施意见",
-    date: "2025-04-27",
-    url: "https://www.sdszk.cn/home/information/item/3/84",
-    unit: "教育部",
-  },
-]);
-
-const theories = ref([
-  {
-    id: 1,
-    title: "习近平新时代中国特色社会主义思想的理论逻辑与实践创新",
-    date: "2025-05-10",
-    url: "https://www.sdszk.cn/home/resources/item/1/156",
-    author: "李明",
-    affiliation: "山东大学马克思主义学院",
-  },
-  {
-    id: 2,
-    title: "论新时代大中小学思政课一体化建设的路径创新",
-    date: "2025-05-08",
-    url: "https://www.sdszk.cn/home/resources/item/1/155",
-    author: "王华",
-    affiliation: "山东师范大学马克思主义学院",
-  },
-  {
-    id: 3,
-    title: "中国共产党百年党史教育的经验与启示",
-    date: "2025-05-05",
-    url: "https://www.sdszk.cn/home/resources/item/1/154",
-    author: "张丽",
-    affiliation: "青岛大学马克思主义学院",
-  },
-  {
-    id: 4,
-    title: "新时代思政课教学改革创新研究",
-    date: "2025-05-03",
-    url: "https://www.sdszk.cn/home/resources/item/1/153",
-    author: "刘强",
-    affiliation: "济南大学马克思主义学院",
-  },
-  {
-    id: 5,
-    title: "大思政课视域下的课程思政建设研究",
-    date: "2025-04-30",
-    url: "https://www.sdszk.cn/home/resources/item/1/152",
-    author: "陈红",
-    affiliation: "山东理工大学马克思主义学院",
-  },
-  {
-    id: 6,
-    title: "新时代爱国主义教育的理论与实践探索",
-    date: "2025-04-28",
-    url: "https://www.sdszk.cn/home/resources/item/1/151",
-    author: "孙伟",
-    affiliation: "中国海洋大学马克思主义学院",
-  },
-]);
-
-const researches = ref([
-  {
-    id: 1,
-    title: "山东高校思政课一体化建设的创新实践与经验总结",
-    date: "2025-05-09",
-    url: "https://www.sdszk.cn/home/resources/item/2/89",
-    author: "张华",
-    affiliation: "山东师范大学",
-  },
-  {
-    id: 2,
-    title: "基于信息技术的思政课教学模式改革研究",
-    date: "2025-05-07",
-    url: "https://www.sdszk.cn/home/resources/item/2/88",
-    author: "李明",
-    affiliation: "山东大学",
-  },
-  {
-    id: 3,
-    title: "新时代大中小学思政课一体化建设的实践探索",
-    date: "2025-05-04",
-    url: "https://www.sdszk.cn/home/resources/item/2/87",
-    author: "王华",
-    affiliation: "青岛大学",
-  },
-  {
-    id: 4,
-    title: "思政课教学中的案例教学方法创新研究",
-    date: "2025-05-02",
-    url: "https://www.sdszk.cn/home/resources/item/2/86",
-    author: "刘强",
-    affiliation: "济南大学",
-  },
-  {
-    id: 5,
-    title: "新媒体环境下思政课教学改革与创新",
-    date: "2025-04-29",
-    url: "https://www.sdszk.cn/home/resources/item/2/85",
-    author: "陈红",
-    affiliation: "山东理工大学",
-  },
-  {
-    id: 6,
-    title: "大中小学思政课一体化教材体系建设研究",
-    date: "2025-04-27",
-    url: "https://www.sdszk.cn/home/resources/item/2/84",
-    author: "孙伟",
-    affiliation: "中国海洋大学",
-  },
-]);
 
 const videos = ref([
   {
