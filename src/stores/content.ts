@@ -1,9 +1,70 @@
-// content.js - 内容状态管理
+// content.ts - 内容状态管理
 import { defineStore } from "pinia";
-import api from "@/utils/api";
+import api, { ApiResponse } from "../utils/api";
+
+interface NewsState {
+  loading: boolean;
+  items: any[];
+  total: number;
+  page: number;
+  limit: number;
+  filters: {
+    category: string;
+    status: string;
+    search: string;
+  };
+}
+
+interface ResourcesState {
+  loading: boolean;
+  items: any[];
+  total: number;
+  page: number;
+  limit: number;
+  filters: {
+    category: string;
+    fileType: string;
+    search: string;
+  };
+}
+
+interface ActivitiesState {
+  loading: boolean;
+  items: any[];
+  total: number;
+  page: number;
+  limit: number;
+  filters: {
+    category: string;
+    status: string;
+    search: string;
+  };
+}
+
+interface CategoriesState {
+  news: any[];
+  resources: any[];
+  activities: any[];
+}
+
+interface ContentState {
+  news: NewsState;
+  resources: ResourcesState;
+  activities: ActivitiesState;
+  categories: CategoriesState;
+  settings: Record<string, any>;
+}
+
+interface PaginationState {
+  current: number;
+  pageSize: number;
+  total: number;
+  showSizeChanger: boolean;
+  pageSizeOptions: string[];
+}
 
 export const useContentStore = defineStore("content", {
-  state: () => ({
+  state: (): ContentState => ({
     // 资讯模块
     news: {
       loading: false,
@@ -58,7 +119,7 @@ export const useContentStore = defineStore("content", {
   }),
 
   getters: {
-    newsPagination: (state) => ({
+    newsPagination: (state): PaginationState => ({
       current: state.news.page,
       pageSize: state.news.limit,
       total: state.news.total,
@@ -66,7 +127,7 @@ export const useContentStore = defineStore("content", {
       pageSizeOptions: ["10", "20", "50", "100"],
     }),
 
-    resourcesPagination: (state) => ({
+    resourcesPagination: (state): PaginationState => ({
       current: state.resources.page,
       pageSize: state.resources.limit,
       total: state.resources.total,
@@ -74,7 +135,7 @@ export const useContentStore = defineStore("content", {
       pageSizeOptions: ["10", "20", "50", "100"],
     }),
 
-    activitiesPagination: (state) => ({
+    activitiesPagination: (state): PaginationState => ({
       current: state.activities.page,
       pageSize: state.activities.limit,
       total: state.activities.total,
@@ -93,17 +154,22 @@ export const useContentStore = defineStore("content", {
 
   actions: {
     // 通用加载状态处理
-    setLoading(module, status) {
+    setLoading(
+      module: "news" | "resources" | "activities",
+      status: boolean
+    ): void {
       this[module].loading = status;
     },
 
     // 新闻相关操作
-    async fetchNews(params = {}) {
+    async fetchNews(params: Record<string, any> = {}): Promise<void> {
       this.setLoading("news", true);
       try {
-        const response = await api.get("/api/news", { params });
+        const response = await api.get<any, ApiResponse<any[]>>("/api/news", {
+          params,
+        });
         this.news.items = response.data;
-        this.news.total = response.total;
+        this.news.total = response.total || 0;
       } catch (error) {
         console.error("获取新闻列表失败:", error);
       } finally {
@@ -111,7 +177,7 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async createNews(newsData) {
+    async createNews(newsData: Record<string, any>): Promise<any> {
       try {
         const response = await api.post("/api/news", newsData);
         return response.data;
@@ -121,7 +187,10 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async updateNews(id, newsData) {
+    async updateNews(
+      id: string | number,
+      newsData: Record<string, any>
+    ): Promise<any> {
       try {
         const response = await api.put(`/api/news/${id}`, newsData);
         return response.data;
@@ -131,7 +200,7 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async deleteNews(id) {
+    async deleteNews(id: string | number): Promise<boolean> {
       try {
         await api.delete(`/api/news/${id}`);
         return true;
@@ -142,12 +211,15 @@ export const useContentStore = defineStore("content", {
     },
 
     // 资源相关操作
-    async fetchResources(params = {}) {
+    async fetchResources(params: Record<string, any> = {}): Promise<void> {
       this.setLoading("resources", true);
       try {
-        const response = await api.get("/api/resources", { params });
+        const response = await api.get<any, ApiResponse<any[]>>(
+          "/api/resources",
+          { params }
+        );
         this.resources.items = response.data;
-        this.resources.total = response.total;
+        this.resources.total = response.total || 0;
       } catch (error) {
         console.error("获取资源列表失败:", error);
       } finally {
@@ -155,7 +227,7 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async createResource(resourceData) {
+    async createResource(resourceData: Record<string, any>): Promise<any> {
       try {
         const response = await api.post("/api/resources", resourceData);
         return response.data;
@@ -165,7 +237,10 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async updateResource(id, resourceData) {
+    async updateResource(
+      id: string | number,
+      resourceData: Record<string, any>
+    ): Promise<any> {
       try {
         const response = await api.put(`/api/resources/${id}`, resourceData);
         return response.data;
@@ -175,7 +250,7 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    async deleteResource(id) {
+    async deleteResource(id: string | number): Promise<boolean> {
       try {
         await api.delete(`/api/resources/${id}`);
         return true;

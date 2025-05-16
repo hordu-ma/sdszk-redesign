@@ -1,9 +1,28 @@
-// dashboard.js - 仪表盘状态管理
+// dashboard.ts - 仪表盘状态管理
 import { defineStore } from "pinia";
-import api from "@/utils/api";
+import api, { ApiResponse } from "../utils/api";
+
+interface OverviewCount {
+  total: number;
+  today: number;
+}
+
+interface DashboardOverview {
+  users: OverviewCount;
+  news: OverviewCount;
+  resources: OverviewCount;
+  activities: OverviewCount;
+}
+
+interface DashboardState {
+  loading: boolean;
+  overview: DashboardOverview;
+  activityTrend: any[];
+  recentActivities: any[];
+}
 
 export const useDashboardStore = defineStore("dashboard", {
-  state: () => ({
+  state: (): DashboardState => ({
     loading: false,
     overview: {
       users: { total: 0, today: 0 },
@@ -16,16 +35,18 @@ export const useDashboardStore = defineStore("dashboard", {
   }),
 
   actions: {
-    setLoading(status) {
+    setLoading(status: boolean): void {
       this.loading = status;
     },
 
     // 获取仪表盘概览数据
-    async fetchOverview() {
+    async fetchOverview(): Promise<void> {
       this.setLoading(true);
       try {
-        const response = await api.get("/api/dashboard/overview");
-        if (response.success) {
+        const response = await api.get<any, ApiResponse>(
+          "/api/dashboard/overview"
+        );
+        if (response && response.success) {
           this.overview = response.data.overview;
           this.activityTrend = response.data.activityTrend;
         }
@@ -38,10 +59,12 @@ export const useDashboardStore = defineStore("dashboard", {
     },
 
     // 获取最近活动
-    async fetchRecentActivities() {
+    async fetchRecentActivities(): Promise<void> {
       try {
-        const response = await api.get("/api/dashboard/recent-activities");
-        if (response.success) {
+        const response = await api.get<any, ApiResponse>(
+          "/api/dashboard/recent-activities"
+        );
+        if (response && response.success) {
           this.recentActivities = response.data;
         }
       } catch (error) {

@@ -1,5 +1,20 @@
-import axios from "axios";
+// api.ts - Axios API 配置
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
+// 定义API响应的通用接口
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  total?: number;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+// 扩展axios实例类型
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001", // 更改为新端口
   timeout: 15000,
@@ -11,21 +26,21 @@ const api = axios.create({
 
 // 请求拦截器
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = localStorage.getItem("token");
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
 
 // 响应拦截器
 api.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse): any => {
     // 根据响应类型处理不同的数据
     // 如果是 JSON 数据，返回 data 属性
     const contentType = response.headers["content-type"];
@@ -35,7 +50,7 @@ api.interceptors.response.use(
     // 如果是图片等二进制数据，直接返回响应
     return response.data;
   },
-  (error) => {
+  (error: any) => {
     console.error("API请求错误:", error);
 
     if (error.response) {
@@ -61,9 +76,14 @@ api.interceptors.response.use(
   }
 );
 
-export const uploadConfig = {
-  uploadUrl: import.meta.env.VITE_UPLOAD_URL,
-  assetsUrl: import.meta.env.VITE_ASSETS_URL,
+export interface UploadConfig {
+  uploadUrl: string;
+  assetsUrl: string;
+}
+
+export const uploadConfig: UploadConfig = {
+  uploadUrl: import.meta.env.VITE_UPLOAD_URL as string,
+  assetsUrl: import.meta.env.VITE_ASSETS_URL as string,
 };
 
 export default api;
