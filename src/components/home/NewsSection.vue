@@ -170,8 +170,8 @@ const formatMonthYear = (date: string): string => {
 
 .news-wrapper {
   display: flex;
-  gap: 15px;
-  padding: 15px;
+  gap: 25px;
+  padding: 15px 15px 15px 5px;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -186,24 +186,35 @@ const formatMonthYear = (date: string): string => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
-  padding: 8px;
+  min-width: 70px;
+  height: 70px;
+  padding: var(--spacing-sm);
   background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-  border-radius: 6px;
+  border-radius: var(--border-radius-base);
   box-shadow: 0 2px 8px rgba(229, 57, 53, 0.2);
-  color: white;
+  color: #ffffff;
+  transition: var(--transition-base);
+}
+
+.news-wrapper:hover .date-block {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+  background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
 }
 
 .day {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: var(--font-size-huge);
+  font-weight: 700;
   line-height: 1;
+  margin-bottom: var(--spacing-xs);
+  font-family: var(--font-family-number);
 }
 
 .month-year {
-  font-size: 12px;
-  margin-top: 4px;
-  opacity: 0.9;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  opacity: 0.95;
+  letter-spacing: 0.5px;
 }
 
 .news-content {
@@ -211,8 +222,8 @@ const formatMonthYear = (date: string): string => {
 }
 
 .news-title {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--text-color);
   line-height: 1.4;
@@ -221,7 +232,7 @@ const formatMonthYear = (date: string): string => {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  transition: color 0.3s ease;
+  transition: var(--transition-base);
 }
 
 .news-wrapper:hover .news-title {
@@ -230,8 +241,8 @@ const formatMonthYear = (date: string): string => {
 
 .news-summary {
   margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  color: var(--text-color-light);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-box-orient: vertical;
