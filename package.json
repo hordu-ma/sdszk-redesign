@@ -6,12 +6,16 @@
   "homepage": "https://hordu-ma.github.io/sdszk-redesign/",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vue-tsc && vite build",
     "build:preview": "vite build --mode preview",
     "preview": "vite preview --port 4173 --strictPort",
     "predeploy": "rm -rf dist && vite build",
     "deploy": "gh-pages -d dist",
-    "update": "npm run predeploy && npm run deploy"
+    "update": "npm run predeploy && npm run deploy",
+    "lint": "eslint --ext .ts,.vue src",
+    "lint:fix": "eslint --ext .ts,.vue src --fix",
+    "format": "prettier --write \"src/**/*.{ts,vue,scss,css}\"",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
@@ -28,12 +32,20 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.18",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/compiler-sfc": "^3.5.14",
     "@vue/runtime-core": "^3.5.14",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-vue": "^10.1.0",
     "gh-pages": "^6.3.0",
+    "prettier": "^3.5.3",
     "terser": "^5.39.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
   }
 }

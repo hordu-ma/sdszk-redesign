@@ -1,213 +1,226 @@
 // resource.ts - 资源管理状态存储
-import { defineStore } from "pinia";
-import api, { ApiResponse } from "../utils/api";
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { useStorage } from '@vueuse/core'
+import type {
+  Resource,
+  ResourceCategory,
+  ResourceType,
+  ResourceStatus,
+  ResourceQuery,
+} from '@/services/resource.service'
+import { ResourceService } from '@/services/resource.service'
 
-interface ResourcePagination {
-  total: number;
-  current: number;
-  pageSize: number;
-}
+const resourceService = new ResourceService()
 
-interface ResourceFilters {
-  category: string | null;
-  search: string;
-  featured: boolean;
-  sortBy: string;
-  sortOrder: string;
-}
+export const useResourceStore = defineStore('resource', () => {
+  // 状态
+  const loading = ref(false)
+  const items = ref<Resource[]>([])
+  const total = ref(0)
+  const page = ref(1)
+  const limit = ref(10)
+  const currentResource = ref<Resource | null>(null)
+  const selectedResources = ref<Resource[]>([])
 
-interface ResourceStatistics {
-  totalCount: number;
-  categoryCount: Record<string, number>;
-  featuredCount: number;
-}
+  // 最近下载的资源
+  const recentlyDownloaded = useStorage<Resource[]>('recently-downloaded-resources', [])
 
-interface ResourceState {
-  resources: any[];
-  currentResource: any | null;
-  loading: boolean;
-  pagination: ResourcePagination;
-  filters: ResourceFilters;
-  statistics: ResourceStatistics;
-  selectedResources: any[];
-}
+  // 筛选条件
+  const filters = ref<{
+    category: ResourceCategory | ''
+    type: ResourceType | ''
+    keyword: string
+    status: ResourceStatus | ''
+    tags: string[]
+  }>({
+    category: '',
+    type: '',
+    keyword: '',
+    status: '',
+    tags: [],
+  })
 
-export const useResourceStore = defineStore("resource", {
-  state: (): ResourceState => ({
-    resources: [],
-    currentResource: null,
-    loading: false,
-    pagination: {
-      total: 0,
-      current: 1,
-      pageSize: 10,
-    },
-    filters: {
-      category: null,
-      search: "",
-      featured: false,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    },
-    statistics: {
-      totalCount: 0,
-      categoryCount: {},
-      featuredCount: 0,
-    },
-    selectedResources: [],
-  }),
+  // 计算属性
+  const pagination = computed(() => ({
+    current: page.value,
+    pageSize: limit.value,
+    total: total.value,
+    showSizeChanger: true,
+    showQuickJumper: true,
+  }))
 
-  getters: {
-    // 获取资源分类统计
-    getCategoryStats: (state): Record<string, number> =>
-      state.statistics.categoryCount,
+  const hasSelected = computed(() => selectedResources.value.length > 0)
 
-    // 获取精选资源数量
-    getFeaturedCount: (state): number => state.statistics.featuredCount,
-
-    // 判断是否有选中的资源
-    hasSelectedResources: (state): boolean =>
-      state.selectedResources.length > 0,
-  },
-
-  actions: {
-    // 设置加载状态
-    setLoading(status: boolean): void {
-      this.loading = status;
-    },
-
-    // 获取资源列表
-    async fetchResources(params: Record<string, any> = {}): Promise<any> {
-      this.setLoading(true);
-      try {
-        const queryParams = {
-          page: this.pagination.current,
-          limit: this.pagination.pageSize,
-          ...this.filters,
-          ...params,
-        };
-
-        const response = await api.get<any[], ApiResponse<any[]>>(
-          "/api/resources",
-          {
-            params: queryParams,
-          }
-        );
-        this.resources = response.data;
-        this.pagination.total = response.total || 0;
-        return response;
-      } catch (error) {
-        console.error("获取资源列表失败:", error);
-        throw error;
-      } finally {
-        this.setLoading(false);
+  // 方法
+  const fetchList = async (query?: Partial<ResourceQuery>) => {
+    try {
+      loading.value = true
+      const { data, pagination: pager } = await resourceService.getList({
+        page: page.value,
+        limit: limit.value,
+        ...filters.value,
+        ...query,
+      })
+      items.value = data
+      if (pager) {
+        total.value = pager.total
+        page.value = pager.page
+        limit.value = pager.limit
       }
-    },
+    } catch (error) {
+      console.error('获取资源列表失败:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
 
-    // 获取单个资源详情
-    async fetchResourceById(id: string | number): Promise<any> {
-      this.setLoading(true);
-      try {
-        const response = await api.get(`/api/resources/${id}`);
-        this.currentResource = response.data;
-        return response.data;
-      } catch (error) {
-        console.error("获取资源详情失败:", error);
-        throw error;
-      } finally {
-        this.setLoading(false);
+  const fetchById = async (id: string) => {
+    try {
+      loading.value = true
+      const { data } = await resourceService.getById(id)
+      currentResource.value = data
+      return data
+    } catch (error) {
+      console.error('获取资源详情失败:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const upload = async (
+    file: File,
+    data: Partial<Resource>,
+    onProgress?: (percent: number) => void
+  ) => {
+    const response = await resourceService.upload(file, data, event => {
+      if (event.total && onProgress) {
+        onProgress((event.loaded * 100) / event.total)
       }
-    },
+    })
+    await fetchList()
+    return response
+  }
 
-    // 创建新资源
-    async createResource(resourceData: Record<string, any>): Promise<any> {
-      try {
-        const response = await api.post("/api/resources", resourceData);
-        return response.data;
-      } catch (error) {
-        console.error("创建资源失败:", error);
-        throw error;
+  const download = async (id: string) => {
+    const response = await resourceService.download(id)
+
+    // 更新下载历史
+    const resource = items.value.find(item => item._id === id)
+    if (resource) {
+      const existingIndex = recentlyDownloaded.value.findIndex(item => item._id === id)
+      if (existingIndex > -1) {
+        recentlyDownloaded.value.splice(existingIndex, 1)
       }
-    },
-
-    // 更新资源
-    async updateResource(
-      id: string | number,
-      resourceData: Record<string, any>
-    ): Promise<any> {
-      try {
-        const response = await api.put(`/api/resources/${id}`, resourceData);
-        return response.data;
-      } catch (error) {
-        console.error("更新资源失败:", error);
-        throw error;
+      recentlyDownloaded.value.unshift(resource)
+      if (recentlyDownloaded.value.length > 10) {
+        recentlyDownloaded.value.pop()
       }
-    },
+    }
 
-    // 删除资源
-    async deleteResource(id: string | number): Promise<boolean> {
-      try {
-        await api.delete(`/api/resources/${id}`);
-        return true;
-      } catch (error) {
-        console.error("删除资源失败:", error);
-        throw error;
-      }
-    },
+    return response
+  }
 
-    // 批量删除资源
-    async batchDeleteResources(ids: (string | number)[]): Promise<boolean> {
-      try {
-        await api.post("/api/resources/batch-delete", { ids });
-        return true;
-      } catch (error) {
-        console.error("批量删除资源失败:", error);
-        throw error;
-      }
-    },
+  const update = async (id: string, data: Partial<Resource>) => {
+    const response = await resourceService.update(id, data)
+    await fetchList()
+    return response
+  }
 
-    // 切换资源精选状态
-    async toggleFeatured(id: string | number, featured: boolean): Promise<any> {
-      try {
-        const response = await api.patch(`/api/resources/${id}/featured`, {
-          featured,
-        });
-        return response.data;
-      } catch (error) {
-        console.error("更改资源精选状态失败:", error);
-        throw error;
-      }
-    },
+  const remove = async (id: string) => {
+    await resourceService.delete(id)
+    await fetchList()
+  }
 
-    // 更新选中的资源列表
-    setSelectedResources(resources: any[]): void {
-      this.selectedResources = resources;
-    },
+  const batchDelete = async (ids: string[]) => {
+    await resourceService.batchDelete(ids)
+    selectedResources.value = []
+    await fetchList()
+  }
 
-    // 清除选中的资源
-    clearSelectedResources(): void {
-      this.selectedResources = [];
-    },
+  const batchUpdateStatus = async (ids: string[], status: ResourceStatus) => {
+    await resourceService.batchUpdateStatus(ids, status)
+    await fetchList()
+  }
 
-    // 更新筛选条件
-    setFilters(filters: Partial<ResourceFilters>): void {
-      this.filters = { ...this.filters, ...filters };
-    },
+  const updateTags = async (id: string, tags: string[]) => {
+    await resourceService.updateTags(id, tags)
+    await fetchList()
+  }
 
-    // 重置筛选条件
-    resetFilters(): void {
-      this.filters = {
-        category: null,
-        search: "",
-        featured: false,
-        sortBy: "createdAt",
-        sortOrder: "desc",
-      };
-    },
+  const setPage = async (newPage: number) => {
+    page.value = newPage
+    await fetchList()
+  }
 
-    // 更新分页信息
-    setPagination(pagination: Partial<ResourcePagination>): void {
-      this.pagination = { ...this.pagination, ...pagination };
-    },
-  },
-});
+  const setLimit = async (newLimit: number) => {
+    limit.value = newLimit
+    page.value = 1
+    await fetchList()
+  }
+
+  const setFilters = async (newFilters: typeof filters.value) => {
+    filters.value = { ...newFilters }
+    page.value = 1
+    await fetchList()
+  }
+
+  const resetFilters = async () => {
+    filters.value = {
+      category: '',
+      type: '',
+      keyword: '',
+      status: '',
+      tags: [],
+    }
+    page.value = 1
+    await fetchList()
+  }
+
+  const toggleSelection = (resource: Resource) => {
+    const index = selectedResources.value.findIndex(item => item._id === resource._id)
+    if (index > -1) {
+      selectedResources.value.splice(index, 1)
+    } else {
+      selectedResources.value.push(resource)
+    }
+  }
+
+  const clearSelection = () => {
+    selectedResources.value = []
+  }
+
+  return {
+    // 状态
+    loading,
+    items,
+    total,
+    page,
+    limit,
+    filters,
+    currentResource,
+    selectedResources,
+    recentlyDownloaded,
+    pagination,
+    hasSelected,
+
+    // 方法
+    fetchList,
+    fetchById,
+    upload,
+    download,
+    update,
+    remove,
+    batchDelete,
+    batchUpdateStatus,
+    updateTags,
+    setPage,
+    setLimit,
+    setFilters,
+    resetFilters,
+    toggleSelection,
+    clearSelection,
+  }
+})
