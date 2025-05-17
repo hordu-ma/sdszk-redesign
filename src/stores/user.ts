@@ -45,7 +45,7 @@ export const useUserStore = defineStore(
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true
-        const response = await api.post('/auth/login', payload)
+        const response = await api.post('/api/auth/login', payload)
         console.log('登录响应:', response)
 
         if (response.data?.status === 'success') {
@@ -79,7 +79,7 @@ export const useUserStore = defineStore(
     // 登出方法
     async function logout(): Promise<void> {
       try {
-        await api.post('/auth/logout')
+        await api.post('/api/auth/logout')
       } catch (error) {
         console.error('登出错误:', error)
       } finally {

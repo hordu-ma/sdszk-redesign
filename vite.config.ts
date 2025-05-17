@@ -8,7 +8,10 @@ export default defineConfig(({ command, mode }) => {
   // 根据命令和模式设置不同的基础路径
   // 在preview模式下使用根路径，生产环境（GitHub Pages）使用子路径
   let base = '/'
-  if (command === 'build' && mode !== 'preview') {
+  // If mode is preview, always use root base
+  if (mode === 'preview') {
+    base = '/'
+  } else if (command === 'build') { // For other build modes (like production), use the subpath
     base = '/sdszk-redesign/'
   }
 
@@ -63,7 +66,7 @@ export default defineConfig(({ command, mode }) => {
         '/api': {
           target: 'http://localhost:3000',
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/api/, ''), // 移除 /api 前缀，转发到后端时不保留前缀
+          rewrite: path => path.replace(/^\/api/, ''),
         },
       },
       hmr: {

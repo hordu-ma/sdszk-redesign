@@ -102,3 +102,4 @@ api.interceptors.response.use(response => {
 setupInterceptors(api)
 
 export default api
+export { ApiResponse };
