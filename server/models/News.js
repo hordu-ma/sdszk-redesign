@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const newsSchema = new mongoose.Schema(
   {
@@ -22,10 +22,16 @@ const newsSchema = new mongoose.Schema(
       trim: true,
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'NewsCategory',
       required: true,
-      enum: ["center", "notice", "policy"],
-      default: "center",
+      index: true,
+    },
+    // 保留旧的分类字段以确保向后兼容
+    legacyCategory: {
+      type: String,
+      enum: ['center', 'notice', 'policy'],
+      select: false, // 默认不返回此字段
     },
     publishDate: {
       type: Date,
@@ -41,12 +47,12 @@ const newsSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     source: {
       name: {
@@ -102,15 +108,15 @@ const newsSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+)
 
 // 创建全文搜索索引
 newsSchema.index(
   {
-    title: "text",
-    content: "text",
-    summary: "text",
-    tags: "text",
+    title: 'text',
+    content: 'text',
+    summary: 'text',
+    tags: 'text',
   },
   {
     weights: {
@@ -119,16 +125,14 @@ newsSchema.index(
       summary: 3,
       content: 1,
     },
-    name: "news_text_index",
+    name: 'news_text_index',
   }
-);
+)
 
 // 创建静态方法：热门新闻
 newsSchema.statics.getPopularNews = async function (limit = 5) {
-  return this.find({ isPublished: true })
-    .sort({ viewCount: -1, publishDate: -1 })
-    .limit(limit);
-};
+  return this.find({ isPublished: true }).sort({ viewCount: -1, publishDate: -1 }).limit(limit)
+}
 
 // 创建静态方法：按类别获取最新新闻
 newsSchema.statics.getLatestByCategory = async function (category, limit = 5) {
@@ -143,23 +147,39 @@ newsSchema.statics.getLatestByCategory = async function (category, limit = 5) {
     ],
   })
     .sort({ publishDate: -1 })
-    .limit(limit);
-};
+    .limit(limit)
+}
 
 // 创建虚拟属性：是否已过期
-newsSchema.virtual("isExpired").get(function () {
-  if (!this.expiryDate) return false;
-  return new Date() > this.expiryDate;
-});
+newsSchema.virtual('isExpired').get(function () {
+  if (!this.expiryDate) return false
+  return new Date() > this.expiryDate
+})
 
 // 创建中间件：更新时自动设置updatedBy字段
-newsSchema.pre("findOneAndUpdate", function (next) {
+newsSchema.pre('findOneAndUpdate', function (next) {
   if (this._update && this._update.$set && this._update.$set.updatedBy) {
-    this._update.updatedBy = this._update.$set.updatedBy;
+    this._update.updatedBy = this._update.$set.updatedBy
   }
-  next();
-});
+  next()
+})
 
-const News = mongoose.model("News", newsSchema);
+// 添加自动填充中间件
+newsSchema.pre(['find', 'findOne'], function () {
+  this.populate('category', 'name key color icon')
+})
 
-export default News;
+// 在保存前，确保legacyCategory与category匹配
+newsSchema.pre('save', async function (next) {
+  if (this.isModified('category')) {
+    const category = await mongoose.model('NewsCategory').findById(this.category)
+    if (category && category.isCore) {
+      this.legacyCategory = category.key
+    }
+  }
+  next()
+})
+
+const News = mongoose.model('News', newsSchema)
+
+export default News

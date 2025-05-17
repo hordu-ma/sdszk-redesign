@@ -31,9 +31,10 @@
               >
                 <a-select-option
                   v-for="category in categories"
-                  :key="category.id || category"
+                  :key="category.key"
+                  :value="category.key"
                 >
-                  {{ category.name || category }}
+                  {{ category.name }}
                 </a-select-option>
               </a-select>
             </a-form-item>
@@ -96,7 +97,7 @@
 
           <!-- 分类列 -->
           <template v-if="column.key === 'category'">
-            <a-tag :color="getCategoryColor(record.category)">
+            <a-tag :color="getCategoryColor(record.categoryKey)">
               {{ record.category }}
             </a-tag>
           </template>
@@ -114,7 +115,7 @@
           <!-- 状态列 -->
           <template v-if="column.key === 'status'">
             <a-tag :color="record.isPublished ? 'green' : 'orange'">
-              {{ record.isPublished ? "已发布" : "草稿" }}
+              {{ record.isPublished ? '已发布' : '草稿' }}
             </a-tag>
           </template>
 
@@ -133,27 +134,14 @@
                 </router-link>
               </a-tooltip>
 
-              <a-tooltip
-                v-if="isEditor"
-                :title="record.isPublished ? '取消发布' : '发布'"
-              >
+              <a-tooltip v-if="isEditor" :title="record.isPublished ? '取消发布' : '发布'">
                 <a href="javascript:;" @click="handleTogglePublish(record)">
-                  <component
-                    :is="
-                      record.isPublished
-                        ? 'StopOutlined'
-                        : 'CheckCircleOutlined'
-                    "
-                  />
+                  <component :is="record.isPublished ? 'StopOutlined' : 'CheckCircleOutlined'" />
                 </a>
               </a-tooltip>
 
               <a-tooltip v-if="isAdmin" title="删除">
-                <a
-                  href="javascript:;"
-                  @click="handleDeleteNews(record)"
-                  class="danger-action"
-                >
+                <a href="javascript:;" @click="handleDeleteNews(record)" class="danger-action">
                   <DeleteOutlined />
                 </a>
               </a-tooltip>
@@ -166,8 +154,8 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   PlusOutlined,
   EyeOutlined,
@@ -175,14 +163,14 @@ import {
   DeleteOutlined,
   CheckCircleOutlined,
   StopOutlined,
-} from "@ant-design/icons-vue";
-import { message, Modal } from "ant-design-vue";
-import { useUserStore } from "@/stores/user";
-import { useContentStore } from "@/stores/content";
-import dayjs from "dayjs";
+} from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
+import { useContentStore } from '@/stores/content'
+import dayjs from 'dayjs'
 
 export default {
-  name: "NewsList",
+  name: 'NewsList',
 
   components: {
     PlusOutlined,
@@ -194,235 +182,226 @@ export default {
   },
 
   setup() {
-    const router = useRouter();
-    const userStore = useUserStore();
-    const contentStore = useContentStore();
+    const router = useRouter()
+    const userStore = useUserStore()
+    const contentStore = useContentStore()
 
     // 表格数据和加载状态
-    const newsList = ref([]);
-    const loading = ref(false);
+    const newsList = ref([])
+    const loading = ref(false)
 
     // 权限相关
-    const isAdmin = computed(() => userStore.isAdmin);
-    const isEditor = computed(() => userStore.isEditor);
+    const isAdmin = computed(() => userStore.isAdmin)
+    const isEditor = computed(() => userStore.isEditor)
 
     // 分类列表
-    const categories = ref([]);
+    const categories = ref([])
 
     // 筛选条件
     const filters = reactive({
-      category: "",
-      status: "",
-      search: "",
-    });
+      category: '',
+      status: '',
+      search: '',
+    })
 
     // 表格列配置
     const columns = [
       {
-        title: "标题",
-        dataIndex: "title",
-        key: "title",
+        title: '标题',
+        dataIndex: 'title',
+        key: 'title',
         ellipsis: true,
-        width: "35%",
+        width: '35%',
       },
       {
-        title: "分类",
-        dataIndex: "category",
-        key: "category",
-        width: "15%",
+        title: '分类',
+        dataIndex: 'category',
+        key: 'category',
+        width: '15%',
       },
       {
-        title: "创建日期",
-        dataIndex: "createdAt",
-        key: "createdAt",
+        title: '创建日期',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
         sorter: true,
-        width: "15%",
+        width: '15%',
       },
       {
-        title: "发布日期",
-        dataIndex: "publishDate",
-        key: "publishDate",
+        title: '发布日期',
+        dataIndex: 'publishDate',
+        key: 'publishDate',
         sorter: true,
-        width: "15%",
+        width: '15%',
       },
       {
-        title: "状态",
-        dataIndex: "isPublished",
-        key: "status",
-        width: "10%",
+        title: '状态',
+        dataIndex: 'isPublished',
+        key: 'status',
+        width: '10%',
       },
       {
-        title: "操作",
-        key: "action",
-        width: "10%",
+        title: '操作',
+        key: 'action',
+        width: '10%',
       },
-    ];
+    ]
 
     // 分页配置
-    const pagination = computed(() => contentStore.newsPagination);
+    const pagination = computed(() => contentStore.newsPagination)
 
     // 获取分类颜色
-    const getCategoryColor = (category) => {
+    const getCategoryColor = categoryKey => {
       const colorMap = {
-        中心动态: "blue",
-        通知公告: "green",
-        政策文件: "orange",
-        媒体报道: "purple",
-        研究成果: "red",
-        思政研究: "cyan",
-      };
-      return colorMap[category] || "default";
-    };
+        center: 'blue',
+        notice: 'green',
+        policy: 'orange',
+        theory: 'purple',
+        teaching: 'cyan',
+      }
+      return colorMap[categoryKey] || 'default'
+    }
 
     // 格式化日期
-    const formatDate = (date) => {
-      return date ? dayjs(date).format("YYYY-MM-DD") : "-";
-    };
+    const formatDate = date => {
+      return date ? dayjs(date).format('YYYY-MM-DD') : '-'
+    }
 
     // 加载资讯列表
     const loadNewsList = async () => {
       try {
-        loading.value = true;
-        await contentStore.fetchNewsList();
-        newsList.value = contentStore.news.items;
+        loading.value = true
+        await contentStore.fetchNewsList()
+        newsList.value = contentStore.news.items
       } catch (error) {
-        message.error("加载资讯列表失败");
+        message.error('加载资讯列表失败')
       } finally {
-        loading.value = false;
+        loading.value = false
       }
-    };
+    }
 
     // 加载分类
     const loadCategories = async () => {
       try {
-        await contentStore.fetchNewsCategories();
-        categories.value = contentStore.newsCategories;
+        await contentStore.fetchNewsCategories()
+        categories.value = contentStore.newsCategories
       } catch (error) {
-        message.error("加载资讯分类失败");
+        message.error('加载资讯分类失败')
       }
-    };
+    }
 
     // 处理表格变化（分页、排序、过滤）
     const handleTableChange = (pag, filters, sorter) => {
       const params = {
         page: pag.current,
         limit: pag.pageSize,
-      };
+      }
 
       // 添加排序
       if (sorter && sorter.field) {
-        params.sortBy = sorter.field;
-        params.sortOrder = sorter.order === "ascend" ? 1 : -1;
+        params.sortBy = sorter.field
+        params.sortOrder = sorter.order === 'ascend' ? 1 : -1
       }
 
-      contentStore.fetchNewsList(params);
-    };
+      contentStore.fetchNewsList(params)
+    }
 
     // 添加资讯
     const handleAddNews = () => {
-      router.push("/admin/news/create");
-    };
+      router.push('/admin/news/create')
+    }
 
     // 查看资讯
-    const handleViewNews = (record) => {
-      // 这里可以根据实际情况跳转到前台查看页面，或者打开预览弹窗
-      window.open(`/news/${record._id}`, "_blank");
-    };
+    const handleViewNews = record => {
+      window.open(`/news/${record._id}`, '_blank')
+    }
 
     // 切换发布状态
-    const handleTogglePublish = async (record) => {
+    const handleTogglePublish = async record => {
       try {
-        loading.value = true;
-        const action = record.isPublished ? "取消发布" : "发布";
-        const updated = await contentStore.toggleNewsPublishStatus(record._id);
+        loading.value = true
+        const action = record.isPublished ? '取消发布' : '发布'
+        const updated = await contentStore.toggleNewsPublishStatus(record._id)
 
         // 更新本地数据
-        const index = newsList.value.findIndex(
-          (item) => item._id === record._id
-        );
+        const index = newsList.value.findIndex(item => item._id === record._id)
         if (index !== -1) {
-          newsList.value[index].isPublished = updated.isPublished;
+          newsList.value[index].isPublished = updated.isPublished
         }
 
-        message.success(`已${action}该资讯`);
+        message.success(`${action}成功`)
       } catch (error) {
-        message.error(`操作失败: ${error.message}`);
+        message.error(`操作失败: ${error.message}`)
       } finally {
-        loading.value = false;
+        loading.value = false
       }
-    };
+    }
 
     // 删除资讯
-    const handleDeleteNews = (record) => {
+    const handleDeleteNews = record => {
       Modal.confirm({
-        title: "确定要删除这条资讯吗？",
-        content: "删除后将无法恢复，请谨慎操作",
-        okText: "确定",
-        okType: "danger",
-        cancelText: "取消",
+        title: '确认删除',
+        content: '确定要删除这条资讯吗？此操作不可恢复。',
+        okText: '确定',
+        okType: 'danger',
+        cancelText: '取消',
         async onOk() {
           try {
-            loading.value = true;
-            await contentStore.deleteNews(record._id);
-
-            // 从列表中移除
-            newsList.value = newsList.value.filter(
-              (item) => item._id !== record._id
-            );
-
-            message.success("资讯已删除");
+            loading.value = true
+            await contentStore.deleteNews(record._id)
+            message.success('删除成功')
+            await loadNewsList() // 重新加载列表
           } catch (error) {
-            message.error(`删除失败: ${error.message}`);
+            message.error('删除失败: ' + error.message)
           } finally {
-            loading.value = false;
+            loading.value = false
           }
         },
-      });
-    };
+      })
+    }
 
     // 处理分类变化
-    const handleCategoryChange = (value) => {
-      filters.category = value;
-    };
+    const handleCategoryChange = value => {
+      filters.category = value
+    }
 
     // 处理状态变化
-    const handleStatusChange = (value) => {
-      filters.status = value;
-    };
+    const handleStatusChange = value => {
+      filters.status = value
+    }
 
     // 处理搜索
     const handleSearch = () => {
-      const params = {};
+      const params = {}
 
       if (filters.category) {
-        params.category = filters.category;
+        params.categoryKey = filters.category
       }
 
       if (filters.status) {
-        params.isPublished = filters.status === "published";
+        params.isPublished = filters.status === 'published'
       }
 
       if (filters.search) {
-        params.search = filters.search;
+        params.search = filters.search
       }
 
-      contentStore.fetchNewsList(params, true);
-    };
+      contentStore.fetchNewsList(params, true)
+    }
 
     // 重置筛选条件
     const handleResetFilters = () => {
-      filters.category = "";
-      filters.status = "";
-      filters.search = "";
+      filters.category = ''
+      filters.status = ''
+      filters.search = ''
 
-      contentStore.fetchNewsList({}, true);
-    };
+      contentStore.fetchNewsList({}, true)
+    }
 
     // 初始化
     onMounted(() => {
-      loadCategories();
-      loadNewsList();
-    });
+      loadCategories()
+      loadNewsList()
+    })
 
     return {
       newsList,
@@ -444,9 +423,9 @@ export default {
       handleStatusChange,
       handleSearch,
       handleResetFilters,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

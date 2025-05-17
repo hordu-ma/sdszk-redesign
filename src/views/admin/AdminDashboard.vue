@@ -415,10 +415,39 @@ export default {
       try {
         loading.value = true;
 
-        // 实际项目中这里应该发起API请求获取数据
-        // 以下为模拟数据
+        // TODO: 实际项目中这里应该发起API请求获取数据
+        // 示例：使用 axios 或其他库发起请求
+        // const response = await axios.get('/api/dashboard-data');
+        // const data = response.data;
 
-        // 统计数据
+        // TODO: 根据实际API响应更新统计数据
+        // stats.totalNews = data.stats.totalNews;
+        // stats.todayNews = data.stats.todayNews;
+        // stats.totalResources = data.stats.totalResources;
+        // stats.totalFileSize = data.stats.totalFileSize;
+        // stats.totalActivities = data.stats.totalActivities;
+        // stats.upcomingActivities = data.stats.upcomingActivities;
+        // stats.totalUsers = data.stats.totalUsers;
+        // stats.activeUsers = data.stats.activeUsers;
+        // stats.todayVisits = data.stats.todayVisits;
+        // stats.totalVisits = data.stats.totalVisits;
+
+        // TODO: 根据实际API响应更新系统状态 (如果用户是管理员)
+        // if (userInfo?.value?.role === 'admin') {
+        //   systemStatus.cpuUsage = data.systemStatus.cpuUsage;
+        //   systemStatus.memoryUsage = data.systemStatus.memoryUsage;
+        //   systemStatus.diskUsage = data.systemStatus.diskUsage;
+        //   systemStatus.uptime = data.systemStatus.uptime;
+        //   systemStatus.version = data.systemStatus.version;
+        //   systemStatus.lastUpdate = new Date(data.systemStatus.lastUpdate);
+        //   systemStatus.serverAddress = data.systemStatus.serverAddress;
+        // }
+
+        // TODO: 根据实际API响应更新最近资讯和活动
+        // recentNews.value = data.recentNews;
+        // recentActivities.value = data.recentActivities;
+
+        // 以下为模拟数据 (请在实际项目中删除)
         stats.totalNews = 127;
         stats.todayNews = 3;
         stats.totalResources = 89;
@@ -430,7 +459,6 @@ export default {
         stats.todayVisits = 356;
         stats.totalVisits = 24689;
 
-        // 系统状态
         systemStatus.cpuUsage = 28;
         systemStatus.memoryUsage = 45;
         systemStatus.diskUsage = 36;
@@ -439,95 +467,27 @@ export default {
         systemStatus.lastUpdate = new Date("2023-06-15");
         systemStatus.serverAddress = "server.sdszk.example.com";
 
-        // 最近资讯
         recentNews.value = [
-          {
-            _id: "1",
-            title: "《思政课创新教学方法探索》研讨会成功举办",
-            publishDate: "2023-06-20",
-            category: "中心动态",
-            isPublished: true,
-            cover: "/temp/news-1.jpg",
-          },
-          {
-            _id: "2",
-            title: "关于举办第二届思政课教学比赛的通知",
-            publishDate: "2023-06-18",
-            category: "通知公告",
-            isPublished: true,
-            cover: null,
-          },
-          {
-            _id: "3",
-            title: "教育部发布新版《思想政治教育工作规程》",
-            publishDate: "2023-06-15",
-            category: "政策文件",
-            isPublished: true,
-            cover: "/temp/news-3.jpg",
-          },
-          {
-            _id: "4",
-            title: "山东省思政课一体化建设经验被《人民日报》报道",
-            publishDate: "2023-06-12",
-            category: "媒体报道",
-            isPublished: true,
-            cover: "/temp/news-4.jpg",
-          },
-          {
-            _id: "5",
-            title: "思政课教学资源库使用指南（草稿）",
-            publishDate: "2023-06-10",
-            category: "中心动态",
-            isPublished: false,
-            cover: null,
-          },
+          { _id: '1', title: '资讯标题1', publishDate: new Date(), category: '中心动态', isPublished: true, cover: '' },
+          { _id: '2', title: '资讯标题2', publishDate: new Date(), category: '通知公告', isPublished: false, cover: '' },
+          { _id: '3', title: '资讯标题3', publishDate: new Date(), category: '政策文件', isPublished: true, cover: '' },
+          { _id: '4', title: '资讯标题4', publishDate: new Date(), category: '媒体报道', isPublished: true, cover: '' },
+          { _id: '5', title: '资讯标题5', publishDate: new Date(), category: '研究成果', isPublished: false, cover: '' },
         ];
 
-        // 最近活动
         recentActivities.value = [
-          {
-            _id: "1",
-            title: "2023年暑期思政教师培训",
-            startDate: "2023-07-10",
-            endDate: "2023-07-15",
-            status: "upcoming",
-            poster: "/temp/activity-1.jpg",
-          },
-          {
-            _id: "2",
-            title: "思想政治教育线上研讨会",
-            startDate: "2023-06-25",
-            endDate: "2023-06-25",
-            status: "upcoming",
-            poster: null,
-          },
-          {
-            _id: "3",
-            title: "第三季度思政教研工作会议",
-            startDate: "2023-06-18",
-            endDate: "2023-06-18",
-            status: "ongoing",
-            poster: "/temp/activity-3.jpg",
-          },
-          {
-            _id: "4",
-            title: "优秀思政课教案评选活动",
-            startDate: "2023-05-20",
-            endDate: "2023-06-10",
-            status: "completed",
-            poster: "/temp/activity-4.jpg",
-          },
-          {
-            _id: "5",
-            title: "思政课教师座谈会",
-            startDate: "2023-05-15",
-            endDate: "2023-05-15",
-            status: "completed",
-            poster: null,
-          },
+          { _id: 'a1', title: '活动标题1', startDate: new Date(), endDate: new Date(Date.now() + 86400000), status: 'upcoming', poster: '' },
+          { _id: 'a2', title: '活动标题2', startDate: new Date(Date.now() - 86400000), endDate: new Date(Date.now() + 86400000), status: 'ongoing', poster: '' },
+          { _id: 'a3', title: '活动标题3', startDate: new Date(Date.now() - 86400000*2), endDate: new Date(Date.now() - 86400000), status: 'completed', poster: '' },
+          { _id: 'a4', title: '活动标题4', startDate: new Date(), endDate: new Date(), status: 'canceled', poster: '' },
+          { _id: 'a5', title: '活动标题5', startDate: new Date(Date.now() + 86400000*2), endDate: new Date(Date.now() + 86400000*3), status: 'upcoming', poster: '' },
         ];
+
+        console.log('Dashboard data loaded:', { stats: stats, recentNews: recentNews.value, recentActivities: recentActivities.value });
+
       } catch (error) {
         console.error("加载仪表盘数据失败:", error);
+        // TODO: 显示错误提示给用户
       } finally {
         loading.value = false;
       }
@@ -546,7 +506,9 @@ export default {
       router.push(`/admin/activities/edit/${id}`);
 
     onMounted(() => {
+      console.log('onMounted called in AdminDashboard.vue');
       loadDashboardData();
+      console.log('loadDashboardData called');
     });
 
     return {

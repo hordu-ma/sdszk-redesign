@@ -4,8 +4,8 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <div class="title-section">
-        <h1>{{ isEditing ? "编辑资讯" : "添加资讯" }}</h1>
-        <p>{{ isEditing ? "修改现有资讯内容" : "创建一条新的资讯" }}</p>
+        <h1>{{ isEditing ? '编辑资讯' : '添加资讯' }}</h1>
+        <p>{{ isEditing ? '修改现有资讯内容' : '创建一条新的资讯' }}</p>
       </div>
 
       <div class="action-section">
@@ -62,17 +62,20 @@
           <a-row :gutter="16">
             <!-- 分类 -->
             <a-col :xs="24" :sm="12">
-              <a-form-item name="category" label="分类" required>
+              <a-form-item name="categoryKey" label="分类" required>
                 <a-select
-                  v-model:value="newsForm.category"
+                  v-model:value="newsForm.categoryKey"
                   placeholder="选择资讯分类"
                   style="width: 100%"
+                  @change="handleCategoryChange"
                 >
                   <a-select-option
                     v-for="category in categories"
-                    :key="category.id || category"
+                    :key="category.key"
+                    :value="category.key"
                   >
-                    {{ category.name || category }}
+                    {{ category.name }}
+                    <a-tag v-if="category.isCore" color="blue" size="small">核心</a-tag>
                   </a-select-option>
                 </a-select>
               </a-form-item>
@@ -159,10 +162,7 @@
             <!-- 作者 -->
             <a-col :xs="24" :sm="12">
               <a-form-item name="author" label="作者">
-                <a-input
-                  v-model:value="newsForm.author"
-                  placeholder="请输入作者姓名"
-                />
+                <a-input v-model:value="newsForm.author" placeholder="请输入作者姓名" />
               </a-form-item>
             </a-col>
           </a-row>
@@ -213,12 +213,8 @@
             <div class="form-actions">
               <a-space>
                 <a-button @click="goBack">取消</a-button>
-                <a-button
-                  type="primary"
-                  html-type="submit"
-                  :loading="submitting"
-                >
-                  {{ isEditing ? "保存修改" : "创建资讯" }}
+                <a-button type="primary" html-type="submit" :loading="submitting">
+                  {{ isEditing ? '保存修改' : '创建资讯' }}
                 </a-button>
                 <a-button
                   v-if="!isEditing"
@@ -237,19 +233,14 @@
     </a-card>
 
     <!-- 预览模态框 -->
-    <a-modal
-      v-model:visible="previewVisible"
-      title="资讯预览"
-      width="800px"
-      :footer="null"
-    >
+    <a-modal v-model:visible="previewVisible" title="资讯预览" width="800px" :footer="null">
       <div class="preview-container">
         <h1 class="preview-title">{{ newsForm.title }}</h1>
         <div class="preview-meta">
-          <span>分类：{{ newsForm.category }}</span>
+          <span>分类：{{ getCategoryName(newsForm.categoryKey) }}</span>
           <span>发布日期：{{ formatDate(newsForm.publishDate) }}</span>
-          <span>作者：{{ newsForm.author || "未署名" }}</span>
-          <span>来源：{{ newsForm.source || "本站" }}</span>
+          <span>作者：{{ newsForm.author || '未署名' }}</span>
+          <span>来源：{{ newsForm.source || '本站' }}</span>
         </div>
         <div class="preview-content" v-html="newsForm.content"></div>
       </div>
@@ -258,23 +249,23 @@
 </template>
 
 <script>
-import { ref, reactive, computed, watch, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import {
   ArrowLeftOutlined,
   PlusOutlined,
   DeleteOutlined,
   PlayCircleOutlined,
   PauseCircleOutlined,
-} from "@ant-design/icons-vue";
-import { message, Modal } from "ant-design-vue";
-import { useUserStore } from "@/stores/user";
-import { useContentStore } from "@/stores/content";
-import RichTextEditor from "@/components/admin/RichTextEditor.vue";
-import dayjs from "dayjs";
+} from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
+import { useContentStore } from '@/stores/content'
+import RichTextEditor from '@/components/admin/RichTextEditor.vue'
+import dayjs from 'dayjs'
 
 export default {
-  name: "NewsForm",
+  name: 'NewsForm',
 
   components: {
     RichTextEditor,
@@ -293,273 +284,280 @@ export default {
   },
 
   setup(props) {
-    const router = useRouter();
-    const route = useRoute();
-    const userStore = useUserStore();
-    const contentStore = useContentStore();
+    const router = useRouter()
+    const route = useRoute()
+    const userStore = useUserStore()
+    const contentStore = useContentStore()
 
-    const formRef = ref(null);
-    const loading = ref(false);
-    const submitting = ref(false);
-    const previewVisible = ref(false);
-    const fileList = ref([]);
+    const formRef = ref(null)
+    const loading = ref(false)
+    const submitting = ref(false)
+    const previewVisible = ref(false)
+    const fileList = ref([])
 
     // 编辑状态判断
-    const isEditing = computed(() => !!props.id);
+    const isEditing = computed(() => !!props.id)
 
     // 原始资讯数据
-    const news = ref({});
+    const news = ref({})
 
     // 表单数据
     const newsForm = reactive({
-      title: "",
-      category: "",
-      summary: "",
-      content: "",
-      cover: "",
+      title: '',
+      categoryKey: '',
+      summary: '',
+      content: '',
+      cover: '',
       publishDate: null,
-      source: "",
-      author: "",
+      source: '',
+      author: '',
       tags: [],
-      metaTitle: "",
-      metaDescription: "",
+      metaTitle: '',
+      metaDescription: '',
       metaKeywords: [],
-    });
+    })
 
     // 表单验证规则
     const rules = {
       title: [
-        { required: true, message: "请输入资讯标题", trigger: "blur" },
+        { required: true, message: '请输入资讯标题', trigger: 'blur' },
         {
           min: 3,
           max: 100,
-          message: "标题长度应在3-100个字符之间",
-          trigger: "blur",
+          message: '标题长度应在3-100个字符之间',
+          trigger: 'blur',
         },
       ],
-      category: [
-        { required: true, message: "请选择资讯分类", trigger: "change" },
-      ],
-      content: [
-        { required: true, message: "请输入资讯内容", trigger: "change" },
-      ],
-    };
+      categoryKey: [{ required: true, message: '请选择资讯分类', trigger: 'change' }],
+      content: [{ required: true, message: '请输入资讯内容', trigger: 'change' }],
+    }
 
     // 上传文件头
     const uploadHeaders = computed(() => ({
       Authorization: `Bearer ${userStore.token}`,
-    }));
+    }))
 
     // 分类列表
-    const categories = ref([
-      "中心动态",
-      "通知公告",
-      "政策文件",
-      "媒体报道",
-      "研究成果",
-      "思政研究",
-    ]);
+    const categories = ref([])
+
+    // 根据key获取分类名称
+    const getCategoryName = key => {
+      const category = categories.value.find(c => c.key === key)
+      return category ? category.name : ''
+    }
+
+    // 处理分类变更
+    const handleCategoryChange = value => {
+      newsForm.categoryKey = value
+      // 自动更新分类名称
+      newsForm.category = getCategoryName(value)
+    }
 
     // 格式化日期
-    const formatDate = (date) => {
-      if (!date) return "";
-      return dayjs(date).format("YYYY-MM-DD");
-    };
+    const formatDate = date => {
+      if (!date) return ''
+      return dayjs(date).format('YYYY-MM-DD')
+    }
 
     // 加载分类
     const loadCategories = async () => {
       try {
-        await contentStore.fetchNewsCategories();
-        // 如果API返回分类，则使用API结果，否则使用默认分类
-        if (contentStore.newsCategories?.length) {
-          categories.value = contentStore.newsCategories;
+        await contentStore.fetchNewsCategories()
+        categories.value = contentStore.newsCategories
+
+        // 如果API返回分类为空，使用默认分类
+        if (!categories.value?.length) {
+          categories.value = [
+            { key: 'center', name: '中心动态', isCore: true },
+            { key: 'notice', name: '通知公告', isCore: true },
+            { key: 'policy', name: '政策文件', isCore: true },
+            { key: 'theory', name: '理论前沿', isCore: true },
+            { key: 'teaching', name: '教学研究', isCore: true },
+          ]
         }
       } catch (error) {
-        console.error("加载资讯分类失败:", error);
+        console.error('加载资讯分类失败:', error)
+        message.error('加载分类失败')
       }
-    };
+    }
 
     // 加载资讯数据
     const loadNewsData = async () => {
-      if (!props.id) return;
+      if (!props.id) return
 
       try {
-        loading.value = true;
-        const data = await contentStore.fetchNewsDetail(props.id);
-        news.value = data;
+        loading.value = true
+        const data = await contentStore.fetchNewsDetail(props.id)
+        news.value = data
 
         // 填充表单数据
-        Object.keys(newsForm).forEach((key) => {
+        Object.keys(newsForm).forEach(key => {
           if (data[key] !== undefined) {
-            if (key === "publishDate" && data[key]) {
-              newsForm[key] = dayjs(data[key]);
+            if (key === 'publishDate' && data[key]) {
+              newsForm[key] = dayjs(data[key])
             } else {
-              newsForm[key] = data[key];
+              newsForm[key] = data[key]
             }
           }
-        });
+        })
 
         // 设置封面图片预览
         if (data.cover) {
           fileList.value = [
             {
-              uid: "-1",
-              name: "cover.jpg",
-              status: "done",
+              uid: '-1',
+              name: 'cover.jpg',
+              status: 'done',
               url: data.cover,
             },
-          ];
+          ]
         }
       } catch (error) {
-        message.error("加载资讯数据失败");
-        console.error("加载资讯数据失败:", error);
+        message.error('加载资讯数据失败')
+        console.error('加载资讯数据失败:', error)
       } finally {
-        loading.value = false;
+        loading.value = false
       }
-    };
+    }
 
     // 上传前校验
-    const beforeUpload = (file) => {
-      const isImage = file.type.startsWith("image/");
+    const beforeUpload = file => {
+      const isImage = file.type.startsWith('image/')
       if (!isImage) {
-        message.error("只能上传图片文件!");
-        return false;
+        message.error('只能上传图片文件!')
+        return false
       }
 
-      const isLt5M = file.size / 1024 / 1024 < 5;
+      const isLt5M = file.size / 1024 / 1024 < 5
       if (!isLt5M) {
-        message.error("图片大小不能超过5MB!");
-        return false;
+        message.error('图片大小不能超过5MB!')
+        return false
       }
 
-      return isImage && isLt5M;
-    };
+      return isImage && isLt5M
+    }
 
     // 处理上传状态变化
-    const handleUploadChange = (info) => {
-      if (info.file.status === "uploading") {
-        loading.value = true;
-        return;
+    const handleUploadChange = info => {
+      if (info.file.status === 'uploading') {
+        loading.value = true
+        return
       }
 
-      if (info.file.status === "done") {
-        loading.value = false;
-        if (info.file.response && info.file.response.status === "success") {
-          newsForm.cover = info.file.response.data.url;
-          message.success("封面上传成功");
+      if (info.file.status === 'done') {
+        loading.value = false
+        if (info.file.response && info.file.response.status === 'success') {
+          newsForm.cover = info.file.response.data.url
+          message.success('封面上传成功')
         } else {
-          message.error("封面上传失败");
+          message.error('封面上传失败')
         }
-      } else if (info.file.status === "error") {
-        loading.value = false;
-        message.error("封面上传失败");
+      } else if (info.file.status === 'error') {
+        loading.value = false
+        message.error('封面上传失败')
       }
-    };
+    }
 
     // 提交表单
-    const handleSubmit = async (values) => {
+    const handleSubmit = async values => {
       try {
-        submitting.value = true;
+        submitting.value = true
 
         // 处理发布日期
         if (newsForm.publishDate) {
-          newsForm.publishDate = dayjs(newsForm.publishDate).format(
-            "YYYY-MM-DD"
-          );
+          newsForm.publishDate = dayjs(newsForm.publishDate).format('YYYY-MM-DD')
         } else {
-          newsForm.publishDate = dayjs().format("YYYY-MM-DD");
+          newsForm.publishDate = dayjs().format('YYYY-MM-DD')
         }
 
-        let result;
+        let result
         if (isEditing.value) {
           // 更新资讯
-          result = await contentStore.updateNews(props.id, newsForm);
-          message.success("资讯更新成功");
+          result = await contentStore.updateNews(props.id, newsForm)
+          message.success('资讯更新成功')
         } else {
           // 创建资讯
-          result = await contentStore.createNews(newsForm);
-          message.success("资讯创建成功");
+          result = await contentStore.createNews(newsForm)
+          message.success('资讯创建成功')
         }
 
         // 返回列表页
-        router.push("/admin/news/list");
+        router.push('/admin/news/list')
       } catch (error) {
-        message.error(`操作失败: ${error.message}`);
+        message.error(`操作失败: ${error.message}`)
       } finally {
-        submitting.value = false;
+        submitting.value = false
       }
-    };
+    }
 
     // 保存并发布
     const handleSaveAndPublish = async () => {
       // 验证表单
       try {
-        await formRef.value.validate();
+        await formRef.value.validate()
 
-        submitting.value = true;
+        submitting.value = true
 
         // 处理发布日期
         if (newsForm.publishDate) {
-          newsForm.publishDate = dayjs(newsForm.publishDate).format(
-            "YYYY-MM-DD"
-          );
+          newsForm.publishDate = dayjs(newsForm.publishDate).format('YYYY-MM-DD')
         } else {
-          newsForm.publishDate = dayjs().format("YYYY-MM-DD");
+          newsForm.publishDate = dayjs().format('YYYY-MM-DD')
         }
 
         // 创建资讯
-        const data = { ...newsForm, isPublished: true };
-        const result = await contentStore.createNews(data);
+        const data = { ...newsForm, isPublished: true }
+        const result = await contentStore.createNews(data)
 
-        message.success("资讯已创建并发布");
+        message.success('资讯已创建并发布')
 
         // 返回列表页
-        router.push("/admin/news/list");
+        router.push('/admin/news/list')
       } catch (error) {
         if (error.errorFields) {
-          message.error("请完善必填信息");
+          message.error('请完善必填信息')
         } else {
-          message.error(`操作失败: ${error.message}`);
+          message.error(`操作失败: ${error.message}`)
         }
       } finally {
-        submitting.value = false;
+        submitting.value = false
       }
-    };
+    }
 
     // 切换发布状态
     const handleTogglePublish = async () => {
-      if (!props.id) return;
+      if (!props.id) return
 
       try {
-        loading.value = true;
-        const action = news.value.isPublished ? "取消发布" : "发布";
+        loading.value = true
+        const action = news.value.isPublished ? '取消发布' : '发布'
 
-        const updated = await contentStore.toggleNewsPublishStatus(props.id);
-        news.value.isPublished = updated.isPublished;
+        const updated = await contentStore.toggleNewsPublishStatus(props.id)
+        news.value.isPublished = updated.isPublished
 
-        message.success(`已${action}该资讯`);
+        message.success(`已${action}该资讯`)
       } catch (error) {
-        message.error(`操作失败: ${error.message}`);
+        message.error(`操作失败: ${error.message}`)
       } finally {
-        loading.value = false;
+        loading.value = false
       }
-    };
+    }
 
     // 返回列表
     const goBack = () => {
-      router.push("/admin/news/list");
-    };
+      router.push('/admin/news/list')
+    }
 
     // 初始化
     onMounted(() => {
-      loadCategories();
+      loadCategories()
       if (isEditing.value) {
-        loadNewsData();
+        loadNewsData()
       } else {
-        // 默认值
-        newsForm.author = userStore.userInfo?.name || "";
+        // 新建资讯时设置默认作者
+        newsForm.author = userStore.userInfo?.name || ''
       }
-    });
+    })
 
     return {
       formRef,
@@ -574,15 +572,17 @@ export default {
       uploadHeaders,
       previewVisible,
       formatDate,
+      getCategoryName,
+      handleCategoryChange,
       handleSubmit,
       handleSaveAndPublish,
       handleUploadChange,
       handleTogglePublish,
       beforeUpload,
       goBack,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

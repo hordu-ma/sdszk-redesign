@@ -79,7 +79,7 @@ export const useUserStore = defineStore(
     // 登出方法
     async function logout(): Promise<void> {
       try {
-        await api.post('/api/auth/logout')
+        await api.post('/auth/logout')
       } catch (error) {
         console.error('登出错误:', error)
       } finally {
