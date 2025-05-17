@@ -40,6 +40,7 @@ const adminRoutes: RouteRecordRaw[] = [
         meta: {
           title: "资讯管理 - 内容管理系统",
           icon: "document",
+          permissions: ["news.read"],
         },
       },
       {
@@ -50,6 +51,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "添加资讯 - 内容管理系统",
           icon: "plus",
           parent: "AdminNewsManagement",
+          permissions: ["news.create"],
         },
       },
       {
@@ -61,6 +63,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "编辑资讯 - 内容管理系统",
           icon: "edit",
           parent: "AdminNewsManagement",
+          permissions: ["news.update"],
         },
       },
       {
@@ -70,6 +73,7 @@ const adminRoutes: RouteRecordRaw[] = [
         meta: {
           title: "资源管理 - 内容管理系统",
           icon: "files",
+          permissions: ["resources.read"],
         },
       },
       {
@@ -80,6 +84,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "添加资源 - 内容管理系统",
           icon: "plus",
           parent: "AdminResourcesManagement",
+          permissions: ["resources.create"],
         },
       },
       {
@@ -91,6 +96,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "编辑资源 - 内容管理系统",
           icon: "edit",
           parent: "AdminResourcesManagement",
+          permissions: ["resources.update"],
         },
       },
       {
@@ -100,6 +106,7 @@ const adminRoutes: RouteRecordRaw[] = [
         meta: {
           title: "活动管理 - 内容管理系统",
           icon: "calendar",
+          permissions: ["activities.read"],
         },
       },
       {
@@ -110,6 +117,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "添加活动 - 内容管理系统",
           icon: "plus",
           parent: "AdminActivitiesManagement",
+          permissions: ["activities.create"],
         },
       },
       {
@@ -121,6 +129,7 @@ const adminRoutes: RouteRecordRaw[] = [
           title: "编辑活动 - 内容管理系统",
           icon: "edit",
           parent: "AdminActivitiesManagement",
+          permissions: ["activities.update"],
         },
       },
       {

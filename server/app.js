@@ -8,10 +8,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
-import session from "express-session";
-import MongoStore from "connect-mongo";
-import { v4 as uuidv4 } from "uuid";
-
 // 路由导入
 import newsRoutes from "./routes/news.js";
 import authRoutes from "./routes/auth.js";
@@ -22,6 +18,9 @@ import activityRoutes from "./routes/activities.js";
 import settingRoutes from "./routes/settings.js";
 import activityLogRoutes from "./routes/activityLogs.js";
 import dashboardRoutes from "./routes/dashboard.js";
+
+// 错误处理中间件
+import errorMiddleware from "./middleware/errorMiddleware.js";
 
 // 加载环境变量
 dotenv.config();
@@ -38,32 +37,6 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1小时
   message: "从此IP发送了太多请求，请一小时后再试",
 });
-
-// Session 配置
-app.use(
-  session({
-    genid: function () {
-      return uuidv4(); // 使用UUID生成会话ID
-    },
-    secret: process.env.SESSION_SECRET || "sdszk-secret",
-    resave: false, // 避免在每次请求时都重新保存会话
-    saveUninitialized: false, // 只在会话被修改后保存
-    rolling: true, // 在每个响应上重设cookie过期时间
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-      ttl: 24 * 60 * 60, // 1 day
-      touchAfter: 1 * 60, // 减少更新会话的时间间隔 (1分钟)
-    }),
-    cookie: {
-      secure: false, // 开发环境禁用secure
-      httpOnly: true,
-      sameSite: "lax", // 开发环境使用lax
-      maxAge: 30 * 60 * 1000, // 减少到30分钟，足够完成登录过程
-      path: "/",
-    },
-    name: "sdszk.sid", // 自定义cookie名称
-  })
-);
 
 // 中间件配置
 app.use("/api", limiter); // 应用速率限制到所有API路由
@@ -173,16 +146,7 @@ app.all("*", (req, res) => {
 });
 
 // 错误处理中间件
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  const statusCode = err.statusCode || 500;
-  const status = err.status || "error";
-
-  res.status(statusCode).json({
-    status: status,
-    message: err.message || "服务器内部错误",
-  });
-});
+app.use(errorMiddleware);
 
 // 启动服务器
 const PORT = process.env.PORT || 3000;

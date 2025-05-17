@@ -1,47 +1,122 @@
 import { defineStore } from "pinia";
-import { ref, type Ref } from "vue";
+import { ref, computed } from "vue";
+import api from "../utils/api";
 
-interface UserData {
-  id: number;
+interface UserInfo {
+  id: string;
   username: string;
-  email: string;
-  role: string;
+  name: string;
+  avatar?: string;
+  email?: string;
+  role: "admin" | "editor" | "user";
+  permissions: string[];
 }
 
-export interface UserState {
-  user: Ref<UserData | null>;
-  isAuthenticated: Ref<boolean>;
+interface LoginPayload {
+  username: string;
+  password: string;
+  remember?: boolean;
 }
 
 export const useUserStore = defineStore(
   "user",
   () => {
-    const user = ref<UserData | null>(null);
-    const isAuthenticated = ref(false);
+    const token = ref<string | null>(null);
+    const userInfo = ref<UserInfo | null>(null);
+    const loading = ref(false);
 
-    // 登录
-    function login(userData: UserData) {
-      user.value = userData;
-      isAuthenticated.value = true;
+    // 计算属性
+    const isAuthenticated = computed(() => !!token.value);
+    const isAdmin = computed(() => userInfo.value?.role === "admin");
+    const isEditor = computed(
+      () => userInfo.value?.role === "editor" || isAdmin.value
+    );
+    const userPermissions = computed(() => userInfo.value?.permissions || []);
+    
+    // 设置token
+    function setToken(newToken: string) {
+      token.value = newToken;
+    }
+    
+    // 设置用户信息
+    function setUserInfo(user: UserInfo) {
+      userInfo.value = user;
     }
 
-    // 登出
-    function logout() {
-      user.value = null;
-      isAuthenticated.value = false;
+    // 登录方法
+    async function login(payload: LoginPayload): Promise<boolean> {
+      try {
+        loading.value = true;
+        const { data } = await api.post("/api/auth/login", payload);
+
+        if (data.status === "success") {
+          token.value = data.token;
+          userInfo.value = data.data.user;
+
+          if (payload.remember) {
+            localStorage.setItem("token", data.token);
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("登录错误:", error);
+        return false;
+      } finally {
+        loading.value = false;
+      }
     }
 
-    // 检查认证状态
-    function checkAuth() {
-      return isAuthenticated.value;
+    // 登出方法
+    async function logout(): Promise<void> {
+      try {
+        await api.post("/api/auth/logout");
+      } catch (error) {
+        console.error("登出错误:", error);
+      } finally {
+        token.value = null;
+        userInfo.value = null;
+        localStorage.removeItem("token");
+      }
+    }
+
+    // 检查权限
+    function hasPermission(permission: string): boolean {
+      return userPermissions.value.includes(permission);
+    }
+
+    // 初始化用户信息
+    async function initUserInfo(): Promise<void> {
+      const savedToken = localStorage.getItem("token");
+      if (savedToken) {
+        token.value = savedToken;
+        try {
+          const { data } = await api.get("/api/auth/me");
+          if (data.status === "success") {
+            userInfo.value = data.data.user;
+          } else {
+            throw new Error("获取用户信息失败");
+          }
+        } catch (error) {
+          console.error("初始化用户信息失败:", error);
+          await logout();
+        }
+      }
     }
 
     return {
-      user,
+      token,
+      userInfo,
+      loading,
       isAuthenticated,
+      isAdmin,
+      isEditor,
+      userPermissions,
       login,
       logout,
-      checkAuth,
+      setUserInfo,
+      setToken,
+      hasPermission,
     };
   },
   {

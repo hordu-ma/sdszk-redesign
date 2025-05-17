@@ -27,4 +27,8 @@ app.use(pinia);
 app.use(router);
 app.use(ElementPlus);
 
+// 导入并注册权限指令
+import permissions from "./directives";
+app.use(permissions);
+
 app.mount("#app");

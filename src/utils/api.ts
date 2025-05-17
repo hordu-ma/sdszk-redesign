@@ -1,5 +1,6 @@
 // api.ts - Axios API 配置
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
+import { setupInterceptors } from "./interceptors";
 
 // 定义API响应的通用接口
 export interface ApiResponse<T = any> {
@@ -14,9 +15,9 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// 扩展axios实例类型
+// 创建axios实例
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001", // 更改为新端口
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000", // 默认使用3000端口
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
@@ -24,57 +25,8 @@ const api = axios.create({
   withCredentials: true, // 允许跨域携带 cookie
 });
 
-// 请求拦截器
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = localStorage.getItem("token");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error: any) => {
-    return Promise.reject(error);
-  }
-);
-
-// 响应拦截器
-api.interceptors.response.use(
-  (response: AxiosResponse): any => {
-    // 根据响应类型处理不同的数据
-    // 如果是 JSON 数据，返回 data 属性
-    const contentType = response.headers["content-type"];
-    if (contentType && contentType.includes("application/json")) {
-      return response.data;
-    }
-    // 如果是图片等二进制数据，直接返回响应
-    return response.data;
-  },
-  (error: any) => {
-    console.error("API请求错误:", error);
-
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // 未授权，清除 token 并跳转到登录页面
-          localStorage.removeItem("token");
-          window.location.href = "/admin/login";
-          break;
-        case 403:
-          // 权限不足
-          console.error("没有权限访问该资源");
-          break;
-        case 500:
-          // 服务器错误
-          console.error("服务器错误");
-          break;
-        default:
-          console.error(error.response.data?.message || "请求失败");
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// 设置拦截器
+setupInterceptors(api);
 
 export interface UploadConfig {
   uploadUrl: string;

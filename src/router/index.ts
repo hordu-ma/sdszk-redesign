@@ -3,8 +3,18 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
+import { message } from "ant-design-vue";
 import adminRoutes from "./adminRoutes";
 import { useUserStore } from "../stores/user";
+
+// 扩展路由元数据类型
+declare module "vue-router" {
+  interface RouteMeta {
+    requiresAuth?: boolean;
+    adminOnly?: boolean;
+    permissions?: string[];
+  }
+}
 
 // 获取基础路径，根据环境变量或meta信息确定
 const getBase = (): string => {
@@ -63,21 +73,40 @@ const router = createRouter({
 });
 
 // 导航守卫
-router.beforeEach((to, _from, next) => {
-  // 处理需要验证的路由
+router.beforeEach(async (to, _from, next) => {
+  const userStore = useUserStore();
+
+  // 如果需要验证
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    const userStore = useUserStore();
     if (!userStore.isAuthenticated) {
-      next({
+      // 未登录，重定向到登录页
+      return next({
         path: "/admin/login",
         query: { redirect: to.fullPath },
       });
-    } else {
-      next();
     }
-  } else {
-    next();
+
+    // 检查路由是否需要管理员权限
+    if (to.meta.adminOnly && !userStore.isAdmin) {
+      message.error("您没有访问该页面的权限");
+      return next({ path: "/admin/dashboard" });
+    }
+
+    // 检查路由是否需要特定权限
+    if (to.meta.permissions) {
+      const requiredPermissions = to.meta.permissions as string[];
+      const hasPermission = requiredPermissions.some((permission) =>
+        userStore.hasPermission(permission)
+      );
+
+      if (!hasPermission) {
+        message.error("您没有访问该页面的权限");
+        return next({ path: "/admin/dashboard" });
+      }
+    }
   }
+
+  next();
 });
 
 export default router;

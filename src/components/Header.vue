@@ -5,11 +5,11 @@
     :data-visible="isHeaderVisible"
   >
     <div class="header-content">
-      <!-- 移动端菜单按钮 -->
       <button class="mobile-menu-trigger" @click="toggleMenu">
         <span class="sr-only">打开菜单</span>
         <i class="fas fa-bars"></i>
       </button>
+
       <div class="logo-container">
         <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">山东省大中小学思政课一体化指导中心</h1>
@@ -104,6 +104,7 @@
           </div>
         </nav>
       </div>
+
       <div class="login-section">
         <el-button type="primary" @click="handleLogin">登录</el-button>
       </div>
@@ -111,24 +112,27 @@
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter, useRoute } from "vue-router";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 
 const router = useRouter();
 const route = useRoute();
-const isMenuOpen = ref(false);
-// 添加滚动状态变量
-const isScrolled = ref(false);
-// 添加导航栏可见状态
-const isHeaderVisible = ref(true);
-// 上一次滚动位置
-const lastScrollY = ref(0);
-// 定时器用于防抖
-let scrollTimer = null;
 
-// 拓展的菜单项
-const menuItems = [
+// 状态管理
+const isMenuOpen = ref(false);
+const isScrolled = ref(false);
+const isHeaderVisible = ref(true);
+const lastScrollY = ref(0);
+let scrollTimer: number | null = null;
+
+interface MenuItem {
+  path: string;
+  name: string;
+  children?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [
   { path: "/", name: "首页" },
   { path: "/about", name: "平台简介" },
   {
@@ -190,7 +194,9 @@ const handleScroll = () => {
   }
 
   // 防抖功能：停止滚动2秒后显示导航
-  clearTimeout(scrollTimer);
+  if (scrollTimer !== null) {
+    clearTimeout(scrollTimer);
+  }
   scrollTimer = setTimeout(() => {
     isHeaderVisible.value = true;
   }, 2000);
@@ -216,7 +222,9 @@ onMounted(() => {
 // 组件卸载时移除滚动监听
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
-  clearTimeout(scrollTimer);
+  if (scrollTimer !== null) {
+    clearTimeout(scrollTimer);
+  }
 });
 </script>
 
