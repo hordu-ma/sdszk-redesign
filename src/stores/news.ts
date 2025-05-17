@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { News, NewsQueryParams, CreateNewsDTO, UpdateNewsDTO } from '@/api/modules/news'
 import { NewsService } from '@/services/news.service'
-import { useStorage } from '@vueuse/core'
+import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 
 const newsService = new NewsService()
 
@@ -18,7 +18,8 @@ export const useNewsStore = defineStore('news', () => {
   const tags = ref<string[]>([])
 
   // 缓存最近访问的新闻
-  const recentlyViewed = useStorage<News[]>('recently-viewed-news', [])
+  const { items: recentlyViewed, addItem: addToRecentlyViewed } =
+    useRecentlyViewed<News>('recently-viewed-news')
 
   // 筛选条件
   const filters = ref({
@@ -78,14 +79,7 @@ export const useNewsStore = defineStore('news', () => {
 
       // 添加到最近访问
       if (response.data) {
-        const index = recentlyViewed.value.findIndex(item => item.id === response.data.id)
-        if (index > -1) {
-          recentlyViewed.value.splice(index, 1)
-        }
-        recentlyViewed.value.unshift(response.data)
-        if (recentlyViewed.value.length > 10) {
-          recentlyViewed.value.pop()
-        }
+        addToRecentlyViewed(response.data)
       }
 
       return response.data

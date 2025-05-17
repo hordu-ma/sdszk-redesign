@@ -34,7 +34,7 @@ export interface NewsQueryParams extends QueryParams {
 
 export class NewsApi extends BaseApi {
   constructor() {
-    super({ prefix: '/api/news' })
+    super({ prefix: '/news' })
   }
 
   // 获取新闻列表

@@ -22,6 +22,11 @@ const shouldRetry = (error: AxiosError): boolean => {
     return false
   }
 
+  // 不重试401（未认证）和403（无权限）错误
+  if (error.response?.status === 401 || error.response?.status === 403) {
+    return false
+  }
+
   // 只重试网络错误、超时和5xx错误
   return (
     !error.response ||
@@ -40,7 +45,19 @@ const api = axios.create({
   withCredentials: true, // 允许跨域携带 cookie
 })
 
-// 添加重试拦截器
+// 请求拦截器：添加 token
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+    return config
+  },
+  error => Promise.reject(error)
+)
+
+// 响应拦截器：处理错误和重试
 api.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
@@ -68,16 +85,17 @@ api.interceptors.response.use(response => {
     return response.data
   }
 
-  // 转换为 ApiResponse 格式
-  const apiResponse: ApiResponse = {
-    success: response.status >= 200 && response.status < 300,
-    data: response.data?.data ?? response.data,
-    message: response.data?.message,
-    total: response.data?.total,
-    pagination: response.data?.pagination,
+  // 如果响应已经是标准格式则直接返回
+  if (response.data?.status === 'success' || response.data?.status === 'error') {
+    return response.data
   }
 
-  return apiResponse
+  // 否则转换为标准格式
+  return {
+    status: response.status >= 200 && response.status < 300 ? 'success' : 'error',
+    data: response.data?.data ?? response.data,
+    message: response.data?.message,
+  }
 })
 
 // 设置其他拦截器

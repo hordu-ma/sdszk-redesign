@@ -34,7 +34,7 @@ export interface ResourceQueryParams extends QueryParams {
 
 export class ResourceApi extends BaseApi {
   constructor() {
-    super({ prefix: '/api/resources' })
+    super({ prefix: '/resources' })
   }
 
   // 获取资源列表

@@ -16,7 +16,7 @@ export abstract class BaseApi {
   }
 
   protected getUrl(path: string): string {
-    return `${this.prefix}${path}`
+    return `/api${this.prefix}${path}`
   }
 
   protected async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {

@@ -1,8 +1,8 @@
 // resource.ts - 资源管理状态存储
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useStorage } from '@vueuse/core'
 import type { Resource, ResourceQueryParams } from '@/services/resource.service'
+import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 
 // 定义资源类型
 type ResourceCategory = string
@@ -39,7 +39,8 @@ export const useResourceStore = defineStore('resource', () => {
   const selectedResources = ref<Resource[]>([])
 
   // 最近下载的资源
-  const recentlyDownloaded = useStorage<Resource[]>('recently-downloaded-resources', [])
+  const { items: recentlyDownloaded, addItem: addToRecentlyDownloaded } =
+    useRecentlyViewed<Resource>('recently-downloaded-resources')
 
   // 筛选条件
   const filters = ref<ResourceFilters>({
@@ -119,14 +120,7 @@ export const useResourceStore = defineStore('resource', () => {
     // 更新下载历史
     const resource = items.value.find(item => item.id === id)
     if (resource) {
-      const existingIndex = recentlyDownloaded.value.findIndex(item => item.id === id)
-      if (existingIndex > -1) {
-        recentlyDownloaded.value.splice(existingIndex, 1)
-      }
-      recentlyDownloaded.value.unshift(resource)
-      if (recentlyDownloaded.value.length > 10) {
-        recentlyDownloaded.value.pop()
-      }
+      addToRecentlyDownloaded(resource)
     }
 
     return response
