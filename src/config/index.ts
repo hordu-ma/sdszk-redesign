@@ -1,23 +1,57 @@
+interface ImportMetaEnv {
+  VITE_APP_TITLE: string
+  VITE_APP_DESC: string
+  VITE_API_BASE_URL: string
+  VITE_API_TIMEOUT: string
+  VITE_UPLOAD_MAX_SIZE: string
+  VITE_UPLOAD_ACCEPT_TYPES: string
+  VITE_CACHE_ENABLED: string
+  VITE_CACHE_TTL: string
+  VITE_CACHE_MAX_SIZE: string
+  VITE_PAGE_SIZE: string
+  VITE_PAGE_SIZES: string
+  VITE_APP_DEBUG: string
+  VITE_ENABLE_LOGGER: string
+  VITE_API_MOCK: string
+  VITE_ENABLE_COMPRESSION?: string
+  VITE_COMPRESSION_THRESHOLD?: string
+}
+
+// 环境变量类型声明
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
 // 应用配置
 export const APP_CONFIG = {
-  title: import.meta.env.VITE_APP_TITLE || '思政课教学指导中心',
-  description: import.meta.env.VITE_APP_DESCRIPTION || '服务山东省大中小学思政课教学',
-  mode: import.meta.env.VITE_MODE,
-}
+  title: import.meta.env.VITE_APP_TITLE,
+  description: import.meta.env.VITE_APP_DESC,
+  debug: import.meta.env.VITE_APP_DEBUG === 'true',
+  mock: import.meta.env.VITE_API_MOCK === 'true',
+  env: import.meta.env.MODE,
+} as const
 
 // API配置
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  timeout: Number(import.meta.env.VITE_API_TIMEOUT || 15000),
-  uploadURL: import.meta.env.VITE_UPLOAD_URL || '/api/uploads',
-  assetsURL: import.meta.env.VITE_ASSETS_URL || 'http://localhost:3000/uploads',
-}
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT),
+  mock: import.meta.env.VITE_API_MOCK === 'true',
+  logger: import.meta.env.VITE_ENABLE_LOGGER === 'true',
+} as const
 
 // 缓存配置
 export const CACHE_CONFIG = {
-  enabled: import.meta.env.VITE_API_CACHE_ENABLED === 'true',
-  ttl: Number(import.meta.env.VITE_API_CACHE_TTL || 300000), // 默认5分钟
-}
+  enabled: import.meta.env.VITE_CACHE_ENABLED === 'true',
+  ttl: Number(import.meta.env.VITE_CACHE_TTL) * 1000, // 转换为毫秒
+  maxSize: Number(import.meta.env.VITE_CACHE_MAX_SIZE),
+  clearOnError: true, // 发生错误时清除缓存
+} as const
+
+// 调试配置
+export const DEBUG_CONFIG = {
+  enabled: import.meta.env.VITE_APP_DEBUG === 'true',
+  logger: import.meta.env.VITE_ENABLE_LOGGER === 'true',
+} as const
 
 // 新闻类别
 export const NEWS_CATEGORIES = [
@@ -46,15 +80,47 @@ export const FILE_TYPES = {
 
 // 分页配置
 export const PAGINATION_CONFIG = {
-  defaultPageSize: 10,
-  pageSizes: [10, 20, 50, 100],
+  defaultPageSize: Number(import.meta.env.VITE_PAGE_SIZE),
+  pageSizes: import.meta.env.VITE_PAGE_SIZES.split(',').map(Number),
 } as const
 
 // 上传配置
 export const UPLOAD_CONFIG = {
-  maxSize: 100 * 1024 * 1024, // 100MB
-  imageMaxSize: 5 * 1024 * 1024, // 5MB
-  imageTypes: ['image/jpeg', 'image/png', 'image/gif'],
-  videoMaxSize: 500 * 1024 * 1024, // 500MB
-  videoTypes: ['video/mp4', 'video/avi', 'video/quicktime'],
+  maxSize: Number(import.meta.env.VITE_UPLOAD_MAX_SIZE) * 1024 * 1024, // 转换为字节
+  acceptTypes: import.meta.env.VITE_UPLOAD_ACCEPT_TYPES.split(','),
+  compression: {
+    enabled: import.meta.env.VITE_ENABLE_COMPRESSION === 'true',
+    threshold: Number(import.meta.env.VITE_COMPRESSION_THRESHOLD || 1024),
+  },
+  typeGroups: {
+    document: ['.doc', '.docx', '.pdf', '.txt'],
+    image: ['.jpg', '.jpeg', '.png', '.gif'],
+    video: ['.mp4', '.avi', '.mov'],
+    audio: ['.mp3', '.wav'],
+    presentation: ['.ppt', '.pptx'],
+    spreadsheet: ['.xls', '.xlsx'],
+  },
+} as const
+
+// 服务状态码
+export const STATUS_CODES = {
+  SUCCESS: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  TIMEOUT: 408,
+  SERVER_ERROR: 500,
+} as const
+
+// 业务错误码
+export const ERROR_CODES = {
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
+  AUTH_EXPIRED: 'AUTH_EXPIRED',
+  PERMISSION_DENIED: 'PERMISSION_DENIED',
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  SERVER_ERROR: 'SERVER_ERROR',
 } as const
