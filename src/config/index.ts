@@ -102,25 +102,62 @@ export const UPLOAD_CONFIG = {
   },
 } as const
 
+// 错误处理配置
+export const ERROR_CONFIG = {
+  // 是否在控制台显示错误
+  showInConsole: APP_CONFIG.debug || import.meta.env.VITE_ENABLE_LOGGER === 'true',
+  // 错误通知显示时间（毫秒）
+  notificationDuration: 4500,
+  // 是否自动重试
+  enableRetry: true,
+  // 最大重试次数
+  maxRetries: 3,
+  // 重试延迟（毫秒）
+  retryDelay: 1000,
+  // 是否记录错误日志
+  enableLogging: true,
+} as const
+
 // 服务状态码
 export const STATUS_CODES = {
-  SUCCESS: 200,
+  OK: 200,
   CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   TIMEOUT: 408,
+  CONFLICT: 409,
+  TOO_MANY_REQUESTS: 429,
   SERVER_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
 } as const
 
 // 业务错误码
 export const ERROR_CODES = {
+  // 通用错误
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
   NETWORK_ERROR: 'NETWORK_ERROR',
-  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
-  AUTH_EXPIRED: 'AUTH_EXPIRED',
-  PERMISSION_DENIED: 'PERMISSION_DENIED',
-  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
   SERVER_ERROR: 'SERVER_ERROR',
+  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
+
+  // 认证相关
+  AUTH_EXPIRED: 'AUTH_EXPIRED',
+  INVALID_TOKEN: 'INVALID_TOKEN',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+
+  // 权限相关
+  PERMISSION_DENIED: 'PERMISSION_DENIED',
+  ACCESS_DENIED: 'ACCESS_DENIED',
+
+  // 验证相关
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_PARAMS: 'INVALID_PARAMS',
+
+  // 业务相关
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  RESOURCE_EXISTS: 'RESOURCE_EXISTS',
+  OPERATION_FAILED: 'OPERATION_FAILED',
 } as const

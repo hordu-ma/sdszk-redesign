@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { NewsCategory, News, NewsQuery } from '@/services/news.service'
+import type { News, NewsQueryParams, CreateNewsDTO, UpdateNewsDTO } from '@/api/modules/news'
 import { NewsService } from '@/services/news.service'
 import { useStorage } from '@vueuse/core'
 
@@ -14,22 +14,27 @@ export const useNewsStore = defineStore('news', () => {
   const page = ref(1)
   const limit = ref(10)
   const currentNews = ref<News | null>(null)
+  const categories = ref<string[]>([])
+  const tags = ref<string[]>([])
 
   // 缓存最近访问的新闻
   const recentlyViewed = useStorage<News[]>('recently-viewed-news', [])
 
   // 筛选条件
-  const filters = ref<{
-    category: NewsCategory | ''
-    keyword: string
-    isPublished: boolean | undefined
-  }>({
-    category: '',
+  const filters = ref({
     keyword: '',
-    isPublished: undefined,
+    category: '',
+    status: '',
+    tag: '',
+    startDate: '',
+    endDate: '',
   })
 
   // 计算属性
+  const totalPages = computed(() => Math.ceil(total.value / limit.value))
+  const hasMore = computed(() => page.value < totalPages.value)
+  const isEmpty = computed(() => items.value.length === 0)
+
   const pagination = computed(() => ({
     current: page.value,
     pageSize: limit.value,
@@ -38,80 +43,108 @@ export const useNewsStore = defineStore('news', () => {
     showQuickJumper: true,
   }))
 
+  // 获取查询参数
+  const getQueryParams = (): Partial<NewsQueryParams> => ({
+    ...filters.value,
+  })
+
   // 方法
-  const fetchList = async (query?: Partial<NewsQuery>) => {
+  // 获取新闻列表
+  const fetchList = async (params?: Partial<NewsQueryParams>) => {
     try {
       loading.value = true
-      const { data, pagination: pager } = await newsService.getList({
-        page: page.value,
-        limit: limit.value,
-        ...filters.value,
-        ...query,
+      const response = await newsService.getList({
+        ...getQueryParams(),
+        ...params,
       })
-      items.value = data
-      if (pager) {
-        total.value = pager.total
-        page.value = pager.page
-        limit.value = pager.limit
+
+      items.value = response.data
+      if (response.pagination) {
+        total.value = response.pagination.total
+        page.value = response.pagination.page
+        limit.value = response.pagination.limit
       }
-    } catch (error) {
-      console.error('Failed to fetch news list:', error)
-      throw error
     } finally {
       loading.value = false
     }
   }
 
+  // 获取新闻详情
   const fetchById = async (id: string) => {
     try {
       loading.value = true
-      const { data } = await newsService.getById(id)
-      currentNews.value = data
+      const response = await newsService.getDetail(id)
+      currentNews.value = response.data
 
       // 添加到最近访问
-      if (data) {
-        const existingIndex = recentlyViewed.value.findIndex(n => n._id === data._id)
-        if (existingIndex > -1) {
-          recentlyViewed.value.splice(existingIndex, 1)
+      if (response.data) {
+        const index = recentlyViewed.value.findIndex(item => item.id === response.data.id)
+        if (index > -1) {
+          recentlyViewed.value.splice(index, 1)
         }
-        recentlyViewed.value.unshift(data)
+        recentlyViewed.value.unshift(response.data)
         if (recentlyViewed.value.length > 10) {
           recentlyViewed.value.pop()
         }
       }
 
-      return data
-    } catch (error) {
-      console.error('Failed to fetch news by id:', error)
-      throw error
+      return response.data
     } finally {
       loading.value = false
     }
   }
 
-  const create = async (data: Partial<News>) => {
+  // 创建新闻
+  const create = async (data: CreateNewsDTO) => {
     const response = await newsService.create(data)
-    await fetchList() // 刷新列表
+    await fetchList()
     return response
   }
 
-  const update = async (id: string, data: Partial<News>) => {
+  // 更新新闻
+  const update = async (id: string, data: UpdateNewsDTO) => {
     const response = await newsService.update(id, data)
-    await fetchList() // 刷新列表
+    if (currentNews.value?.id === id) {
+      currentNews.value = response.data
+    }
+    await fetchList()
     return response
   }
 
+  // 删除新闻
   const remove = async (id: string) => {
     await newsService.delete(id)
-    await fetchList() // 刷新列表
+    if (currentNews.value?.id === id) {
+      currentNews.value = null
+    }
+    await fetchList()
   }
 
-  const togglePublish = async (id: string) => {
-    const response = await newsService.togglePublish(id)
-    await fetchList() // 刷新列表
+  // 更新新闻状态
+  const updateStatus = async (id: string, status: News['status']) => {
+    const response = await newsService.updateStatus(id, status)
+    if (currentNews.value?.id === id) {
+      currentNews.value = response.data
+    }
+    await fetchList()
     return response
   }
 
+  // 获取分类
+  const fetchCategories = async () => {
+    const response = await newsService.getCategories()
+    categories.value = response.data
+    return response.data
+  }
+
+  // 获取标签
+  const fetchTags = async () => {
+    const response = await newsService.getTags()
+    tags.value = response.data
+    return response.data
+  }
+
+  // 分页相关方法
   const setPage = async (newPage: number) => {
     page.value = newPage
     await fetchList()
@@ -123,6 +156,7 @@ export const useNewsStore = defineStore('news', () => {
     await fetchList()
   }
 
+  // 筛选相关方法
   const setFilters = async (newFilters: typeof filters.value) => {
     filters.value = { ...newFilters }
     page.value = 1
@@ -131,9 +165,12 @@ export const useNewsStore = defineStore('news', () => {
 
   const resetFilters = async () => {
     filters.value = {
-      category: '',
       keyword: '',
-      isPublished: undefined,
+      category: '',
+      status: '',
+      tag: '',
+      startDate: '',
+      endDate: '',
     }
     page.value = 1
     await fetchList()
@@ -146,9 +183,16 @@ export const useNewsStore = defineStore('news', () => {
     total,
     page,
     limit,
-    filters,
     currentNews,
     recentlyViewed,
+    categories,
+    tags,
+    filters,
+
+    // 计算属性
+    totalPages,
+    hasMore,
+    isEmpty,
     pagination,
 
     // 方法
@@ -157,7 +201,9 @@ export const useNewsStore = defineStore('news', () => {
     create,
     update,
     remove,
-    togglePublish,
+    updateStatus,
+    fetchCategories,
+    fetchTags,
     setPage,
     setLimit,
     setFilters,

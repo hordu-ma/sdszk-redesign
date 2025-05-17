@@ -1,56 +1,115 @@
 import { BaseService } from './base.service'
+import type { ApiResponse } from './api.types'
+import type { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams } from '@/api/modules/news'
+import { newsApi } from '@/api'
 
-export enum NewsCategory {
-  Notice = 'notice',
-  News = 'news',
-  Activity = 'activity',
-}
-
-export interface News {
-  _id: string
-  title: string
-  content: string
-  category: NewsCategory
-  cover?: string
-  isPublished?: boolean
-  publishedAt: string
-  createdAt: string
-  updatedAt: string
-}
-
-export interface NewsQuery {
-  category?: NewsCategory | ''
-  keyword?: string
-  isPublished?: boolean
-  page?: number
-  limit?: number
-}
+export { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams }
 
 export class NewsService extends BaseService<News> {
   constructor() {
-    super('/api/news', true)
+    super('news')
   }
 
-  async getList(params: NewsQuery & { page?: number; limit?: number }) {
-    return this.getAll(params)
+  // 获取新闻列表
+  async getList(params?: NewsQueryParams): Promise<ApiResponse<News[]>> {
+    const response = await newsApi.getList(params)
+    if (this.useCache) {
+      this.cacheResponse('list', response, params)
+    }
+    return response
   }
 
-  async getById(id: string) {
-    return this.get(id)
+  // 获取新闻详情
+  async getDetail(id: string): Promise<ApiResponse<News>> {
+    const cacheKey = `detail:${id}`
+    if (this.useCache) {
+      const cached = this.getCached<ApiResponse<News>>(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await newsApi.getDetail(id)
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
   }
 
-  async togglePublish(id: string) {
-    const { data } = await this.get(id)
-    return this.update(id, {
-      isPublished: !data.isPublished,
-    })
+  // 创建新闻
+  async create(data: CreateNewsDTO): Promise<ApiResponse<News>> {
+    const response = await newsApi.create(data)
+    if (this.useCache) {
+      this.clearCache()
+    }
+    return response
   }
 
-  async getByCategory(category: NewsCategory) {
-    return this.getAll({ category })
+  // 更新新闻
+  async update(id: string, data: UpdateNewsDTO): Promise<ApiResponse<News>> {
+    const response = await newsApi.update(id, data)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
   }
 
-  async search(keyword: string) {
-    return this.getAll({ keyword })
+  // 删除新闻
+  async delete(id: string): Promise<ApiResponse<void>> {
+    const response = await newsApi.delete(id)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
+  }
+
+  // 更新新闻状态
+  async updateStatus(id: string, status: News['status']): Promise<ApiResponse<News>> {
+    const response = await newsApi.updateStatus(id, status)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
+  }
+
+  // 获取分类列表
+  async getCategories(): Promise<ApiResponse<string[]>> {
+    const cacheKey = 'categories'
+    if (this.useCache) {
+      const cached = this.getCached<ApiResponse<string[]>>(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await newsApi.getCategories()
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
+  }
+
+  // 获取标签列表
+  async getTags(): Promise<ApiResponse<string[]>> {
+    const cacheKey = 'tags'
+    if (this.useCache) {
+      const cached = this.getCached<ApiResponse<string[]>>(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await newsApi.getTags()
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
+  }
+
+  // 搜索新闻
+  async search(keyword: string): Promise<ApiResponse<News[]>> {
+    return this.getList({ keyword })
+  }
+
+  // 按分类获取新闻
+  async getByCategory(category: string): Promise<ApiResponse<News[]>> {
+    return this.getList({ category })
   }
 }

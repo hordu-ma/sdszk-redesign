@@ -1,123 +1,169 @@
 import { BaseService } from './base.service'
-import type { AxiosProgressEvent } from 'axios'
-import api from '../utils/api'
+import type { ApiResponse } from './api.types'
+import type {
+  Resource,
+  CreateResourceDTO,
+  UpdateResourceDTO,
+  ResourceQueryParams,
+} from '@/api/modules/resources'
+import { resourceApi } from '@/api'
 
-export enum ResourceType {
-  Document = 'document',
-  Video = 'video',
-  Image = 'image',
-  Other = 'other',
-}
-
-export enum ResourceCategory {
-  Course = 'course',
-  Teaching = 'teaching',
-  Training = 'training',
-  Research = 'research',
-  Other = 'other',
-}
-
-export enum ResourceStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
-
-export interface ResourceQuery {
-  category?: ResourceCategory | ''
-  type?: ResourceType | ''
-  keyword?: string
-  status?: ResourceStatus | ''
-  tags?: string[]
-  startDate?: string
-  endDate?: string
-  page?: number
-  limit?: number
-}
-
-export interface Resource {
-  _id: string
-  title: string
-  description?: string
-  type: ResourceType
-  category: ResourceCategory
-  fileUrl: string
-  fileName: string
-  fileSize: number
-  downloadCount: number
-  status: ResourceStatus
-  tags?: string[]
-  createdAt: string
-  updatedAt: string
-  createdBy?: string
-}
+export { Resource, CreateResourceDTO, UpdateResourceDTO, ResourceQueryParams }
 
 export class ResourceService extends BaseService<Resource> {
   constructor() {
-    super('/api/resources', true) // 启用缓存
+    super('resources')
   }
 
-  async getList(params?: ResourceQuery) {
-    return this.getAll(params)
+  // 获取资源列表
+  async getList(params?: ResourceQueryParams) {
+    const response = await resourceApi.getList(params)
+    if (this.useCache) {
+      this.cacheResponse('list', response, params)
+    }
+    return response
   }
 
-  async getById(id: string) {
-    return this.get(id)
+  // 获取资源详情
+  async getDetail(id: string): Promise<ApiResponse<Resource>> {
+    const cacheKey = `detail:${id}`
+    if (this.useCache) {
+      const cached = this.getCached<ApiResponse<Resource>>(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await resourceApi.getDetail(id)
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
   }
 
-  async upload(
-    file: File,
-    data: Partial<Resource>,
-    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
-  ) {
+  // 创建资源
+  async create(data: CreateResourceDTO) {
+    const response = await resourceApi.create(data)
+    if (this.useCache) {
+      this.clearCache()
+    }
+    return response
+  }
+
+  // 更新资源
+  async update(id: string, data: UpdateResourceDTO) {
+    const response = await resourceApi.update(id, data)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
+  }
+
+  // 删除资源
+  async delete(id: string) {
+    const response = await resourceApi.delete(id)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
+  }
+
+  // 更新资源状态
+  async updateStatus(id: string, status: Resource['status']) {
+    const response = await resourceApi.updateStatus(id, status)
+    if (this.useCache) {
+      this.clearCache()
+      this.deleteCached(`detail:${id}`)
+    }
+    return response
+  }
+
+  // 批量删除资源
+  async batchDelete(ids: string[]) {
+    const response = await resourceApi.batchDelete(ids)
+    if (this.useCache) {
+      this.clearCache()
+    }
+    return response
+  }
+
+  // 批量更新资源状态
+  async batchUpdateStatus(ids: string[], status: Resource['status']) {
+    const response = await resourceApi.batchUpdateStatus(ids, status)
+    if (this.useCache) {
+      this.clearCache()
+    }
+    return response
+  }
+
+  // 更新资源标签
+  async updateTags(id: string, tags: string[]) {
+    const response = await resourceApi.updateTags(id, tags)
+    if (this.useCache) {
+      this.clearCache()
+    }
+    return response
+  }
+
+  // 上传资源
+  async upload(file: File, data: Partial<Resource>, onProgress?: (event: any) => void) {
     const formData = new FormData()
     formData.append('file', file)
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined) {
-        formData.append(key, String(value))
+        formData.append(key, value.toString())
       }
     })
 
-    return this.create(formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress,
-    })
-  }
-
-  async download(id: string) {
-    const response = await api.get(`${this.endpoint}/${id}/download`, {
-      responseType: 'blob',
-    })
-    await this.incrementDownloads(id)
+    const response = await resourceApi.create(formData)
+    if (this.useCache) {
+      this.clearCache()
+    }
     return response
   }
 
-  async getByCategory(category: ResourceCategory, params?: Omit<ResourceQuery, 'category'>) {
-    return this.getList({ ...params, category })
+  // 下载资源
+  async download(id: string) {
+    return await resourceApi.download(id)
   }
 
-  async getByType(type: ResourceType, params?: Omit<ResourceQuery, 'type'>) {
-    return this.getList({ ...params, type })
+  // 获取分类列表
+  async getCategories() {
+    const cacheKey = 'categories'
+    if (this.useCache) {
+      const cached = this.getCached(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await resourceApi.getCategories()
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
   }
 
-  async search(keyword: string, params?: Omit<ResourceQuery, 'keyword'>) {
-    return this.getList({ ...params, keyword })
+  // 获取标签列表
+  async getTags() {
+    const cacheKey = 'tags'
+    if (this.useCache) {
+      const cached = this.getCached(cacheKey)
+      if (cached) return cached
+    }
+
+    const response = await resourceApi.getTags()
+    if (this.useCache) {
+      this.cacheResponse(cacheKey, response)
+    }
+    return response
   }
 
-  async incrementDownloads(id: string) {
-    return api.post(`${this.endpoint}/${id}/downloads`)
+  // 按类型获取资源
+  async getByType(type: Resource['type']) {
+    return this.getList({ type })
   }
 
-  async batchDelete(ids: string[]) {
-    return api.post(`${this.endpoint}/batch-delete`, { ids })
-  }
-
-  async batchUpdateStatus(ids: string[], status: ResourceStatus) {
-    return api.post(`${this.endpoint}/batch-update-status`, { ids, status })
-  }
-
-  async updateTags(id: string, tags: string[]) {
-    return this.update(id, { tags })
+  // 按分类获取资源
+  async getByCategory(category: string) {
+    return this.getList({ category })
   }
 }

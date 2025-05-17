@@ -1,19 +1,9 @@
 import type { AxiosError } from 'axios'
-import router from '../router'
+import router from '@/router'
 import { message, notification } from 'ant-design-vue'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '@/stores/user'
 import { ERROR_CODES, STATUS_CODES } from '@/config'
-
-// 错误响应类型
-export interface ApiErrorResponse {
-  message: string
-  code: string
-  status: number
-  errors?: Record<string, string[]>
-  details?: unknown
-  timestamp?: string
-  path?: string
-}
+import type { ApiErrorResponse, ErrorHandlerOptions } from '@/types/error.types'
 
 // 自定义 API 错误类
 export class ApiError extends Error {
@@ -21,7 +11,7 @@ export class ApiError extends Error {
   status: number
   errors?: Record<string, string[]>
   details?: unknown
-  timestamp?: string
+  timestamp: string
   path?: string
 
   constructor(
@@ -41,14 +31,12 @@ export class ApiError extends Error {
     this.status = status
     this.errors = options?.errors
     this.details = options?.details
-    this.timestamp = options?.timestamp
+    this.timestamp = options?.timestamp || new Date().toISOString()
     this.path = options?.path
 
-    // 设置 prototype 链
     Object.setPrototypeOf(this, new.target.prototype)
   }
 
-  // 格式化错误信息
   getFormattedMessage(): string {
     if (this.errors) {
       const errorMessages = Object.entries(this.errors)
@@ -59,24 +47,28 @@ export class ApiError extends Error {
     return this.message
   }
 
-  // 是否是特定类型的错误
   is(code: string): boolean {
     return this.code === code
   }
 
-  // 是否是认证错误
   isAuthError(): boolean {
-    return this.status === STATUS_CODES.UNAUTHORIZED || this.is(ERROR_CODES.AUTH_EXPIRED)
+    return (
+      this.status === STATUS_CODES.UNAUTHORIZED ||
+      this.is(ERROR_CODES.AUTH_EXPIRED) ||
+      this.is(ERROR_CODES.INVALID_TOKEN)
+    )
   }
 
-  // 是否是权限错误
   isPermissionError(): boolean {
     return this.status === STATUS_CODES.FORBIDDEN || this.is(ERROR_CODES.PERMISSION_DENIED)
   }
 
-  // 是否是验证错误
   isValidationError(): boolean {
     return this.status === STATUS_CODES.BAD_REQUEST || this.is(ERROR_CODES.VALIDATION_ERROR)
+  }
+
+  isNetworkError(): boolean {
+    return this.is(ERROR_CODES.NETWORK_ERROR)
   }
 }
 
@@ -99,10 +91,10 @@ const logError = (error: ApiError) => {
       Code: ${error.code}
       Status: ${error.status}
       Message: ${error.message}
-      Path: ${error.path}
+      Path: ${error.path || 'N/A'}
       Time: ${error.timestamp}
-      Details:`,
-      error.details
+      Details: ${error.details ? JSON.stringify(error.details, null, 2) : 'N/A'}
+      ${error.errors ? `Validation Errors:\n${JSON.stringify(error.errors, null, 2)}` : ''}`
     )
   }
 }
@@ -142,7 +134,12 @@ const handlePermissionError = (error: ApiError) => {
 }
 
 // 主要的错误处理函数
-export const handleApiError = async (error: AxiosError<ApiErrorResponse>) => {
+export const handleApiError = async (
+  error: AxiosError<ApiErrorResponse>,
+  options: ErrorHandlerOptions = {}
+): Promise<never> => {
+  const { showNotification = true, redirectOnAuth = true, logError: enableLogging = true } = options
+
   // 处理响应错误
   if (error.response) {
     const { status, data } = error.response
@@ -161,16 +158,18 @@ export const handleApiError = async (error: AxiosError<ApiErrorResponse>) => {
     )
 
     // 记录错误日志
-    logError(apiError)
+    if (enableLogging) {
+      logError(apiError)
+    }
 
     // 根据错误类型处理
-    if (apiError.isAuthError()) {
+    if (apiError.isAuthError() && redirectOnAuth) {
       await handleAuthError(apiError)
     } else if (apiError.isPermissionError()) {
       handlePermissionError(apiError)
     } else if (apiError.isValidationError()) {
       handleValidationError(apiError)
-    } else {
+    } else if (showNotification) {
       // 根据状态码处理其他错误
       switch (status) {
         case STATUS_CODES.NOT_FOUND:
@@ -200,32 +199,40 @@ export const handleApiError = async (error: AxiosError<ApiErrorResponse>) => {
   // 处理请求错误（网络问题等）
   if (error.request) {
     const networkError = new ApiError('网络连接失败，请检查您的网络', ERROR_CODES.NETWORK_ERROR, 0)
-    logError(networkError)
-    message.error(networkError.message)
+    if (enableLogging) {
+      logError(networkError)
+    }
+    if (showNotification) {
+      message.error(networkError.message)
+    }
     return Promise.reject(networkError)
   }
 
   // 处理其他错误
-  const unknownError = new ApiError('发生未知错误', ERROR_CODES.SERVER_ERROR, 0, { details: error })
-  logError(unknownError)
-  showErrorNotification(unknownError)
+  const unknownError = new ApiError('发生未知错误', ERROR_CODES.UNKNOWN_ERROR, 0, {
+    details: error,
+  })
+  if (enableLogging) {
+    logError(unknownError)
+  }
+  if (showNotification) {
+    showErrorNotification(unknownError)
+  }
   return Promise.reject(unknownError)
 }
 
-// 导出错误处理相关的工具函数
-type CreateErrorOptions = {
-  errors?: Record<string, string[]>
-  details?: unknown
-  timestamp?: string
-  path?: string
-}
-
+// 导出错误处理工具
 export const ErrorUtils = {
   isApiError: (error: unknown): error is ApiError => error instanceof ApiError,
   createError: (
     message: string,
     code: string,
     status: number,
-    options?: CreateErrorOptions
+    options?: {
+      errors?: Record<string, string[]>
+      details?: unknown
+      timestamp?: string
+      path?: string
+    }
   ): ApiError => new ApiError(message, code, status, options),
 }

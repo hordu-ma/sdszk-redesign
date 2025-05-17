@@ -1,6 +1,6 @@
 import api from '@/utils/api'
-import type { QueryParams, ApiResponse } from './api.types'
 import { apiCache } from '@/utils/apiCache'
+import type { QueryParams, ApiResponse } from './api.types'
 
 interface CacheOptions {
   ttl?: number
@@ -14,11 +14,35 @@ export abstract class BaseService<T> {
     protected defaultCacheOptions: CacheOptions = {}
   ) {}
 
+  protected getCacheKey(key: string, params?: Record<string, any>): string {
+    const base = `${this.endpoint}:${key}`
+    return params ? `${base}:${JSON.stringify(params)}` : base
+  }
+
+  protected getCached<R>(key: string, params?: Record<string, any>): R | null {
+    if (!this.useCache) return null
+    return apiCache.get<R>(this.getCacheKey(key, params))
+  }
+
+  protected cacheResponse<R>(key: string, response: ApiResponse<R>, params?: Record<string, any>) {
+    if (!this.useCache) return
+    const cacheKey = this.getCacheKey(key, params)
+    apiCache.set(cacheKey, response, {
+      params,
+      tags: [this.endpoint, key],
+      ...this.defaultCacheOptions,
+    })
+  }
+
+  protected deleteCached(key: string, params?: Record<string, any>) {
+    if (!this.useCache) return
+    apiCache.delete(this.getCacheKey(key, params))
+  }
+
   async getAll(params?: QueryParams): Promise<ApiResponse<T[]>> {
-    if (this.useCache) {
-      const cached = apiCache.get<ApiResponse<T[]>>(this.endpoint, params)
-      if (cached) return cached
-    }
+    const cacheKey = 'list'
+    const cached = this.getCached<ApiResponse<T[]>>(cacheKey, params)
+    if (cached) return cached
 
     const response = await api.get(this.endpoint, { params })
     const apiResponse: ApiResponse<T[]> = {
@@ -27,39 +51,23 @@ export abstract class BaseService<T> {
       message: response.statusText,
     }
 
-    if (this.useCache) {
-      apiCache.set(this.endpoint, apiResponse, {
-        params,
-        tags: [this.endpoint, 'list'],
-        ...this.defaultCacheOptions,
-      })
-    }
-
+    this.cacheResponse(cacheKey, apiResponse, params)
     return apiResponse
   }
 
   async get(id: string | number): Promise<ApiResponse<T>> {
-    const url = `${this.endpoint}/${id}`
+    const cacheKey = `${id}`
+    const cached = this.getCached<ApiResponse<T>>(cacheKey)
+    if (cached) return cached
 
-    if (this.useCache) {
-      const cached = apiCache.get<ApiResponse<T>>(url)
-      if (cached) return cached
-    }
-
-    const response = await api.get(url)
+    const response = await api.get(`${this.endpoint}/${id}`)
     const apiResponse: ApiResponse<T> = {
       success: response.status >= 200 && response.status < 300,
       data: response.data,
       message: response.statusText,
     }
 
-    if (this.useCache) {
-      apiCache.set(url, apiResponse, {
-        tags: [this.endpoint, `${this.endpoint}:${id}`],
-        ...this.defaultCacheOptions,
-      })
-    }
-
+    this.cacheResponse(cacheKey, apiResponse)
     return apiResponse
   }
 
@@ -72,7 +80,6 @@ export abstract class BaseService<T> {
     }
 
     if (this.useCache) {
-      // 清除列表缓存
       apiCache.deleteByTag(this.endpoint)
     }
 
@@ -88,8 +95,7 @@ export abstract class BaseService<T> {
     }
 
     if (this.useCache) {
-      // 清除相关缓存
-      apiCache.deleteByTag(`${this.endpoint}:${id}`)
+      this.deleteCached(`${id}`)
       apiCache.deleteByTag(this.endpoint)
     }
 
@@ -105,22 +111,19 @@ export abstract class BaseService<T> {
     }
 
     if (this.useCache) {
-      // 清除相关缓存
-      apiCache.deleteByTag(`${this.endpoint}:${id}`)
+      this.deleteCached(`${id}`)
       apiCache.deleteByTag(this.endpoint)
     }
 
     return apiResponse
   }
 
-  // 清除此服务相关的所有缓存
   clearCache(): void {
     if (this.useCache) {
-      apiCache.deleteByPattern(`^${this.endpoint}`)
+      apiCache.deleteByPattern(`^${this.endpoint}:`)
     }
   }
 
-  // 启用/禁用缓存
   toggleCache(enabled: boolean): void {
     this.useCache = enabled
     if (!enabled) {
@@ -128,7 +131,6 @@ export abstract class BaseService<T> {
     }
   }
 
-  // 更新缓存选项
   updateCacheOptions(options: CacheOptions): void {
     this.defaultCacheOptions = {
       ...this.defaultCacheOptions,

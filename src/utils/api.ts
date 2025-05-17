@@ -1,63 +1,86 @@
 // api.ts - Axios API 配置
-import axios from 'axios'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import { setupInterceptors } from './interceptors'
+import { API_CONFIG, ERROR_CONFIG } from '@/config'
+import type { ApiResponse } from '@/services/api.types'
 
-// 定义API响应的通用接口
-export interface ApiResponse<T = any> {
-  success: boolean
-  data: T
-  message?: string
-  total?: number
-  pagination?: {
-    total: number
-    page: number
-    limit: number
+// 重试配置接口
+interface RetryConfig extends AxiosRequestConfig {
+  _retry?: boolean
+  _retryCount?: number
+}
+
+// 检查是否需要重试
+const shouldRetry = (error: AxiosError): boolean => {
+  // 如果配置不允许重试，直接返回false
+  if (!ERROR_CONFIG.enableRetry) return false
+
+  const config = error.config as RetryConfig
+
+  // 如果已经重试了最大次数，不再重试
+  if (config._retryCount && config._retryCount >= ERROR_CONFIG.maxRetries) {
+    return false
   }
+
+  // 只重试网络错误、超时和5xx错误
+  return (
+    !error.response ||
+    error.code === 'ECONNABORTED' ||
+    (error.response && error.response.status >= 500)
+  )
 }
 
 // 创建axios实例
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 15000,
+  baseURL: API_CONFIG.baseURL,
+  timeout: API_CONFIG.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // 允许跨域携带 cookie
 })
 
-// 添加响应转换器
+// 添加重试拦截器
 api.interceptors.response.use(
-  response => {
-    // 如果响应是blob类型（文件下载），直接返回
-    if (response.config.responseType === 'blob') {
-      return response.data
+  response => response,
+  async (error: AxiosError) => {
+    const config = error.config as RetryConfig
+
+    if (shouldRetry(error)) {
+      config._retryCount = (config._retryCount || 0) + 1
+
+      // 等待延迟时间
+      const delayTime = ERROR_CONFIG.retryDelay * config._retryCount
+      await new Promise(resolve => setTimeout(resolve, delayTime))
+
+      // 重试请求
+      return api(config)
     }
 
-    // 转换为 ApiResponse 格式
-    const apiResponse: ApiResponse = {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data?.data ?? response.data,
-      message: response.data?.message,
-      total: response.data?.total,
-      pagination: response.data?.pagination,
-    }
-
-    return apiResponse
-  },
-  error => Promise.reject(error)
+    return Promise.reject(error)
+  }
 )
 
-// 设置拦截器
+// 添加响应转换器
+api.interceptors.response.use(response => {
+  // 如果响应是blob类型（文件下载），直接返回
+  if (response.config.responseType === 'blob') {
+    return response.data
+  }
+
+  // 转换为 ApiResponse 格式
+  const apiResponse: ApiResponse = {
+    success: response.status >= 200 && response.status < 300,
+    data: response.data?.data ?? response.data,
+    message: response.data?.message,
+    total: response.data?.total,
+    pagination: response.data?.pagination,
+  }
+
+  return apiResponse
+})
+
+// 设置其他拦截器
 setupInterceptors(api)
-
-export interface UploadConfig {
-  uploadUrl: string
-  assetsUrl: string
-}
-
-export const uploadConfig: UploadConfig = {
-  uploadUrl: import.meta.env.VITE_UPLOAD_URL as string,
-  assetsUrl: import.meta.env.VITE_ASSETS_URL as string,
-}
 
 export default api

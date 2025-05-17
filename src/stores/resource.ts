@@ -2,13 +2,28 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
-import type {
-  Resource,
-  ResourceCategory,
-  ResourceType,
-  ResourceStatus,
-  ResourceQuery,
-} from '@/services/resource.service'
+import type { Resource, ResourceQueryParams } from '@/services/resource.service'
+
+// 定义资源类型
+type ResourceCategory = string
+type ResourceStatus = 'active' | 'inactive'
+
+// 筛选器类型
+interface ResourceFilters {
+  category: ResourceCategory | ''
+  type: Resource['type'] | ''
+  keyword: string
+  status: ResourceStatus | ''
+  tags: string[]
+}
+
+// 定义查询类型
+interface ResourceQuery extends ResourceQueryParams {
+  page?: number
+  limit?: number
+}
+
+import type { Resource as ResourceType } from '@/api/modules/resources'
 import { ResourceService } from '@/services/resource.service'
 
 const resourceService = new ResourceService()
@@ -27,13 +42,7 @@ export const useResourceStore = defineStore('resource', () => {
   const recentlyDownloaded = useStorage<Resource[]>('recently-downloaded-resources', [])
 
   // 筛选条件
-  const filters = ref<{
-    category: ResourceCategory | ''
-    type: ResourceType | ''
-    keyword: string
-    status: ResourceStatus | ''
-    tags: string[]
-  }>({
+  const filters = ref<ResourceFilters>({
     category: '',
     type: '',
     keyword: '',
@@ -79,7 +88,7 @@ export const useResourceStore = defineStore('resource', () => {
   const fetchById = async (id: string) => {
     try {
       loading.value = true
-      const { data } = await resourceService.getById(id)
+      const { data } = await resourceService.getDetail(id)
       currentResource.value = data
       return data
     } catch (error) {
@@ -108,9 +117,9 @@ export const useResourceStore = defineStore('resource', () => {
     const response = await resourceService.download(id)
 
     // 更新下载历史
-    const resource = items.value.find(item => item._id === id)
+    const resource = items.value.find(item => item.id === id)
     if (resource) {
-      const existingIndex = recentlyDownloaded.value.findIndex(item => item._id === id)
+      const existingIndex = recentlyDownloaded.value.findIndex(item => item.id === id)
       if (existingIndex > -1) {
         recentlyDownloaded.value.splice(existingIndex, 1)
       }
@@ -180,7 +189,7 @@ export const useResourceStore = defineStore('resource', () => {
   }
 
   const toggleSelection = (resource: Resource) => {
-    const index = selectedResources.value.findIndex(item => item._id === resource._id)
+    const index = selectedResources.value.findIndex(item => item.id === resource.id)
     if (index > -1) {
       selectedResources.value.splice(index, 1)
     } else {
