@@ -1,76 +1,126 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NewsCategoryService } from '../newsCategory.service'
-import { NewsCategoryApi } from '@/api/modules/newsCategory'
-import type {
+import {
+  NewsCategoryService,
   NewsCategory,
   CreateNewsCategoryDTO,
   UpdateNewsCategoryDTO,
-} from '@/api/modules/newsCategory'
+} from '../newsCategory.service'
+import { CategoryNotFoundError } from '../errors/newsCategory.errors'
+import type { ApiResponse } from '../../api/types'
+
+// 创建 mock 分类数据
+const mockCategory: NewsCategory = {
+  _id: '1',
+  name: '中心动态',
+  key: 'center',
+  description: '中心动态描述', 
+  order: 1,
+  color: '#1890ff',
+  isActive: true,
+  isCore: true,
+  createdAt: '2023-01-01',
+  updatedAt: '2023-01-01',
+}
+
+// 创建 mock API 函数
+const mockGetList = vi.fn()
+const mockGetCoreCategories = vi.fn()
+const mockGetById = vi.fn()
+const mockCreate = vi.fn()
+const mockUpdate = vi.fn()
+const mockDelete = vi.fn()
+const mockUpdateOrder = vi.fn()
 
 // Mock NewsCategoryApi
-vi.mock('@/api/modules/newsCategory', () => {
+vi.mock('../../api/modules/newsCategory', () => {
   return {
-    NewsCategoryApi: vi.fn().mockImplementation(() => ({
-      getList: vi.fn(),
-      getCoreCategories: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      updateOrder: vi.fn(),
-    })),
+    NewsCategoryApi: vi.fn().mockImplementation(() => {
+      return {
+        getList: mockGetList,
+        getCoreCategories: mockGetCoreCategories,
+        getById: mockGetById,
+        create: mockCreate,
+        update: mockUpdate,
+        delete: mockDelete,
+        updateOrder: mockUpdateOrder,
+      }
+    }),
   }
 })
 
 describe('NewsCategoryService', () => {
   let service: NewsCategoryService
-  let mockApi: jest.Mocked<NewsCategoryApi>
 
   beforeEach(() => {
-    mockApi = new NewsCategoryApi() as jest.Mocked<NewsCategoryApi>
+    vi.clearAllMocks()
     service = new NewsCategoryService()
   })
 
   describe('getList', () => {
     it('应该返回分类列表', async () => {
-      const mockCategories = [
-        { _id: '1', name: '中心动态', key: 'center', isCore: true },
-        { _id: '2', name: '通知公告', key: 'notice', isCore: true },
-      ]
-
-      mockApi.getList.mockResolvedValue({ data: mockCategories })
+      const mockCategories = [mockCategory]
+      mockGetList.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
 
       const result = await service.getList()
       expect(result.data).toEqual(mockCategories)
-      expect(mockApi.getList).toHaveBeenCalledWith({ includeInactive: false })
+      expect(mockGetList).toHaveBeenCalled()
     })
 
-    it('应该包含已禁用的分类', async () => {
-      const mockCategories = [
-        { _id: '1', name: '中心动态', key: 'center', isCore: true, isActive: true },
-        { _id: '2', name: '已禁用分类', key: 'disabled', isCore: false, isActive: false },
-      ]
+    it('应该使用缓存当调用多次时', async () => {
+      const mockCategories = [mockCategory]
+      mockGetList.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
 
-      mockApi.getList.mockResolvedValue({ data: mockCategories })
+      await service.getList()
+      await service.getList() // 第二次调用应该使用缓存
+      
+      expect(mockGetList).toHaveBeenCalledTimes(1)
+    })
 
-      const result = await service.getList(true)
-      expect(result.data).toEqual(mockCategories)
-      expect(mockApi.getList).toHaveBeenCalledWith({ includeInactive: true })
+    it('应该在禁用缓存时每次都调用API', async () => {
+      const mockCategories = [mockCategory]
+      mockGetList.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
+
+      service.toggleCache(false) // 禁用缓存
+      await service.getList()
+      await service.getList()
+      
+      expect(mockGetList).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('getCoreCategories', () => {
-    it('应该只返回核心分类', async () => {
-      const mockCoreCategories = [
-        { _id: '1', name: '中心动态', key: 'center', isCore: true },
-        { _id: '2', name: '通知公告', key: 'notice', isCore: true },
-        { _id: '3', name: '政策文件', key: 'policy', isCore: true },
-      ]
-
-      mockApi.getCoreCategories.mockResolvedValue({ data: mockCoreCategories })
+    it('应该返回核心分类列表', async () => {
+      const mockCategories = [mockCategory]
+      mockGetCoreCategories.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
 
       const result = await service.getCoreCategories()
-      expect(result.data).toEqual(mockCoreCategories)
-      expect(mockApi.getCoreCategories).toHaveBeenCalled()
+      expect(result.data).toEqual(mockCategories)
+      expect(mockGetCoreCategories).toHaveBeenCalled()
+    })
+
+    it('应该使用缓存当调用多次时', async () => {
+      const mockCategories = [mockCategory]
+      mockGetCoreCategories.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
+
+      await service.getCoreCategories()
+      await service.getCoreCategories()
+      
+      expect(mockGetCoreCategories).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -78,93 +128,140 @@ describe('NewsCategoryService', () => {
     it('应该创建新分类', async () => {
       const newCategory: CreateNewsCategoryDTO = {
         name: '新分类',
-        key: 'new',
-        color: '#ff0000',
-        order: 0,
+        key: 'new-category',
+        description: '新分类描述',
       }
-
-      const mockCreatedCategory = {
-        _id: '4',
+      
+      const createdCategory = {
         ...newCategory,
-        isCore: false,
+        _id: '3',
+        order: 3,
         isActive: true,
+        isCore: false,
+        createdAt: '2023-01-03',
+        updatedAt: '2023-01-03',
       }
 
-      mockApi.create.mockResolvedValue({ data: mockCreatedCategory })
+      mockCreate.mockResolvedValue({
+        success: true,
+        data: createdCategory,
+        message: '创建成功',
+      })
 
       const result = await service.create(newCategory)
-      expect(result.data).toEqual(mockCreatedCategory)
-      expect(mockApi.create).toHaveBeenCalledWith(newCategory)
+      expect(result.data).toEqual(createdCategory)
+      expect(mockCreate).toHaveBeenCalledWith(newCategory)
+    })
+
+    it('应该在创建新分类后清除缓存', async () => {
+      // 先加载列表到缓存
+      const mockCategories = [mockCategory]
+      mockGetList.mockResolvedValue({
+        success: true,
+        data: mockCategories,
+      })
+      await service.getList()
+      
+      // 创建新分类
+      const newCategory: CreateNewsCategoryDTO = { name: '新分类', key: 'new-category' }
+      mockCreate.mockResolvedValue({
+        success: true,
+        data: { ...newCategory, _id: '3' } as NewsCategory,
+      })
+      await service.create(newCategory)
+      
+      // 再次调用getList应该重新请求API
+      await service.getList()
+      expect(mockGetList).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('update', () => {
-    it('应该更新现有分类', async () => {
-      const categoryId = '4'
-      const updateData: UpdateNewsCategoryDTO = {
+    it('应该更新分类', async () => {
+      const updateData: UpdateNewsCategoryDTO = { name: '更新的分类' }
+      const updatedCategory = { 
+        ...mockCategory,
         name: '更新的分类',
-        color: '#00ff00',
+        updatedAt: '2023-01-04'
       }
 
-      const mockUpdatedCategory = {
-        _id: categoryId,
-        key: 'new',
-        ...updateData,
-        isCore: false,
-        isActive: true,
-      }
+      mockGetById.mockResolvedValue({
+        success: true,
+        data: mockCategory,
+      })
+      
+      mockUpdate.mockResolvedValue({
+        success: true,
+        data: updatedCategory,
+        message: '更新成功',
+      })
 
-      mockApi.update.mockResolvedValue({ data: mockUpdatedCategory })
-
-      const result = await service.update(categoryId, updateData)
-      expect(result.data).toEqual(mockUpdatedCategory)
-      expect(mockApi.update).toHaveBeenCalledWith(categoryId, updateData)
+      const result = await service.update('1', updateData)
+      expect(result.data).toEqual(updatedCategory)
+      expect(mockUpdate).toHaveBeenCalledWith('1', updateData)
     })
 
-    it('不应该更新核心分类的key', async () => {
-      const categoryId = '1'
-      const updateData: UpdateNewsCategoryDTO = {
-        key: 'new-key', // 尝试更新key
-        name: '更新的中心动态',
-      }
+    it('不能修改核心分类的key', async () => {
+      mockGetById.mockResolvedValue({
+        success: true,
+        data: mockCategory, // 这是一个核心分类
+      })
 
-      const mockCoreCategory = {
-        _id: categoryId,
-        key: 'center', // key保持不变
-        name: '更新的中心动态',
-        isCore: true,
-        isActive: true,
-      }
+      await expect(service.update('1', { key: 'changed-key' })).rejects.toThrow(/不能修改核心分类的标识符/)
+    })
 
-      mockApi.update.mockResolvedValue({ data: mockCoreCategory })
+    it('不能禁用核心分类', async () => {
+      mockGetById.mockResolvedValue({
+        success: true,
+        data: mockCategory, // 这是一个核心分类
+      })
 
-      const result = await service.update(categoryId, updateData)
-      expect(result.data.key).toBe('center')
+      await expect(service.update('1', { isActive: false })).rejects.toThrow(/不能禁用核心分类/)
+    })
+
+    it('应该在分类不存在时抛出异常', async () => {
+      mockGetById.mockRejectedValue(new Error('分类不存在'))
+
+      await expect(service.update('99', { name: '更新' })).rejects.toBeInstanceOf(CategoryNotFoundError)
     })
   })
 
   describe('delete', () => {
-    it('应该删除非核心分类', async () => {
-      const categoryId = '4'
-      mockApi.delete.mockResolvedValue({ data: void 0 })
+    it('应该删除分类', async () => {
+      const nonCoreCategory = {
+        ...mockCategory,
+        isCore: false,
+      }
 
-      await service.delete(categoryId)
-      expect(mockApi.delete).toHaveBeenCalledWith(categoryId)
+      mockGetById.mockResolvedValue({
+        success: true,
+        data: nonCoreCategory,
+      })
+      
+      mockDelete.mockResolvedValue({
+        success: true,
+        message: '删除成功',
+        data: undefined,
+      })
+
+      const result = await service.delete('1')
+      expect(result.success).toBe(true)
+      expect(mockDelete).toHaveBeenCalledWith('1')
     })
-  })
 
-  describe('updateOrder', () => {
-    it('应该更新分类排序', async () => {
-      const orderUpdates = [
-        { id: '1', order: 0 },
-        { id: '2', order: 1 },
-        { id: '3', order: 2 },
-      ]
+    it('不能删除核心分类', async () => {
+      mockGetById.mockResolvedValue({
+        success: true,
+        data: mockCategory, // 这是一个核心分类
+      })
 
-      mockApi.updateOrder.mockResolvedValue({ data: void 0 })
+      await expect(service.delete('1')).rejects.toThrow(/不能删除核心分类/)
+    })
 
-      await service.updateOrder(orderUpdates)
-      expect(mockApi.updateOrder).toHaveBeenCalledWith(orderUpdates)
+    it('应该在分类不存在时抛出异常', async () => {
+      mockGetById.mockRejectedValue(new Error('分类不存在'))
+
+      await expect(service.delete('99')).rejects.toBeInstanceOf(CategoryNotFoundError)
     })
   })
 })

@@ -1,11 +1,11 @@
 import { BaseApi } from '../../base'
-import type { ApiResponse, PaginatedResponse } from '../../types'
+import type { ApiResponse } from '../../types'
 
 export interface NewsCategory {
   _id: string
   name: string
   key: string
-  description?: string
+  description: string
   order: number
   color: string
   icon?: string

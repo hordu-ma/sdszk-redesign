@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { NewsCategory } from '@/services/newsCategory.service'
-import { NewsCategoryService } from '@/services/newsCategory.service'
+import type { NewsCategory } from '../api/modules/newsCategory'
+import { NewsCategoryService } from '../services/newsCategory.service'
 import { message } from 'ant-design-vue'
 
 const newsCategoryService = new NewsCategoryService()
