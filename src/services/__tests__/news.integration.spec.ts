@@ -131,7 +131,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 获取新闻详情
       await store.fetchNewsDetail('1')
 
@@ -154,7 +154,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 加载分类
       await store.fetchCategories()
 
@@ -177,7 +177,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 加载标签
       await store.fetchTags()
 
@@ -195,7 +195,7 @@ describe('News Integration Tests', () => {
         content: '<p>我们的团队最近取得了重大突破...</p>',
         summary: '团队在人工智能领域取得新突破',
         category: '研究成果',
-        tags: ['人工智能', '突破']
+        tags: ['人工智能', '突破'],
       }
 
       const mockResponse: ApiResponse<News> = {
@@ -228,7 +228,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 创建新闻
       await store.createNews(newNews)
 
@@ -240,7 +240,7 @@ describe('News Integration Tests', () => {
     it('应该能够更新新闻', async () => {
       const updateData = {
         title: '更新后的标题',
-        content: '<p>更新后的内容...</p>'
+        content: '<p>更新后的内容...</p>',
       }
 
       const mockResponse: ApiResponse<News> = {
@@ -261,7 +261,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 更新新闻
       await store.updateNews('1', updateData)
 
@@ -286,7 +286,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 更新新闻状态
       await store.updateNewsStatus('1', 'archived')
 
@@ -305,7 +305,7 @@ describe('News Integration Tests', () => {
 
       // 使用 store
       const store = useNewsStore()
-      
+
       // 删除新闻
       await store.deleteNews('1')
 

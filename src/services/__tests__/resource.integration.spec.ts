@@ -137,7 +137,7 @@ describe('Resource Integration Tests', () => {
 
       // 使用 store
       const store = useResourceStore()
-      
+
       // 获取资源详情
       await store.fetchResourceDetail('1')
 
@@ -188,7 +188,7 @@ describe('Resource Integration Tests', () => {
 
       // 使用 store
       const store = useResourceStore()
-      
+
       // 创建资源
       await store.createResource(newResource)
 
@@ -218,7 +218,7 @@ describe('Resource Integration Tests', () => {
 
       // 使用 store
       const store = useResourceStore()
-      
+
       // 更新资源状态
       await store.updateResourceStatus('1', 'inactive')
 
@@ -237,7 +237,7 @@ describe('Resource Integration Tests', () => {
 
       // 使用 store
       const store = useResourceStore()
-      
+
       // 删除资源
       await store.deleteResource('1')
 

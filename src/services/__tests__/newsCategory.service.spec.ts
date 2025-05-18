@@ -13,7 +13,7 @@ const mockCategory: NewsCategory = {
   _id: '1',
   name: '中心动态',
   key: 'center',
-  description: '中心动态描述', 
+  description: '中心动态描述',
   order: 1,
   color: '#1890ff',
   isActive: true,
@@ -78,7 +78,7 @@ describe('NewsCategoryService', () => {
 
       await service.getList()
       await service.getList() // 第二次调用应该使用缓存
-      
+
       expect(mockGetList).toHaveBeenCalledTimes(1)
     })
 
@@ -92,7 +92,7 @@ describe('NewsCategoryService', () => {
       service.toggleCache(false) // 禁用缓存
       await service.getList()
       await service.getList()
-      
+
       expect(mockGetList).toHaveBeenCalledTimes(2)
     })
   })
@@ -119,7 +119,7 @@ describe('NewsCategoryService', () => {
 
       await service.getCoreCategories()
       await service.getCoreCategories()
-      
+
       expect(mockGetCoreCategories).toHaveBeenCalledTimes(1)
     })
   })
@@ -131,7 +131,7 @@ describe('NewsCategoryService', () => {
         key: 'new-category',
         description: '新分类描述',
       }
-      
+
       const createdCategory = {
         ...newCategory,
         _id: '3',
@@ -161,7 +161,7 @@ describe('NewsCategoryService', () => {
         data: mockCategories,
       })
       await service.getList()
-      
+
       // 创建新分类
       const newCategory: CreateNewsCategoryDTO = { name: '新分类', key: 'new-category' }
       mockCreate.mockResolvedValue({
@@ -169,7 +169,7 @@ describe('NewsCategoryService', () => {
         data: { ...newCategory, _id: '3' } as NewsCategory,
       })
       await service.create(newCategory)
-      
+
       // 再次调用getList应该重新请求API
       await service.getList()
       expect(mockGetList).toHaveBeenCalledTimes(2)
@@ -179,17 +179,17 @@ describe('NewsCategoryService', () => {
   describe('update', () => {
     it('应该更新分类', async () => {
       const updateData: UpdateNewsCategoryDTO = { name: '更新的分类' }
-      const updatedCategory = { 
+      const updatedCategory = {
         ...mockCategory,
         name: '更新的分类',
-        updatedAt: '2023-01-04'
+        updatedAt: '2023-01-04',
       }
 
       mockGetById.mockResolvedValue({
         success: true,
         data: mockCategory,
       })
-      
+
       mockUpdate.mockResolvedValue({
         success: true,
         data: updatedCategory,
@@ -207,7 +207,9 @@ describe('NewsCategoryService', () => {
         data: mockCategory, // 这是一个核心分类
       })
 
-      await expect(service.update('1', { key: 'changed-key' })).rejects.toThrow(/不能修改核心分类的标识符/)
+      await expect(service.update('1', { key: 'changed-key' })).rejects.toThrow(
+        /不能修改核心分类的标识符/
+      )
     })
 
     it('不能禁用核心分类', async () => {
@@ -222,7 +224,9 @@ describe('NewsCategoryService', () => {
     it('应该在分类不存在时抛出异常', async () => {
       mockGetById.mockRejectedValue(new Error('分类不存在'))
 
-      await expect(service.update('99', { name: '更新' })).rejects.toBeInstanceOf(CategoryNotFoundError)
+      await expect(service.update('99', { name: '更新' })).rejects.toBeInstanceOf(
+        CategoryNotFoundError
+      )
     })
   })
 
@@ -237,7 +241,7 @@ describe('NewsCategoryService', () => {
         success: true,
         data: nonCoreCategory,
       })
-      
+
       mockDelete.mockResolvedValue({
         success: true,
         message: '删除成功',
