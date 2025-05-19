@@ -48,25 +48,70 @@
 
       <!-- 颜色选择器 -->
       <a-form-item label="颜色" name="color">
-        <a-input v-model:value="formState.color" type="color" style="width: 100px" />
+        <div class="color-picker-container">
+          <a-input v-model:value="formState.color" type="color" style="width: 100px" />
+          <div class="color-preview" :style="{ backgroundColor: formState.color }">
+            <span :style="{ color: getContrastColor(formState.color) }">预览文本</span>
+          </div>
+        </div>
       </a-form-item>
 
       <!-- 图标 -->
       <a-form-item label="图标" name="icon">
-        <a-select
-          v-model:value="formState.icon"
-          placeholder="选择图标（选填）"
-          style="width: 200px"
-          allow-clear
-        >
-          <a-select-option value="folder-outlined">文件夹</a-select-option>
-          <a-select-option value="notification-outlined">通知</a-select-option>
-          <a-select-option value="file-text-outlined">文档</a-select-option>
-          <a-select-option value="book-outlined">书籍</a-select-option>
-          <a-select-option value="sound-outlined">声音</a-select-option>
-          <a-select-option value="video-camera-outlined">视频</a-select-option>
-          <a-select-option value="picture-outlined">图片</a-select-option>
-        </a-select>
+        <div class="icon-selector-container">
+          <a-select
+            v-model:value="formState.icon"
+            placeholder="选择图标（选填）"
+            style="width: 200px"
+            allow-clear
+          >
+            <a-select-option value="folder-outlined">
+              <span class="icon-option">
+                <folder-outlined />
+                <span>文件夹</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="notification-outlined">
+              <span class="icon-option">
+                <notification-outlined />
+                <span>通知</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="file-text-outlined">
+              <span class="icon-option">
+                <file-text-outlined />
+                <span>文档</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="book-outlined">
+              <span class="icon-option">
+                <book-outlined />
+                <span>书籍</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="sound-outlined">
+              <span class="icon-option">
+                <sound-outlined />
+                <span>声音</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="video-camera-outlined">
+              <span class="icon-option">
+                <video-camera-outlined />
+                <span>视频</span>
+              </span>
+            </a-select-option>
+            <a-select-option value="picture-outlined">
+              <span class="icon-option">
+                <picture-outlined />
+                <span>图片</span>
+              </span>
+            </a-select-option>
+          </a-select>
+          <div v-if="formState.icon" class="icon-preview">
+            <component :is="formState.icon" />
+          </div>
+        </div>
       </a-form-item>
 
       <!-- 排序值 -->
@@ -85,8 +130,17 @@ export default { name: __name }
 <script setup lang="ts">
 import { computed, reactive, ref, watchEffect } from 'vue'
 import { Form, message } from 'ant-design-vue'
-import type { NewsCategory } from '@/api/modules/newsCategory'
+import type { NewsCategory } from '@/services/newsCategory.service'
 import { useNewsCategoryStore } from '@/stores/newsCategory'
+import {
+  FolderOutlined,
+  NotificationOutlined,
+  FileTextOutlined,
+  BookOutlined,
+  SoundOutlined,
+  VideoCameraOutlined,
+  PictureOutlined,
+} from '@ant-design/icons-vue'
 
 interface Props {
   visible?: boolean
@@ -153,6 +207,15 @@ const resetForm = () => {
   })
 }
 
+// 获取对比颜色
+const getContrastColor = (color: string): string => {
+  const r = parseInt(color.slice(1, 3), 16)
+  const g = parseInt(color.slice(3, 5), 16)
+  const b = parseInt(color.slice(5, 7), 16)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness > 125 ? '#000000' : '#FFFFFF'
+}
+
 // 处理表单提交
 const handleSubmit = async () => {
   try {
@@ -194,5 +257,44 @@ watchEffect(() => {
 <style scoped>
 .ant-form {
   padding: 24px 0;
+}
+
+.color-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.color-preview {
+  width: 100px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.icon-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.icon-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-preview {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
 }
 </style>

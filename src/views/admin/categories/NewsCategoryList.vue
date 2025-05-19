@@ -58,6 +58,31 @@
             </a-tag>
           </template>
 
+          <!-- 排序列 -->
+          <template v-else-if="column.key === 'order'">
+            <a-space>
+              <span>{{ record.order }}</span>
+              <div class="order-buttons">
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="handleMoveUp(record)"
+                  :disabled="isFirstItem(record) || record.isCore"
+                >
+                  <template #icon><up-outlined /></template>
+                </a-button>
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="handleMoveDown(record)"
+                  :disabled="isLastItem(record) || record.isCore"
+                >
+                  <template #icon><down-outlined /></template>
+                </a-button>
+              </div>
+            </a-space>
+          </template>
+
           <!-- 操作列 -->
           <template v-else-if="column.key === 'action'">
             <a-space>
@@ -113,6 +138,8 @@ import {
   StopOutlined,
   ReloadOutlined,
   FolderOutlined,
+  UpOutlined,
+  DownOutlined,
 } from '@ant-design/icons-vue'
 const NewsCategoryForm = defineAsyncComponent(() => import('./NewsCategoryForm.vue'))
 
@@ -151,6 +178,7 @@ const columns = [
     title: '排序',
     dataIndex: 'order',
     key: 'order',
+    width: 120,
   },
   {
     title: '状态',
@@ -206,6 +234,56 @@ const handleFormSuccess = () => {
   loadData()
 }
 
+const isFirstItem = (record: NewsCategory) => {
+  const sortedList = store.sortedCategories
+  return sortedList.length > 0 && sortedList[0]._id === record._id
+}
+
+const isLastItem = (record: NewsCategory) => {
+  const sortedList = store.sortedCategories
+  return sortedList.length > 0 && sortedList[sortedList.length - 1]._id === record._id
+}
+
+const handleMoveUp = async (record: NewsCategory) => {
+  if (isFirstItem(record) || record.isCore) return
+
+  const sortedList = store.sortedCategories
+  const currentIndex = sortedList.findIndex(item => item._id === record._id)
+  if (currentIndex <= 0) return
+
+  const prevItem = sortedList[currentIndex - 1]
+  const newOrder = [
+    { id: record._id, order: prevItem.order },
+    { id: prevItem._id, order: record.order },
+  ]
+
+  try {
+    await store.updateCategoryOrder(newOrder)
+  } catch (error: any) {
+    message.error(error.message || '排序失败')
+  }
+}
+
+const handleMoveDown = async (record: NewsCategory) => {
+  if (isLastItem(record) || record.isCore) return
+
+  const sortedList = store.sortedCategories
+  const currentIndex = sortedList.findIndex(item => item._id === record._id)
+  if (currentIndex < 0 || currentIndex >= sortedList.length - 1) return
+
+  const nextItem = sortedList[currentIndex + 1]
+  const newOrder = [
+    { id: record._id, order: nextItem.order },
+    { id: nextItem._id, order: record.order },
+  ]
+
+  try {
+    await store.updateCategoryOrder(newOrder)
+  } catch (error: any) {
+    message.error(error.message || '排序失败')
+  }
+}
+
 const getRowClassName = (record: NewsCategory) => {
   if (!record.isActive) return 'inactive-row'
   if (record.isCore) return 'core-row'
@@ -241,6 +319,19 @@ onMounted(() => {
   margin-right: 8px;
   border-radius: 4px;
   vertical-align: middle;
+}
+
+.order-buttons {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 4px;
+
+  .ant-btn {
+    padding: 0 4px;
+    height: 14px;
+    line-height: 1;
+    font-size: 12px;
+  }
 }
 
 :deep(.inactive-row) {
