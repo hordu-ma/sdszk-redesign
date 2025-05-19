@@ -166,4 +166,29 @@ export class ResourceService extends BaseService<Resource> {
   async getByCategory(category: string) {
     return this.getList({ category })
   }
+
+  // 评论相关方法
+  async getComments(id: string, params?: { page?: number; limit?: number }) {
+    return await resourceApi.getComments(id, params)
+  }
+
+  async addComment(id: string, data: { content: string; parentId?: string }) {
+    return await resourceApi.addComment(id, data)
+  }
+
+  async deleteComment(resourceId: string, commentId: string) {
+    return await resourceApi.deleteComment(resourceId, commentId)
+  }
+
+  // 分享相关方法
+  async share(
+    id: string,
+    data: {
+      shareType: 'email' | 'link' | 'wechat'
+      recipientEmail?: string
+      message?: string
+    }
+  ) {
+    return await resourceApi.share(id, data)
+  }
 }

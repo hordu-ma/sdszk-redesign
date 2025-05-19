@@ -1,18 +1,14 @@
-import {
-  createRouter,
-  createWebHistory,
-  type RouteRecordRaw,
-} from "vue-router";
-import { message } from "ant-design-vue";
-import adminRoutes from "./adminRoutes";
-import { useUserStore } from "../stores/user";
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { message } from 'ant-design-vue'
+import adminRoutes from './adminRoutes'
+import { useUserStore } from '../stores/user'
 
 // 扩展路由元数据类型
-declare module "vue-router" {
+declare module 'vue-router' {
   interface RouteMeta {
-    requiresAuth?: boolean;
-    adminOnly?: boolean;
-    permissions?: string[];
+    requiresAuth?: boolean
+    adminOnly?: boolean
+    permissions?: string[]
   }
 }
 
@@ -20,93 +16,99 @@ declare module "vue-router" {
 const getBase = (): string => {
   // 检查是否有环境变量
   if (import.meta.env.VITE_BASE_URL) {
-    return import.meta.env.VITE_BASE_URL;
+    return import.meta.env.VITE_BASE_URL
   }
   // 否则使用默认的BASE_URL
-  return import.meta.env.BASE_URL || "/";
-};
+  return import.meta.env.BASE_URL || '/'
+}
 
 const routes: RouteRecordRaw[] = [
   {
-    path: "/",
-    name: "home",
-    component: () => import("../views/Home.vue"),
+    path: '/',
+    name: 'home',
+    component: () => import('../views/Home.vue'),
   },
   {
-    path: "/about",
-    name: "about",
-    component: () => import("../views/About.vue"),
+    path: '/about',
+    name: 'about',
+    component: () => import('../views/About.vue'),
   },
   {
-    path: "/news",
-    name: "news",
-    component: () => import("../views/News.vue"),
+    path: '/news',
+    name: 'news',
+    component: () => import('../views/News.vue'),
   },
   {
-    path: "/news/detail/:id",
-    name: "newsDetail",
-    component: () => import("../views/NewsDetail.vue"),
+    path: '/news/detail/:id',
+    name: 'newsDetail',
+    component: () => import('../views/NewsDetail.vue'),
     props: true,
   },
   {
-    path: "/activities",
-    name: "activities",
-    component: () => import("../views/Activities.vue"),
+    path: '/activities',
+    name: 'activities',
+    component: () => import('../views/Activities.vue'),
   },
   {
-    path: "/resources",
-    name: "resources",
-    component: () => import("../views/Resources.vue"),
+    path: '/resources',
+    name: 'resources',
+    component: () => import('../views/Resources.vue'),
   },
   {
-    path: "/ai",
-    name: "ai",
-    component: () => import("../views/AI.vue"),
+    path: '/resources/detail/:id',
+    name: 'resourceDetail',
+    component: () => import('../views/resources/ResourceDetail.vue'),
+    props: true,
+  },
+  {
+    path: '/ai',
+    name: 'ai',
+    component: () => import('../views/AI.vue'),
   },
   // 添加管理系统路由
   ...adminRoutes,
-];
+]
 
 const router = createRouter({
   history: createWebHistory(getBase()),
   routes,
-});
+})
 
 // 导航守卫
 router.beforeEach(async (to, _from, next) => {
-  const userStore = useUserStore();
+  const userStore = useUserStore()
 
   // 如果需要验证
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!userStore.isAuthenticated) {
       // 未登录，重定向到登录页
       return next({
-        path: "/admin/login",
+        path: '/admin/login',
         query: { redirect: to.fullPath },
-      });
+      })
     }
 
     // 检查路由是否需要管理员权限
     if (to.meta.adminOnly && !userStore.isAdmin) {
-      message.error("您没有访问该页面的权限");
-      return next({ path: "/admin/dashboard" });
+      message.error('您没有访问该页面的权限')
+      return next({ path: '/admin/dashboard' })
     }
 
     // 检查路由是否需要特定权限
     if (to.meta.permissions) {
-      const requiredPermissions = to.meta.permissions as string[];
-      const hasPermission = requiredPermissions.some((permission) =>
+      const requiredPermissions = to.meta.permissions as string[]
+      const hasPermission = requiredPermissions.some(permission =>
         userStore.hasPermission(permission)
-      );
+      )
 
       if (!hasPermission) {
-        message.error("您没有访问该页面的权限");
-        return next({ path: "/admin/dashboard" });
+        message.error('您没有访问该页面的权限')
+        return next({ path: '/admin/dashboard' })
       }
     }
   }
 
-  next();
-});
+  next()
+})
 
-export default router;
+export default router

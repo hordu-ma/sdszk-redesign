@@ -4,7 +4,7 @@
     <!-- 上传区域 -->
     <a-upload-dragger
       :fileList="fileList"
-      :multiple="true"
+      :multiple="multiple"
       :action="uploadUrl"
       :headers="uploadHeaders"
       :before-upload="beforeUpload"
@@ -166,6 +166,7 @@ export default {
   },
 
   props: {
+    // 最大文件大小(MB)
     maxSize: {
       type: Number,
       default: 500, // 默认500MB
@@ -174,9 +175,29 @@ export default {
       type: Array,
       default: () => ['*'],
     },
+    // 是否自动上传
+    autoUpload: {
+      type: Boolean,
+      default: true,
+    },
+    // 最大上传数量
+    maxCount: {
+      type: Number,
+      default: 10,
+    },
+    // 是否支持多选
+    multiple: {
+      type: Boolean,
+      default: true,
+    },
+    // 当前文件列表
+    value: {
+      type: Array,
+      default: () => [],
+    },
   },
 
-  emits: ['upload-success', 'upload-error', 'file-removed'],
+  emits: ['update:value', 'upload-success', 'upload-error', 'file-removed', 'exceed'],
 
   setup(props, { emit }) {
     const userStore = useUserStore()
@@ -217,6 +238,13 @@ export default {
         return false
       }
 
+      // 检查队列大小
+      if (fileList.value.length >= props.maxCount) {
+        message.error(`最多只能上传 ${props.maxCount} 个文件!`)
+        emit('exceed', file)
+        return false
+      }
+
       return true
     }
 
@@ -241,6 +269,7 @@ export default {
       }
 
       fileList.value = fileList
+      emit('update:value', fileList)
     }
 
     // 处理文件删除
@@ -341,6 +370,7 @@ export default {
       isPdfFile,
       formatFileSize,
       clearFiles,
+      multiple: props.multiple,
     }
   },
 }

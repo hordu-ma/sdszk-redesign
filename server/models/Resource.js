@@ -1,5 +1,5 @@
 // Resource.js - 资源模型
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const resourceSchema = new mongoose.Schema(
   {
@@ -23,10 +23,9 @@ const resourceSchema = new mongoose.Schema(
       trim: true,
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ResourceCategory',
       required: true,
-      enum: ["theory", "teaching", "video"],
-      default: "theory",
     },
     videoUrl: {
       type: String,
@@ -96,6 +95,29 @@ const resourceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+      },
+    ],
+    shares: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Share',
+      },
+    ],
+    fileUrl: {
+      type: String,
+      required: true,
+    },
+    fileSize: {
+      type: Number,
+      min: 0,
+    },
+    mimeType: {
+      type: String,
+    },
     seo: {
       metaTitle: {
         type: String,
@@ -110,31 +132,31 @@ const resourceSchema = new mongoose.Schema(
     relatedResources: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Resource",
+        ref: 'Resource',
       },
     ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
     timestamps: true,
   }
-);
+)
 
 // 创建全文搜索索引
 resourceSchema.index(
   {
-    title: "text",
-    content: "text",
-    summary: "text",
-    tags: "text",
+    title: 'text',
+    content: 'text',
+    summary: 'text',
+    tags: 'text',
   },
   {
     weights: {
@@ -143,10 +165,10 @@ resourceSchema.index(
       summary: 3,
       content: 1,
     },
-    name: "resource_text_index",
+    name: 'resource_text_index',
   }
-);
+)
 
-const Resource = mongoose.model("Resource", resourceSchema);
+const Resource = mongoose.model('Resource', resourceSchema)
 
-export default Resource;
+export default Resource

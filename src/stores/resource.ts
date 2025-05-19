@@ -5,12 +5,12 @@ import type { Resource, ResourceQueryParams } from '@/services/resource.service'
 import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 
 // 定义资源类型
-type ResourceCategory = string
-type ResourceStatus = 'active' | 'inactive'
+import type { ResourceCategory } from '@/api/modules/resourceCategory/index'
+type ResourceStatus = 'draft' | 'published'
 
 // 筛选器类型
 interface ResourceFilters {
-  category: ResourceCategory | ''
+  category: ResourceCategory['_id'] | ''
   type: Resource['type'] | ''
   keyword: string
   status: ResourceStatus | ''
@@ -195,6 +195,31 @@ export const useResourceStore = defineStore('resource', () => {
     selectedResources.value = []
   }
 
+  // 评论相关方法
+  const getComments = async (id: string, params?: { page?: number; limit?: number }) => {
+    return await resourceService.getComments(id, params)
+  }
+
+  const addComment = async (id: string, data: { content: string; parentId?: string }) => {
+    return await resourceService.addComment(id, data)
+  }
+
+  const deleteComment = async (resourceId: string, commentId: string) => {
+    return await resourceService.deleteComment(resourceId, commentId)
+  }
+
+  // 分享相关方法
+  const share = async (
+    id: string,
+    data: {
+      shareType: 'email' | 'link' | 'wechat'
+      recipientEmail?: string
+      message?: string
+    }
+  ) => {
+    return await resourceService.share(id, data)
+  }
+
   return {
     // 状态
     loading,
@@ -225,5 +250,13 @@ export const useResourceStore = defineStore('resource', () => {
     resetFilters,
     toggleSelection,
     clearSelection,
+
+    // 评论相关
+    getComments,
+    addComment,
+    deleteComment,
+
+    // 分享相关
+    share,
   }
 })

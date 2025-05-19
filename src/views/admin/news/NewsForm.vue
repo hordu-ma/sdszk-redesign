@@ -34,6 +34,11 @@
             <template #icon><PlayCircleOutlined /></template>
             发布
           </a-button>
+
+          <a-button type="primary" ghost @click="showPreview">
+            <template #icon><EyeOutlined /></template>
+            预览
+          </a-button>
         </a-space>
       </div>
     </div>
@@ -118,7 +123,12 @@
                 :before-upload="beforeUpload"
                 @change="handleUploadChange"
               >
-                <div v-if="newsForm.cover" class="image-uploader-wrapper">
+                <template v-if="uploadingFile">
+                  <div class="uploading-progress">
+                    <a-progress type="circle" :percent="uploadProgress" :width="80" />
+                  </div>
+                </template>
+                <div v-else-if="newsForm.cover" class="image-uploader-wrapper">
                   <img :src="newsForm.cover" class="image-preview" />
                   <div class="image-mask">
                     <DeleteOutlined />
@@ -233,23 +243,23 @@
     </a-card>
 
     <!-- 预览模态框 -->
-    <a-modal v-model:visible="previewVisible" title="资讯预览" width="800px" :footer="null">
-      <div class="preview-container">
-        <h1 class="preview-title">{{ newsForm.title }}</h1>
-        <div class="preview-meta">
-          <span>分类：{{ getCategoryName(newsForm.categoryKey) }}</span>
-          <span>发布日期：{{ formatDate(newsForm.publishDate) }}</span>
-          <span>作者：{{ newsForm.author || '未署名' }}</span>
-          <span>来源：{{ newsForm.source || '本站' }}</span>
-        </div>
-        <div class="preview-content" v-html="newsForm.content"></div>
-      </div>
+    <a-modal
+      v-model:visible="previewVisible"
+      title="新闻预览"
+      width="900px"
+      :footer="null"
+      :bodyStyle="{ padding: '0' }"
+    >
+      <NewsPreview
+        :news="{ ...newsForm, publishDate: formatDate(newsForm.publishDate) }"
+        :categories="categories"
+      />
     </a-modal>
   </div>
 </template>
 
 <script>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   ArrowLeftOutlined,
@@ -257,12 +267,14 @@ import {
   DeleteOutlined,
   PlayCircleOutlined,
   PauseCircleOutlined,
+  EyeOutlined,
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
 import { useNewsStore } from '@/stores/news'
 import { useNewsCategoryStore } from '@/stores/newsCategory'
 import RichTextEditor from '@/components/admin/RichTextEditor.vue'
+import NewsPreview from '@/components/admin/NewsPreview.vue'
 import dayjs from 'dayjs'
 
 export default {
@@ -270,11 +282,13 @@ export default {
 
   components: {
     RichTextEditor,
+    NewsPreview,
     ArrowLeftOutlined,
     PlusOutlined,
     DeleteOutlined,
     PlayCircleOutlined,
     PauseCircleOutlined,
+    EyeOutlined,
   },
 
   props: {
@@ -296,6 +310,11 @@ export default {
     const submitting = ref(false)
     const previewVisible = ref(false)
     const fileList = ref([])
+    const uploadProgress = ref(0)
+    const uploadingFile = ref(false)
+
+    const AUTOSAVE_KEY = 'news_draft'
+    const autoSaveInterval = ref(null)
 
     // 编辑状态判断
     const isEditing = computed(() => !!props.id)
@@ -323,42 +342,80 @@ export default {
     const rules = {
       title: [
         { required: true, message: '请输入资讯标题', trigger: 'blur' },
-        {
-          min: 3,
-          max: 100,
-          message: '标题长度应在3-100个字符之间',
-          trigger: 'blur',
-        },
+        { min: 3, max: 100, message: '标题长度应在3-100个字符之间', trigger: 'blur' },
       ],
       categoryKey: [{ required: true, message: '请选择资讯分类', trigger: 'change' }],
       content: [{ required: true, message: '请输入资讯内容', trigger: 'change' }],
+      summary: [{ max: 300, message: '摘要最多300字符', trigger: 'blur' }],
+      publishDate: [{ required: true, message: '请选择发布日期', trigger: 'change' }],
+      author: [{ max: 50, message: '作者名称最多50字符', trigger: 'blur' }],
+      source: [{ max: 100, message: '来源最多100字符', trigger: 'blur' }],
+      tags: [{ type: 'array', max: 10, message: '最多可添加10个标签', trigger: 'change' }],
     }
 
-    // 上传文件头
-    const uploadHeaders = computed(() => ({
-      Authorization: `Bearer ${userStore.token}`,
-    }))
+    // 表单提交前的数据处理
+    const processFormData = data => {
+      const processedData = { ...data }
 
-    // 分类列表
-    const categories = ref([])
+      // 处理日期
+      if (processedData.publishDate) {
+        processedData.publishDate = dayjs(processedData.publishDate).format('YYYY-MM-DD')
+      }
 
-    // 根据key获取分类名称
-    const getCategoryName = key => {
-      const category = categories.value.find(c => c.key === key)
-      return category ? category.name : ''
+      // 处理标签
+      if (processedData.tags) {
+        processedData.tags = processedData.tags.map(tag => tag.trim()).filter(Boolean)
+      }
+
+      // 处理SEO信息
+      processedData.seo = {
+        metaTitle: processedData.metaTitle || processedData.title,
+        metaDescription: processedData.metaDescription || processedData.summary,
+        keywords: processedData.metaKeywords || processedData.tags,
+      }
+
+      return processedData
     }
 
-    // 处理分类变更
-    const handleCategoryChange = value => {
-      newsForm.categoryKey = value
-      // 自动更新分类名称
-      newsForm.category = getCategoryName(value)
+    // 自动保存
+    const autoSave = () => {
+      if (!isEditing.value) {
+        const draftData = {
+          ...newsForm,
+          timestamp: Date.now(),
+        }
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(draftData))
+        message.info('草稿已自动保存', 1)
+      }
     }
 
-    // 格式化日期
-    const formatDate = date => {
-      if (!date) return ''
-      return dayjs(date).format('YYYY-MM-DD')
+    // 加载草稿
+    const loadDraft = () => {
+      const draftJson = localStorage.getItem(AUTOSAVE_KEY)
+      if (draftJson) {
+        const draft = JSON.parse(draftJson)
+        // 检查草稿是否在24小时内
+        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
+          Modal.confirm({
+            title: '发现未发布的草稿',
+            content: '是否要继续编辑上次保存的草稿？',
+            okText: '继续编辑',
+            cancelText: '放弃草稿',
+            onOk() {
+              Object.keys(draft).forEach(key => {
+                if (key !== 'timestamp') {
+                  newsForm[key] = draft[key]
+                }
+              })
+            },
+            onCancel() {
+              localStorage.removeItem(AUTOSAVE_KEY)
+            },
+          })
+        } else {
+          localStorage.removeItem(AUTOSAVE_KEY)
+        }
+      }
     }
 
     // 加载分类
@@ -442,21 +499,25 @@ export default {
 
     // 处理上传状态变化
     const handleUploadChange = info => {
-      if (info.file.status === 'uploading') {
-        loading.value = true
+      const { status, percent } = info.file
+
+      if (status === 'uploading') {
+        uploadingFile.value = true
+        uploadProgress.value = percent
         return
       }
 
-      if (info.file.status === 'done') {
-        loading.value = false
-        if (info.file.response && info.file.response.status === 'success') {
+      uploadingFile.value = false
+      uploadProgress.value = 0
+
+      if (status === 'done') {
+        if (info.file.response && info.file.response.success) {
           newsForm.cover = info.file.response.data.url
           message.success('封面上传成功')
         } else {
-          message.error('封面上传失败')
+          message.error(info.file.response?.message || '封面上传失败')
         }
-      } else if (info.file.status === 'error') {
-        loading.value = false
+      } else if (status === 'error') {
         message.error('封面上传失败')
       }
     }
@@ -467,43 +528,17 @@ export default {
         await formRef.value.validate()
         submitting.value = true
 
-        // 处理发布日期
-        if (newsForm.publishDate) {
-          newsForm.publishDate = dayjs(newsForm.publishDate).format('YYYY-MM-DD')
-        } else {
-          newsForm.publishDate = dayjs().format('YYYY-MM-DD')
-        }
-
-        // 准备提交数据
-        const submitData = {
-          title: newsForm.title,
-          content: newsForm.content,
-          summary: newsForm.summary,
-          thumbnail: newsForm.cover,
-          category: newsForm.categoryKey, // 使用分类Key作为category ID
-          publishDate: newsForm.publishDate,
-          author: newsForm.author || userStore.userInfo?.name || '管理员',
-          source: newsForm.source ? { name: newsForm.source } : undefined,
-          tags: newsForm.tags || [],
-          seo: {
-            metaTitle: newsForm.metaTitle,
-            metaDescription: newsForm.metaDescription,
-            keywords: newsForm.metaKeywords,
-          },
-        }
+        const processedData = processFormData(newsForm)
 
         let result
         if (isEditing.value) {
-          // 更新资讯
-          result = await newsStore.update(props.id, submitData)
+          result = await newsStore.update(props.id, processedData)
           message.success('资讯更新成功')
         } else {
-          // 创建资讯
-          result = await newsStore.create(submitData)
+          result = await newsStore.create(processedData)
           message.success('资讯创建成功')
         }
 
-        // 返回列表页
         router.push('/admin/news')
       } catch (error) {
         if (error.errorFields) {
@@ -511,6 +546,7 @@ export default {
         } else {
           message.error(`操作失败: ${error.message}`)
         }
+        console.error('表单提交错误:', error)
       } finally {
         submitting.value = false
       }
@@ -591,14 +627,28 @@ export default {
       router.push('/admin/news/list')
     }
 
-    // 初始化
+    // 显示预览
+    const showPreview = () => {
+      previewVisible.value = true
+    }
+
+    // 设置自动保存定时器
     onMounted(() => {
       loadCategories()
       if (isEditing.value) {
         loadNewsData()
       } else {
-        // 新建资讯时设置默认作者
+        loadDraft()
         newsForm.author = userStore.userInfo?.name || ''
+        // 每3分钟自动保存一次
+        autoSaveInterval.value = setInterval(autoSave, 3 * 60 * 1000)
+      }
+    })
+
+    // 清理定时器
+    onBeforeUnmount(() => {
+      if (autoSaveInterval.value) {
+        clearInterval(autoSaveInterval.value)
       }
     })
 
@@ -623,6 +673,9 @@ export default {
       handleTogglePublish,
       beforeUpload,
       goBack,
+      showPreview,
+      uploadProgress,
+      uploadingFile,
     }
   },
 }
@@ -725,31 +778,25 @@ export default {
 .editor-container {
   border: 1px solid #d9d9d9;
   border-radius: 2px;
+  margin-top: 8px;
 }
 
-/* 预览样式 */
-.preview-container {
-  padding: 20px;
+.editor-container :deep(.ql-container) {
+  min-height: 400px;
 }
 
-.preview-title {
-  font-size: 24px;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.preview-meta {
+.uploading-progress {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 14px;
   justify-content: center;
+  align-items: center;
+  width: 104px;
+  height: 104px;
+  background: rgba(0, 0, 0, 0.02);
 }
 
-.preview-content {
-  line-height: 1.8;
+.preview-container :deep(.news-preview) {
+  padding: 24px;
+  background: #fff;
 }
 
 @media (max-width: 768px) {
@@ -761,6 +808,15 @@ export default {
   .action-section {
     margin-top: 16px;
     width: 100%;
+  }
+
+  .preview-container {
+    padding: 16px;
+  }
+
+  .ant-modal {
+    max-width: 95% !important;
+    margin: 16px auto !important;
   }
 }
 </style>

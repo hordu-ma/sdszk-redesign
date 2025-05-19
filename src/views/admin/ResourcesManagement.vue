@@ -22,69 +22,113 @@
     <!-- 搜索和筛选 -->
     <a-card class="filter-card">
       <a-form layout="inline">
-        <a-form-item label="关键词">
-          <a-input
-            v-model:value="query.keyword"
-            placeholder="搜索标题或描述"
-            allowClear
-            @pressEnter="handleSearch"
-          >
-            <template #suffix>
-              <SearchOutlined style="color: rgba(0, 0, 0, 0.45)" />
-            </template>
-          </a-input>
-        </a-form-item>
-        <a-form-item label="类型">
-          <a-select
-            v-model:value="query.type"
-            style="width: 120px"
-            allowClear
-            placeholder="资源类型"
-          >
-            <a-select-option value="document">文档资料</a-select-option>
-            <a-select-option value="video">视频资源</a-select-option>
-            <a-select-option value="image">图片资源</a-select-option>
-            <a-select-option value="audio">音频资源</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="分类">
-          <a-select
-            v-model:value="query.category"
-            style="width: 120px"
-            allowClear
-            placeholder="资源分类"
-          >
-            <a-select-option v-for="category in categories" :key="category.id" :value="category.id">
-              {{ category.name }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select
-            v-model:value="query.status"
-            style="width: 120px"
-            allowClear
-            placeholder="资源状态"
-          >
-            <a-select-option value="published">已发布</a-select-option>
-            <a-select-option value="draft">草稿</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
+        <div class="search-section">
           <a-space>
-            <a-button type="primary" @click="handleSearch">
-              <template #icon><SearchOutlined /></template>
-              搜索
-            </a-button>
-            <a-button @click="handleReset"> 重置 </a-button>
+            <a-form-item label="关键词" style="flex: 1; min-width: 250px">
+              <a-input
+                v-model:value="query.keyword"
+                placeholder="搜索标题或描述"
+                allowClear
+                @pressEnter="handleSearch"
+              >
+                <template #suffix>
+                  <SearchOutlined style="color: rgba(0, 0, 0, 0.45)" />
+                </template>
+              </a-input>
+            </a-form-item>
+
+            <a-form-item label="类型" style="min-width: 180px">
+              <a-select
+                v-model:value="query.type"
+                style="width: 100%"
+                allowClear
+                placeholder="资源类型"
+              >
+                <a-select-option value="document">文档资料</a-select-option>
+                <a-select-option value="video">视频资源</a-select-option>
+                <a-select-option value="image">图片资源</a-select-option>
+                <a-select-option value="audio">音频资源</a-select-option>
+              </a-select>
+            </a-form-item>
+
+            <a-form-item label="分类" style="min-width: 180px">
+              <a-select
+                v-model:value="query.category"
+                style="width: 100%"
+                allowClear
+                placeholder="资源分类"
+                :loading="categoriesLoading"
+              >
+                <a-select-option
+                  v-for="category in categories"
+                  :key="category.id"
+                  :value="category.id"
+                >
+                  {{ category.name }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+
+            <a-form-item label="状态" style="min-width: 150px">
+              <a-select
+                v-model:value="query.status"
+                style="width: 100%"
+                allowClear
+                placeholder="资源状态"
+              >
+                <a-select-option value="published">已发布</a-select-option>
+                <a-select-option value="draft">草稿</a-select-option>
+              </a-select>
+            </a-form-item>
+
+            <a-form-item>
+              <a-space>
+                <a-button type="primary" @click="handleSearch" :loading="loading">
+                  <template #icon><SearchOutlined /></template>
+                  搜索
+                </a-button>
+                <a-button @click="handleReset"> 重置 </a-button>
+              </a-space>
+            </a-form-item>
           </a-space>
-        </a-form-item>
+        </div>
+
+        <div class="toolbar-section">
+          <a-space>
+            <a-radio-group v-model:value="viewMode" size="small">
+              <a-radio-button value="table">
+                <template #icon><TableOutlined /></template>
+                表格视图
+              </a-radio-button>
+              <a-radio-button value="grid">
+                <template #icon><AppstoreOutlined /></template>
+                网格视图
+              </a-radio-button>
+            </a-radio-group>
+
+            <a-select
+              v-model:value="query.sort"
+              style="width: 150px"
+              size="small"
+              placeholder="排序方式"
+            >
+              <a-select-option value="createdAt_desc">创建时间 ↓</a-select-option>
+              <a-select-option value="createdAt_asc">创建时间 ↑</a-select-option>
+              <a-select-option value="title_asc">标题 A-Z</a-select-option>
+              <a-select-option value="title_desc">标题 Z-A</a-select-option>
+              <a-select-option value="downloadCount_desc">下载次数 ↓</a-select-option>
+              <a-select-option value="viewCount_desc">浏览次数 ↓</a-select-option>
+            </a-select>
+          </a-space>
+        </div>
       </a-form>
     </a-card>
 
     <!-- 资源列表 -->
     <a-card>
+      <!-- 表格视图 -->
       <a-table
+        v-if="viewMode === 'table'"
         :columns="columns"
         :data-source="resources"
         :loading="loading"
@@ -165,16 +209,20 @@
                 <a class="ant-dropdown-link" @click.prevent> 更多 <DownOutlined /> </a>
                 <template #overlay>
                   <a-menu>
-                    <a-menu-item key="publish" v-if="record.status !== 'published'">
+                    <a-menu-item
+                      key="publish"
+                      v-if="record.status !== 'published'"
+                      @click="handlePublish(record)"
+                    >
                       <CloudUploadOutlined />
                       <span>发布</span>
                     </a-menu-item>
-                    <a-menu-item key="unpublish" v-else>
+                    <a-menu-item key="unpublish" v-else @click="handleUnpublish(record)">
                       <CloudDownloadOutlined />
                       <span>取消发布</span>
                     </a-menu-item>
                     <a-menu-divider />
-                    <a-menu-item key="delete">
+                    <a-menu-item key="delete" @click="handleDelete(record)">
                       <DeleteOutlined />
                       <span>删除</span>
                     </a-menu-item>
@@ -185,6 +233,93 @@
           </template>
         </template>
       </a-table>
+
+      <!-- 网格视图 -->
+      <template v-else>
+        <div class="grid-view">
+          <a-row :gutter="[16, 16]">
+            <a-col :xs="24" :sm="12" :md="8" :lg="6" v-for="record in resources" :key="record.id">
+              <a-card hoverable class="resource-card" :loading="loading">
+                <template #cover>
+                  <div class="resource-cover" @click="handlePreview(record)">
+                    <component
+                      v-if="!record.thumbnail"
+                      :is="getFileIcon(record.type)"
+                      :style="{ color: getTypeColor(record.type) }"
+                    />
+                    <img v-else :src="record.thumbnail" :alt="record.title" />
+                    <div class="resource-type">
+                      <a-tag :color="getTypeColor(record.type)">{{
+                        getTypeText(record.type)
+                      }}</a-tag>
+                    </div>
+                  </div>
+                </template>
+                <template #title>
+                  <div class="resource-card-title">
+                    <span class="title-text" @click="handlePreview(record)">{{
+                      record.title
+                    }}</span>
+                    <a-tag v-if="record.featured" color="gold">推荐</a-tag>
+                  </div>
+                </template>
+                <template #actions>
+                  <a-tooltip title="预览">
+                    <EyeOutlined key="preview" @click="handlePreview(record)" />
+                  </a-tooltip>
+                  <a-tooltip title="下载">
+                    <DownloadOutlined key="download" @click="handleDownload(record)" />
+                  </a-tooltip>
+                  <a-tooltip title="编辑">
+                    <EditOutlined key="edit" @click="handleEdit(record)" />
+                  </a-tooltip>
+                  <a-dropdown>
+                    <a class="ant-dropdown-link" @click.prevent>
+                      <MoreOutlined key="more" />
+                    </a>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item key="toggleFeatured" @click="handleToggleFeatured(record)">
+                          <StarOutlined :class="{ featured: record.featured }" />
+                          <span>{{ record.featured ? '取消推荐' : '设为推荐' }}</span>
+                        </a-menu-item>
+                        <a-menu-item
+                          key="publish"
+                          v-if="record.status !== 'published'"
+                          @click="handlePublish(record)"
+                        >
+                          <CloudUploadOutlined />
+                          <span>发布</span>
+                        </a-menu-item>
+                        <a-menu-item key="unpublish" v-else @click="handleUnpublish(record)">
+                          <CloudDownloadOutlined />
+                          <span>取消发布</span>
+                        </a-menu-item>
+                        <a-menu-divider />
+                        <a-menu-item key="delete" danger @click="handleDelete(record)">
+                          <DeleteOutlined />
+                          <span>删除</span>
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </template>
+                <div class="resource-meta">
+                  <div class="meta-item"><DownloadOutlined /> {{ record.downloadCount || 0 }}</div>
+                  <div class="meta-item"><EyeOutlined /> {{ record.viewCount || 0 }}</div>
+                  <a-tag :color="record.status === 'published' ? 'success' : 'default'">
+                    {{ record.status === 'published' ? '已发布' : '草稿' }}
+                  </a-tag>
+                </div>
+                <div class="resource-footer">
+                  <span>{{ formatDate(record.createdAt) }}</span>
+                  <span>{{ formatFileSize(record.size) }}</span>
+                </div>
+              </a-card>
+            </a-col>
+          </a-row>
+        </div>
+      </template>
     </a-card>
 
     <!-- 预览模态框 -->
@@ -297,12 +432,14 @@ export default {
 
     // 状态
     const loading = ref(false)
+    const categoriesLoading = ref(false)
     const previewVisible = ref(false)
     const previewData = ref(null)
     const selectedRowKeys = ref([])
     const batchActionVisible = ref(false)
     const batchActionLoading = ref(false)
     const batchActionType = ref('')
+    const viewMode = ref('table') // 视图模式：table/grid
 
     const resources = computed(() => resourceStore.items)
     const categories = ref([])
@@ -457,10 +594,35 @@ export default {
     // 加载分类列表
     const loadCategories = async () => {
       try {
+        categoriesLoading.value = true
         const response = await resourceStore.getCategories()
         categories.value = response.data
       } catch (error) {
         message.error('加载分类列表失败')
+      } finally {
+        categoriesLoading.value = false
+      }
+    }
+
+    // 处理发布
+    const handlePublish = async record => {
+      try {
+        await resourceStore.updateStatus(record.id, { status: 'published' })
+        message.success('发布成功')
+        loadResources()
+      } catch (error) {
+        message.error('发布失败')
+      }
+    }
+
+    // 处理取消发布
+    const handleUnpublish = async record => {
+      try {
+        await resourceStore.updateStatus(record.id, { status: 'draft' })
+        message.success('已取消发布')
+        loadResources()
+      } catch (error) {
+        message.error('操作失败')
       }
     }
 
@@ -684,16 +846,41 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  background: #fff;
+  padding: 16px 24px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .page-header h1 {
   margin: 0;
   font-size: 20px;
   font-weight: 500;
+  color: #1f2937;
 }
 
 .filter-card {
   margin-bottom: 16px;
+}
+
+.filter-card :deep(.ant-form) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+
+.toolbar-section {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
 }
 
 .resource-title {
@@ -719,6 +906,91 @@ export default {
   max-width: 100%;
   max-height: 500px;
   object-fit: contain;
+}
+
+/* 网格视图样式 */
+.grid-view {
+  margin: 0 -8px;
+}
+
+.resource-card {
+  height: 100%;
+  transition: all 0.3s;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+}
+
+.resource-cover {
+  position: relative;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.resource-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.resource-cover .anticon {
+  font-size: 48px;
+  opacity: 0.8;
+}
+
+.resource-type {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.resource-card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.resource-card-title .title-text {
+  flex: 1;
+  min-width: 0;
+  color: #1f2937;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.resource-card-title .title-text:hover {
+  color: #1890ff;
+}
+
+.resource-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.resource-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 12px;
 }
 
 .preview-video video,

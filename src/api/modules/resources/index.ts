@@ -1,20 +1,72 @@
 import type { ApiResponse, PaginatedResponse, QueryParams } from '../../types'
 import { BaseApi } from '../../base'
 
+export interface Comment {
+  id: string
+  content: string
+  author: {
+    id: string
+    username: string
+    name: string
+    avatar?: string
+  }
+  createdAt: string
+  updatedAt: string
+  parentComment?: string
+}
+
+export interface Share {
+  id: string
+  shareType: 'email' | 'link' | 'wechat'
+  sharedBy: {
+    id: string
+    username: string
+    name: string
+    avatar?: string
+  }
+  recipientEmail?: string
+  message?: string
+  shareDate: string
+  status: 'pending' | 'sent' | 'failed'
+  accessCount: number
+}
+
+export interface ResourceAuthor {
+  id: string
+  username: string
+  name: string
+  avatar?: string
+  affiliation?: string
+}
+
 export interface Resource {
   id: string
   title: string
   description?: string
+  content: string
   type: 'document' | 'video' | 'image' | 'audio' | 'other'
   category?: string
   url: string
   fileSize?: number
   mimeType?: string
   downloadCount?: number
-  status: 'active' | 'inactive'
+  viewCount?: number
+  author?: ResourceAuthor
+  authorAffiliation?: string
+  publishDate?: string
+  comments?: Comment[]
+  shares?: Share[]
+  status: 'draft' | 'published'
+  featured?: boolean
   tags?: string[]
+  seo?: {
+    metaTitle?: string
+    metaDescription?: string
+    keywords?: string[]
+  }
   createdAt: string
   updatedAt: string
+  data?: any
 }
 
 export interface CreateResourceDTO extends Partial<Resource> {
@@ -110,5 +162,40 @@ export class ResourceApi extends BaseApi {
       responseType: 'blob',
     })
     return response.data
+  }
+
+  // 分享资源
+  async share(
+    id: string,
+    data: {
+      shareType: 'email' | 'link' | 'wechat'
+      recipientEmail?: string
+      message?: string
+    }
+  ): Promise<ApiResponse<any>> {
+    return await this.post(`/${id}/share`, data)
+  }
+
+  // 获取评论列表
+  async getComments(
+    id: string,
+    params?: { page?: number; limit?: number }
+  ): Promise<
+    ApiResponse<Comment[]> & { pagination?: { total: number; page: number; limit: number } }
+  > {
+    return await this.get(`/${id}/comments`, params)
+  }
+
+  // 添加评论
+  async addComment(
+    id: string,
+    data: { content: string; parentId?: string }
+  ): Promise<ApiResponse<any>> {
+    return await this.post(`/${id}/comments`, data)
+  }
+
+  // 删除评论
+  async deleteComment(resourceId: string, commentId: string): Promise<ApiResponse<void>> {
+    return await this.delete(`/${resourceId}/comments/${commentId}`)
   }
 }
