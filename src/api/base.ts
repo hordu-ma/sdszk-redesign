@@ -9,10 +9,15 @@ export abstract class BaseApi {
   protected baseURL: string
   protected prefix: string
 
-  constructor(config: ApiModuleConfig = {}) {
+  constructor(config: ApiModuleConfig | string = {}) {
     this.api = api
-    this.baseURL = config.baseURL || ''
-    this.prefix = config.prefix || ''
+    if (typeof config === 'string') {
+      this.baseURL = ''
+      this.prefix = config
+    } else {
+      this.baseURL = config.baseURL || ''
+      this.prefix = config.prefix || ''
+    }
   }
 
   protected getUrl(path: string): string {

@@ -23,7 +23,7 @@ interface ResourceQuery extends ResourceQueryParams {
   limit?: number
 }
 
-import type { Resource as ResourceType } from '@/api/modules/resources'
+import type { Resource as ResourceType } from '@/api/modules/resources/index'
 import { ResourceService } from '@/services/resource.service'
 
 const resourceService = new ResourceService()

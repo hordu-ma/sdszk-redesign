@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { News, NewsQueryParams, CreateNewsDTO, UpdateNewsDTO } from '@/api/modules/news'
+import type { News, NewsQueryParams, CreateNewsDTO, UpdateNewsDTO } from '@/api/modules/news/index'
 import { NewsService } from '@/services/news.service'
 import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 

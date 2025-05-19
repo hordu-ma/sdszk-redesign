@@ -260,7 +260,8 @@ import {
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
-import { useContentStore } from '@/stores/content'
+import { useNewsStore } from '@/stores/news'
+import { useNewsCategoryStore } from '@/stores/newsCategory'
 import RichTextEditor from '@/components/admin/RichTextEditor.vue'
 import dayjs from 'dayjs'
 
@@ -287,7 +288,8 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const userStore = useUserStore()
-    const contentStore = useContentStore()
+    const newsStore = useNewsStore()
+    const categoryStore = useNewsCategoryStore()
 
     const formRef = ref(null)
     const loading = ref(false)
@@ -362,22 +364,11 @@ export default {
     // 加载分类
     const loadCategories = async () => {
       try {
-        await contentStore.fetchNewsCategories()
-        categories.value = contentStore.newsCategories
-
-        // 如果API返回分类为空，使用默认分类
-        if (!categories.value?.length) {
-          categories.value = [
-            { key: 'center', name: '中心动态', isCore: true },
-            { key: 'notice', name: '通知公告', isCore: true },
-            { key: 'policy', name: '政策文件', isCore: true },
-            { key: 'theory', name: '理论前沿', isCore: true },
-            { key: 'teaching', name: '教学研究', isCore: true },
-          ]
-        }
+        await categoryStore.fetchList()
+        categories.value = categoryStore.items
       } catch (error) {
         console.error('加载资讯分类失败:', error)
-        message.error('加载分类失败')
+        message.error('加载分类失败: ' + error.message)
       }
     }
 
@@ -387,7 +378,13 @@ export default {
 
       try {
         loading.value = true
-        const data = await contentStore.fetchNewsDetail(props.id)
+        await newsStore.fetchById(props.id)
+        const data = newsStore.currentNews
+
+        if (!data) {
+          throw new Error('未找到该条资讯')
+        }
+
         news.value = data
 
         // 填充表单数据
@@ -401,19 +398,25 @@ export default {
           }
         })
 
+        // 确保分类ID转换为key
+        if (data.category) {
+          newsForm.categoryKey = data.category.key
+        }
+
         // 设置封面图片预览
-        if (data.cover) {
+        if (data.cover || data.thumbnail) {
+          const coverUrl = data.cover || data.thumbnail
           fileList.value = [
             {
               uid: '-1',
               name: 'cover.jpg',
               status: 'done',
-              url: data.cover,
+              url: coverUrl,
             },
           ]
         }
       } catch (error) {
-        message.error('加载资讯数据失败')
+        message.error('加载资讯数据失败: ' + error.message)
         console.error('加载资讯数据失败:', error)
       } finally {
         loading.value = false
@@ -459,8 +462,9 @@ export default {
     }
 
     // 提交表单
-    const handleSubmit = async values => {
+    const handleSubmit = async () => {
       try {
+        await formRef.value.validate()
         submitting.value = true
 
         // 处理发布日期
@@ -470,21 +474,43 @@ export default {
           newsForm.publishDate = dayjs().format('YYYY-MM-DD')
         }
 
+        // 准备提交数据
+        const submitData = {
+          title: newsForm.title,
+          content: newsForm.content,
+          summary: newsForm.summary,
+          thumbnail: newsForm.cover,
+          category: newsForm.categoryKey, // 使用分类Key作为category ID
+          publishDate: newsForm.publishDate,
+          author: newsForm.author || userStore.userInfo?.name || '管理员',
+          source: newsForm.source ? { name: newsForm.source } : undefined,
+          tags: newsForm.tags || [],
+          seo: {
+            metaTitle: newsForm.metaTitle,
+            metaDescription: newsForm.metaDescription,
+            keywords: newsForm.metaKeywords,
+          },
+        }
+
         let result
         if (isEditing.value) {
           // 更新资讯
-          result = await contentStore.updateNews(props.id, newsForm)
+          result = await newsStore.update(props.id, submitData)
           message.success('资讯更新成功')
         } else {
           // 创建资讯
-          result = await contentStore.createNews(newsForm)
+          result = await newsStore.create(submitData)
           message.success('资讯创建成功')
         }
 
         // 返回列表页
-        router.push('/admin/news/list')
+        router.push('/admin/news')
       } catch (error) {
-        message.error(`操作失败: ${error.message}`)
+        if (error.errorFields) {
+          message.error('请完善必填信息')
+        } else {
+          message.error(`操作失败: ${error.message}`)
+        }
       } finally {
         submitting.value = false
       }
@@ -495,7 +521,6 @@ export default {
       // 验证表单
       try {
         await formRef.value.validate()
-
         submitting.value = true
 
         // 处理发布日期
@@ -505,14 +530,31 @@ export default {
           newsForm.publishDate = dayjs().format('YYYY-MM-DD')
         }
 
-        // 创建资讯
-        const data = { ...newsForm, isPublished: true }
-        const result = await contentStore.createNews(data)
+        // 准备提交数据
+        const submitData = {
+          title: newsForm.title,
+          content: newsForm.content,
+          summary: newsForm.summary,
+          thumbnail: newsForm.cover,
+          category: newsForm.categoryKey, // 使用分类Key作为category ID
+          publishDate: newsForm.publishDate,
+          author: newsForm.author || userStore.userInfo?.name || '管理员',
+          source: newsForm.source ? { name: newsForm.source } : undefined,
+          tags: newsForm.tags || [],
+          isPublished: true,
+          seo: {
+            metaTitle: newsForm.metaTitle,
+            metaDescription: newsForm.metaDescription,
+            keywords: newsForm.metaKeywords,
+          },
+        }
 
+        // 创建资讯
+        await newsStore.create(submitData)
         message.success('资讯已创建并发布')
 
         // 返回列表页
-        router.push('/admin/news/list')
+        router.push('/admin/news')
       } catch (error) {
         if (error.errorFields) {
           message.error('请完善必填信息')
@@ -531,9 +573,10 @@ export default {
       try {
         loading.value = true
         const action = news.value.isPublished ? '取消发布' : '发布'
+        const newStatus = news.value.isPublished ? 'draft' : 'published'
 
-        const updated = await contentStore.toggleNewsPublishStatus(props.id)
-        news.value.isPublished = updated.isPublished
+        await newsStore.updateStatus(props.id, newStatus)
+        news.value.isPublished = !news.value.isPublished
 
         message.success(`已${action}该资讯`)
       } catch (error) {

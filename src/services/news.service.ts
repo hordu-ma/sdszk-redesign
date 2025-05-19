@@ -1,6 +1,6 @@
 import { BaseService } from './base.service'
 import type { ApiResponse } from './api.types'
-import type { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams } from '@/api/modules/news'
+import type { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams } from '@/api/modules/news/index'
 import { newsApi } from '@/api'
 
 export { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams }
@@ -35,8 +35,9 @@ export class NewsService extends BaseService<News> {
   }
 
   // 创建新闻
-  async create(data: CreateNewsDTO): Promise<ApiResponse<News>> {
-    const response = await newsApi.create(data)
+  async create(data: FormData | Partial<News>, options = {}): Promise<ApiResponse<News>> {
+    const newsData = data as Partial<News>
+    const response = await newsApi.create(newsData as CreateNewsDTO)
     if (this.useCache) {
       this.clearCache()
     }
@@ -44,8 +45,8 @@ export class NewsService extends BaseService<News> {
   }
 
   // 更新新闻
-  async update(id: string, data: UpdateNewsDTO): Promise<ApiResponse<News>> {
-    const response = await newsApi.update(id, data)
+  async update(id: string | number, data: Partial<News>): Promise<ApiResponse<News>> {
+    const response = await newsApi.update(id.toString(), data as UpdateNewsDTO)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)

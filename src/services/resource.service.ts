@@ -5,7 +5,7 @@ import type {
   CreateResourceDTO,
   UpdateResourceDTO,
   ResourceQueryParams,
-} from '@/api/modules/resources'
+} from '@/api/modules/resources/index'
 import { resourceApi } from '@/api'
 
 export { Resource, CreateResourceDTO, UpdateResourceDTO, ResourceQueryParams }

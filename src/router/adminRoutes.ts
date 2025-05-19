@@ -37,7 +37,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'news',
         name: 'AdminNewsManagement',
-        component: () => import('../views/admin/NewsManagement.vue'),
+        component: () => import('../views/admin/news/NewsList.vue'),
         meta: {
           title: '资讯管理 - 内容管理系统',
           icon: 'document',

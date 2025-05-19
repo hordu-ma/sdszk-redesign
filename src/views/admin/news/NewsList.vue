@@ -166,7 +166,8 @@ import {
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
-import { useContentStore } from '@/stores/content'
+import { useNewsStore } from '@/stores/news'
+import { useNewsCategoryStore } from '@/stores/newsCategory'
 import dayjs from 'dayjs'
 
 export default {
@@ -184,18 +185,19 @@ export default {
   setup() {
     const router = useRouter()
     const userStore = useUserStore()
-    const contentStore = useContentStore()
+    const newsStore = useNewsStore()
+    const categoryStore = useNewsCategoryStore()
 
     // 表格数据和加载状态
-    const newsList = ref([])
-    const loading = ref(false)
+    const newsList = computed(() => newsStore.items)
+    const loading = computed(() => newsStore.loading)
 
     // 权限相关
     const isAdmin = computed(() => userStore.isAdmin)
     const isEditor = computed(() => userStore.isEditor)
 
     // 分类列表
-    const categories = ref([])
+    const categories = computed(() => categoryStore.items)
 
     // 筛选条件
     const filters = reactive({
@@ -247,7 +249,7 @@ export default {
     ]
 
     // 分页配置
-    const pagination = computed(() => contentStore.newsPagination)
+    const pagination = computed(() => newsStore.pagination)
 
     // 获取分类颜色
     const getCategoryColor = categoryKey => {
@@ -269,23 +271,18 @@ export default {
     // 加载资讯列表
     const loadNewsList = async () => {
       try {
-        loading.value = true
-        await contentStore.fetchNewsList()
-        newsList.value = contentStore.news.items
+        await newsStore.fetchList()
       } catch (error) {
-        message.error('加载资讯列表失败')
-      } finally {
-        loading.value = false
+        message.error('加载资讯列表失败: ' + error.message)
       }
     }
 
     // 加载分类
     const loadCategories = async () => {
       try {
-        await contentStore.fetchNewsCategories()
-        categories.value = contentStore.newsCategories
+        await categoryStore.fetchList()
       } catch (error) {
-        message.error('加载资讯分类失败')
+        message.error('加载资讯分类失败: ' + error.message)
       }
     }
 
@@ -302,12 +299,12 @@ export default {
         params.sortOrder = sorter.order === 'ascend' ? 1 : -1
       }
 
-      contentStore.fetchNewsList(params)
+      newsStore.fetchList(params)
     }
 
     // 添加资讯
     const handleAddNews = () => {
-      router.push('/admin/news/create')
+      router.push('/admin/news/add')
     }
 
     // 查看资讯
@@ -318,21 +315,13 @@ export default {
     // 切换发布状态
     const handleTogglePublish = async record => {
       try {
-        loading.value = true
         const action = record.isPublished ? '取消发布' : '发布'
-        const updated = await contentStore.toggleNewsPublishStatus(record._id)
+        const newStatus = record.isPublished ? 'draft' : 'published'
 
-        // 更新本地数据
-        const index = newsList.value.findIndex(item => item._id === record._id)
-        if (index !== -1) {
-          newsList.value[index].isPublished = updated.isPublished
-        }
-
+        await newsStore.updateStatus(record.id, newStatus)
         message.success(`${action}成功`)
       } catch (error) {
         message.error(`操作失败: ${error.message}`)
-      } finally {
-        loading.value = false
       }
     }
 
@@ -346,14 +335,10 @@ export default {
         cancelText: '取消',
         async onOk() {
           try {
-            loading.value = true
-            await contentStore.deleteNews(record._id)
+            await newsStore.remove(record.id)
             message.success('删除成功')
-            await loadNewsList() // 重新加载列表
           } catch (error) {
             message.error('删除失败: ' + error.message)
-          } finally {
-            loading.value = false
           }
         },
       })
@@ -374,18 +359,19 @@ export default {
       const params = {}
 
       if (filters.category) {
-        params.categoryKey = filters.category
+        params.category = filters.category
       }
 
       if (filters.status) {
-        params.isPublished = filters.status === 'published'
+        params.status = filters.status
       }
 
       if (filters.search) {
-        params.search = filters.search
+        params.keyword = filters.search
       }
 
-      contentStore.fetchNewsList(params, true)
+      newsStore.setFilters(params)
+      newsStore.fetchList()
     }
 
     // 重置筛选条件
@@ -394,7 +380,7 @@ export default {
       filters.status = ''
       filters.search = ''
 
-      contentStore.fetchNewsList({}, true)
+      newsStore.resetFilters()
     }
 
     // 初始化
