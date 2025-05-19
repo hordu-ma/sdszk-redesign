@@ -1,406 +1,780 @@
 <template>
   <div class="resources-management">
+    <!-- 头部操作区 -->
     <div class="page-header">
-      <h2>资源管理</h2>
-      <a-button type="primary" @click="showModal">
-        <template #icon><plus-outlined /></template>
-        添加资源
-      </a-button>
+      <h1>资源管理</h1>
+      <a-space>
+        <a-button type="primary" @click="handleAdd">
+          <template #icon><PlusOutlined /></template>
+          添加资源
+        </a-button>
+        <a-button v-if="selectedRowKeys.length > 0" @click="handleBatchDelete" danger>
+          <template #icon><DeleteOutlined /></template>
+          批量删除 ({{ selectedRowKeys.length }})
+        </a-button>
+        <a-button v-if="selectedRowKeys.length > 0" @click="handleBatchPublish">
+          <template #icon><CloudUploadOutlined /></template>
+          批量发布
+        </a-button>
+      </a-space>
     </div>
 
+    <!-- 搜索和筛选 -->
+    <a-card class="filter-card">
+      <a-form layout="inline">
+        <a-form-item label="关键词">
+          <a-input
+            v-model:value="query.keyword"
+            placeholder="搜索标题或描述"
+            allowClear
+            @pressEnter="handleSearch"
+          >
+            <template #suffix>
+              <SearchOutlined style="color: rgba(0, 0, 0, 0.45)" />
+            </template>
+          </a-input>
+        </a-form-item>
+        <a-form-item label="类型">
+          <a-select
+            v-model:value="query.type"
+            style="width: 120px"
+            allowClear
+            placeholder="资源类型"
+          >
+            <a-select-option value="document">文档资料</a-select-option>
+            <a-select-option value="video">视频资源</a-select-option>
+            <a-select-option value="image">图片资源</a-select-option>
+            <a-select-option value="audio">音频资源</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="分类">
+          <a-select
+            v-model:value="query.category"
+            style="width: 120px"
+            allowClear
+            placeholder="资源分类"
+          >
+            <a-select-option v-for="category in categories" :key="category.id" :value="category.id">
+              {{ category.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select
+            v-model:value="query.status"
+            style="width: 120px"
+            allowClear
+            placeholder="资源状态"
+          >
+            <a-select-option value="published">已发布</a-select-option>
+            <a-select-option value="draft">草稿</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleSearch">
+              <template #icon><SearchOutlined /></template>
+              搜索
+            </a-button>
+            <a-button @click="handleReset"> 重置 </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <!-- 资源列表 -->
     <a-card>
       <a-table
         :columns="columns"
-        :data-source="tableData"
+        :data-source="resources"
         :loading="loading"
         :pagination="pagination"
+        :row-selection="{ selectedRowKeys, onChange: onSelectionChange }"
         @change="handleTableChange"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'action'">
-            <a-space>
-              <a @click="handleEdit(record)">编辑</a>
-              <a-divider type="vertical" />
-              <a @click="handlePreview(record)">预览</a>
-              <a-divider type="vertical" />
-              <a-popconfirm
-                title="确定要删除这个资源吗？"
-                @confirm="() => handleDelete(record)"
-              >
-                <a class="delete-link">删除</a>
-              </a-popconfirm>
-            </a-space>
+          <!-- 标题列 -->
+          <template v-if="column.key === 'title'">
+            <div class="resource-title">
+              <component
+                :is="getFileIcon(record.type)"
+                :style="{ color: getTypeColor(record.type) }"
+              />
+              <span class="title-text">{{ record.title }}</span>
+              <a-tag v-if="record.featured" color="gold">推荐</a-tag>
+            </div>
           </template>
+
+          <!-- 类型列 -->
           <template v-else-if="column.key === 'type'">
             <a-tag :color="getTypeColor(record.type)">
-              {{ record.type }}
+              {{ getTypeText(record.type) }}
             </a-tag>
           </template>
+
+          <!-- 大小列 -->
           <template v-else-if="column.key === 'size'">
             {{ formatFileSize(record.size) }}
+          </template>
+
+          <!-- 状态列 -->
+          <template v-else-if="column.key === 'status'">
+            <a-tag :color="record.status === 'published' ? 'success' : 'default'">
+              {{ record.status === 'published' ? '已发布' : '草稿' }}
+            </a-tag>
+          </template>
+
+          <!-- 统计列 -->
+          <template v-else-if="column.key === 'stats'">
+            <a-space>
+              <span title="下载次数"> <DownloadOutlined /> {{ record.downloadCount || 0 }} </span>
+              <span title="浏览次数"> <EyeOutlined /> {{ record.viewCount || 0 }} </span>
+            </a-space>
+          </template>
+
+          <!-- 创建时间列 -->
+          <template v-else-if="column.key === 'createdAt'">
+            {{ formatDate(record.createdAt) }}
+          </template>
+
+          <!-- 操作列 -->
+          <template v-else-if="column.key === 'action'">
+            <a-space>
+              <a-tooltip title="预览">
+                <a @click="handlePreview(record)">
+                  <EyeOutlined />
+                </a>
+              </a-tooltip>
+              <a-tooltip title="下载">
+                <a @click="handleDownload(record)">
+                  <DownloadOutlined />
+                </a>
+              </a-tooltip>
+              <a-tooltip title="编辑">
+                <a @click="handleEdit(record)">
+                  <EditOutlined />
+                </a>
+              </a-tooltip>
+              <a-tooltip :title="record.featured ? '取消推荐' : '设为推荐'">
+                <a @click="handleToggleFeatured(record)">
+                  <StarOutlined :class="{ featured: record.featured }" />
+                </a>
+              </a-tooltip>
+              <a-divider type="vertical" />
+              <a-dropdown>
+                <a class="ant-dropdown-link" @click.prevent> 更多 <DownOutlined /> </a>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="publish" v-if="record.status !== 'published'">
+                      <CloudUploadOutlined />
+                      <span>发布</span>
+                    </a-menu-item>
+                    <a-menu-item key="unpublish" v-else>
+                      <CloudDownloadOutlined />
+                      <span>取消发布</span>
+                    </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item key="delete">
+                      <DeleteOutlined />
+                      <span>删除</span>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-space>
           </template>
         </template>
       </a-table>
     </a-card>
 
-    <!-- 新增/编辑资源模态框 -->
-    <a-modal
-      v-model:visible="modalVisible"
-      :title="modalTitle"
-      @ok="handleModalOk"
-      @cancel="handleModalCancel"
-      width="800px"
-    >
-      <a-form
-        ref="formRef"
-        :model="formState"
-        :rules="rules"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 20 }"
-      >
-        <a-form-item label="标题" name="title">
-          <a-input
-            v-model:value="formState.title"
-            placeholder="请输入资源标题"
-          />
-        </a-form-item>
-        <a-form-item label="分类" name="type">
-          <a-select v-model:value="formState.type" placeholder="请选择资源分类">
-            <a-select-option value="视频">视频</a-select-option>
-            <a-select-option value="文档">文档</a-select-option>
-            <a-select-option value="图片">图片</a-select-option>
-            <a-select-option value="其他">其他</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="作者" name="author">
-          <a-input v-model:value="formState.author" placeholder="请输入作者" />
-        </a-form-item>
-        <a-form-item label="单位" name="unit">
-          <a-input
-            v-model:value="formState.unit"
-            placeholder="请输入所属单位"
-          />
-        </a-form-item>
-        <a-form-item label="描述" name="description">
-          <a-textarea
-            v-model:value="formState.description"
-            :rows="4"
-            placeholder="请输入资源描述"
-          />
-        </a-form-item>
-        <a-form-item label="文件" name="file">
-          <a-upload
-            v-model:fileList="fileList"
-            :beforeUpload="beforeUpload"
-            @change="handleUploadChange"
-          >
-            <a-button>
-              <upload-outlined />
-              选择文件
-            </a-button>
-          </a-upload>
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
     <!-- 预览模态框 -->
     <a-modal
       v-model:visible="previewVisible"
-      title="资源预览"
+      :title="previewData?.title"
+      :width="800"
       :footer="null"
-      width="800px"
     >
       <div class="preview-content">
-        <h3>{{ previewData.title }}</h3>
-        <p class="preview-meta">
-          作者：{{ previewData.author }} | 单位：{{ previewData.unit }}
-        </p>
-        <div class="preview-description">
-          {{ previewData.description }}
+        <!-- 图片预览 -->
+        <div v-if="previewData?.type === 'image'" class="preview-image">
+          <img :src="previewData.url" alt="预览图片" />
         </div>
-        <!-- 根据资源类型显示不同的预览内容 -->
-        <div class="preview-file">
-          <a :href="previewData.url" target="_blank">
-            <download-outlined /> 下载文件
-          </a>
+        <!-- 视频预览 -->
+        <div v-else-if="previewData?.type === 'video'" class="preview-video">
+          <video :src="previewData.url" controls />
+        </div>
+        <!-- 音频预览 -->
+        <div v-else-if="previewData?.type === 'audio'" class="preview-audio">
+          <audio :src="previewData.url" controls />
+        </div>
+        <!-- 文档预览 -->
+        <div v-else class="preview-document">
+          <p>文件名：{{ previewData?.title }}</p>
+          <p>类型：{{ getTypeText(previewData?.type) }}</p>
+          <p>大小：{{ formatFileSize(previewData?.size) }}</p>
+        </div>
+
+        <a-divider />
+
+        <!-- 资源详情 -->
+        <div class="preview-details">
+          <p>上传时间：{{ formatDate(previewData?.createdAt) }}</p>
+          <p>下载次数：{{ previewData?.downloadCount || 0 }}</p>
+          <p v-if="previewData?.description">描述：{{ previewData.description }}</p>
+          <div v-if="previewData?.tags?.length" class="preview-tags">
+            <span>标签：</span>
+            <a-tag v-for="tag in previewData.tags" :key="tag">{{ tag }}</a-tag>
+          </div>
+        </div>
+
+        <div class="preview-actions">
+          <a-button type="primary" @click="handleDownload(previewData)"> 立即下载 </a-button>
         </div>
       </div>
+    </a-modal>
+
+    <!-- 批量操作确认框 -->
+    <a-modal
+      v-model:visible="batchActionVisible"
+      :title="batchActionTitle"
+      :confirm-loading="batchActionLoading"
+      @ok="confirmBatchAction"
+      @cancel="cancelBatchAction"
+    >
+      <p>{{ batchActionMessage }}</p>
     </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from "vue";
-import { message } from "ant-design-vue";
+<script>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   PlusOutlined,
-  UploadOutlined,
+  SearchOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
   DownloadOutlined,
-} from "@ant-design/icons-vue";
+  StarOutlined,
+  CloudUploadOutlined,
+  CloudDownloadOutlined,
+  DownOutlined,
+  FileTextOutlined,
+  VideoCameraOutlined,
+  PictureOutlined,
+  AudioOutlined,
+  FileOutlined,
+} from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
+import { useResourceStore } from '@/stores/resource'
+import dayjs from 'dayjs'
 
-// 表格列定义
-const columns = [
-  {
-    title: "标题",
-    dataIndex: "title",
-    key: "title",
-    ellipsis: true,
-    width: "30%",
+export default {
+  name: 'ResourcesManagement',
+
+  components: {
+    PlusOutlined,
+    SearchOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
+    DownloadOutlined,
+    StarOutlined,
+    CloudUploadOutlined,
+    CloudDownloadOutlined,
+    DownOutlined,
+    FileTextOutlined,
+    VideoCameraOutlined,
+    PictureOutlined,
+    AudioOutlined,
+    FileOutlined,
   },
-  {
-    title: "类型",
-    dataIndex: "type",
-    key: "type",
-  },
-  {
-    title: "作者",
-    dataIndex: "author",
-    key: "author",
-  },
-  {
-    title: "单位",
-    dataIndex: "unit",
-    key: "unit",
-  },
-  {
-    title: "大小",
-    dataIndex: "size",
-    key: "size",
-    width: "100px",
-  },
-  {
-    title: "上传时间",
-    dataIndex: "uploadTime",
-    key: "uploadTime",
-    sorter: true,
-  },
-  {
-    title: "操作",
-    key: "action",
-    width: "180px",
-  },
-];
 
-// 表格数据
-const loading = ref(false);
-const tableData = ref([]);
-const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0,
-});
+  setup() {
+    const router = useRouter()
+    const resourceStore = useResourceStore()
 
-// 获取表格数据
-const fetchTableData = async () => {
-  loading.value = true;
-  try {
-    // 模拟API调用
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    tableData.value = [
-      {
-        id: 1,
-        title: "大中小学思政课一体化教材",
-        type: "文档",
-        author: "张教授",
-        unit: "山东大学",
-        size: 1024576, // 1MB
-        uploadTime: "2025-04-28",
-      },
-      {
-        id: 2,
-        title: "课程思政示范课视频",
-        type: "视频",
-        author: "李教授",
-        unit: "山东师范大学",
-        size: 52428800, // 50MB
-        uploadTime: "2025-04-29",
-      },
-    ];
-    pagination.total = 100;
-  } catch (error) {
-    message.error("获取数据失败");
-  } finally {
-    loading.value = false;
-  }
-};
+    // 状态
+    const loading = ref(false)
+    const previewVisible = ref(false)
+    const previewData = ref(null)
+    const selectedRowKeys = ref([])
+    const batchActionVisible = ref(false)
+    const batchActionLoading = ref(false)
+    const batchActionType = ref('')
 
-// 文件大小格式化
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-};
+    const resources = computed(() => resourceStore.items)
+    const categories = ref([])
 
-// 获取类型对应的颜色
-const getTypeColor = (type) => {
-  const colors = {
-    视频: "blue",
-    文档: "green",
-    图片: "purple",
-    其他: "orange",
-  };
-  return colors[type] || "default";
-};
-
-// 表格变化处理
-const handleTableChange = (pag, filters, sorter) => {
-  console.log("table change:", pag, filters, sorter);
-  pagination.current = pag.current;
-  pagination.pageSize = pag.pageSize;
-  fetchTableData();
-};
-
-// 文件上传相关
-const fileList = ref([]);
-const beforeUpload = (file) => {
-  // 这里可以添加文件类型和大小的校验
-  return false; // 阻止自动上传
-};
-
-const handleUploadChange = (info) => {
-  fileList.value = info.fileList.slice(-1); // 只保留最后一个文件
-};
-
-// 编辑模态框相关
-const modalVisible = ref(false);
-const modalTitle = ref("添加资源");
-const formRef = ref(null);
-const formState = reactive({
-  title: "",
-  type: undefined,
-  author: "",
-  unit: "",
-  description: "",
-});
-
-const rules = {
-  title: [{ required: true, message: "请输入资源标题" }],
-  type: [{ required: true, message: "请选择资源类型" }],
-  author: [{ required: true, message: "请输入作者" }],
-  unit: [{ required: true, message: "请输入所属单位" }],
-  description: [{ required: true, message: "请输入资源描述" }],
-};
-
-const showModal = () => {
-  modalTitle.value = "添加资源";
-  formState.title = "";
-  formState.type = undefined;
-  formState.author = "";
-  formState.unit = "";
-  formState.description = "";
-  fileList.value = [];
-  modalVisible.value = true;
-};
-
-const handleModalOk = () => {
-  formRef.value
-    .validate()
-    .then(() => {
-      if (fileList.value.length === 0) {
-        return message.error("请选择上传文件");
-      }
-      // 在这里处理表单提交
-      console.log("form values:", formState);
-      console.log("file:", fileList.value[0]);
-      modalVisible.value = false;
-      message.success("操作成功");
-      fetchTableData();
+    // 查询参数
+    const query = reactive({
+      keyword: '',
+      type: undefined,
+      category: undefined,
+      status: undefined,
     })
-    .catch((error) => {
-      console.log("validation failed:", error);
-    });
-};
 
-const handleModalCancel = () => {
-  modalVisible.value = false;
-};
+    // 分页配置
+    const pagination = computed(() => ({
+      total: resourceStore.total,
+      current: resourceStore.page,
+      pageSize: resourceStore.limit,
+      showSizeChanger: true,
+      showQuickJumper: true,
+      showTotal: total => `共 ${total} 条记录`,
+    }))
 
-// 预览模态框相关
-const previewVisible = ref(false);
-const previewData = reactive({
-  title: "",
-  author: "",
-  unit: "",
-  description: "",
-  url: "",
-});
+    // 表格列配置
+    const columns = [
+      {
+        title: '标题',
+        dataIndex: 'title',
+        key: 'title',
+        ellipsis: true,
+        width: '30%',
+      },
+      {
+        title: '类型',
+        dataIndex: 'type',
+        key: 'type',
+        width: '10%',
+        filters: [
+          { text: '文档资料', value: 'document' },
+          { text: '视频资源', value: 'video' },
+          { text: '图片资源', value: 'image' },
+          { text: '音频资源', value: 'audio' },
+        ],
+      },
+      {
+        title: '分类',
+        dataIndex: 'category',
+        key: 'category',
+        width: '15%',
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: '10%',
+        filters: [
+          { text: '已发布', value: 'published' },
+          { text: '草稿', value: 'draft' },
+        ],
+      },
+      {
+        title: '大小',
+        dataIndex: 'size',
+        key: 'size',
+        width: '10%',
+        sorter: true,
+      },
+      {
+        title: '统计',
+        key: 'stats',
+        width: '15%',
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
+        width: '15%',
+        sorter: true,
+      },
+      {
+        title: '操作',
+        key: 'action',
+        width: '20%',
+        fixed: 'right',
+      },
+    ]
 
-const handlePreview = (record) => {
-  Object.assign(previewData, record);
-  previewVisible.value = true;
-};
+    // 获取类型颜色
+    const getTypeColor = type => {
+      const colors = {
+        document: 'blue',
+        video: 'green',
+        image: 'purple',
+        audio: 'orange',
+        other: 'default',
+      }
+      return colors[type] || colors.other
+    }
 
-const handleEdit = (record) => {
-  modalTitle.value = "编辑资源";
-  Object.assign(formState, record);
-  modalVisible.value = true;
-};
+    // 获取文件图标
+    const getFileIcon = type => {
+      const icons = {
+        document: FileTextOutlined,
+        video: VideoCameraOutlined,
+        image: PictureOutlined,
+        audio: AudioOutlined,
+      }
+      return icons[type] || FileOutlined
+    }
 
-const handleDelete = (record) => {
-  console.log("delete record:", record);
-  message.success("删除成功");
-  fetchTableData();
-};
+    // 获取类型文本
+    const getTypeText = type => {
+      const texts = {
+        document: '文档资料',
+        video: '视频资源',
+        image: '图片资源',
+        audio: '音频资源',
+        other: '其他',
+      }
+      return texts[type] || texts.other
+    }
 
-onMounted(() => {
-  fetchTableData();
-});
+    // 格式化文件大小
+    const formatFileSize = bytes => {
+      if (!bytes) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
+    }
+
+    // 格式化日期
+    const formatDate = date => {
+      return dayjs(date).format('YYYY-MM-DD HH:mm')
+    }
+
+    // 加载资源列表
+    const loadResources = async () => {
+      try {
+        loading.value = true
+        await resourceStore.fetchList({
+          ...query,
+          page: pagination.value.current,
+          limit: pagination.value.pageSize,
+        })
+      } catch (error) {
+        message.error('加载资源列表失败')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 加载分类列表
+    const loadCategories = async () => {
+      try {
+        const response = await resourceStore.getCategories()
+        categories.value = response.data
+      } catch (error) {
+        message.error('加载分类列表失败')
+      }
+    }
+
+    // 处理搜索
+    const handleSearch = () => {
+      pagination.value.current = 1
+      loadResources()
+    }
+
+    // 处理重置
+    const handleReset = () => {
+      Object.keys(query).forEach(key => {
+        query[key] = undefined
+      })
+      pagination.value.current = 1
+      loadResources()
+    }
+
+    // 处理表格变化
+    const handleTableChange = (pag, filters, sorter) => {
+      // 处理排序
+      if (sorter.field) {
+        query.sortBy = sorter.field
+        query.sortOrder = sorter.order === 'ascend' ? 1 : -1
+      } else {
+        query.sortBy = undefined
+        query.sortOrder = undefined
+      }
+
+      // 处理筛选
+      if (filters.type?.length) {
+        query.type = filters.type[0]
+      }
+      if (filters.status?.length) {
+        query.status = filters.status[0]
+      }
+
+      // 更新分页
+      pagination.value.current = pag.current
+      pagination.value.pageSize = pag.pageSize
+
+      loadResources()
+    }
+
+    // 处理选择变化
+    const onSelectionChange = keys => {
+      selectedRowKeys.value = keys
+    }
+
+    // 处理添加
+    const handleAdd = () => {
+      router.push('/admin/resources/add')
+    }
+
+    // 处理编辑
+    const handleEdit = record => {
+      router.push(`/admin/resources/edit/${record.id}`)
+    }
+
+    // 处理预览
+    const handlePreview = record => {
+      previewData.value = record
+      previewVisible.value = true
+    }
+
+    // 处理下载
+    const handleDownload = async record => {
+      try {
+        await resourceStore.download(record.id)
+        message.success('开始下载')
+      } catch (error) {
+        message.error('下载失败')
+      }
+    }
+
+    // 处理删除
+    const handleDelete = record => {
+      Modal.confirm({
+        title: '确定要删除这个资源吗？',
+        content: '此操作不可恢复',
+        okText: '确定',
+        okType: 'danger',
+        cancelText: '取消',
+        async onOk() {
+          try {
+            await resourceStore.remove(record.id)
+            message.success('删除成功')
+            if (pagination.value.total === 1 && pagination.value.current > 1) {
+              pagination.value.current--
+            }
+            loadResources()
+          } catch (error) {
+            message.error('删除失败')
+          }
+        },
+      })
+    }
+
+    // 处理批量删除
+    const handleBatchDelete = () => {
+      batchActionType.value = 'delete'
+      batchActionVisible.value = true
+    }
+
+    // 处理批量发布
+    const handleBatchPublish = () => {
+      batchActionType.value = 'publish'
+      batchActionVisible.value = true
+    }
+
+    // 切换推荐状态
+    const handleToggleFeatured = async record => {
+      try {
+        await resourceStore.updateStatus(record.id, {
+          featured: !record.featured,
+        })
+        message.success(record.featured ? '已取消推荐' : '已设为推荐')
+        loadResources()
+      } catch (error) {
+        message.error('操作失败')
+      }
+    }
+
+    // 批量操作相关
+    const batchActionTitle = computed(() => {
+      const titles = {
+        delete: '批量删除',
+        publish: '批量发布',
+      }
+      return titles[batchActionType.value]
+    })
+
+    const batchActionMessage = computed(() => {
+      const messages = {
+        delete: `确定要删除选中的 ${selectedRowKeys.value.length} 个资源吗？此操作不可恢复。`,
+        publish: `确定要发布选中的 ${selectedRowKeys.value.length} 个资源吗？`,
+      }
+      return messages[batchActionType.value]
+    })
+
+    // 确认批量操作
+    const confirmBatchAction = async () => {
+      batchActionLoading.value = true
+      try {
+        if (batchActionType.value === 'delete') {
+          await resourceStore.batchDelete(selectedRowKeys.value)
+          message.success('批量删除成功')
+        } else if (batchActionType.value === 'publish') {
+          await resourceStore.batchUpdateStatus(selectedRowKeys.value, 'published')
+          message.success('批量发布成功')
+        }
+        selectedRowKeys.value = []
+        batchActionVisible.value = false
+        loadResources()
+      } catch (error) {
+        message.error('操作失败')
+      } finally {
+        batchActionLoading.value = false
+      }
+    }
+
+    // 取消批量操作
+    const cancelBatchAction = () => {
+      batchActionVisible.value = false
+      batchActionType.value = ''
+    }
+
+    onMounted(() => {
+      loadCategories()
+      loadResources()
+    })
+
+    return {
+      loading,
+      resources,
+      categories,
+      columns,
+      pagination,
+      query,
+      selectedRowKeys,
+      previewVisible,
+      previewData,
+      batchActionVisible,
+      batchActionLoading,
+      batchActionTitle,
+      batchActionMessage,
+      getTypeColor,
+      getFileIcon,
+      getTypeText,
+      formatFileSize,
+      formatDate,
+      handleSearch,
+      handleReset,
+      handleTableChange,
+      onSelectionChange,
+      handleAdd,
+      handleEdit,
+      handlePreview,
+      handleDownload,
+      handleDelete,
+      handleBatchDelete,
+      handleBatchPublish,
+      handleToggleFeatured,
+      confirmBatchAction,
+      cancelBatchAction,
+    }
+  },
+}
 </script>
 
 <style scoped>
 .resources-management {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 24px;
 }
 
 .page-header {
-  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
 
-.page-header h2 {
+.page-header h1 {
   margin: 0;
   font-size: 20px;
+  font-weight: 500;
 }
 
-.delete-link {
-  color: #ff4d4f;
+.filter-card {
+  margin-bottom: 16px;
 }
 
-.delete-link:hover {
-  color: #ff7875;
+.resource-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-text {
+  color: #1890ff;
+  cursor: pointer;
+}
+
+.title-text:hover {
+  color: #40a9ff;
 }
 
 .preview-content {
-  padding: 16px;
-}
-
-.preview-content h3 {
-  margin-bottom: 16px;
-  color: #1890ff;
-}
-
-.preview-meta {
-  color: #666;
-  margin-bottom: 16px;
-}
-
-.preview-description {
-  margin-bottom: 24px;
-  line-height: 1.6;
-}
-
-.preview-file {
-  text-align: center;
   padding: 24px;
+}
+
+.preview-image img {
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.preview-video video,
+.preview-audio audio {
+  width: 100%;
+}
+
+.preview-document {
+  padding: 16px;
   background: #f5f5f5;
   border-radius: 4px;
 }
 
-.preview-file a {
-  font-size: 16px;
+.preview-details {
+  margin-top: 16px;
+}
+
+.preview-details p {
+  margin-bottom: 8px;
+}
+
+.preview-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.preview-actions {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.featured {
+  color: #faad14;
+}
+
+@media (max-width: 768px) {
+  .resources-management {
+    padding: 16px;
+  }
+
+  :deep(.ant-form-inline) {
+    flex-wrap: wrap;
+  }
+
+  :deep(.ant-form-inline .ant-form-item) {
+    margin-bottom: 16px;
+  }
+
+  :deep(.ant-table) {
+    overflow-x: auto;
+  }
+
+  .preview-image img {
+    max-height: 300px;
+  }
 }
 </style>
