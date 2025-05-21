@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { message } from 'ant-design-vue'
-import adminRoutes from './adminRoutes'
 import { useUserStore } from '../stores/user'
 
 // 扩展路由元数据类型
@@ -73,8 +72,7 @@ const routes: RouteRecordRaw[] = [
     name: 'ai',
     component: () => import('../views/AI.vue'),
   },
-  // 添加管理系统路由
-  ...adminRoutes,
+  // 用户相关路由
 ]
 
 const router = createRouter({
