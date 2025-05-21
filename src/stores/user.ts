@@ -18,6 +18,14 @@ interface LoginPayload {
   remember?: boolean
 }
 
+interface RegisterPayload {
+  username: string
+  password: string
+  email: string
+  phone: string
+  verificationCode: string
+}
+
 export const useUserStore = defineStore(
   'user',
   () => {
@@ -89,6 +97,35 @@ export const useUserStore = defineStore(
       }
     }
 
+    // 注册方法
+    async function register(payload: RegisterPayload): Promise<boolean> {
+      try {
+        loading.value = true
+        const response = await api.post('/api/auth/register', payload)
+
+        if (response.data?.status === 'success') {
+          return true
+        }
+        return false
+      } catch (error) {
+        console.error('注册失败:', error)
+        throw error
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 发送验证码
+    async function sendVerificationCode(phone: string): Promise<boolean> {
+      try {
+        const response = await api.post('/api/auth/send-code', { phone })
+        return response.data?.status === 'success'
+      } catch (error) {
+        console.error('发送验证码失败:', error)
+        throw error
+      }
+    }
+
     // 检查权限
     function hasPermission(permission: string): boolean {
       return userPermissions.value.includes(permission)
@@ -123,6 +160,8 @@ export const useUserStore = defineStore(
       userPermissions,
       login,
       logout,
+      register,
+      sendVerificationCode,
       setUserInfo,
       setToken,
       hasPermission,
