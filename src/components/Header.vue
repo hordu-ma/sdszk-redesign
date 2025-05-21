@@ -59,7 +59,7 @@
         <el-input
           v-model="searchKeyword"
           placeholder="搜索"
-          class="search-input"
+          class="search-input search-box"
           @keyup.enter="handleSearch"
         >
           <template #suffix>
@@ -71,7 +71,7 @@
 
         <div class="auth-buttons" v-if="!isAuthenticated">
           <router-link to="/auth" class="auth-button">
-            <el-button class="custom-auth-button" plain>登录/注册</el-button>
+            <el-button class="custom-auth-button login-button" plain>登录/注册</el-button>
           </router-link>
         </div>
         <div class="user-menu" v-else>
@@ -154,7 +154,7 @@ const isScrolled = ref(false)
 const isHeaderVisible = ref(true)
 const lastScrollY = ref(0)
 const searchKeyword = ref('')
-let scrollTimer: number | null = null
+let scrollTimer: ReturnType<typeof setTimeout> | null = null
 
 // 用户状态
 const isAuthenticated = computed(() => userStore.isAuthenticated)
@@ -441,16 +441,39 @@ onUnmounted(() => {
 .search-login-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   min-width: 280px; /* 固定最小宽度 */
   justify-content: flex-end; /* 右对齐 */
 }
 
 @media screen and (max-width: 768px) {
   .search-login-container {
+    gap: 8px;
     min-width: auto;
-    gap: 6px; /* 减小间距 */
-    margin-left: auto; /* 确保靠右对齐 */
+    margin-left: auto;
+  }
+
+  .search-login-container .auth-buttons {
+    margin-right: 8px;
+  }
+
+  .search-login-container .auth-buttons .auth-button .el-button {
+    font-size: 13px;
+    height: 32px;
+    padding: 0 12px;
+  }
+
+  .search-login-container .user-menu {
+    display: none;
+  }
+
+  .search-box {
+    display: none;
+  }
+
+  .login-button {
+    padding: 6px 12px;
+    font-size: 14px;
   }
 }
 
@@ -533,12 +556,16 @@ onUnmounted(() => {
 
 @media screen and (max-width: 768px) {
   .header-content {
-    padding: 12px;
+    padding: 8px 12px;
     justify-content: space-between;
   }
 
   .desktop-nav {
     display: none;
+  }
+
+  .search-input {
+    display: none !important;
   }
 
   .logo-container {
@@ -550,8 +577,9 @@ onUnmounted(() => {
 
   .center-name {
     font-size: 14px;
-    max-width: calc(100vw - 180px); /* 调整计算方式，扩大文字显示区域 */
+    max-width: calc(100vw - 140px); /* 调整计算方式，扩大文字显示区域 */
     line-height: 1.2; /* 稍微压缩行高 */
+    letter-spacing: -0.2px;
   }
 
   .search-login-container {
@@ -573,18 +601,52 @@ onUnmounted(() => {
     margin-right: 8px;
   }
 
-  .auth-button :deep(.el-button) {
-    padding: 6px 12px;
-    font-size: 14px;
+  .auth-buttons {
+    margin-right: 8px;
+  }
+
+  .auth-buttons .auth-button .el-button {
+    padding: 0 12px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .user-menu {
+    display: none; /* 移动端隐藏用户菜单，在mobile-nav中显示 */
   }
 
   /* 移动端菜单优化 */
   .mobile-menu {
-    width: 280px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80%;
+    max-width: 300px;
+    height: 100%;
+    background: #fff;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-menu.active {
+    transform: translateX(0);
+  }
+
+  .mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
   }
 
   .mobile-nav {
-    padding: 70px 24px 24px;
+    padding: 80px 30px 30px;
   }
 
   .mobile-nav-link {
@@ -634,64 +696,6 @@ onUnmounted(() => {
 }
 
 /* 移动端样式 */
-.mobile-menu-trigger {
-  display: none;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-@media screen and (max-width: 768px) {
-  .desktop-nav {
-    display: none;
-  }
-
-  .mobile-menu-trigger {
-    display: flex;
-    width: 28px;
-    height: 28px;
-    padding: 4px;
-    margin-right: 4px;
-  }
-
-  .header-content {
-    padding: 8px;
-  }
-
-  .center-name {
-    font-size: 14px;
-    max-width: calc(100vw - 110px); /* 关键修改：大幅减小计算值 */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    letter-spacing: -0.2px;
-  }
-
-  .logo-container {
-    margin: 0;
-    padding: 0;
-  }
-
-  .logo {
-    width: 32px; /* 进一步缩小logo */
-    height: 32px;
-    margin-right: 6px;
-  }
-
-  .search-login-container {
-    display: none; /* 移动端隐藏搜索框和登录按钮 */
-  }
-}
-
-/* 移动端菜单样式 */
 .mobile-menu {
   position: fixed;
   top: 0;
@@ -715,19 +719,18 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);
   z-index: 1500;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .menu-open .mobile-overlay {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
 }
 
 .mobile-nav {
@@ -764,5 +767,26 @@ onUnmounted(() => {
 
 .mobile-auth-link:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-menu-trigger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 4px;
+}
+
+.mobile-menu-trigger .fas {
+  font-size: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-menu-trigger {
+    display: block;
+    margin-right: 8px;
+  }
 }
 </style>
