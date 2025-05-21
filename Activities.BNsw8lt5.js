@@ -1,0 +1,2 @@
+import{_ as s}from"./index.VhZT-DF7.js";import{l as t,p as a,m as i}from"./vendor.BN0yMOrj.js";const e={class:"activities-container"},n=s({__name:"Activities",setup:s=>(s,n)=>(i(),t("div",e,n[0]||(n[0]=[a("h1",null,"活动中心",-1),a("div",{class:"activities-content"},[a("p",null,"活动中心内容正在建设中...")],-1)])))},[["__scopeId","data-v-4a4e1d23"]]);export{n as default};
+//# sourceMappingURL=Activities.BNsw8lt5.js.map
