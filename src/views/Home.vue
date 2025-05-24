@@ -47,11 +47,7 @@
       </div>
       <div class="teachers-grid">
         <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
-          <img
-            :src="teacher.avatar"
-            :alt="teacher.name"
-            class="teacher-avatar"
-          />
+          <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
           <h4>{{ teacher.name }}</h4>
           <p>{{ teacher.title }}</p>
           <p class="teacher-institution">{{ teacher.description }}</p>
@@ -89,247 +85,247 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import VideoPlayer from "../components/VideoPlayer.vue";
-import NewsSection from "../components/home/NewsSection.vue";
-import InfoSection from "../components/home/InfoSection.vue";
-import BannerSection from "../components/home/BannerSection.vue";
-import video1 from "../assets/videos/video1.mp4";
-import video2 from "../assets/videos/video2.mp4";
-import video3 from "../assets/videos/video3.mp4";
-import video4 from "../assets/videos/video4.mp4";
-import video5 from "../assets/videos/video5.mp4";
-import video6 from "../assets/videos/video6.mp4";
-import poster1 from "../assets/images/posters/poster1.jpg";
-import poster2 from "../assets/images/posters/poster2.jpg";
-import poster3 from "../assets/images/posters/poster3.jpg";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import VideoPlayer from '../components/VideoPlayer.vue'
+import NewsSection from '../components/home/NewsSection.vue'
+import InfoSection from '../components/home/InfoSection.vue'
+import BannerSection from '../components/home/BannerSection.vue'
+import video1 from '../assets/videos/video1.mp4'
+import video2 from '../assets/videos/video2.mp4'
+import video3 from '../assets/videos/video3.mp4'
+import video4 from '../assets/videos/video4.mp4'
+import video5 from '../assets/videos/video5.mp4'
+import video6 from '../assets/videos/video6.mp4'
+import poster1 from '../assets/images/posters/poster1.jpg'
+import poster2 from '../assets/images/posters/poster2.jpg'
+import poster3 from '../assets/images/posters/poster3.jpg'
 
 // 示例数据
 const notices = ref([
   {
     id: 1,
-    title: "关于开展2023年度思政课教学研究项目申报工作的通知",
-    date: "2023-09-15",
-    unit: "思政课程部",
+    title: '关于开展2023年度思政课教学研究项目申报工作的通知',
+    date: '2023-09-15',
+    unit: '思政课程部',
   },
   {
     id: 2,
-    title: "2023年秋季学期思政课教研活动安排",
-    date: "2023-09-10",
-    unit: "教务处",
+    title: '2023年秋季学期思政课教研活动安排',
+    date: '2023-09-10',
+    unit: '教务处',
   },
-]);
+])
 
 const policies = ref([
   {
     id: 3,
-    title: "关于加强新时代大中小学思政课一体化建设的指导意见",
-    date: "2023-08-20",
-    unit: "教育部",
+    title: '关于加强新时代大中小学思政课一体化建设的指导意见',
+    date: '2023-08-20',
+    unit: '教育部',
   },
   {
     id: 4,
-    title: "思政课改革创新实施方案（2023-2025）",
-    date: "2023-08-15",
-    unit: "省教育厅",
+    title: '思政课改革创新实施方案（2023-2025）',
+    date: '2023-08-15',
+    unit: '省教育厅',
   },
-]);
+])
 
 const theories = ref([
   {
     id: 5,
-    title: "新时代思政课教学方法创新研究",
-    author: "张教授",
-    affiliation: "北京师范大学",
-    date: "2023-09-01",
+    title: '新时代思政课教学方法创新研究',
+    author: '张教授',
+    affiliation: '北京师范大学',
+    date: '2023-09-01',
   },
   {
     id: 6,
-    title: "大中小学思政课一体化协同育人机制探索",
-    author: "李教授",
-    affiliation: "华东师范大学",
-    date: "2023-08-25",
+    title: '大中小学思政课一体化协同育人机制探索',
+    author: '李教授',
+    affiliation: '华东师范大学',
+    date: '2023-08-25',
   },
-]);
+])
 
 const researches = ref([
   {
     id: 7,
-    title: "思政课程与课程思政协同育人实践研究",
-    author: "王教授",
-    affiliation: "复旦大学",
-    date: "2023-09-05",
+    title: '思政课程与课程思政协同育人实践研究',
+    author: '王教授',
+    affiliation: '复旦大学',
+    date: '2023-09-05',
   },
   {
     id: 8,
-    title: "中小学思政课教学资源开发与应用",
-    author: "刘教授",
-    affiliation: "华中师范大学",
-    date: "2023-08-30",
+    title: '中小学思政课教学资源开发与应用',
+    author: '刘教授',
+    affiliation: '华中师范大学',
+    date: '2023-08-30',
   },
-]);
-import poster4 from "../assets/images/posters/poster4.jpg";
-import poster5 from "../assets/images/posters/poster5.jpg";
-import poster6 from "../assets/images/posters/poster6.jpg";
-import teacher1 from "../assets/images/teachers/teacher1.jpg";
-import teacher2 from "../assets/images/teachers/teacher2.jpg";
-import teacher3 from "../assets/images/teachers/teacher3.jpg";
-import teacher4 from "../assets/images/teachers/teacher4.jpg";
-import teacher5 from "../assets/images/teachers/teacher5.jpg";
-import teacher6 from "../assets/images/teachers/teacher6.jpg";
-import school1Logo from "../assets/images/schools/school1.png";
-import school2Logo from "../assets/images/schools/school2.png";
-import school3Logo from "../assets/images/schools/school3.png";
-import school4Logo from "../assets/images/schools/school4.png";
-import school5Logo from "../assets/images/schools/school5.png";
-import school6Logo from "../assets/images/schools/school6.png";
+])
+import poster4 from '../assets/images/posters/poster4.jpg'
+import poster5 from '../assets/images/posters/poster5.jpg'
+import poster6 from '../assets/images/posters/poster6.jpg'
+import teacher1 from '../assets/images/teachers/teacher1.jpg'
+import teacher2 from '../assets/images/teachers/teacher2.jpg'
+import teacher3 from '../assets/images/teachers/teacher3.jpg'
+import teacher4 from '../assets/images/teachers/teacher4.jpg'
+import teacher5 from '../assets/images/teachers/teacher5.jpg'
+import teacher6 from '../assets/images/teachers/teacher6.jpg'
+import school1Logo from '../assets/images/schools/school1.png'
+import school2Logo from '../assets/images/schools/school2.png'
+import school3Logo from '../assets/images/schools/school3.png'
+import school4Logo from '../assets/images/schools/school4.png'
+import school5Logo from '../assets/images/schools/school5.png'
+import school6Logo from '../assets/images/schools/school6.png'
 
-const router = useRouter();
+const router = useRouter()
 
 // 模拟数据
 
 const videos = ref([
   {
     id: 1,
-    title: "思政课程创新实践",
+    title: '思政课程创新实践',
     url: video1,
     poster: poster1,
   },
   {
     id: 2,
-    title: "红色教育示范课",
+    title: '红色教育示范课',
     url: video2,
     poster: poster2,
   },
   {
     id: 3,
-    title: "思政理论实践探索",
+    title: '思政理论实践探索',
     url: video3,
     poster: poster3,
   },
   {
     id: 4,
-    title: "党史教育专题课",
+    title: '党史教育专题课',
     url: video4,
     poster: poster4,
   },
   {
     id: 5,
-    title: "思政实践教学案例",
+    title: '思政实践教学案例',
     url: video5,
     poster: poster5,
   },
   {
     id: 6,
-    title: "教学方法创新讲座",
+    title: '教学方法创新讲座',
     url: video6,
     poster: poster6,
   },
-]);
+])
 
 const teachers = ref([
   {
     id: 1,
-    name: "王岳喜",
-    title: "教授",
+    name: '王岳喜',
+    title: '教授',
     avatar: teacher1,
-    description: "山东商业职业技术学院",
+    description: '山东商业职业技术学院',
   },
   {
     id: 2,
-    name: "高继文",
-    title: "二级教授",
+    name: '高继文',
+    title: '二级教授',
     avatar: teacher2,
-    description: "山东师范大学",
+    description: '山东师范大学',
   },
   {
     id: 3,
-    name: "渠月",
-    title: "正高级教师",
+    name: '渠月',
+    title: '正高级教师',
     avatar: teacher3,
-    description: "山东省教科院",
+    description: '山东省教科院',
   },
   {
     id: 4,
-    name: "张淑琴",
-    title: "校长",
+    name: '张淑琴',
+    title: '校长',
     avatar: teacher4,
-    description: "临沂北城小学",
+    description: '临沂北城小学',
   },
   {
     id: 5,
-    name: "朱海英",
-    title: "特级教师",
+    name: '朱海英',
+    title: '特级教师',
     avatar: teacher5,
-    description: "邹平市第一实验小学",
+    description: '邹平市第一实验小学',
   },
   {
     id: 6,
-    name: "宋侃侃",
-    title: "教师",
+    name: '宋侃侃',
+    title: '教师',
     avatar: teacher6,
-    description: "枣庄市第十五中学",
+    description: '枣庄市第十五中学',
   },
-]);
+])
 
 const schools = ref([
   {
     id: 1,
-    name: "山东大学",
+    name: '山东大学',
     logo: school1Logo,
-    website: "http://www.sdu.edu.cn",
+    website: 'http://www.sdu.edu.cn',
   },
   {
     id: 2,
-    name: "中国海洋大学",
+    name: '中国海洋大学',
     logo: school2Logo,
-    website: "http://www.ouc.edu.cn",
+    website: 'http://www.ouc.edu.cn',
   },
   {
     id: 3,
-    name: "山东师范大学",
+    name: '山东师范大学',
     logo: school3Logo,
-    website: "http://www.sdnu.edu.cn",
+    website: 'http://www.sdnu.edu.cn',
   },
   {
     id: 4,
-    name: "济南大学",
+    name: '济南大学',
     logo: school4Logo,
-    website: "http://www.ujn.edu.cn",
+    website: 'http://www.ujn.edu.cn',
   },
   {
     id: 5,
-    name: "青岛大学",
+    name: '青岛大学',
     logo: school5Logo,
-    website: "http://www.qdu.edu.cn",
+    website: 'http://www.qdu.edu.cn',
   },
   {
     id: 6,
-    name: "山东理工大学",
+    name: '山东理工大学',
     logo: school6Logo,
-    website: "http://www.sdut.edu.cn",
+    website: 'http://www.sdut.edu.cn',
   },
-]);
+])
 
 const relatedLinks = ref([
-  { id: 1, name: "教育部", url: "http://www.moe.gov.cn" },
-  { id: 2, name: "山东省教育厅", url: "http://edu.shandong.gov.cn" },
+  { id: 1, name: '教育部', url: 'http://www.moe.gov.cn' },
+  { id: 2, name: '山东省教育厅', url: 'http://edu.shandong.gov.cn' },
   {
     id: 3,
-    name: "北京高校思想政治理论课高精尖创新中心",
-    url: "http://www.bjcipt.org/",
+    name: '北京高校思想政治理论课高精尖创新中心',
+    url: 'http://www.bjcipt.org/',
   },
   {
     id: 4,
-    name: "山东师范大学马克思主义学院",
-    url: "http://www.marx.sdnu.edu.cn/index.htm",
+    name: '山东师范大学马克思主义学院',
+    url: 'http://www.marx.sdnu.edu.cn/index.htm',
   },
-]);
+])
 
 const handleLogin = () => {
-  router.push("/login");
-};
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -422,7 +418,7 @@ const handleLogin = () => {
 }
 
 .nav-item::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -516,18 +512,18 @@ const handleLogin = () => {
 
 .news-section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 2fr;
   gap: 24px;
-  padding: 24px;
+  padding: 12px;
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1600px;
   background-color: transparent;
 }
 
 @media (max-width: 768px) {
   .news-section {
     grid-template-columns: 1fr;
-    padding: 16px;
+    padding: 8px;
   }
 
   .carousel-container {
@@ -574,7 +570,7 @@ const handleLogin = () => {
   padding: 12px 20px;
   border-radius: 4px;
   margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   position: relative;
 }
@@ -611,7 +607,9 @@ const handleLogin = () => {
   background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .news-item:hover {
@@ -665,8 +663,8 @@ const handleLogin = () => {
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin: 30px auto;
-  max-width: 1200px;
-  padding: 0 20px;
+  max-width: 1600px;
+  padding: 0 12px;
 }
 
 .info-block {
@@ -742,7 +740,7 @@ const handleLogin = () => {
 }
 
 .info-block .styled-list li::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 24px;
@@ -848,8 +846,8 @@ const handleLogin = () => {
   grid-template-columns: repeat(3, 1fr);
   gap: 30px 20px;
   margin: 30px auto;
-  max-width: 1200px;
-  padding: 0 20px;
+  max-width: 1600px;
+  padding: 0 12px;
 }
 
 .video-card,
@@ -908,7 +906,7 @@ const handleLogin = () => {
 }
 
 .teacher-card::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -978,7 +976,7 @@ const handleLogin = () => {
 }
 
 .school-logo::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -1011,7 +1009,7 @@ const handleLogin = () => {
   line-height: 1.4;
   flex-grow: 1;
   text-align: left;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
 }
 
 .school-logo:hover img {
@@ -1046,13 +1044,13 @@ const handleLogin = () => {
   color: #333;
   font-size: 20px;
   margin-bottom: 20px;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   position: relative;
   padding-left: 12px;
 }
 
 .links h4::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 50%;
@@ -1114,7 +1112,7 @@ const handleLogin = () => {
 
   .info-section {
     grid-template-columns: 1fr;
-    padding: 0 1rem;
+    padding: 0 8px;
   }
 
   .video-grid,
@@ -1318,8 +1316,8 @@ const handleLogin = () => {
 .video-section h3,
 .teachers-section h3,
 .community-section h3 {
-  font-family: "STZhongsong", "Microsoft YaHei", "PingFang SC",
-    "Hiragino Sans GB", "Heiti SC", sans-serif;
+  font-family:
+    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
   font-size: 24px;
   font-weight: 600;
   color: #333;
@@ -1353,7 +1351,7 @@ const handleLogin = () => {
   padding: 12px 20px;
   border-radius: 4px;
   margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   position: relative;
 }
@@ -1429,7 +1427,7 @@ const handleLogin = () => {
 .teachers-section .block-header h3,
 .community-section .block-header h3 {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px;
   padding: 12px 40px;
   display: flex;
   align-items: center;
@@ -1510,6 +1508,8 @@ const handleLogin = () => {
 .video-section .header-icon,
 .teachers-section .header-icon,
 .community-section .header-icon {
-  transition: transform 0.3s ease, color 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
 }
 </style>
