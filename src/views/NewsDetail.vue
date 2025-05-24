@@ -1,192 +1,151 @@
 <!-- NewsDetail.vue - 用于显示单个新闻文章详情 -->
 <template>
   <div class="news-detail-container">
-    <!-- 面包屑导航 -->
-    <div class="breadcrumb-nav">
-      <a-breadcrumb>
-        <a-breadcrumb-item>
-          <router-link to="/">首页</router-link>
-        </a-breadcrumb-item>
-        <a-breadcrumb-item>
-          <router-link to="/news">资讯中心</router-link>
-        </a-breadcrumb-item>
-        <a-breadcrumb-item>{{
-          newsData.title || "文章详情"
-        }}</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-
-    <!-- 文章标题 -->
-    <div class="article-header">
-      <h1 class="article-title">{{ newsData.title }}</h1>
-      <div class="article-meta">
-        <span class="meta-item">
-          <i class="fas fa-calendar-alt"></i> {{ newsData.date }}
-        </span>
-        <span class="meta-item" v-if="newsData.author">
-          <i class="fas fa-user"></i> {{ newsData.author }}
-        </span>
-        <span class="meta-item" v-if="newsData.source">
-          <i class="fas fa-bookmark"></i> {{ newsData.source }}
-        </span>
-      </div>
-    </div>
-
-    <!-- 文章内容 -->
-    <div class="article-content">
-      <!-- 文章摘要 -->
-      <div class="article-summary" v-if="newsData.summary">
-        <p>{{ newsData.summary }}</p>
+    <a-spin :spinning="loading" tip="加载中...">
+      <!-- 面包屑导航 -->
+      <div class="breadcrumb-nav">
+        <a-breadcrumb>
+          <a-breadcrumb-item>
+            <router-link to="/">首页</router-link>
+          </a-breadcrumb-item>
+          <a-breadcrumb-item>
+            <router-link to="/news">资讯中心</router-link>
+          </a-breadcrumb-item>
+          <a-breadcrumb-item>{{ newsData.title || '文章详情' }}</a-breadcrumb-item>
+        </a-breadcrumb>
       </div>
 
-      <!-- 主要内容 -->
-      <div class="article-body" v-html="newsData.content"></div>
-    </div>
-
-    <!-- 相关文章 -->
-    <div class="related-articles" v-if="relatedNews.length > 0">
-      <div class="block-header">
-        <h3>
-          <i class="fas fa-newspaper header-icon"></i>
-          <span class="title-text">相关文章</span>
-        </h3>
+      <!-- 文章标题 -->
+      <div class="article-header">
+        <h1 class="article-title">{{ newsData.title }}</h1>
+        <div class="article-meta">
+          <span class="meta-item">
+            <i class="fas fa-calendar-alt"></i>
+            {{ new Date(newsData.publishDate || newsData.createdAt).toLocaleDateString('zh-CN') }}
+          </span>
+          <span class="meta-item" v-if="newsData.author">
+            <i class="fas fa-user"></i> {{ newsData.author }}
+          </span>
+          <span class="meta-item" v-if="newsData.source?.name">
+            <i class="fas fa-bookmark"></i> {{ newsData.source.name }}
+          </span>
+          <span class="meta-item" v-if="newsData.viewCount">
+            <i class="fas fa-eye"></i> 浏览 {{ newsData.viewCount }} 次
+          </span>
+        </div>
       </div>
-      <ul class="styled-list">
-        <li v-for="item in relatedNews" :key="item.id">
-          <router-link :to="`/news/detail/${item.id}`" class="info-link">
-            <div class="info-content">
-              <div class="info-header">
-                <span class="info-title">{{ item.title }}</span>
+
+      <!-- 文章内容 -->
+      <div class="article-content">
+        <!-- 文章摘要 -->
+        <div class="article-summary" v-if="newsData.summary">
+          <p>{{ newsData.summary }}</p>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="article-body" v-html="newsData.content"></div>
+      </div>
+
+      <!-- 相关文章 -->
+      <div class="related-articles" v-if="relatedNews.length > 0">
+        <div class="block-header">
+          <h3>
+            <i class="fas fa-newspaper header-icon"></i>
+            <span class="title-text">相关文章</span>
+          </h3>
+        </div>
+        <ul class="styled-list">
+          <li v-for="item in relatedNews" :key="item._id">
+            <router-link :to="`/news/detail/${item._id}`" class="info-link">
+              <div class="info-content">
+                <div class="info-header">
+                  <span class="info-title">{{ item.title }}</span>
+                </div>
+                <div class="info-footer">
+                  <span class="info-date"
+                    >发布日期：{{
+                      new Date(item.publishDate || item.createdAt).toLocaleDateString('zh-CN')
+                    }}</span
+                  >
+                </div>
               </div>
-              <div class="info-footer">
-                <span class="info-date">发布日期：{{ item.date }}</span>
-              </div>
-            </div>
-          </router-link>
-        </li>
-      </ul>
-    </div>
+            </router-link>
+          </li>
+        </ul>
+      </div>
+    </a-spin>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
-import { message, Breadcrumb } from "ant-design-vue";
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { message, Breadcrumb } from 'ant-design-vue'
+import { newsApi } from '@/api'
 
-const route = useRoute();
-const newsId = computed(() => route.params.id);
+const route = useRoute()
+const newsId = computed(() => route.params.id)
+const loading = ref(false)
 
 // 文章数据
 const newsData = ref({
-  id: null,
-  title: "",
-  date: "",
-  author: "",
-  source: "",
-  summary: "",
-  content: "",
-  category: "",
-});
+  _id: null,
+  title: '',
+  publishDate: '',
+  author: '',
+  source: null,
+  summary: '',
+  content: '',
+  category: null,
+  viewCount: 0,
+})
 
 // 相关文章
-const relatedNews = ref([]);
-
-// 假数据（实际项目中应通过API获取数据）
-const newsDatabase = {
-  1: {
-    id: "1",
-    title: '校际协同，星辰引航："星空下的思政课"开讲',
-    date: "2025-04-29",
-    author: "张明",
-    source: "青岛理工大学",
-    summary:
-      '青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办"星空下的思政课"大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。把思政课堂与文化实践教学有机结合，推动大中小学一体化课程思政是青岛理工大学近年来着力开展的重点工作，物理作为贯穿大中小学的科学教育，是实现大中小学一体化课程思政的重要课程载体。',
-    content: `<p>4月29日晚，青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办"星空下的思政课"大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。</p>
-
-              <p>把思政课堂与文化实践教学有机结合，推动大中小学一体化课程思政是青岛理工大学近年来着力开展的重点工作，物理作为贯穿大中小学的科学教育，是实现大中小学一体化课程思政的重要课程载体。</p>
-
-              <div class="image-container">
-                <img src="../assets/images/carousel1.jpg" alt="思政课实践现场" />
-                <div class="image-caption">思政课现场互动</div>
-              </div>
-
-              <p>此次"星空下的思政课"的举办地点选在了紧邻大海的青岛理工大学金家岭校区群星广场，学生们在聆听物理老师讲解星空下的物理知识时，不仅了解了望远镜结构、原理，学习了天体知识，也聆听了思政老师穿插其中的科技报国、宇航强国的主题宣传教育，在润物无声中传递爱国主义与科技报国精神。</p>
-
-              <p>据悉，"星空下的思政课"为青岛理工大学首次面向大中小学生户外教学的实践教育活动，联合了多个院系和学科的力量。本次活动旨在通过天文知识和天体观测活动，将科学精神与家国情怀有机融合，充分发挥"大思政课"协同育人作用。</p>
-
-              <div class="image-container">
-                <img src="../assets/images/carousel2.jpg" alt="学生观测星空" />
-                <div class="image-caption">大中小学生共同观测星空</div>
-              </div>
-
-              <p>青岛理工大学马克思主义学院院长王教授表示："探索宇宙奥秘与探索真理规律相通，我们希望通过这样的活动，让学生们不仅学习知识，更能感受到科学探索的魅力和责任担当。这种体验式教育比课堂讲授更为直观生动，对学生的影响也更持久深远。"</p>
-
-              <p>参加活动的小学生小明说："这是我第一次通过专业望远镜观察星空，太神奇了！以前只在书本上看过这些星球，今天能亲眼看到，还听老师讲了这么多关于宇宙和国家航天事业的故事，我长大也要为中国航天事业贡献力量。"</p>
-
-              <p>此次活动的成功举办，标志着青岛理工大学在探索大中小学思政课一体化建设方面迈出了新的一步，为今后同类活动的开展积累了宝贵经验。学校表示，将继续深化产教融合、校地合作，推动形成更多富有特色的思政教育实践模式。</p>`,
-    category: "中心动态",
-  },
-  2: {
-    id: "2",
-    title: "菏泽家政职业学院组织开展大中小学乡村振兴劳动教育实践活动",
-    date: "2025-04-26",
-    author: "李华",
-    source: "菏泽家政职业学院",
-    summary:
-      '菏泽家政职业学院依托菏泽市大中小学思政课一体化建设共同体平台，组织大中小学学生走进全国文明村、全国乡村治理示范村——单县龙王庙镇刘土城村，开展了以"劳动铸魂 青春筑梦"为主题的乡村振兴劳动教育实践活动。',
-    content: "<p>具体内容将根据实际情况填充...</p>",
-    category: "中心动态",
-  },
-  3: {
-    id: "3",
-    title: "济宁市新时代学校思政课建设推进会召开",
-    date: "2025-04-20",
-    author: "王强",
-    source: "济宁市教育局",
-    summary:
-      "济宁市新时代学校思政课建设推进会召开，市委常委、宣传部部长董冰出席并讲话，副市长宫晓芳主持会议。",
-    content: "<p>具体内容将根据实际情况填充...</p>",
-    category: "中心动态",
-  },
-};
+const relatedNews = ref([])
 
 // 获取新闻数据
-const fetchNewsData = (id) => {
+const fetchNewsData = async id => {
+  loading.value = true
   try {
-    // 这里应该是API调用，现在模拟数据
-    const data = newsDatabase[id];
-    if (data) {
-      newsData.value = data;
+    const response = await newsApi.getDetail(id)
+    if (response.status === 'success') {
+      newsData.value = response.data
       // 获取相关文章（同一分类的其他文章）
-      fetchRelatedNews(data.category, data.id);
+      await fetchRelatedNews(response.data.category, response.data._id)
     } else {
-      message.error("找不到对应的文章");
+      message.error('找不到对应的文章')
     }
   } catch (error) {
-    console.error("获取文章详情失败", error);
-    message.error("获取文章详情失败");
+    console.error('获取文章详情失败', error)
+    message.error('获取文章详情失败')
+  } finally {
+    loading.value = false
   }
-};
+}
 
 // 获取相关文章
-const fetchRelatedNews = (category, currentId) => {
+const fetchRelatedNews = async (categoryId, currentId) => {
   try {
-    // 这里应该是API调用，现在模拟数据
-    const related = Object.values(newsDatabase).filter(
-      (item) => item.category === category && item.id !== currentId
-    );
-    relatedNews.value = related;
+    const response = await newsApi.getList({
+      category: categoryId,
+      limit: 5,
+      isPublished: true,
+    })
+
+    if (response.status === 'success') {
+      // 过滤掉当前文章
+      relatedNews.value = response.data.filter(item => item._id !== currentId)
+    }
   } catch (error) {
-    console.error("获取相关文章失败", error);
+    console.error('获取相关文章失败', error)
   }
-};
+}
 
 onMounted(() => {
   if (newsId.value) {
-    fetchNewsData(newsId.value);
+    fetchNewsData(newsId.value)
   }
-});
+})
 </script>
 
 <style scoped>

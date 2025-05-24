@@ -35,13 +35,4 @@ router.put('/:id', updateResource)
 router.delete('/:id', deleteResource)
 router.patch('/:id/featured', toggleFeaturedStatus)
 
-// 下载和分享路由
-router.get('/:id/download', authenticateToken, downloadResource)
-router.post('/:id/share', authenticateToken, shareResource)
-
-// 评论相关路由
-router.get('/:id/comments', getComments)
-router.post('/:id/comments', authenticateToken, addComment)
-router.delete('/:id/comments/:commentId', authenticateToken, deleteComment)
-
 export default router

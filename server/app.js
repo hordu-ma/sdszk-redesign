@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit'
 // 路由导入
 import newsRoutes from './routes/news.js'
+import newsCategoryRoutes from './routes/newsCategories.js'
 import authRoutes from './routes/auth.js'
 import userRoutes from './routes/users.js'
 import uploadRoutes from './routes/upload.js'
@@ -124,6 +125,7 @@ app.get('/', (req, res) => {
 
 // API 路由
 app.use('/api/news', newsRoutes)
+app.use('/api/news-categories', newsCategoryRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/uploads', uploadRoutes)

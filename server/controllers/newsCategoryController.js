@@ -1,16 +1,38 @@
 import NewsCategory from '../models/NewsCategory.js'
 import ActivityLog from '../models/ActivityLog.js'
 import { NotFoundError, ForbiddenError } from '../utils/appError.js'
+import mongoose from 'mongoose'
 
 // 获取所有新闻分类
 export const getCategories = async (req, res) => {
   try {
-    const { includeInactive = false } = req.query
-    const query = includeInactive ? {} : { isActive: true }
+    console.log('getCategories 被调用')
+    console.log('MongoDB连接状态:', mongoose.connection.readyState)
+    console.log('数据库名称:', mongoose.connection.db.databaseName)
 
-    const categories = await NewsCategory.find(query)
-      .sort({ order: 1, name: 1 })
-      .select('-createdBy -updatedBy')
+    // 直接用原生查询
+    const rawData = await mongoose.connection.db.collection('newscategories').find({}).toArray()
+    console.log(
+      '原生查询结果:',
+      rawData.length,
+      rawData.map(d => ({ name: d.name, key: d.key }))
+    )
+
+    // 直接计数看是否能连接到集合
+    const count = await NewsCategory.countDocuments()
+    console.log('Mongoose文档数量:', count)
+
+    const { includeInactive = false } = req.query
+    const query = {}
+    console.log('查询条件:', query)
+
+    const categories = await NewsCategory.find(query).sort({ order: 1, name: 1 })
+
+    console.log('找到分类数量:', categories.length)
+    console.log(
+      '分类数据:',
+      categories.map(c => ({ name: c.name, isActive: c.isActive }))
+    )
 
     // 标记核心分类
     const formattedCategories = categories.map(cat => ({
