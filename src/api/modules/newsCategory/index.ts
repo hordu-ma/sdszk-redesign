@@ -29,6 +29,9 @@ export interface UpdateNewsCategoryDTO extends Partial<CreateNewsCategoryDTO> {
 }
 
 export class NewsCategoryApi extends BaseApi {
+  static list(): { data: any } | PromiseLike<{ data: any }> {
+    throw new Error('Method not implemented.')
+  }
   constructor() {
     super({ prefix: '/news-categories' })
   }

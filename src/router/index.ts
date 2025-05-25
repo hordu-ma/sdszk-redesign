@@ -72,7 +72,151 @@ const routes: RouteRecordRaw[] = [
     name: 'ai',
     component: () => import('../views/AI.vue'),
   },
-  // 用户相关路由
+  // 管理后台路由
+  {
+    path: '/admin/login',
+    name: 'adminLogin',
+    component: () => import('../views/admin/auth/AdminLogin.vue'),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/admin',
+    component: () => import('../components/admin/AdminLayout.vue'),
+    meta: {
+      requiresAuth: true,
+      adminOnly: true,
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/admin/dashboard',
+      },
+      {
+        path: 'dashboard',
+        name: 'adminDashboard',
+        component: () => import('../views/admin/dashboard/AdminDashboard.vue'),
+      },
+      // 新闻管理路由
+      {
+        path: 'news',
+        children: [
+          {
+            path: 'list',
+            name: 'adminNewsList',
+            component: () => import('../views/admin/news/NewsList.vue'),
+            meta: {
+              permissions: ['news:read'],
+            },
+          },
+          {
+            path: 'create',
+            name: 'adminNewsCreate',
+            component: () => import('../views/admin/news/NewsCreate.vue'),
+            meta: {
+              permissions: ['news:create'],
+            },
+          },
+          {
+            path: 'edit/:id',
+            name: 'adminNewsEdit',
+            component: () => import('../views/admin/news/NewsEdit.vue'),
+            props: true,
+            meta: {
+              permissions: ['news:update'],
+            },
+          },
+          {
+            path: 'categories',
+            name: 'adminNewsCategories',
+            component: () => import('../views/admin/news/NewsCategories.vue'),
+            meta: {
+              permissions: ['news:category'],
+            },
+          },
+        ],
+      },
+      // 资源管理路由
+      {
+        path: 'resources',
+        children: [
+          {
+            path: 'list',
+            name: 'adminResourcesList',
+            component: () => import('../views/admin/resources/ResourcesList.vue'),
+            meta: {
+              permissions: ['resource:read'],
+            },
+          },
+          {
+            path: 'create',
+            name: 'adminResourcesCreate',
+            component: () => import('../views/admin/resources/ResourcesCreate.vue'),
+            meta: {
+              permissions: ['resource:create'],
+            },
+          },
+          {
+            path: 'edit/:id',
+            name: 'adminResourcesEdit',
+            component: () => import('../views/admin/resources/ResourcesEdit.vue'),
+            props: true,
+            meta: {
+              permissions: ['resource:update'],
+            },
+          },
+          {
+            path: 'categories',
+            name: 'adminResourcesCategories',
+            component: () => import('../views/admin/resources/ResourcesCategories.vue'),
+            meta: {
+              permissions: ['resource:category'],
+            },
+          },
+        ],
+      },
+      // 用户管理路由
+      {
+        path: 'users',
+        children: [
+          {
+            path: 'list',
+            name: 'adminUsersList',
+            component: () => import('../views/admin/users/UsersList.vue'),
+            meta: {
+              permissions: ['user:read'],
+            },
+          },
+          {
+            path: 'roles',
+            name: 'adminUserRoles',
+            component: () => import('../views/admin/users/UserRoles.vue'),
+            meta: {
+              permissions: ['user:role'],
+            },
+          },
+          {
+            path: 'permissions',
+            name: 'adminUserPermissions',
+            component: () => import('../views/admin/users/UserPermissions.vue'),
+            meta: {
+              permissions: ['user:permission'],
+            },
+          },
+        ],
+      },
+      // 系统设置路由
+      {
+        path: 'settings',
+        name: 'adminSettings',
+        component: () => import('../views/admin/settings/SystemSettings.vue'),
+        meta: {
+          permissions: ['system:setting'],
+        },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

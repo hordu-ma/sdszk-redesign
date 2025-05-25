@@ -77,3 +77,5 @@ export abstract class BaseApi {
     })
   }
 }
+
+export { api }

@@ -19,64 +19,39 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
+<script setup lang="ts">
+import { ref } from "vue";
 import { VideoPlay } from "@element-plus/icons-vue";
 
-export interface VideoPlayerProps {
+interface Props {
   src: string;
   poster: string;
 }
 
-export default defineComponent({
-  name: "VideoPlayer",
-  components: {
-    VideoPlay,
-  },
-  props: {
-    src: {
-      type: String,
-      required: true,
-    },
-    poster: {
-      type: String,
-      required: true,
-    },
-  },
-  setup() {
-    const videoRef = ref<HTMLVideoElement | null>(null);
-    const isPlaying = ref(false);
+const props = defineProps<Props>();
 
-    // 播放视频
-    const playVideo = () => {
-      if (videoRef.value) {
-        videoRef.value.play();
-      }
-    };
+const videoRef = ref<HTMLVideoElement | null>(null);
+const isPlaying = ref(false);
 
-    // 视频事件处理函数
-    const onPlay = () => {
-      isPlaying.value = true;
-    };
+// 播放视频
+const playVideo = () => {
+  if (videoRef.value) {
+    videoRef.value.play();
+  }
+};
 
-    const onPause = () => {
-      isPlaying.value = false;
-    };
+// 视频事件处理函数
+const onPlay = () => {
+  isPlaying.value = true;
+};
 
-    const onEnded = () => {
-      isPlaying.value = false;
-    };
+const onPause = () => {
+  isPlaying.value = false;
+};
 
-    return {
-      videoRef,
-      isPlaying,
-      playVideo,
-      onPlay,
-      onPause,
-      onEnded,
-    };
-  },
-});
+const onEnded = () => {
+  isPlaying.value = false;
+};
 </script>
 
 <style scoped>

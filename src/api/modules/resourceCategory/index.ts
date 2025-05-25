@@ -10,6 +10,11 @@ export interface ResourceCategory {
   resourceCount: number
   createdAt: string
   updatedAt: string
+  // UI properties
+  color?: string
+  sort?: number
+  status?: boolean
+  id?: string // alias for _id for easier component usage
 }
 
 export interface CreateResourceCategoryDTO {

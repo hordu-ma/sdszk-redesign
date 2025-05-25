@@ -1,0 +1,367 @@
+<template>
+  <div class="news-categories">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2>新闻分类管理</h2>
+        <p>管理新闻分类，包括创建、编辑、删除等操作</p>
+      </div>
+      <div class="header-right">
+        <a-button type="primary" @click="showCreateModal">
+          <template #icon>
+            <PlusOutlined />
+          </template>
+          新建分类
+        </a-button>
+      </div>
+    </div>
+
+    <!-- 分类列表 -->
+    <div class="categories-list">
+      <a-table
+        :columns="columns"
+        :data-source="categories"
+        :loading="loading"
+        row-key="id"
+        :pagination="false"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'name'">
+            <div class="category-name">
+              <span class="name-text">{{ record.name }}</span>
+              <a-tag v-if="record.isDefault" color="blue" size="small">默认</a-tag>
+            </div>
+          </template>
+
+          <template v-if="column.key === 'newsCount'">
+            <span>{{ record.newsCount || 0 }} 篇</span>
+          </template>
+
+          <template v-if="column.key === 'status'">
+            <a-switch
+              v-model:checked="record.status"
+              :checked-value="'active'"
+              :un-checked-value="'inactive'"
+              @change="handleStatusChange(record)"
+            />
+          </template>
+
+          <template v-if="column.key === 'createdAt'">
+            <span>{{ formatDate(record.createdAt) }}</span>
+          </template>
+
+          <template v-if="column.key === 'actions'">
+            <a-space>
+              <a-button type="link" size="small" @click="handleEdit(record)"> 编辑 </a-button>
+              <a-popconfirm
+                :title="`确定要删除分类「${record.name}」吗？`"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="handleDelete(record)"
+                :disabled="record.isDefault"
+              >
+                <a-button type="link" size="small" danger :disabled="record.isDefault">
+                  删除
+                </a-button>
+              </a-popconfirm>
+            </a-space>
+          </template>
+        </template>
+      </a-table>
+    </div>
+
+    <!-- 创建/编辑分类模态框 -->
+    <a-modal
+      v-model:open="modalVisible"
+      :title="editingCategory ? '编辑分类' : '新建分类'"
+      :confirm-loading="modalLoading"
+      @ok="handleModalOk"
+      @cancel="handleModalCancel"
+    >
+      <a-form ref="modalFormRef" :model="modalForm" :rules="modalRules" layout="vertical">
+        <a-form-item label="分类名称" name="name">
+          <a-input
+            v-model:value="modalForm.name"
+            placeholder="请输入分类名称"
+            :maxlength="50"
+            show-count
+          />
+        </a-form-item>
+
+        <a-form-item label="分类描述" name="description">
+          <a-textarea
+            v-model:value="modalForm.description"
+            placeholder="请输入分类描述（可选）"
+            :maxlength="200"
+            :rows="3"
+            show-count
+          />
+        </a-form-item>
+
+        <a-form-item label="排序" name="sort">
+          <a-input-number
+            v-model:value="modalForm.sort"
+            placeholder="数字越小排序越靠前"
+            :min="0"
+            :max="999"
+            style="width: 100%"
+          />
+        </a-form-item>
+
+        <a-form-item name="status">
+          <a-checkbox v-model:checked="modalForm.status"> 启用分类 </a-checkbox>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
+import { message } from 'ant-design-vue'
+import { PlusOutlined } from '@ant-design/icons-vue'
+import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
+
+// 创建分类API实例
+const newsCategoryApi = new NewsCategoryApi()
+import type { TableColumnsType } from 'ant-design-vue'
+import type { Rule } from 'ant-design-vue/es/form'
+
+// 数据状态
+const loading = ref(false)
+const categories = ref<NewsCategory[]>([])
+const modalVisible = ref(false)
+const modalLoading = ref(false)
+const editingCategory = ref<NewsCategory | null>(null)
+const modalFormRef = ref()
+
+// 模态框表单
+const modalForm = reactive({
+  name: '',
+  description: '',
+  sort: 0,
+  status: true,
+})
+
+// 表格列配置
+const columns: TableColumnsType = [
+  {
+    title: '分类名称',
+    key: 'name',
+    dataIndex: 'name',
+    width: 200,
+  },
+  {
+    title: '描述',
+    key: 'description',
+    dataIndex: 'description',
+    ellipsis: true,
+  },
+  {
+    title: '新闻数量',
+    key: 'newsCount',
+    dataIndex: 'newsCount',
+    width: 120,
+  },
+  {
+    title: '排序',
+    key: 'sort',
+    dataIndex: 'sort',
+    width: 100,
+    sorter: (a: any, b: any) => a.sort - b.sort,
+  },
+  {
+    title: '状态',
+    key: 'status',
+    dataIndex: 'status',
+    width: 100,
+  },
+  {
+    title: '创建时间',
+    key: 'createdAt',
+    dataIndex: 'createdAt',
+    width: 180,
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    fixed: 'right',
+  },
+]
+
+// 表单验证规则
+const modalRules: Record<string, Rule[]> = {
+  name: [
+    { required: true, message: '请输入分类名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '分类名称长度应在2-50个字符之间', trigger: 'blur' },
+  ],
+  sort: [{ type: 'number', min: 0, max: 999, message: '排序值应在0-999之间', trigger: 'blur' }],
+}
+
+// 格式化日期
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// 获取分类列表
+const fetchCategories = async () => {
+  try {
+    loading.value = true
+    const { data } = await newsCategoryApi.getList()
+    categories.value = data.sort((a: NewsCategory, b: NewsCategory) => a.order - b.order)
+  } catch (error: any) {
+    message.error(error.message || '获取分类列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 显示创建模态框
+const showCreateModal = () => {
+  editingCategory.value = null
+  Object.assign(modalForm, {
+    name: '',
+    description: '',
+    sort: 0,
+    status: true,
+  })
+  modalVisible.value = true
+}
+
+// 处理编辑
+const handleEdit = (record: NewsCategory) => {
+  editingCategory.value = record
+  Object.assign(modalForm, {
+    name: record.name,
+    description: record.description || '',
+    sort: record.order || 0,
+    status: record.isActive,
+  })
+  modalVisible.value = true
+}
+
+// 处理状态变化
+const handleStatusChange = async (record: NewsCategory) => {
+  try {
+    await newsCategoryApi.update(record._id, {
+      isActive: !record.isActive,
+    })
+    record.isActive = !record.isActive
+    message.success('状态更新成功')
+  } catch (error: any) {
+    // 恢复原状态
+    record.isActive = !record.isActive
+    message.error(error.message || '状态更新失败')
+  }
+}
+
+// 处理删除
+const handleDelete = async (record: NewsCategory) => {
+  try {
+    await newsCategoryApi.delete(record._id)
+    message.success('删除成功')
+    fetchCategories()
+  } catch (error: any) {
+    message.error(error.message || '删除失败')
+  }
+}
+
+// 处理模态框确认
+const handleModalOk = async () => {
+  try {
+    await modalFormRef.value.validate()
+    modalLoading.value = true
+
+    const data = {
+      name: modalForm.name,
+      description: modalForm.description,
+      order: modalForm.sort,
+      isActive: modalForm.status,
+    }
+
+    if (editingCategory.value) {
+      await newsCategoryApi.update(editingCategory.value._id, data)
+      message.success('编辑成功')
+    } else {
+      await newsCategoryApi.create({
+        ...data,
+        key: modalForm.name.toLowerCase().replace(/\s+/g, '-'),
+      })
+      message.success('创建成功')
+    }
+
+    modalVisible.value = false
+    fetchCategories()
+  } catch (error: any) {
+    if (error.errorFields) {
+      message.error('请检查表单填写是否正确')
+    } else {
+      message.error(error.message || '操作失败')
+    }
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+// 处理模态框取消
+const handleModalCancel = () => {
+  modalVisible.value = false
+  editingCategory.value = null
+}
+
+onMounted(() => {
+  fetchCategories()
+})
+</script>
+
+<style scoped lang="scss">
+.news-categories {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .header-left {
+      h2 {
+        margin: 0 0 8px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .categories-list {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    :deep(.ant-table) {
+      .category-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .name-text {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+</style>

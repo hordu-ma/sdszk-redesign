@@ -272,7 +272,10 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@use '../styles/variables.scss' as *;
+@use '../styles/mixins.scss' as *;
+
 .header {
   width: 100%;
   margin: 0;
@@ -300,6 +303,10 @@ onUnmounted(() => {
   transform: translateY(0);
 }
 
+.header[data-visible='false'] {
+  transform: translateY(-100%);
+}
+
 .header-content {
   max-width: 1440px; /* 增加最大宽度 */
   width: 100%;
@@ -313,17 +320,13 @@ onUnmounted(() => {
   height: 100%;
   position: relative;
   gap: 20px; /* 添加间距 */
-}
-
-@media screen and (max-width: 768px) {
-  .header-content {
+  
+  @include sm {
     padding: 8px 12px;
     gap: 8px; /* 减小整体间距 */
   }
-}
-
-@media screen and (max-width: 480px) {
-  .header-content {
+  
+  @include xs {
     padding: 6px 8px;
     gap: 4px;
   }
@@ -335,10 +338,8 @@ onUnmounted(() => {
   padding-right: 0; /* 移除右侧内边距 */
   min-width: 300px; /* 增加最小宽度 */
   max-width: 360px; /* 增加最大宽度 */
-}
-
-@media screen and (max-width: 768px) {
-  .logo-container {
+  
+  @include sm {
     flex: 1;
     min-width: 0;
     margin: 0 8px;
@@ -353,10 +354,8 @@ onUnmounted(() => {
   margin-right: 12px;
   transition: all 0.3s ease;
   flex-shrink: 0; /* 防止logo被压缩 */
-}
-
-@media screen and (max-width: 768px) {
-  .logo {
+  
+  @include sm {
     width: 36px;
     height: 36px;
     margin-right: 6px;
@@ -383,7 +382,7 @@ onUnmounted(() => {
   display: none;
 }
 
-@media screen and (max-width: 768px) {
+@include sm {
   .full-name {
     display: none;
   }
@@ -397,9 +396,7 @@ onUnmounted(() => {
     white-space: nowrap;
     line-height: 1.2;
   }
-}
-
-@media screen and (max-width: 768px) {
+  
   .center-name {
     font-size: 14px;
     max-width: calc(100vw - 140px); /* 进一步扩大显示区域 */
@@ -408,7 +405,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 480px) {
+@include xs {
   .center-name {
     font-size: 13px;
     max-width: calc(100vw - 120px); /* 最大程度扩大显示区域 */
@@ -444,61 +441,59 @@ onUnmounted(() => {
   gap: 16px;
   min-width: 280px; /* 固定最小宽度 */
   justify-content: flex-end; /* 右对齐 */
-}
-
-@media screen and (max-width: 768px) {
-  .search-login-container {
+  
+  @include sm {
     gap: 8px;
     min-width: auto;
     margin-left: auto;
-  }
-
-  .search-login-container .auth-buttons {
-    margin-right: 8px;
-  }
-
-  .search-login-container .auth-buttons .auth-button .el-button {
-    font-size: 13px;
-    height: 32px;
-    padding: 0 12px;
-  }
-
-  .search-login-container .user-menu {
-    display: none;
-  }
-
-  .search-box {
-    display: none;
-  }
-
-  .login-button {
-    padding: 6px 12px;
-    font-size: 14px;
+    
+    .auth-buttons {
+      margin-right: 8px;
+      
+      .auth-button .el-button {
+        font-size: 13px;
+        height: 32px;
+        padding: 0 12px;
+      }
+    }
+    
+    .user-menu {
+      display: none;
+    }
+    
+    .search-box {
+      display: none;
+    }
+    
+    .login-button {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
   }
 }
 
 .search-input {
   width: 180px; /* 减小搜索框宽度 */
   transition: width 0.3s ease;
-}
-
-.search-input:focus-within {
-  width: 220px; /* 聚焦时增加宽度 */
+  
+  &:focus-within {
+    width: 220px; /* 聚焦时增加宽度 */
+  }
 }
 
 .custom-auth-button {
   color: #9a2314 !important;
   border-color: #9a2314 !important;
   background-color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.custom-auth-button:hover {
-  color: #fff !important;
-  background-color: #9a2314 !important;
+  
+  &:hover {
+    color: #fff !important;
+    background-color: #9a2314 !important;
+  }
 }
 
 /* 响应式布局优化 */
-@media screen and (max-width: 1280px) {
+@include min($breakpoint-lg) {
   .header-content {
     padding: 12px 16px;
   }
@@ -521,14 +516,14 @@ onUnmounted(() => {
 
   .search-input {
     width: 160px;
-  }
-
-  .search-input:focus-within {
-    width: 200px;
+    
+    &:focus-within {
+      width: 200px;
+    }
   }
 }
 
-@media screen and (max-width: 1024px) {
+@include min($breakpoint-md) {
   .logo-container {
     min-width: 220px;
   }
@@ -547,14 +542,14 @@ onUnmounted(() => {
 
   .search-input {
     width: 140px;
-  }
-
-  .search-input:focus-within {
-    width: 180px;
+    
+    &:focus-within {
+      width: 180px;
+    }
   }
 }
 
-@media screen and (max-width: 768px) {
+@include sm {
   .header-content {
     padding: 8px 12px;
     justify-content: space-between;
@@ -589,10 +584,10 @@ onUnmounted(() => {
 
   .search-input {
     width: 120px;
-  }
-
-  .search-input:focus-within {
-    width: 160px;
+    
+    &:focus-within {
+      width: 160px;
+    }
   }
 
   .logo {
@@ -664,7 +659,7 @@ onUnmounted(() => {
   }
 }
 
-@media screen and (max-width: 480px) {
+@include xs {
   .header-content {
     padding: 8px;
   }
@@ -683,10 +678,10 @@ onUnmounted(() => {
 
   .search-input {
     width: 100px;
-  }
-
-  .search-input:focus-within {
-    width: 140px;
+    
+    &:focus-within {
+      width: 140px;
+    }
   }
 
   .auth-button :deep(.el-button) {
@@ -763,10 +758,10 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   transition: all 0.3s ease;
-}
-
-.mobile-auth-link:hover {
-  background: rgba(255, 255, 255, 0.2);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
 
 .mobile-menu-trigger {
@@ -777,16 +772,26 @@ onUnmounted(() => {
   cursor: pointer;
   padding: 8px;
   margin-right: 4px;
-}
-
-.mobile-menu-trigger .fas {
-  font-size: 20px;
-}
-
-@media screen and (max-width: 768px) {
-  .mobile-menu-trigger {
+  
+  .fas {
+    font-size: 20px;
+  }
+  
+  @include sm {
     display: block;
     margin-right: 8px;
   }
+}
+
+.mobile-menu-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2001;
 }
 </style>

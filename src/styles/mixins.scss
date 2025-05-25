@@ -1,0 +1,73 @@
+// 导入变量
+@use './variables.scss' as *;
+
+// 响应式设计混合宏
+
+// 超小屏幕（手机）
+@mixin xs {
+  @media (max-width: $breakpoint-xs) {
+    @content;
+  }
+}
+
+// 小屏幕（平板）
+@mixin sm {
+  @media (max-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+// 中等屏幕（小型笔记本）
+@mixin md {
+  @media (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// 大屏幕（桌面显示器）
+@mixin lg {
+  @media (max-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+// 超大屏幕
+@mixin xl {
+  @media (max-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+// 自定义范围
+@mixin between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}
+
+// 最小宽度
+@mixin min($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+// 最大宽度
+@mixin max($width) {
+  @media (max-width: $width) {
+    @content;
+  }
+}
+
+// 使用示例：
+// .example {
+//   color: black;
+//   
+//   @include sm {
+//     color: red;
+//   }
+//   
+//   @include md {
+//     color: blue;
+//   }
+// }

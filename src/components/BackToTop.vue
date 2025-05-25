@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 
 // 控制按钮可见性的响应式变量
@@ -35,7 +35,10 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@use '../styles/variables.scss' as *;
+@use '../styles/mixins.scss' as *;
+
 .back-to-top {
   position: fixed;
   bottom: 40px;
@@ -57,22 +60,20 @@ onUnmounted(() => {
   z-index: 999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   -webkit-tap-highlight-color: transparent;
-}
-
-.back-to-top:hover {
-  background-color: #9a2314;
-  transform: translateY(0) scale(1.1);
-}
-
-.back-to-top.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .back-to-top {
+  
+  &:hover {
+    background-color: #9a2314;
+    transform: translateY(0) scale(1.1);
+  }
+  
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  /* 移动端适配 */
+  @include sm {
     bottom: 20px;
     right: 20px;
     width: 45px;

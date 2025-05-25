@@ -38,12 +38,10 @@
   </footer>
 </template>
 
-<script>
-export default {
-  name: "FooterLinks",
-};
+<script setup lang="ts">
+// 组件逻辑
 </script>
 
-<style>
+<style scoped>
 @import "../styles/footer.css";
 </style>

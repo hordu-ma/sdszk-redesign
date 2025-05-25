@@ -61,4 +61,23 @@
   --transition-base: all 0.3s ease;
   --transition-fast: all 0.2s ease;
   --transition-slow: all 0.4s ease;
+  
+  // 响应式设计断点值
+  --breakpoint-xs: 480px;  // 超小屏幕，如手机
+  --breakpoint-sm: 768px;  // 小屏幕，如平板
+  --breakpoint-md: 1024px; // 中等屏幕，如小型笔记本
+  --breakpoint-lg: 1200px; // 大屏幕，如桌面显示器
+  --breakpoint-xl: 1440px; // 超大屏幕
 }
+
+// SCSS变量（用于在SCSS文件中使用）
+$breakpoint-xs: 480px;  // 超小屏幕，如手机
+$breakpoint-sm: 768px;  // 小屏幕，如平板
+$breakpoint-md: 1024px; // 中等屏幕，如小型笔记本
+$breakpoint-lg: 1200px; // 大屏幕，如桌面显示器
+$breakpoint-xl: 1440px; // 超大屏幕
+
+// 使用示例：
+// @media (max-width: $breakpoint-sm) { ... }
+// @media (min-width: $breakpoint-md) { ... }
+// @media (min-width: $breakpoint-sm) and (max-width: $breakpoint-md) { ... }
