@@ -9,6 +9,8 @@ import ActivityLog from './ActivityLog.js'
 import Comment from './Comment.js'
 import Share from './Share.js'
 import SiteSetting from './SiteSetting.js'
+import Favorite from './Favorite.js'
+import ViewHistory from './ViewHistory.js'
 
 export {
   News,
@@ -21,4 +23,6 @@ export {
   Comment,
   Share,
   SiteSetting,
+  Favorite,
+  ViewHistory,
 }

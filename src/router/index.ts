@@ -72,6 +72,40 @@ const routes: RouteRecordRaw[] = [
     name: 'ai',
     component: () => import('../views/AI.vue'),
   },
+  // 个人中心路由
+  {
+    path: '/user',
+    component: () => import('../views/user/UserLayout.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/user/profile',
+      },
+      {
+        path: 'profile',
+        name: 'userProfile',
+        component: () => import('../views/user/UserProfile.vue'),
+      },
+      {
+        path: 'favorites',
+        name: 'userFavorites',
+        component: () => import('../views/user/UserFavorites.vue'),
+      },
+      {
+        path: 'history',
+        name: 'userHistory',
+        component: () => import('../views/user/UserHistory.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'userSettings',
+        component: () => import('../views/user/UserSettings.vue'),
+      },
+    ],
+  },
   // 管理后台路由
   {
     path: '/admin/login',

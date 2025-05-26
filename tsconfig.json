@@ -25,14 +25,24 @@
     "baseUrl": ".",
     "types": ["vite/client", "vue", "element-plus/global", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/env.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/views/**/*.vue",
+    "src/components/**/*.vue",
+    "src/layouts/**/*.vue",
+    "src/App.vue",
+    "src/env.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.spec.ts",
     "**/*.test.ts",
     "**/*.spec.tsx",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "**/fixed-*.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

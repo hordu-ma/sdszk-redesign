@@ -20,6 +20,8 @@ import activityRoutes from './routes/activities.js'
 import settingRoutes from './routes/settings.js'
 import activityLogRoutes from './routes/activityLogs.js'
 import dashboardRoutes from './routes/dashboard.js'
+import favoriteRoutes from './routes/favorites.js'
+import viewHistoryRoutes from './routes/viewHistory.js'
 
 // 错误处理中间件
 import errorMiddleware from './middleware/errorMiddleware.js'
@@ -135,6 +137,8 @@ app.use('/api/activities', activityRoutes)
 app.use('/api/settings', settingRoutes)
 app.use('/api/logs', activityLogRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/favorites', favoriteRoutes)
+app.use('/api/view-history', viewHistoryRoutes)
 
 // 处理未找到的路由
 app.all('*', (req, res) => {
