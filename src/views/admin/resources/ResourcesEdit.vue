@@ -581,7 +581,154 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 // 复用 ResourcesCreate 的样式
-@import './ResourcesCreate.vue';
+.resources-edit {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .header-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+
+      .back-btn {
+        margin-top: 4px;
+        color: #666;
+
+        &:hover {
+          color: #1890ff;
+        }
+      }
+
+      .title-section {
+        h2 {
+          margin: 0 0 8px 0;
+          font-size: 24px;
+          font-weight: 600;
+          color: #333;
+        }
+
+        p {
+          margin: 0;
+          color: #666;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .header-right {
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  .form-container {
+    .main-content {
+      .section-card {
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+    }
+
+    .settings-panel {
+      .setting-card {
+        margin-bottom: 16px;
+
+        :deep(.ant-card-head) {
+          padding: 12px 16px;
+          min-height: auto;
+
+          .ant-card-head-title {
+            font-size: 14px;
+            font-weight: 500;
+          }
+        }
+
+        :deep(.ant-card-body) {
+          padding: 16px;
+        }
+      }
+    }
+  }
+
+  .editor-container {
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    overflow: hidden;
+
+    .editor {
+      min-height: 300px;
+
+      :deep(.editor-textarea) {
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: vertical;
+        font-family: inherit;
+      }
+    }
+  }
+
+  .file-upload {
+    .resource-uploader {
+      margin-bottom: 16px;
+    }
+
+    .upload-progress {
+      margin-top: 16px;
+    }
+  }
+
+  .file-preview {
+    .image-preview {
+      text-align: center;
+
+      img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .video-preview,
+    .audio-preview {
+      text-align: center;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+
+      .file-icon {
+        flex-shrink: 0;
+      }
+
+      .file-details {
+        h4 {
+          margin: 0 0 8px 0;
+          font-size: 16px;
+          color: #333;
+        }
+
+        p {
+          margin: 4px 0;
+          color: #666;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
 
 .loading-container {
   display: flex;

@@ -330,6 +330,21 @@ import { useRouter } from 'vue-router'
 import { userApi } from '@/api/modules/user'
 import { clearAllHistory } from '@/services/viewHistory.service'
 
+// 扩展用户信息接口
+interface ExtendedUserInfo {
+  id: string
+  username: string
+  name: string
+  avatar?: string
+  email?: string
+  role: 'admin' | 'editor' | 'user'
+  permissions: string[]
+  phone?: string
+  emailVerified?: boolean
+  phoneVerified?: boolean
+  twoFactorEnabled?: boolean
+}
+
 const userStore = useUserStore()
 const router = useRouter()
 
@@ -350,7 +365,7 @@ const passwordFormRef = ref<FormInstance>()
 const phoneFormRef = ref<FormInstance>()
 
 // 计算属性
-const userInfo = computed(() => userStore.userInfo)
+const userInfo = computed<ExtendedUserInfo | null>(() => userStore.userInfo as ExtendedUserInfo)
 
 // 隐私设置
 const privacySettings = reactive({

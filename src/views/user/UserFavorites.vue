@@ -122,25 +122,25 @@
           <div class="item-content" @click="openResource(item)">
             <div class="item-image">
               <img
-                v-if="item.thumbnail"
-                :src="item.thumbnail"
-                :alt="item.title"
+                v-if="item.itemId.image"
+                :src="item.itemId.image"
+                :alt="item.itemId.title"
                 @error="handleImageError"
               />
               <div v-else class="default-image">
-                <i :class="getTypeIcon(item.resourceType)"></i>
+                <i :class="getTypeIcon(item.itemType)"></i>
               </div>
             </div>
 
             <div class="item-info">
-              <h3 class="item-title">{{ item.title }}</h3>
-              <p v-if="item.description" class="item-description">
-                {{ item.description }}
+              <h3 class="item-title">{{ item.itemId.title }}</h3>
+              <p v-if="item.itemId.description" class="item-description">
+                {{ item.itemId.description }}
               </p>
 
               <div class="item-meta">
-                <el-tag :type="getTypeColor(item.resourceType)" size="small" class="type-tag">
-                  {{ getTypeText(item.resourceType) }}
+                <el-tag :type="getTypeColor(item.itemType)" size="small" class="type-tag">
+                  {{ getTypeText(item.itemType) }}
                 </el-tag>
 
                 <el-tag v-if="item.category" size="small" plain class="category-tag">
@@ -305,9 +305,43 @@ import {
 } from '@/services/favorite.service'
 
 // 响应式数据
+// 定义收藏项接口
+interface Favorite {
+  _id: string
+  user: string
+  itemType: 'news' | 'resource'
+  itemId: {
+    _id: string
+    title: string
+    description?: string
+    image?: string
+    status: string
+    createdAt: string
+  }
+  category: string
+  tags: string[]
+  notes?: string
+  isPublic: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// 定义统计数据接口
+interface FavoriteStats {
+  total: number
+  news: number
+  resources: number
+  activities: number
+}
+
 const loading = ref(false)
-const favorites = ref<any[]>([])
-const stats = ref<any>({})
+const favorites = ref<Favorite[]>([])
+const stats = ref<FavoriteStats>({
+  total: 0,
+  news: 0,
+  resources: 0,
+  activities: 0
+})
 const selectedItems = ref<string[]>([])
 const selectAll = ref(false)
 const currentPage = ref(1)
@@ -326,7 +360,7 @@ const newCategoryName = ref('')
 
 // 编辑收藏
 const showEditDialog = ref(false)
-const editingItem = ref<any>(null)
+const editingItem = ref<Favorite | null>(null)
 const editForm = reactive({
   category: '',
   tags: [] as string[],
@@ -361,8 +395,9 @@ const loadFavorites = async () => {
     // 清空选择
     selectedItems.value = []
     selectAll.value = false
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载收藏失败')
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '加载收藏失败'
+    ElMessage.error(errorMessage)
   } finally {
     loading.value = false
   }
@@ -395,8 +430,9 @@ const handleCategoryChange = () => {
 }
 
 // 全选处理
-const handleSelectAll = (checked: boolean) => {
-  if (checked) {
+const handleSelectAll = (checked: boolean | string | number) => {
+  const isChecked = Boolean(checked)
+  if (isChecked) {
     selectedItems.value = favorites.value.map(item => item._id)
   } else {
     selectedItems.value = []
@@ -404,8 +440,9 @@ const handleSelectAll = (checked: boolean) => {
 }
 
 // 单项选择处理
-const handleItemSelect = (id: string, checked: boolean) => {
-  if (checked) {
+const handleItemSelect = (id: string, checked: boolean | string | number) => {
+  const isChecked = Boolean(checked)
+  if (isChecked) {
     selectedItems.value.push(id)
   } else {
     const index = selectedItems.value.indexOf(id)
@@ -417,8 +454,16 @@ const handleItemSelect = (id: string, checked: boolean) => {
 
 // 打开资源
 const openResource = (item: any) => {
-  if (item.resourceUrl) {
-    window.open(item.resourceUrl, '_blank')
+  // 根据类型构建URL
+  let url = ''
+  if (item.itemType === 'news') {
+    url = `/news/${item.itemId._id}`
+  } else if (item.itemType === 'resource') {
+    url = `/resources/${item.itemId._id}`
+  }
+  
+  if (url) {
+    window.open(url, '_blank')
   }
 }
 
@@ -538,8 +583,8 @@ const getTypeIcon = (type: string) => {
 }
 
 // 获取类型颜色
-const getTypeColor = (type: string) => {
-  const colorMap: Record<string, string> = {
+const getTypeColor = (type: string): 'success' | 'warning' | 'danger' | 'info' | 'primary' => {
+  const colorMap: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
     news: 'primary',
     resource: 'success',
     activity: 'warning',

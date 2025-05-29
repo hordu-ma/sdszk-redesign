@@ -4,9 +4,11 @@
       <!-- 左侧导航菜单 -->
       <aside class="user-sidebar">
         <div class="user-info">
-          <el-avatar :size="60" :src="userInfo?.avatar">
-            <i class="el-icon-user-solid"></i>
-          </el-avatar>
+          <div class="avatar-container">
+            <el-avatar :size="60" :src="userInfo?.avatar" class="user-avatar">
+              <i class="el-icon-user-solid"></i>
+            </el-avatar>
+          </div>
           <h3 class="user-name">{{ userInfo?.name || '用户' }}</h3>
           <p class="user-role">{{ getRoleText(userInfo?.role) }}</p>
         </div>
@@ -137,8 +139,19 @@ const currentPageTitle = computed(() => {
   color: white;
 }
 
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.user-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .user-name {
-  margin: 15px 0 5px;
+  margin: 0 0 5px;
   font-size: 18px;
   font-weight: 600;
 }

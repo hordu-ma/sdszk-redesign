@@ -370,7 +370,78 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 // 复用 NewsCreate 的样式
-@import './NewsCreate.vue';
+.news-edit {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .header-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+
+      .back-btn {
+        margin-top: 4px;
+        color: #666;
+
+        &:hover {
+          color: #1890ff;
+        }
+      }
+
+      .title-section {
+        h2 {
+          margin: 0 0 8px 0;
+          font-size: 24px;
+          font-weight: 600;
+          color: #333;
+        }
+
+        p {
+          margin: 0;
+          color: #666;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .header-right {
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  .form-container {
+    .main-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .settings-panel {
+      .setting-card {
+        margin-bottom: 16px;
+
+        :deep(.ant-card-head) {
+          padding: 12px 16px;
+          min-height: auto;
+
+          .ant-card-head-title {
+            font-size: 14px;
+            font-weight: 500;
+          }
+        }
+
+        :deep(.ant-card-body) {
+          padding: 16px;
+        }
+      }
+    }
+  }
+}
 
 .loading-container {
   display: flex;

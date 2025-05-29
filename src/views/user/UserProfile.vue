@@ -9,11 +9,18 @@
         <el-upload
           :show-file-list="false"
           :before-upload="beforeAvatarUpload"
-          :http-request="handleAvatarUpload"
+          :auto-upload="false"
           accept="image/*"
+          ref="uploadRef"
         >
           <el-button size="small" type="primary" plain>更换头像</el-button>
         </el-upload>
+        <!-- 头像裁剪组件 -->
+        <avatar-cropper
+          v-model:visible="cropperVisible"
+          :img-file="avatarFile"
+          @crop-success="cropSuccess"
+        />
       </div>
       <div class="user-stats">
         <div class="stat-item">
@@ -180,9 +187,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { FormInstance, FormRules, UploadRequestOptions } from 'element-plus'
+import type { FormInstance, FormRules, UploadRequestOptions, UploadInstance, UploadFile, UploadRawFile } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { userApi } from '@/api/modules/user'
+import AvatarCropper from '@/components/common/AvatarCropper.vue'
 
 // 定义扩展的用户信息接口（与 userStore.UserInfo 接口兼容）
 interface ExtendedUserInfo {
@@ -195,22 +203,52 @@ interface ExtendedUserInfo {
   permissions: string[]
   // 添加 UserProfile 中的额外字段
   phone?: string
-  gender?: string
+  gender?: 'male' | 'female' | 'secret'
   birthday?: string
   bio?: string
   location?: string
   createdAt?: string
   lastLoginAt?: string
-  status?: string
+  status?: 'active' | 'inactive'
+  emailVerified?: boolean
+  phoneVerified?: boolean
+  twoFactorEnabled?: boolean
+}
+
+// 定义用户统计数据接口
+interface UserStats {
+  totalViews: number
+  totalFavorites: number
+  joinDays: number
+}
+
+// 定义表单数据接口
+interface FormData {
+  username: string
+  name: string
+  email: string
+  phone: string
+  gender: string
+  birthday: string
+  bio: string
+  location: string
+  avatar: string
 }
 
 const userStore = useUserStore()
 
 // 响应式数据
 const formRef = ref<FormInstance>()
+const uploadRef = ref<UploadInstance>()
 const isEditing = ref(false)
 const loading = ref(false)
-const userStats = ref<any>({})
+const userStats = ref<UserStats>({
+  totalViews: 0,
+  totalFavorites: 0,
+  joinDays: 0
+})
+const cropperVisible = ref(false)
+const avatarFile = ref<File>()
 
 // 计算属性
 const userInfo = computed(() => userStore.userInfo as unknown as ExtendedUserInfo)
@@ -229,7 +267,17 @@ const formData = reactive({
 })
 
 // 原始数据备份
-let originalData: any = {}
+let originalData: FormData = {
+  username: '',
+  name: '',
+  email: '',
+  phone: '',
+  gender: '',
+  birthday: '',
+  bio: '',
+  location: '',
+  avatar: ''
+}
 
 // 表单验证规则
 const rules: FormRules = {
@@ -295,13 +343,25 @@ const saveProfile = async () => {
         const response = await userApi.getMe()
         if (response.success) {
           // 适配 UserInfo 类型要求的字段
-          const userData = {
-            ...response.data.user,
-            permissions: userStore.userInfo?.permissions || [],
-            name: response.data.user.name || username, // 确保 name 不为 undefined
-          }
+        const userData: ExtendedUserInfo = {
+          id: response.data.user.id,
+          username: response.data.user.username,
+          name: response.data.user.name || username,
+          avatar: response.data.user.avatar,
+          email: response.data.user.email,
+          role: response.data.user.role || 'user',
+          permissions: userStore.userInfo?.permissions || [],
+          phone: response.data.user.phone,
+          gender: response.data.user.gender,
+          birthday: response.data.user.birthday,
+          bio: response.data.user.bio,
+          location: response.data.user.location,
+          createdAt: response.data.user.createdAt,
+          lastLoginAt: response.data.user.lastLoginAt,
+          status: response.data.user.status
+        }
 
-          userStore.setUserInfo(userData as any) // 使用 any 类型暂时解决类型问题
+        userStore.setUserInfo(userData)
         }
 
         originalData = { ...formData }
@@ -317,50 +377,75 @@ const saveProfile = async () => {
 }
 
 // 头像上传前检查
-const beforeAvatarUpload = (file: File) => {
-  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
+const beforeAvatarUpload = (rawFile: UploadRawFile) => {
+  if (!rawFile.type) {
+    ElMessage.error('无法识别文件类型!')
+    return false
+  }
+  
+  const isJPG = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png'
+  
+  if (!rawFile.size) {
+    ElMessage.error('无法获取文件大小!')
+    return false
+  }
+  
+  const isLt2M = rawFile.size / 1024 / 1024 < 2
 
   if (!isJPG) {
-    ElMessage.error('头像图片只能是 JPG/PNG 格式!')
+    ElMessage.error('头像图片只能是 JPG 或 PNG 格式!')
     return false
   }
   if (!isLt2M) {
     ElMessage.error('头像图片大小不能超过 2MB!')
     return false
   }
-  return true
+
+  // 设置文件并打开裁剪器
+  avatarFile.value = rawFile
+  cropperVisible.value = true
+  return false // 阻止自动上传
 }
 
-// 头像上传
-const handleAvatarUpload = async (options: UploadRequestOptions) => {
+// 裁剪成功后的处理
+const cropSuccess = async (blob: Blob, dataUrl: string) => {
+  loading.value = true
   try {
-    const avatarFormData = new FormData()
-    avatarFormData.append('avatar', options.file)
+    // 将Blob转换为File对象
+    const file = new File([blob], avatarFile.value?.name || 'avatar.png', {
+      type: blob.type,
+    })
 
-    // 调用 API 上传头像
-    const response = await userApi.uploadAvatar(options.file)
-    if (response.data?.avatarUrl) {
-      // 更新本地头像
-      formData.avatar = response.data.avatarUrl
+    // 创建FormData对象
+    const formData = new FormData()
+    formData.append('avatar', file)
 
-      // 刷新用户信息
-      const userResponse = await userApi.getMe()
-      if (userResponse.success) {
-        // 适配 UserInfo 类型要求的字段
-        const userData = {
-          ...userResponse.data.user,
-          permissions: userStore.userInfo?.permissions || [],
-          name: userResponse.data.user.name || userStore.userInfo?.username || '',
-        }
-
-        userStore.setUserInfo(userData as any) // 使用 any 类型暂时解决类型问题
-      }
-
+    // 调用API上传头像
+    const res = await userApi.uploadAvatar(formData)
+    if (res.success) {
       ElMessage.success('头像上传成功')
+      // 更新用户信息
+      const userRes = await userApi.getMe()
+      if (userRes.success) {
+        const updatedUserInfo: ExtendedUserInfo = {
+          ...userStore.userInfo as ExtendedUserInfo,
+          avatar: userRes.data.user.avatar
+        }
+        userStore.setUserInfo(updatedUserInfo)
+      }
+      // 清除上传组件的文件列表
+      if (uploadRef.value) {
+        uploadRef.value.clearFiles()
+      }
+    } else {
+      ElMessage.error(res.message || '头像上传失败')
     }
-  } catch (error: any) {
-    ElMessage.error(error.message || '头像上传失败')
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '上传头像时发生错误'
+    console.error('上传头像出错:', error)
+    ElMessage.error(errorMessage)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -375,8 +460,8 @@ const getRoleText = (role?: string) => {
 }
 
 // 获取角色标签类型
-const getRoleType = (role?: string) => {
-  const typeMap: Record<string, string> = {
+const getRoleType = (role?: string): 'success' | 'warning' | 'danger' | 'info' | 'primary' => {
+  const typeMap: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
     admin: 'danger',
     editor: 'warning',
     user: 'success',
@@ -400,9 +485,10 @@ const loadUserStats = async () => {
       totalFavorites: 0,
       joinDays: 0,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取用户统计数据失败'
     console.error('获取用户统计失败:', error)
-    ElMessage.error(error.message || '获取用户统计数据失败')
+    ElMessage.error(errorMessage)
   }
 }
 

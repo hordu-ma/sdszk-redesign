@@ -15,6 +15,12 @@ export interface UserProfile {
   role: 'admin' | 'editor' | 'user'
   createdAt: string
   updatedAt: string
+  lastLoginAt?: string
+  status?: 'active' | 'inactive'
+  bio?: string
+  location?: string
+  gender?: 'male' | 'female' | 'secret'
+  birthday?: string
 }
 
 // 用户统计信息接口
@@ -91,11 +97,8 @@ export class UserApi extends BaseApi {
   }
 
   // 上传头像
-  uploadAvatar(file: File): Promise<ApiResponse<{ user: UserProfile; avatarUrl: string }>> {
-    const formData = new FormData()
-    formData.append('avatar', file)
-
-    return this.request<{ user: UserProfile; avatarUrl: string }>({
+  uploadAvatar(formData: FormData): Promise<ApiResponse<{ user: UserProfile; avatarUrl: string }>> {
+    return this.request<{ user: UserProfile; avatarUrl: string }>({  
       method: 'POST',
       url: '/api/users/upload-avatar',
       data: formData,

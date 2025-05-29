@@ -348,9 +348,54 @@ import { favoriteApi } from '@/api/modules/favorite'
 
 // 响应式数据
 const loading = ref(false)
-const history = ref<any[]>([])
-const stats = ref<any>({})
-const recommendations = ref<any[]>([])
+// 定义历史记录接口
+interface ViewHistory {
+  _id: string
+  resourceId: string
+  resourceTitle: string
+  resourceType: string
+  resourceUrl?: string
+  viewDuration: number
+  createdAt: string
+  device?: {
+    type?: string
+    browser?: string
+  }
+}
+
+// 定义统计数据接口
+interface HistoryStats {
+  totalViews: number
+  todayViews: number
+  weekViews: number
+  monthViews: number
+  avgDuration: number
+  mostViewedType: string
+  mostActiveHour: number
+}
+
+// 定义推荐内容接口
+interface Recommendation {
+  _id: string
+  title: string
+  type: 'news' | 'resource' | 'activity'
+  url: string
+  score: number
+  reason: string
+  thumbnail?: string
+}
+
+const history = ref<ViewHistory[]>([])
+const stats = ref<HistoryStats>({
+  totalViews: 0,
+  todayViews: 0,
+  weekViews: 0,
+  monthViews: 0,
+  avgDuration: 0,
+  mostViewedType: '',
+  mostActiveHour: 0
+})
+const recommendations = ref<Recommendation[]>([])
 const selectedItems = ref<string[]>([])
 const selectAll = ref(false)
 const currentPage = ref(1)
@@ -386,8 +431,9 @@ const loadHistory = async () => {
     // 清空选择
     selectedItems.value = []
     selectAll.value = false
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载浏览历史失败')
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '加载浏览历史失败'
+    ElMessage.error(errorMessage)
   } finally {
     loading.value = false
   }
@@ -414,8 +460,9 @@ const loadRecommendations = async () => {
 }
 
 // 全选处理
-const handleSelectAll = (checked: boolean) => {
-  if (checked) {
+const handleSelectAll = (checked: boolean | string | number) => {
+  const isChecked = Boolean(checked)
+  if (isChecked) {
     selectedItems.value = history.value.map(item => item._id)
   } else {
     selectedItems.value = []
@@ -428,8 +475,9 @@ const handleSelectionChange = (selection: any[]) => {
 }
 
 // 单项选择处理
-const handleItemSelect = (id: string, checked: boolean) => {
-  if (checked) {
+const handleItemSelect = (id: string, checked: boolean | string | number) => {
+  const isChecked = Boolean(checked)
+  if (isChecked) {
     selectedItems.value.push(id)
   } else {
     const index = selectedItems.value.indexOf(id)
@@ -569,8 +617,8 @@ const getTypeIcon = (type: string) => {
 }
 
 // 获取类型颜色
-const getTypeColor = (type: string) => {
-  const colorMap: Record<string, string> = {
+const getTypeColor = (type: string): 'success' | 'warning' | 'danger' | 'info' | 'primary' => {
+  const colorMap: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
     news: 'primary',
     resource: 'success',
     activity: 'warning',
