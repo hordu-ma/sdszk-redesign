@@ -60,17 +60,17 @@ export interface FavoriteStats {
 export class FavoriteApi extends BaseApi {
   // 添加收藏
   addFavorite(data: AddFavoriteRequest): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.post('/api/favorites', data)
+    return this.post('/favorites', data)
   }
 
   // 移除收藏
   removeFavorite(itemType: string, itemId: string): Promise<ApiResponse<void>> {
-    return this.delete(`/api/favorites/${itemType}/${itemId}`)
+    return this.delete(`/favorites/${itemType}/${itemId}`)
   }
 
   // 检查是否已收藏
   checkFavorite(itemType: string, itemId: string): Promise<ApiResponse<{ isFavorited: boolean }>> {
-    return this.get(`/api/favorites/check/${itemType}/${itemId}`)
+    return this.get(`/favorites/check/${itemType}/${itemId}`)
   }
 
   // 获取收藏列表
@@ -83,12 +83,12 @@ export class FavoriteApi extends BaseApi {
       totalPages: number
     }>
   > {
-    return this.get('/api/favorites', { params })
+    return this.get('/favorites', { params })
   }
 
   // 获取收藏统计
   getFavoriteStats(): Promise<ApiResponse<FavoriteStats>> {
-    return this.get('/api/favorites/stats')
+    return this.get('/favorites/stats')
   }
 
   // 更新收藏分类
@@ -96,7 +96,7 @@ export class FavoriteApi extends BaseApi {
     id: string,
     category: string
   ): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.patch(`/api/favorites/${id}/category`, { category })
+    return this.patch(`/favorites/${id}/category`, { category })
   }
 
   // 批量更新收藏分类
@@ -104,28 +104,28 @@ export class FavoriteApi extends BaseApi {
     favoriteIds: string[],
     category: string
   ): Promise<ApiResponse<{ modifiedCount: number }>> {
-    return this.patch('/api/favorites/batch/category', { favoriteIds, category })
+    return this.patch('/favorites/batch/category', { favoriteIds, category })
   }
 
   // 批量删除收藏
   batchDeleteFavorites(favoriteIds: string[]): Promise<ApiResponse<{ deletedCount: number }>> {
     return this.request<{ deletedCount: number }>({
       method: 'DELETE',
-      url: '/api/favorites/batch',
+      url: '/favorites/batch',
       data: { favoriteIds },
     })
   }
 
   // 添加收藏标签
   addFavoriteTag(id: string, tag: string): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.post(`/api/favorites/${id}/tags`, { tag })
+    return this.post(`/favorites/${id}/tags`, { tag })
   }
 
   // 移除收藏标签
   removeFavoriteTag(id: string, tag: string): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
     return this.request<{ favorite: FavoriteItem }>({
       method: 'DELETE',
-      url: `/api/favorites/${id}/tags`,
+      url: `/favorites/${id}/tags`,
       data: { tag },
     })
   }

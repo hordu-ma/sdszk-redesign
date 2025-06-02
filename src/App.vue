@@ -23,16 +23,22 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useUserStore } from "./stores/user";
 import Header from "./components/Header.vue";
 import FooterLinks from "./components/FooterLinks.vue";
 import BackToTop from "./components/BackToTop.vue";
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
 const isAdminRoute = computed(() => route.path.startsWith("/admin"));
 
-// 处理GitHub Pages的路由重定向
-onMounted(() => {
+// 应用初始化
+onMounted(async () => {
+  // 初始化用户信息
+  await userStore.initUserInfo();
+  
+  // 处理GitHub Pages的路由重定向
   const redirect = sessionStorage.getItem("redirect");
   if (redirect) {
     sessionStorage.removeItem("redirect");

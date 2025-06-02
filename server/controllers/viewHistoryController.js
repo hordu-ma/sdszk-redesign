@@ -1,7 +1,7 @@
 // viewHistoryController.js - 浏览历史控制器
 import ViewHistory from '../models/ViewHistory.js'
 import { catchAsync } from '../utils/catchAsync.js'
-import AppError from '../utils/appError.js'
+import { AppError } from '../utils/appError.js'
 
 // 记录浏览历史
 export const recordView = catchAsync(async (req, res, next) => {

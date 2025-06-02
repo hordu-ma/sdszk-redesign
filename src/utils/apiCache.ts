@@ -190,12 +190,12 @@ export const apiCache = new ApiCache()
 /* 使用示例：
 
 1. 基本使用
-const data = apiCache.get('/api/resources')
-apiCache.set('/api/resources', responseData)
+const data = apiCache.get('/resources')
+apiCache.set('/resources', responseData)
 
 2. 带参数的缓存
-const data = apiCache.get('/api/resources', { category: 'document' })
-apiCache.set('/api/resources', responseData, { 
+const data = apiCache.get('/resources', { category: 'document' })
+apiCache.set('/resources', responseData, { 
   params: { category: 'document' },
   ttl: 5 * 60 * 1000, // 5分钟
   tags: ['resources', 'document']
@@ -205,7 +205,7 @@ apiCache.set('/api/resources', responseData, {
 apiCache.deleteByTag('resources')
 
 4. 按模式清除缓存
-apiCache.deleteByPattern('^/api/resources')
+apiCache.deleteByPattern('^/resources')
 
 5. 获取缓存统计
 const stats = apiCache.getStats()

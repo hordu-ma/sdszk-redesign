@@ -1,7 +1,7 @@
 // favoriteController.js - 收藏功能控制器
 import Favorite from '../models/Favorite.js'
 import { catchAsync } from '../utils/catchAsync.js'
-import AppError from '../utils/appError.js'
+import { AppError } from '../utils/appError.js'
 
 // 添加收藏
 export const addFavorite = catchAsync(async (req, res, next) => {

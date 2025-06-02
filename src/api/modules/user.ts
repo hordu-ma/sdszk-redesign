@@ -83,24 +83,24 @@ export interface ChangePasswordRequest {
 export class UserApi extends BaseApi {
   // 获取当前用户信息
   getMe(): Promise<ApiResponse<{ user: UserProfile }>> {
-    return this.get('/api/users/me')
+    return this.get('/users/me')
   }
 
   // 更新个人信息
   updateProfile(data: UpdateProfileRequest): Promise<ApiResponse<{ user: UserProfile }>> {
-    return this.patch('/api/users/me', data)
+    return this.patch('/users/me', data)
   }
 
   // 修改密码
   changePassword(data: ChangePasswordRequest): Promise<ApiResponse<void>> {
-    return this.patch('/api/users/update-password', data)
+    return this.patch('/users/update-password', data)
   }
 
   // 上传头像
   uploadAvatar(formData: FormData): Promise<ApiResponse<{ user: UserProfile; avatarUrl: string }>> {
     return this.request<{ user: UserProfile; avatarUrl: string }>({  
       method: 'POST',
-      url: '/api/users/upload-avatar',
+      url: '/users/upload-avatar',
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -110,7 +110,7 @@ export class UserApi extends BaseApi {
 
   // 获取用户统计信息
   getUserStats(): Promise<ApiResponse<UserStats>> {
-    return this.get('/api/users/stats')
+    return this.get('/users/stats')
   }
 
   // 获取用户活动日志
@@ -123,14 +123,14 @@ export class UserApi extends BaseApi {
       totalPages: number
     }>
   > {
-    return this.get('/api/users/activity-log', { params })
+    return this.get('/users/activity-log', { params })
   }
 
   // 删除账号
   deleteAccount(password: string): Promise<ApiResponse<void>> {
     return this.request<void>({
       method: 'DELETE',
-      url: '/api/users/delete-account',
+      url: '/users/delete-account',
       data: { password },
     })
   }

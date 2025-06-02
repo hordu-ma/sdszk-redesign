@@ -79,12 +79,12 @@ export class ViewHistoryApi extends BaseApi {
     resourceUrl: string
     viewDuration?: number
   }): Promise<ApiResponse<ViewHistory>> {
-    return this.post('/api/view-history/record', data)
+    return this.post('/view-history/record', data)
   }
 
   // 更新浏览时长
   updateViewDuration(historyId: string, duration: number): Promise<ApiResponse<ViewHistory>> {
-    return this.patch(`/api/view-history/${historyId}/duration`, { duration })
+    return this.patch(`/view-history/${historyId}/duration`, { duration })
   }
 
   // 获取浏览历史列表
@@ -97,12 +97,12 @@ export class ViewHistoryApi extends BaseApi {
       totalPages: number
     }>
   > {
-    return this.get('/api/view-history', { params })
+    return this.get('/view-history', { params })
   }
 
   // 获取浏览历史统计
   getHistoryStats(params?: { days?: number }): Promise<ApiResponse<HistoryStats>> {
-    return this.get('/api/view-history/stats', { params })
+    return this.get('/view-history/stats', { params })
   }
 
   // 获取热门内容
@@ -111,31 +111,31 @@ export class ViewHistoryApi extends BaseApi {
     days?: number
     resourceType?: 'news' | 'resource' | 'activity'
   }): Promise<ApiResponse<PopularContent[]>> {
-    return this.get('/api/view-history/popular', { params })
+    return this.get('/view-history/popular', { params })
   }
 
   // 获取推荐内容
   getRecommendedContent(params?: { limit?: number }): Promise<ApiResponse<RecommendedContent[]>> {
-    return this.get('/api/view-history/recommendations', { params })
+    return this.get('/view-history/recommendations', { params })
   }
 
   // 删除指定浏览历史
   deleteViewHistory(historyId: string): Promise<ApiResponse<void>> {
-    return this.delete(`/api/view-history/${historyId}`)
+    return this.delete(`/view-history/${historyId}`)
   }
 
   // 批量删除浏览历史
   batchDeleteHistory(historyIds: string[]): Promise<ApiResponse<void>> {
     return this.request<void>({
       method: 'DELETE',
-      url: '/api/view-history/batch',
+      url: '/view-history/batch',
       data: { historyIds },
     })
   }
 
   // 清空浏览历史
   clearAllHistory(): Promise<ApiResponse<void>> {
-    return this.delete('/api/view-history/clear')
+    return this.delete('/view-history/clear')
   }
 
   // 导出浏览历史
@@ -147,7 +147,7 @@ export class ViewHistoryApi extends BaseApi {
   }): Promise<Blob> {
     const response = await this.request<Blob>({
       method: 'GET',
-      url: '/api/view-history/export',
+      url: '/view-history/export',
       params,
       responseType: 'blob',
     })

@@ -49,6 +49,28 @@ export const useUserStore = defineStore(
       userInfo.value = user
     }
 
+    // 权限转换函数：将后端嵌套对象格式转换为前端字符串数组格式
+    function transformPermissions(backendPermissions: any): string[] {
+      const permissions: string[] = []
+      
+      if (!backendPermissions || typeof backendPermissions !== 'object') {
+        return permissions
+      }
+
+      // 遍历权限对象，将嵌套结构转换为字符串数组
+      for (const [module, actions] of Object.entries(backendPermissions)) {
+        if (actions && typeof actions === 'object') {
+          for (const [action, hasPermission] of Object.entries(actions as Record<string, boolean>)) {
+            if (hasPermission === true) {
+              permissions.push(`${module}:${action}`)
+            }
+          }
+        }
+      }
+      
+      return permissions
+    }
+
     // 登录方法
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
@@ -56,13 +78,22 @@ export const useUserStore = defineStore(
         const response = await api.post('/api/auth/login', payload)
         console.log('登录响应:', response)
 
-        if (response.data?.status === 'success') {
+        if (response.data.status === 'success') {
           const authToken = response.data.token
-          const userData = response.data.data.user
+          const userData = response.data.user
 
           if (authToken && userData) {
             token.value = authToken
-            userInfo.value = userData
+            
+            // 转换权限格式
+            const transformedPermissions = transformPermissions(userData.permissions)
+            const userWithTransformedPermissions = {
+              ...userData,
+              permissions: transformedPermissions
+            }
+            
+            userInfo.value = userWithTransformedPermissions
+            console.log('转换后的权限:', transformedPermissions)
 
             // 如果选择记住登录状态，保存token
             if (payload.remember) {
@@ -75,10 +106,13 @@ export const useUserStore = defineStore(
             return true
           }
         }
-        return false
-      } catch (error) {
+        
+        // 登录失败时抛出错误
+        throw new Error(response.data.message || '登录失败，请检查用户名和密码')
+      } catch (error: any) {
         console.error('登录错误:', error)
-        return false
+        // 重新抛出错误，让组件能够捕获
+        throw new Error(error.response?.data?.message || error.message || '登录失败，请检查网络连接')
       } finally {
         loading.value = false
       }
@@ -87,7 +121,7 @@ export const useUserStore = defineStore(
     // 登出方法
     async function logout(): Promise<void> {
       try {
-        await api.post('/auth/logout')
+        await api.post('/api/auth/logout')
       } catch (error) {
         console.error('登出错误:', error)
       } finally {
@@ -136,10 +170,22 @@ export const useUserStore = defineStore(
       const savedToken = localStorage.getItem('token')
       if (savedToken) {
         token.value = savedToken
+        // 设置全局请求头
+        api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
         try {
           const { data } = await api.get('/api/auth/me')
           if (data.status === 'success') {
-            userInfo.value = data.data.user
+            const userData = data.data.user
+            
+            // 转换权限格式
+            const transformedPermissions = transformPermissions(userData.permissions)
+            const userWithTransformedPermissions = {
+              ...userData,
+              permissions: transformedPermissions
+            }
+            
+            userInfo.value = userWithTransformedPermissions
+            console.log('初始化时转换后的权限:', transformedPermissions)
           } else {
             throw new Error('获取用户信息失败')
           }
@@ -165,6 +211,8 @@ export const useUserStore = defineStore(
       setUserInfo,
       setToken,
       hasPermission,
+      initUserInfo,
+      transformPermissions,
     }
   },
   {
