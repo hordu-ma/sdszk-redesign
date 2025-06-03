@@ -185,12 +185,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, defineAsyncComponent } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { FormInstance, FormRules, UploadRequestOptions, UploadInstance, UploadFile, UploadRawFile } from 'element-plus'
+import type {
+  FormInstance,
+  FormRules,
+  UploadRequestOptions,
+  UploadInstance,
+  UploadFile,
+  UploadRawFile,
+} from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { userApi } from '@/api/modules/user'
-import AvatarCropper from '@/components/common/AvatarCropper.vue'
+// 使用defineAsyncComponent异步导入AvatarCropper组件
+const AvatarCropper = defineAsyncComponent(() => import('@/components/common/AvatarCropper.vue'))
 
 // 定义扩展的用户信息接口（与 userStore.UserInfo 接口兼容）
 interface ExtendedUserInfo {
@@ -245,7 +253,7 @@ const loading = ref(false)
 const userStats = ref<UserStats>({
   totalViews: 0,
   totalFavorites: 0,
-  joinDays: 0
+  joinDays: 0,
 })
 const cropperVisible = ref(false)
 const avatarFile = ref<File>()
@@ -276,7 +284,7 @@ let originalData: FormData = {
   birthday: '',
   bio: '',
   location: '',
-  avatar: ''
+  avatar: '',
 }
 
 // 表单验证规则
@@ -343,25 +351,25 @@ const saveProfile = async () => {
         const response = await userApi.getMe()
         if (response.success) {
           // 适配 UserInfo 类型要求的字段
-        const userData: ExtendedUserInfo = {
-          id: response.data.user.id,
-          username: response.data.user.username,
-          name: response.data.user.name || username,
-          avatar: response.data.user.avatar,
-          email: response.data.user.email,
-          role: response.data.user.role || 'user',
-          permissions: userStore.userInfo?.permissions || [],
-          phone: response.data.user.phone,
-          gender: response.data.user.gender,
-          birthday: response.data.user.birthday,
-          bio: response.data.user.bio,
-          location: response.data.user.location,
-          createdAt: response.data.user.createdAt,
-          lastLoginAt: response.data.user.lastLoginAt,
-          status: response.data.user.status
-        }
+          const userData: ExtendedUserInfo = {
+            id: response.data.user.id,
+            username: response.data.user.username,
+            name: response.data.user.name || username,
+            avatar: response.data.user.avatar,
+            email: response.data.user.email,
+            role: response.data.user.role || 'user',
+            permissions: userStore.userInfo?.permissions || [],
+            phone: response.data.user.phone,
+            gender: response.data.user.gender,
+            birthday: response.data.user.birthday,
+            bio: response.data.user.bio,
+            location: response.data.user.location,
+            createdAt: response.data.user.createdAt,
+            lastLoginAt: response.data.user.lastLoginAt,
+            status: response.data.user.status,
+          }
 
-        userStore.setUserInfo(userData)
+          userStore.setUserInfo(userData)
         }
 
         originalData = { ...formData }
@@ -382,14 +390,14 @@ const beforeAvatarUpload = (rawFile: UploadRawFile) => {
     ElMessage.error('无法识别文件类型!')
     return false
   }
-  
+
   const isJPG = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png'
-  
+
   if (!rawFile.size) {
     ElMessage.error('无法获取文件大小!')
     return false
   }
-  
+
   const isLt2M = rawFile.size / 1024 / 1024 < 2
 
   if (!isJPG) {
@@ -428,8 +436,8 @@ const cropSuccess = async (blob: Blob, dataUrl: string) => {
       const userRes = await userApi.getMe()
       if (userRes.success) {
         const updatedUserInfo: ExtendedUserInfo = {
-          ...userStore.userInfo as ExtendedUserInfo,
-          avatar: userRes.data.user.avatar
+          ...(userStore.userInfo as ExtendedUserInfo),
+          avatar: userRes.data.user.avatar,
         }
         userStore.setUserInfo(updatedUserInfo)
       }
@@ -486,7 +494,7 @@ const loadUserStats = async () => {
       joinDays: 0,
     }
   } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '获取用户统计数据失败'
+    const errorMessage = error instanceof Error ? error.message : '获取用户统计数据失败'
     console.error('获取用户统计失败:', error)
     ElMessage.error(errorMessage)
   }

@@ -344,6 +344,13 @@ const handleReset = () => {
 const handleTableChange: TableProps['onChange'] = (pag, filters, sorter) => {
   pagination.current = pag.current || 1
   pagination.pageSize = pag.pageSize || 20
+
+  // 更新URL，但不刷新页面
+  const newUrl = new URL(window.location.href)
+  newUrl.searchParams.set('page', pagination.current.toString())
+  newUrl.searchParams.set('limit', pagination.pageSize.toString())
+  window.history.pushState({}, '', newUrl.toString())
+
   fetchNewsList()
 }
 
@@ -415,6 +422,20 @@ const handleBatchArchive = async () => {
 }
 
 onMounted(() => {
+  // 获取URL查询参数
+  const urlParams = new URLSearchParams(window.location.search)
+  const pageParam = urlParams.get('page')
+  const limitParam = urlParams.get('limit')
+
+  // 如果存在URL参数，则使用它们
+  if (pageParam) {
+    pagination.current = parseInt(pageParam) || 1
+  }
+  if (limitParam) {
+    pagination.pageSize = parseInt(limitParam) || 20
+  }
+
+  // 获取数据
   fetchNewsList()
   fetchCategories()
 })

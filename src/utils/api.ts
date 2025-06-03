@@ -85,16 +85,36 @@ api.interceptors.response.use(response => {
     return response.data
   }
 
+  const responseData = response.data
+
+  // 如果响应带有错误消息，如"用户名密码错误"等，则抛出错误
+  if (
+    responseData?.message &&
+    (responseData.message.includes('错误') ||
+      responseData.message.includes('失败') ||
+      responseData.message.includes('无效'))
+  ) {
+    const error = new Error(responseData.message)
+    ;(error as any).response = {
+      status: 401,
+      data: {
+        message: responseData.message,
+        status: 'error',
+      },
+    }
+    return Promise.reject(error)
+  }
+
   // 如果响应已经是标准格式则直接返回
-  if (response.data?.status === 'success' || response.data?.status === 'error') {
-    return response.data
+  if (responseData?.status === 'success' || responseData?.status === 'error') {
+    return responseData
   }
 
   // 否则转换为标准格式
   return {
     status: response.status >= 200 && response.status < 300 ? 'success' : 'error',
-    data: response.data?.data ?? response.data,
-    message: response.data?.message,
+    data: responseData?.data ?? responseData,
+    message: responseData?.message,
   }
 })
 
@@ -102,4 +122,4 @@ api.interceptors.response.use(response => {
 setupInterceptors(api)
 
 export default api
-export { ApiResponse };
+export { ApiResponse }

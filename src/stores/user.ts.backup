@@ -83,7 +83,7 @@ export const useUserStore = defineStore(
         // 确保检查response是对象且有status属性
         if (typeof response === 'object' && response !== null && response.status === 'success') {
           const authToken = response.token
-          const userData = response.data?.user // 获取用户数据
+          const userData = response.data?.user || response.user // 兼容两种可能的数据结构
 
           if (authToken && userData) {
             token.value = authToken

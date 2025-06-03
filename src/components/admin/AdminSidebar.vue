@@ -1,5 +1,8 @@
 <template>
-  <div class="admin-sidebar" :class="{ 'admin-sidebar--collapsed': collapsed, 'mobile-visible': isMobileVisible }">
+  <div
+    class="admin-sidebar"
+    :class="{ 'admin-sidebar--collapsed': collapsed, 'mobile-visible': isMobileVisible }"
+  >
     <!-- 顶部Logo区域 -->
     <div class="sidebar-header">
       <div class="logo-container">
@@ -107,7 +110,13 @@ watch(
 
 // 处理菜单点击
 const handleMenuClick = ({ key }: { key: string }) => {
-  emit('menu-click', key)
+  // 确保所有路径都正确处理
+  if (key.startsWith('/admin/')) {
+    emit('menu-click', key)
+  } else {
+    // 如果是子菜单标识而不是完整路径，则不进行导航
+    console.log('非导航菜单项:', key)
+  }
 }
 
 // 监听窗口大小变化
@@ -128,7 +137,7 @@ onUnmounted(() => {
 defineExpose({
   toggleMobileVisibility: () => {
     isMobileVisible.value = !isMobileVisible.value
-  }
+  },
 })
 </script>
 

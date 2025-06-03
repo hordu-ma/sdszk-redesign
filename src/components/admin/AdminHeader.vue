@@ -63,6 +63,15 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  BellOutlined,
+  UserOutlined,
+  SettingOutlined,
+  LogoutOutlined,
+  DownOutlined,
+} from '@ant-design/icons-vue'
 
 interface Props {
   collapsed?: boolean

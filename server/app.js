@@ -22,6 +22,7 @@ import activityLogRoutes from './routes/activityLogs.js'
 import dashboardRoutes from './routes/dashboard.js'
 import favoriteRoutes from './routes/favorites.js'
 import viewHistoryRoutes from './routes/viewHistory.js'
+import adminNewsRoutes from './routes/adminNews.js'
 
 // 错误处理中间件
 import errorMiddleware from './middleware/errorMiddleware.js'
@@ -139,6 +140,20 @@ app.use('/api/logs', activityLogRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/favorites', favoriteRoutes)
 app.use('/api/view-history', viewHistoryRoutes)
+app.use('/api/admin/news', adminNewsRoutes)
+
+// 修复错误格式的路由
+app.get('/admin/news/page=:page&limit=:limit', (req, res) => {
+  // 将请求重定向到正确格式的URL
+  res.redirect(`/admin/news/list?page=${req.params.page}&limit=${req.params.limit}`)
+})
+
+// 处理管理员新闻路由格式错误的情况
+app.get('/admin/news', (req, res) => {
+  const { page = 1, limit = 20 } = req.query
+  // 重定向到正确的API端点
+  res.redirect(`/api/admin/news?page=${page}&limit=${limit}`)
+})
 
 // 处理未找到的路由
 app.all('*', (req, res) => {
