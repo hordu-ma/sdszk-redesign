@@ -1,0 +1,2 @@
+import{_ as s}from"./index.DfSDjDZN.js";import{l as a,p as e,m as o}from"./vendor.D6UprDZQ.js";const r={class:"resources-container"},n=s({__name:"Resources",setup:s=>(s,n)=>(o(),a("div",r,n[0]||(n[0]=[e("h1",null,"资源中心",-1),e("div",{class:"resources-content"},[e("p",null,"资源中心内容正在建设中...")],-1)])))},[["__scopeId","data-v-a4afbda3"]]);export{n as default};
+//# sourceMappingURL=Resources.sr1z6QM2.js.map
