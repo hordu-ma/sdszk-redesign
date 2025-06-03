@@ -209,16 +209,28 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-// 获取分类列表
+} // 获取分类列表
 const fetchCategories = async () => {
   try {
     loading.value = true
-    const { data } = await newsCategoryApi.getList()
-    categories.value = data.sort((a: NewsCategory, b: NewsCategory) => a.order - b.order)
+    const response = await newsCategoryApi.getList()
+
+    // 简化数据处理逻辑
+    const data = response?.data || []
+    if (!Array.isArray(data)) {
+      console.warn('响应数据不是数组格式:', data)
+      categories.value = []
+      return
+    }
+
+    // 排序分类列表
+    categories.value = data.sort(
+      (a: NewsCategory, b: NewsCategory) => (a.order || 0) - (b.order || 0)
+    )
   } catch (error: any) {
+    console.error('获取分类列表错误:', error)
     message.error(error.message || '获取分类列表失败')
+    categories.value = []
   } finally {
     loading.value = false
   }

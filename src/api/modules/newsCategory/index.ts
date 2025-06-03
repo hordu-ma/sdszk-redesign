@@ -38,7 +38,8 @@ export class NewsCategoryApi extends BaseApi {
 
   // 获取所有分类
   async getList(params?: { includeInactive?: boolean }): Promise<ApiResponse<NewsCategory[]>> {
-    return await this.get<NewsCategory[]>('', params)
+    const response = await this.get<NewsCategory[]>('', params)
+    return response
   }
 
   // 获取核心分类

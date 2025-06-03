@@ -1,87 +1,92 @@
 // permissionMiddleware.js - 权限中间件
-import { ForbiddenError } from "../utils/appError.js";
+import { ForbiddenError } from '../utils/appError.js'
 
 // 权限检查中间件
 export const checkPermission = (resource, action) => {
   return (req, res, next) => {
     try {
       if (!req.user) {
-        throw new ForbiddenError("未认证的访问");
+        throw new ForbiddenError('未认证的访问')
       }
-
-      const { permissions } = req.user;
 
       // 管理员拥有所有权限
-      if (req.user.role === "admin") {
-        return next();
+      if (req.user.role === 'admin') {
+        return next()
       }
 
-      // 检查特定资源的特定操作权限
-      if (!permissions?.[resource]?.[action]) {
-        throw new ForbiddenError(`没有${resource}的${action}权限`);
+      const { permissions } = req.user
+
+      // 检查基本权限
+      if (permissions?.[resource]?.[action]) {
+        return next()
       }
 
-      next();
+      // 检查管理权限
+      if (permissions?.[resource]?.['manage']) {
+        return next()
+      }
+
+      throw new ForbiddenError(`没有${resource}的${action}权限`)
     } catch (error) {
-      next(error);
+      next(error)
     }
-  };
-};
+  }
+}
 
 // 多权限检查中间件（或关系）
-export const checkAnyPermission = (permissionChecks) => {
+export const checkAnyPermission = permissionChecks => {
   return (req, res, next) => {
     try {
       if (!req.user) {
-        throw new ForbiddenError("未认证的访问");
+        throw new ForbiddenError('未认证的访问')
       }
 
       // 管理员拥有所有权限
-      if (req.user.role === "admin") {
-        return next();
+      if (req.user.role === 'admin') {
+        return next()
       }
 
-      const { permissions } = req.user;
+      const { permissions } = req.user
       const hasPermission = permissionChecks.some(
         ([resource, action]) => permissions?.[resource]?.[action]
-      );
+      )
 
       if (!hasPermission) {
-        throw new ForbiddenError("无权限执行此操作");
+        throw new ForbiddenError('无权限执行此操作')
       }
 
-      next();
+      next()
     } catch (error) {
-      next(error);
+      next(error)
     }
-  };
-};
+  }
+}
 
 // 多权限检查中间件（与关系）
-export const checkAllPermissions = (permissionChecks) => {
+export const checkAllPermissions = permissionChecks => {
   return (req, res, next) => {
     try {
       if (!req.user) {
-        throw new ForbiddenError("未认证的访问");
+        throw new ForbiddenError('未认证的访问')
       }
 
       // 管理员拥有所有权限
-      if (req.user.role === "admin") {
-        return next();
+      if (req.user.role === 'admin') {
+        return next()
       }
 
-      const { permissions } = req.user;
+      const { permissions } = req.user
       const hasAllPermissions = permissionChecks.every(
         ([resource, action]) => permissions?.[resource]?.[action]
-      );
+      )
 
       if (!hasAllPermissions) {
-        throw new ForbiddenError("无权限执行此操作");
+        throw new ForbiddenError('无权限执行此操作')
       }
 
-      next();
+      next()
     } catch (error) {
-      next(error);
+      next(error)
     }
-  };
-};
+  }
+}

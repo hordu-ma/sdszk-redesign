@@ -53,34 +53,45 @@ export const useUserStore = defineStore(
     function transformPermissions(backendPermissions: any): string[] {
       const permissions: string[] = []
 
-      // 调试输出权限对象
-      console.log('接收到的原始权限对象:', backendPermissions)
-
       if (!backendPermissions || typeof backendPermissions !== 'object') {
+        console.warn('无效的权限对象:', backendPermissions)
         return permissions
       }
 
       // 遍历权限对象，将嵌套结构转换为字符串数组
-      for (const [module, actions] of Object.entries(backendPermissions)) {
-        if (actions && typeof actions === 'object') {
-          for (const [action, hasPermission] of Object.entries(
-            actions as Record<string, boolean>
-          )) {
-            if (hasPermission === true) {
-              // 特殊处理 settings 模块权限，确保 settings:read 和 settings:update 匹配路由中的要求
-              const permissionKey = `${module}:${action}`
-              permissions.push(permissionKey)
+      try {
+        for (const [module, actions] of Object.entries(backendPermissions)) {
+          if (actions && typeof actions === 'object') {
+            for (const [action, hasPermission] of Object.entries(
+              actions as Record<string, boolean>
+            )) {
+              if (hasPermission === true) {
+                const permissionKey = `${module}:${action}`
+                permissions.push(permissionKey)
 
-              // 为管理员添加系统设置权限
-              if (module === 'settings' && action === 'update') {
-                permissions.push('system:setting')
+                // 如果有特定资源权限，也加入相应的操作权限
+                if (action === 'manage') {
+                  permissions.push(`${module}:read`)
+                  permissions.push(`${module}:create`)
+                  permissions.push(`${module}:update`)
+                  permissions.push(`${module}:delete`)
+                }
+
+                // 特殊处理 settings 模块权限，确保 settings:read 和 settings:update 匹配路由中的要求
+                if (module === 'settings' && action === 'update') {
+                  permissions.push('system:setting')
+                }
               }
             }
           }
         }
+      } catch (error) {
+        console.error('权限转换失败:', error)
+        return []
       }
 
-      return permissions
+      // 去重并返回权限数组
+      return Array.from(new Set(permissions))
     }
 
     // 登录方法
