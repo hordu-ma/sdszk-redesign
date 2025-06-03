@@ -121,7 +121,7 @@ mongoose.connection.on('disconnected', () => {
 // 初始化数据库连接
 connectDB()
 
-// 路由配置
+// API 路由
 app.get('/', (req, res) => {
   res.json({ message: '山东省大中小学思政课一体化指导中心API服务' })
 })
@@ -133,6 +133,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/uploads', uploadRoutes)
 app.use('/api/resources', resourceRoutes)
+app.use('/api/admin/resources', resourceRoutes) // 添加管理员资源路由
 app.use('/api/resource-categories', resourceCategoryRoutes)
 app.use('/api/activities', activityRoutes)
 app.use('/api/settings', settingRoutes)
