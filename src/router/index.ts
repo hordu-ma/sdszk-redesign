@@ -246,7 +246,7 @@ const routes: RouteRecordRaw[] = [
         name: 'adminSettings',
         component: () => import('../views/admin/settings/SystemSettings.vue'),
         meta: {
-          permissions: ['system:setting'],
+          permissions: ['settings:update'],
         },
       },
     ],

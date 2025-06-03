@@ -53,6 +53,9 @@ export const useUserStore = defineStore(
     function transformPermissions(backendPermissions: any): string[] {
       const permissions: string[] = []
 
+      // 调试输出权限对象
+      console.log('接收到的原始权限对象:', backendPermissions)
+
       if (!backendPermissions || typeof backendPermissions !== 'object') {
         return permissions
       }
@@ -64,7 +67,14 @@ export const useUserStore = defineStore(
             actions as Record<string, boolean>
           )) {
             if (hasPermission === true) {
-              permissions.push(`${module}:${action}`)
+              // 特殊处理 settings 模块权限，确保 settings:read 和 settings:update 匹配路由中的要求
+              const permissionKey = `${module}:${action}`
+              permissions.push(permissionKey)
+
+              // 为管理员添加系统设置权限
+              if (module === 'settings' && action === 'update') {
+                permissions.push('system:setting')
+              }
             }
           }
         }
@@ -77,13 +87,18 @@ export const useUserStore = defineStore(
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true
+        console.log('正在发送登录请求到:', '/api/auth/login', '携带数据:', payload)
         const response = await api.post('/api/auth/login', payload)
-        console.log('登录响应:', response)
+        console.log('登录响应:', response.data)
 
-        // 确保检查response是对象且有status属性
-        if (typeof response === 'object' && response !== null && response.status === 'success') {
-          const authToken = response.token
-          const userData = response.data?.user // 获取用户数据
+        // 确保检查response.data是对象且有status属性
+        if (
+          typeof response.data === 'object' &&
+          response.data !== null &&
+          response.data.status === 'success'
+        ) {
+          const authToken = response.data.token
+          const userData = response.data.data?.user // 获取用户数据
 
           if (authToken && userData) {
             token.value = authToken
@@ -111,9 +126,11 @@ export const useUserStore = defineStore(
         }
 
         // 登录失败时抛出错误
+        console.error('登录请求成功但返回失败状态:', response.data)
         throw new Error(response.data.message || '登录失败，请检查用户名和密码')
       } catch (error: any) {
         console.error('登录错误:', error)
+        console.error('错误详情:', error.response?.data || '无响应数据')
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message || error.message || '登录失败，请检查网络连接'
@@ -167,6 +184,15 @@ export const useUserStore = defineStore(
 
     // 检查权限
     function hasPermission(permission: string): boolean {
+      console.log(`检查权限: ${permission}，当前权限列表:`, userPermissions.value)
+      console.log(`当前用户角色: ${userInfo.value?.role}`)
+
+      // 如果是管理员，始终有权限
+      if (userInfo.value?.role === 'admin') {
+        console.log('管理员具有所有权限，返回 true')
+        return true
+      }
+
       return userPermissions.value.includes(permission)
     }
 

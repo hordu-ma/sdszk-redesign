@@ -87,35 +87,22 @@ api.interceptors.response.use(response => {
 
   const responseData = response.data
 
-  // 如果响应带有错误消息，如"用户名密码错误"等，则抛出错误
-  if (
-    responseData?.message &&
-    (responseData.message.includes('错误') ||
-      responseData.message.includes('失败') ||
-      responseData.message.includes('无效'))
-  ) {
+  // 如果响应包含status='error'且有message，则抛出错误
+  if (responseData?.status === 'error' && responseData?.message) {
     const error = new Error(responseData.message)
     ;(error as any).response = {
-      status: 401,
+      status: response.status,
       data: {
         message: responseData.message,
-        status: 'error',
+        status: responseData.status,
+        code: responseData.code || 'API_ERROR',
       },
     }
     return Promise.reject(error)
   }
 
-  // 如果响应已经是标准格式则直接返回
-  if (responseData?.status === 'success' || responseData?.status === 'error') {
-    return responseData
-  }
-
-  // 否则转换为标准格式
-  return {
-    status: response.status >= 200 && response.status < 300 ? 'success' : 'error',
-    data: responseData?.data ?? responseData,
-    message: responseData?.message,
-  }
+  // 返回原始响应数据
+  return response
 })
 
 // 设置其他拦截器

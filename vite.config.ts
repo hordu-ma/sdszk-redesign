@@ -11,7 +11,8 @@ export default defineConfig(({ command, mode }) => {
   // If mode is preview, always use root base
   if (mode === 'preview') {
     base = '/'
-  } else if (command === 'build') { // For other build modes (like production), use the subpath
+  } else if (command === 'build') {
+    // For other build modes (like production), use the subpath
     base = '/sdszk-redesign/'
   }
 
@@ -67,6 +68,19 @@ export default defineConfig(({ command, mode }) => {
           target: 'http://localhost:3000',
           changeOrigin: true,
           secure: false,
+          rewrite: path => path, // 不重写路径
+          configure: (proxy, options) => {
+            // 调试代理请求
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('代理请求:', req.method, req.url)
+            })
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('代理响应:', proxyRes.statusCode, req.url)
+            })
+            proxy.on('error', (err, req, res) => {
+              console.error('代理错误:', err)
+            })
+          },
         },
       },
       hmr: {
