@@ -1,9 +1,9 @@
-
 # 项目技术栈
 
 ## 当前项目使用的框架
 
-- Vue3, JavaScript, Node.js, Express, MongoDB, Mongoose, Git, GitHub, Vite等。
+- Vue3, JavaScript, TypeScript, Node.js, Express, MongoDB, Mongoose, Git, GitHub, Vite等。
+- CI/CD, 阿里云部署
 
 ## 本项目的主要功能
 
