@@ -1,2 +1,0 @@
-import{_ as t}from"./index.DfSDjDZN.js";import{l as a,p as o,m as e}from"./vendor.D6UprDZQ.js";const s={class:"ai-container"},i=t({__name:"AI",setup:t=>(t,i)=>(e(),a("div",s,i[0]||(i[0]=[o("h1",null,"AI思政",-1),o("div",{class:"ai-content"},[o("p",null,"AI思政功能正在建设中,简单示例如下...")],-1),o("div",null,[o("iframe",{src:"http://localhost/chatbot/iHoXtxvZtBavk23g",style:{width:"100%",height:"100%","min-height":"700px"},frameborder:"0",allow:"microphone"})],-1)])))},[["__scopeId","data-v-4e625f46"]]);export{i as default};
-//# sourceMappingURL=AI.C5cO4VUT.js.map
