@@ -1,10 +1,6 @@
 <template>
   <div class="video-section">
-    <block-header
-      title="影像思政"
-      icon-class="fa-video"
-      more-link="/resources/video"
-    />
+    <block-header title="影像思政" icon-class="fa-video" more-link="/resources/video" />
     <div class="video-grid">
       <div v-for="video in videos" :key="video.id" class="video-card">
         <video-player :src="video.url" :poster="video.poster" />
@@ -15,19 +11,19 @@
 </template>
 
 <script setup lang="ts">
-import { default as BlockHeader } from "../common/BlockHeader.vue";
-import { default as VideoPlayer } from "../VideoPlayer.vue";
+import { default as BlockHeader } from '../common/BlockHeader.vue'
+import { default as VideoPlayer } from '../VideoPlayer.vue'
 
 interface Video {
-  id: number;
-  url: string;
-  poster: string;
-  title: string;
+  id: number
+  url: string
+  poster: string
+  title: string
 }
 
 defineProps<{
-  videos: Video[];
-}>();
+  videos: Video[]
+}>()
 </script>
 
 <style scoped>

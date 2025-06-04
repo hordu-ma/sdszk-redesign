@@ -20,38 +20,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { VideoPlay } from "@element-plus/icons-vue";
+import { ref } from 'vue'
+import { VideoPlay } from '@element-plus/icons-vue'
 
 interface Props {
-  src: string;
-  poster: string;
+  src: string
+  poster: string
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
-const videoRef = ref<HTMLVideoElement | null>(null);
-const isPlaying = ref(false);
+const videoRef = ref<HTMLVideoElement | null>(null)
+const isPlaying = ref(false)
 
 // 播放视频
 const playVideo = () => {
   if (videoRef.value) {
-    videoRef.value.play();
+    videoRef.value.play()
   }
-};
+}
 
 // 视频事件处理函数
 const onPlay = () => {
-  isPlaying.value = true;
-};
+  isPlaying.value = true
+}
 
 const onPause = () => {
-  isPlaying.value = false;
-};
+  isPlaying.value = false
+}
 
 const onEnded = () => {
-  isPlaying.value = false;
-};
+  isPlaying.value = false
+}
 </script>
 
 <style scoped>

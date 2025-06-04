@@ -13,16 +13,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue'
 
 export interface BlockHeaderProps {
-  title: string;
-  iconClass: string;
-  moreLink?: string;
+  title: string
+  iconClass: string
+  moreLink?: string
 }
 
 export default defineComponent({
-  name: "BlockHeader",
+  name: 'BlockHeader',
   props: {
     title: {
       type: String,
@@ -37,7 +37,7 @@ export default defineComponent({
       required: false,
     },
   },
-});
+})
 </script>
 
 <style scoped>
@@ -57,7 +57,7 @@ export default defineComponent({
   padding: 12px 20px;
   border-radius: 4px;
   margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   position: relative;
   transition: all 0.3s ease;

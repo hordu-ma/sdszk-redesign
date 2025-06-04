@@ -29,7 +29,16 @@
       </div>
       <div class="preview-container">
         <div class="preview-title">预览</div>
-        <div class="preview-box" :style="{ overflow: 'hidden', width: '100px', height: '100px', margin: '0 auto', borderRadius: '50%' }">
+        <div
+          class="preview-box"
+          :style="{
+            overflow: 'hidden',
+            width: '100px',
+            height: '100px',
+            margin: '0 auto',
+            borderRadius: '50%',
+          }"
+        >
           <div :style="previews.div" class="preview-content">
             <img :src="imgSrc" :style="previews.img" class="preview-img" />
           </div>
@@ -49,7 +58,13 @@
         </div>
         <div class="control-group">
           <div class="control-title">图片质量 ({{ outputSize }})</div>
-          <el-slider v-model="outputSize" :min="0.1" :max="1" :step="0.1" :format-tooltip="(value: number) => `${Math.round(value * 100)}%`" />
+          <el-slider
+            v-model="outputSize"
+            :min="0.1"
+            :max="1"
+            :step="0.1"
+            :format-tooltip="(value: number) => `${Math.round(value * 100)}%`"
+          />
         </div>
       </div>
     </div>
@@ -86,7 +101,7 @@ const imgSrc = ref('')
 const cropperRef = ref()
 const previews = reactive({
   div: {},
-  img: {}
+  img: {},
 })
 
 // 裁剪配置
@@ -95,33 +110,45 @@ const outputType = ref('png') // 裁剪生成图片的格式
 const zoom = ref(1) // 缩放比例
 
 // 监听visible属性变化
-watch(() => props.visible, (newVal) => {
-  dialogVisible.value = newVal
-})
+watch(
+  () => props.visible,
+  newVal => {
+    dialogVisible.value = newVal
+  }
+)
 
 // 监听dialogVisible变化，同步回父组件
-watch(() => dialogVisible.value, (newVal) => {
-  emit('update:visible', newVal)
-})
+watch(
+  () => dialogVisible.value,
+  newVal => {
+    emit('update:visible', newVal)
+  }
+)
 
 // 监听imgFile变化
-watch(() => props.imgFile, (newFile) => {
-  if (newFile) {
-    loadImage(newFile)
-    // 重置缩放比例
-    zoom.value = 1
+watch(
+  () => props.imgFile,
+  newFile => {
+    if (newFile) {
+      loadImage(newFile)
+      // 重置缩放比例
+      zoom.value = 1
+    }
   }
-})
+)
 
 // 监听zoom变化
-watch(() => zoom.value, (newZoom) => {
-  handleZoom(newZoom)
-})
+watch(
+  () => zoom.value,
+  newZoom => {
+    handleZoom(newZoom)
+  }
+)
 
 // 加载图片
 const loadImage = (file: File) => {
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = e => {
     imgSrc.value = e.target?.result as string
   }
   reader.readAsDataURL(file)
@@ -153,7 +180,7 @@ const realTime = (data: RealTimeData) => {
 // 裁剪图片
 const handleCrop = () => {
   if (!cropperRef.value) return
-  
+
   cropperRef.value.getCropBlob((blob: Blob) => {
     const dataUrl = URL.createObjectURL(blob)
     emit('crop-success', blob, dataUrl)
@@ -258,7 +285,7 @@ onMounted(() => {
   .cropper-container {
     height: 250px;
   }
-  
+
   .control-buttons {
     flex-wrap: wrap;
   }

@@ -1,20 +1,20 @@
 // activityLogController.js - 活动日志控制器
-import ActivityLog from "../models/ActivityLog.js";
+import ActivityLog from '../models/ActivityLog.js'
 
 // 获取活动日志列表
 export const getActivityLogs = async (req, res) => {
   try {
-    const { page = 1, limit = 10, type } = req.query;
-    const query = type ? { type } : {};
+    const { page = 1, limit = 10, type } = req.query
+    const query = type ? { type } : {}
 
     const logs = await ActivityLog.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate("user", "username")
-      .lean();
+      .populate('user', 'username')
+      .lean()
 
-    const total = await ActivityLog.countDocuments(query);
+    const total = await ActivityLog.countDocuments(query)
 
     res.json({
       success: true,
@@ -24,15 +24,15 @@ export const getActivityLogs = async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
       },
-    });
+    })
   } catch (error) {
-    console.error("获取活动日志失败:", error);
+    console.error('获取活动日志失败:', error)
     res.status(500).json({
       success: false,
-      message: "获取活动日志失败",
-    });
+      message: '获取活动日志失败',
+    })
   }
-};
+}
 
 // 创建活动日志
 export const createActivityLog = async (userId, action, type, details = {}) => {
@@ -42,11 +42,11 @@ export const createActivityLog = async (userId, action, type, details = {}) => {
       action,
       type,
       details,
-    });
-    await log.save();
-    return log;
+    })
+    await log.save()
+    return log
   } catch (error) {
-    console.error("创建活动日志失败:", error);
-    return null;
+    console.error('创建活动日志失败:', error)
+    return null
   }
-};
+}

@@ -18,17 +18,18 @@ interface UserInfo {
 type UserStore = ReturnType<typeof useUserStore>
 
 // 创建测试用的路由实例
-const createTestRouter = () => createRouter({
-  history: createWebHistory(),
-  routes: [
-    { path: '/', component: {} },
-    { path: '/about', component: {} },
-    { path: '/news', component: {} },
-    { path: '/resources', component: {} },
-    { path: '/ai', component: {} },
-    { path: '/auth', component: {} }
-  ]
-})
+const createTestRouter = () =>
+  createRouter({
+    history: createWebHistory(),
+    routes: [
+      { path: '/', component: {} },
+      { path: '/about', component: {} },
+      { path: '/news', component: {} },
+      { path: '/resources', component: {} },
+      { path: '/ai', component: {} },
+      { path: '/auth', component: {} },
+    ],
+  })
 
 // 模拟组件
 vi.mock('element-plus', () => ({
@@ -36,7 +37,7 @@ vi.mock('element-plus', () => ({
   ElButton: { name: 'ElButton' },
   ElInput: { name: 'ElInput' },
   ElIcon: { name: 'ElIcon' },
-  ElAvatar: { name: 'ElAvatar' }
+  ElAvatar: { name: 'ElAvatar' },
 }))
 
 describe('Header Component', () => {
@@ -52,15 +53,15 @@ describe('Header Component', () => {
           ElButton,
           ElInput,
           ElIcon,
-          ElAvatar
+          ElAvatar,
         },
         stubs: {
           'router-link': true,
           'el-dropdown-menu': true,
-          'el-dropdown-item': true
-        }
+          'el-dropdown-item': true,
+        },
       },
-      ...options
+      ...options,
     })
   }
 
@@ -135,7 +136,7 @@ describe('Header Component', () => {
         name: '测试用户',
         role: 'user',
         permissions: ['read'],
-        avatar: 'test.jpg'
+        avatar: 'test.jpg',
       })
       await store.setToken('test-token')
 
@@ -154,7 +155,7 @@ describe('Header Component', () => {
         name: '测试用户',
         role: 'user',
         permissions: ['read'],
-        avatar: 'test.jpg'
+        avatar: 'test.jpg',
       })
       await store.setToken('test-token')
 

@@ -1,7 +1,5 @@
-// 导入变量
-@use './variables.scss' as *;
-
 // 响应式设计混合宏
+@use 'variables' as *;
 
 // 超小屏幕（手机）
 @mixin xs {
@@ -62,11 +60,11 @@
 // 使用示例：
 // .example {
 //   color: black;
-//   
+//
 //   @include sm {
 //     color: red;
 //   }
-//   
+//
 //   @include md {
 //     color: blue;
 //   }

@@ -7,7 +7,7 @@ describe('BackToTop Component', () => {
     // 模拟 window.scrollY
     Object.defineProperty(window, 'scrollY', {
       value: 0,
-      writable: true
+      writable: true,
     })
 
     // 模拟 window.scrollTo
@@ -27,7 +27,7 @@ describe('BackToTop Component', () => {
 
   it('当滚动超过300px时按钮应该显示', async () => {
     const wrapper = mount(BackToTop)
-    
+
     // 模拟滚动事件
     window.scrollY = 301
     await window.dispatchEvent(new Event('scroll'))
@@ -37,11 +37,11 @@ describe('BackToTop Component', () => {
 
   it('当滚动小于300px时按钮应该隐藏', async () => {
     const wrapper = mount(BackToTop)
-    
+
     // 先滚动到显示位置
     window.scrollY = 301
     await window.dispatchEvent(new Event('scroll'))
-    
+
     // 再滚动回隐藏位置
     window.scrollY = 299
     await window.dispatchEvent(new Event('scroll'))
@@ -51,19 +51,19 @@ describe('BackToTop Component', () => {
 
   it('点击按钮应该调用scrollTo方法', async () => {
     const wrapper = mount(BackToTop)
-    
+
     await wrapper.trigger('click')
 
     expect(window.scrollTo).toHaveBeenCalledWith({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   })
 
   it('组件卸载时应该移除滚动事件监听器', () => {
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener')
     const wrapper = mount(BackToTop)
-    
+
     wrapper.unmount()
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function))

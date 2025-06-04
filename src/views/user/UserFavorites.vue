@@ -340,7 +340,7 @@ const stats = ref<FavoriteStats>({
   total: 0,
   news: 0,
   resources: 0,
-  activities: 0
+  activities: 0,
 })
 const selectedItems = ref<string[]>([])
 const selectAll = ref(false)
@@ -461,7 +461,7 @@ const openResource = (item: any) => {
   } else if (item.itemType === 'resource') {
     url = `/resources/${item.itemId._id}`
   }
-  
+
   if (url) {
     window.open(url, '_blank')
   }

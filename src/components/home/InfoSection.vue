@@ -110,26 +110,24 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
-
 defineProps({
   notices: {
     type: Array,
-    required: true
+    required: true,
   },
   policies: {
     type: Array,
-    required: true
+    required: true,
   },
   theories: {
     type: Array,
-    required: true
+    required: true,
   },
   researches: {
     type: Array,
-    required: true
-  }
-});
+    required: true,
+  },
+})
 </script>
 
 <style scoped>
@@ -159,7 +157,7 @@ defineProps({
   padding: 12px 20px;
   border-radius: 4px;
   margin: 0;
-  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   position: relative;
   transition: all 0.3s ease;

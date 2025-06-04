@@ -9,10 +9,10 @@ vi.mock('../../utils/api', () => ({
     post: vi.fn(),
     defaults: {
       headers: {
-        common: {}
-      }
-    }
-  }
+        common: {},
+      },
+    },
+  },
 }))
 
 describe('User Store', () => {
@@ -39,7 +39,7 @@ describe('User Store', () => {
     const mockLoginPayload = {
       username: 'testuser',
       password: 'password123',
-      remember: true
+      remember: true,
     }
 
     const mockSuccessResponse = {
@@ -52,10 +52,10 @@ describe('User Store', () => {
             username: 'testuser',
             name: 'Test User',
             role: 'user',
-            permissions: ['read']
-          }
-        }
-      }
+            permissions: ['read'],
+          },
+        },
+      },
     }
 
     it('成功登录应该正确设置状态', async () => {
@@ -95,7 +95,7 @@ describe('User Store', () => {
         username: 'testuser',
         name: 'Test User',
         role: 'user',
-        permissions: ['read']
+        permissions: ['read'],
       })
       localStorage.setItem('token', 'test-token')
 

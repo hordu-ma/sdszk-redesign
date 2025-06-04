@@ -1,5 +1,5 @@
 // Activity.js - 活动模型
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const activitySchema = new mongoose.Schema(
   {
@@ -74,20 +74,13 @@ const activitySchema = new mongoose.Schema(
     ],
     category: {
       type: String,
-      enum: [
-        "conference",
-        "seminar",
-        "workshop",
-        "competition",
-        "lecture",
-        "other",
-      ],
-      default: "other",
+      enum: ['conference', 'seminar', 'workshop', 'competition', 'lecture', 'other'],
+      default: 'other',
     },
     status: {
       type: String,
-      enum: ["upcoming", "ongoing", "completed", "canceled", "postponed"],
-      default: "upcoming",
+      enum: ['upcoming', 'ongoing', 'completed', 'canceled', 'postponed'],
+      default: 'upcoming',
     },
     registrationRequired: {
       type: Boolean,
@@ -170,19 +163,19 @@ const activitySchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
     timestamps: true,
   }
-);
+)
 
-const Activity = mongoose.model("Activity", activitySchema);
+const Activity = mongoose.model('Activity', activitySchema)
 
-export default Activity;
+export default Activity

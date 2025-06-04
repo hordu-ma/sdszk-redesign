@@ -9,16 +9,16 @@ vi.mock('../../services/news.service', () => ({
     getList: vi.fn(),
     getDetail: vi.fn(),
     create: vi.fn(),
-    update: vi.fn()
-  }))
+    update: vi.fn(),
+  })),
 }))
 
 // Mock useRecentlyViewed composable
 vi.mock('../../composables/useRecentlyViewed', () => ({
   useRecentlyViewed: () => ({
     items: [],
-    addItem: vi.fn()
-  })
+    addItem: vi.fn(),
+  }),
 }))
 
 describe('News Store', () => {
@@ -57,7 +57,7 @@ describe('News Store', () => {
         status: '',
         tag: '',
         startDate: '',
-        endDate: ''
+        endDate: '',
       })
     })
   })
@@ -65,19 +65,19 @@ describe('News Store', () => {
   describe('获取新闻列表', () => {
     const mockNewsList = [
       { id: '1', title: 'News 1', content: 'Content 1' },
-      { id: '2', title: 'News 2', content: 'Content 2' }
+      { id: '2', title: 'News 2', content: 'Content 2' },
     ]
 
     const mockPagination = {
       total: 20,
       page: 1,
-      limit: 10
+      limit: 10,
     }
 
     it('应该正确获取新闻列表', async () => {
       vi.mocked(newsService.getList).mockResolvedValueOnce({
         data: mockNewsList,
-        pagination: mockPagination
+        pagination: mockPagination,
       })
 
       await store.fetchList()
@@ -103,12 +103,12 @@ describe('News Store', () => {
     const mockNews = {
       id: '1',
       title: 'Test News',
-      content: 'Test Content'
+      content: 'Test Content',
     }
 
     it('应该正确获取新闻详情', async () => {
       newsService.getDetail.mockResolvedValueOnce({
-        data: mockNews
+        data: mockNews,
       })
 
       const result = await store.fetchById('1')
@@ -131,16 +131,16 @@ describe('News Store', () => {
   describe('创建和更新新闻', () => {
     const mockNewsData = {
       title: 'New News',
-      content: 'New Content'
+      content: 'New Content',
     }
 
     it('应该正确创建新闻', async () => {
       newsService.create.mockResolvedValueOnce({
-        data: { id: '1', ...mockNewsData }
+        data: { id: '1', ...mockNewsData },
       })
       newsService.getList.mockResolvedValueOnce({
         data: [{ id: '1', ...mockNewsData }],
-        pagination: { total: 1, page: 1, limit: 10 }
+        pagination: { total: 1, page: 1, limit: 10 },
       })
 
       await store.create(mockNewsData)
@@ -152,7 +152,7 @@ describe('News Store', () => {
     it('应该正确更新新闻', async () => {
       const updateData = { title: 'Updated News' }
       newsService.update.mockResolvedValueOnce({
-        data: { id: '1', ...mockNewsData, ...updateData }
+        data: { id: '1', ...mockNewsData, ...updateData },
       })
 
       await store.update('1', updateData)

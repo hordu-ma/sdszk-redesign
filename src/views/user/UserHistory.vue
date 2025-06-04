@@ -393,7 +393,7 @@ const stats = ref<HistoryStats>({
   monthViews: 0,
   avgDuration: 0,
   mostViewedType: '',
-  mostActiveHour: 0
+  mostActiveHour: 0,
 })
 const recommendations = ref<Recommendation[]>([])
 const selectedItems = ref<string[]>([])

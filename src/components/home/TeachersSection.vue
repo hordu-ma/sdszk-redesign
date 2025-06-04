@@ -1,10 +1,6 @@
 <template>
   <div class="teachers-section">
-    <block-header
-      title="'十佳百优'思政教师"
-      icon-class="fa-user-tie"
-      more-link="/teachers"
-    />
+    <block-header title="'十佳百优'思政教师" icon-class="fa-user-tie" more-link="/teachers" />
     <div class="teachers-grid">
       <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
         <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
@@ -17,19 +13,19 @@
 </template>
 
 <script setup lang="ts">
-import { default as BlockHeader } from "../common/BlockHeader.vue";
+import { default as BlockHeader } from '../common/BlockHeader.vue'
 
 interface Teacher {
-  id: number;
-  name: string;
-  title: string;
-  avatar: string;
-  description: string;
+  id: number
+  name: string
+  title: string
+  avatar: string
+  description: string
 }
 
 defineProps<{
-  teachers: Teacher[];
-}>();
+  teachers: Teacher[]
+}>()
 </script>
 
 <style scoped>

@@ -21,34 +21,34 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useUserStore } from "./stores/user";
-import Header from "./components/Header.vue";
-import FooterLinks from "./components/FooterLinks.vue";
-import BackToTop from "./components/BackToTop.vue";
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from './stores/user'
+import Header from './components/Header.vue'
+import FooterLinks from './components/FooterLinks.vue'
+import BackToTop from './components/BackToTop.vue'
 
-const route = useRoute();
-const router = useRouter();
-const userStore = useUserStore();
-const isAdminRoute = computed(() => route.path.startsWith("/admin"));
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
 // 应用初始化
 onMounted(async () => {
   // 初始化用户信息
-  await userStore.initUserInfo();
-  
+  await userStore.initUserInfo()
+
   // 处理GitHub Pages的路由重定向
-  const redirect = sessionStorage.getItem("redirect");
+  const redirect = sessionStorage.getItem('redirect')
   if (redirect) {
-    sessionStorage.removeItem("redirect");
-    router.push(redirect);
+    sessionStorage.removeItem('redirect')
+    router.push(redirect)
   }
-});
+})
 </script>
 
 <style>
-@import "./styles/components.css";
+@import './styles/components.css';
 
 /* 全局样式 */
 * {
@@ -84,8 +84,8 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #333;
@@ -147,7 +147,9 @@ header {
 /* 页面过渡动画 */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fade-enter-from {

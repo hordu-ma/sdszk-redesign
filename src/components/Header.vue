@@ -273,9 +273,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@use '../styles/variables.scss' as *;
-@use '../styles/mixins.scss' as *;
-
 .header {
   width: 100%;
   margin: 0;
@@ -320,12 +317,12 @@ onUnmounted(() => {
   height: 100%;
   position: relative;
   gap: 20px; /* 添加间距 */
-  
+
   @include sm {
     padding: 8px 12px;
     gap: 8px; /* 减小整体间距 */
   }
-  
+
   @include xs {
     padding: 6px 8px;
     gap: 4px;
@@ -338,7 +335,7 @@ onUnmounted(() => {
   padding-right: 0; /* 移除右侧内边距 */
   min-width: 300px; /* 增加最小宽度 */
   max-width: 360px; /* 增加最大宽度 */
-  
+
   @include sm {
     flex: 1;
     min-width: 0;
@@ -354,7 +351,7 @@ onUnmounted(() => {
   margin-right: 12px;
   transition: all 0.3s ease;
   flex-shrink: 0; /* 防止logo被压缩 */
-  
+
   @include sm {
     width: 36px;
     height: 36px;
@@ -396,7 +393,7 @@ onUnmounted(() => {
     white-space: nowrap;
     line-height: 1.2;
   }
-  
+
   .center-name {
     font-size: 14px;
     max-width: calc(100vw - 140px); /* 进一步扩大显示区域 */
@@ -441,30 +438,30 @@ onUnmounted(() => {
   gap: 16px;
   min-width: 280px; /* 固定最小宽度 */
   justify-content: flex-end; /* 右对齐 */
-  
+
   @include sm {
     gap: 8px;
     min-width: auto;
     margin-left: auto;
-    
+
     .auth-buttons {
       margin-right: 8px;
-      
+
       .auth-button .el-button {
         font-size: 13px;
         height: 32px;
         padding: 0 12px;
       }
     }
-    
+
     .user-menu {
       display: none;
     }
-    
+
     .search-box {
       display: none;
     }
-    
+
     .login-button {
       padding: 6px 12px;
       font-size: 14px;
@@ -475,7 +472,7 @@ onUnmounted(() => {
 .search-input {
   width: 180px; /* 减小搜索框宽度 */
   transition: width 0.3s ease;
-  
+
   &:focus-within {
     width: 220px; /* 聚焦时增加宽度 */
   }
@@ -485,7 +482,7 @@ onUnmounted(() => {
   color: #9a2314 !important;
   border-color: #9a2314 !important;
   background-color: rgba(255, 255, 255, 0.9) !important;
-  
+
   &:hover {
     color: #fff !important;
     background-color: #9a2314 !important;
@@ -516,7 +513,7 @@ onUnmounted(() => {
 
   .search-input {
     width: 160px;
-    
+
     &:focus-within {
       width: 200px;
     }
@@ -542,7 +539,7 @@ onUnmounted(() => {
 
   .search-input {
     width: 140px;
-    
+
     &:focus-within {
       width: 180px;
     }
@@ -584,7 +581,7 @@ onUnmounted(() => {
 
   .search-input {
     width: 120px;
-    
+
     &:focus-within {
       width: 160px;
     }
@@ -678,7 +675,7 @@ onUnmounted(() => {
 
   .search-input {
     width: 100px;
-    
+
     &:focus-within {
       width: 140px;
     }
@@ -758,7 +755,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.2);
   }
@@ -772,11 +769,11 @@ onUnmounted(() => {
   cursor: pointer;
   padding: 8px;
   margin-right: 4px;
-  
+
   .fas {
     font-size: 20px;
   }
-  
+
   @include sm {
     display: block;
     margin-right: 8px;

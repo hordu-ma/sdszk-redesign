@@ -4,12 +4,12 @@ import { useResourceStore } from '../resource'
 import { ResourceService } from '../../services/resource.service'
 
 interface MockResourceService {
-  getList: ReturnType<typeof vi.fn>;
-  getDetail: ReturnType<typeof vi.fn>;
-  create: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-  download: ReturnType<typeof vi.fn>;
+  getList: ReturnType<typeof vi.fn>
+  getDetail: ReturnType<typeof vi.fn>
+  create: ReturnType<typeof vi.fn>
+  update: ReturnType<typeof vi.fn>
+  delete: ReturnType<typeof vi.fn>
+  download: ReturnType<typeof vi.fn>
 }
 
 // Mock ResourceService
@@ -20,16 +20,16 @@ vi.mock('../../services/resource.service', () => ({
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    download: vi.fn()
-  }))
+    download: vi.fn(),
+  })),
 }))
 
 // Mock useRecentlyViewed composable
 vi.mock('../../composables/useRecentlyViewed', () => ({
   useRecentlyViewed: () => ({
     items: [],
-    addItem: vi.fn()
-  })
+    addItem: vi.fn(),
+  }),
 }))
 
 describe('Resource Store', () => {
@@ -60,7 +60,7 @@ describe('Resource Store', () => {
         type: '',
         keyword: '',
         status: '',
-        tags: []
+        tags: [],
       })
     })
 
@@ -70,7 +70,7 @@ describe('Resource Store', () => {
         pageSize: 10,
         total: 0,
         showSizeChanger: true,
-        showQuickJumper: true
+        showQuickJumper: true,
       })
     })
   })
@@ -78,19 +78,19 @@ describe('Resource Store', () => {
   describe('获取资源列表', () => {
     const mockResources = [
       { id: '1', title: 'Resource 1', type: 'document' },
-      { id: '2', title: 'Resource 2', type: 'video' }
+      { id: '2', title: 'Resource 2', type: 'video' },
     ]
 
     const mockPagination = {
       total: 20,
       page: 1,
-      limit: 10
+      limit: 10,
     }
 
     it('应该正确获取资源列表', async () => {
       resourceService.getList.mockResolvedValueOnce({
         data: mockResources,
-        pagination: mockPagination
+        pagination: mockPagination,
       })
 
       await store.fetchList()
@@ -109,11 +109,13 @@ describe('Resource Store', () => {
 
       await store.fetchList()
 
-      expect(resourceService.getList).toHaveBeenCalledWith(expect.objectContaining({
-        category: 'test-category',
-        type: 'document',
-        keyword: 'test'
-      }))
+      expect(resourceService.getList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'test-category',
+          type: 'document',
+          keyword: 'test',
+        })
+      )
     })
 
     it('应该处理获取列表时的错误', async () => {
@@ -130,12 +132,12 @@ describe('Resource Store', () => {
       id: '1',
       title: 'Test Resource',
       type: 'document',
-      content: 'Test Content'
+      content: 'Test Content',
     }
 
     it('应该正确获取资源详情', async () => {
       resourceService.getDetail.mockResolvedValueOnce({
-        data: mockResource
+        data: mockResource,
       })
 
       const result = await store.fetchById('1')

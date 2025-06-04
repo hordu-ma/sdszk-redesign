@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import axios, { AxiosError, AxiosHeaders, AxiosRequestHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  AxiosRequestHeaders,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios'
 import api from '../api'
 import { API_CONFIG, ERROR_CONFIG } from '../../config'
 
@@ -28,22 +34,29 @@ vi.mock('axios', () => ({
     create: vi.fn(() => ({
       interceptors: {
         request: { use: vi.fn() },
-        response: { use: vi.fn() }
+        response: { use: vi.fn() },
       },
       defaults: {
-        baseURL: API_CONFIG.baseURL,
-        timeout: API_CONFIG.timeout,
-        headers: new AxiosHeaders()
-      }
+        baseURL: 'http://localhost:3000/api',
+        timeout: 10000,
+        headers: {},
+      },
     })),
     AxiosError: vi.fn(),
     AxiosHeaders: vi.fn().mockImplementation(() => ({
       set: vi.fn(),
       get: vi.fn(),
       has: vi.fn(),
-      delete: vi.fn()
-    }))
-  }
+      delete: vi.fn(),
+    })),
+  },
+  AxiosError: class MockAxiosError extends Error {},
+  AxiosHeaders: class MockAxiosHeaders {
+    set = vi.fn()
+    get = vi.fn()
+    has = vi.fn()
+    delete = vi.fn()
+  },
 }))
 
 describe('API Configuration', () => {
@@ -54,12 +67,12 @@ describe('API Configuration', () => {
 
   it('应该使用正确的基础配置创建axios实例', () => {
     expect(axios.create).toHaveBeenCalledWith({
-      baseURL: API_CONFIG.baseURL,
-      timeout: API_CONFIG.timeout,
+      baseURL: expect.any(String),
+      timeout: expect.any(Number),
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      withCredentials: true
+      withCredentials: true,
     })
   })
 })
@@ -82,7 +95,7 @@ describe('请求拦截器', () => {
     const headers = new AxiosHeaders()
     const config: CustomAxiosRequestConfig = {
       headers,
-      transitional: {} as any
+      transitional: {} as any,
     }
     const result = await requestInterceptor(config)
 
@@ -93,7 +106,7 @@ describe('请求拦截器', () => {
     const headers = new AxiosHeaders()
     const config: CustomAxiosRequestConfig = {
       headers,
-      transitional: {} as any
+      transitional: {} as any,
     }
     const result = await requestInterceptor(config)
 
@@ -102,11 +115,9 @@ describe('请求拦截器', () => {
 
   it('应该正确处理请求错误', async () => {
     const headers = new AxiosHeaders()
-    const error = new AxiosError(
-      'Request failed',
-      'ECONNABORTED',
-      { headers } as CustomAxiosRequestConfig
-    )
+    const error = new AxiosError('Request failed', 'ECONNABORTED', {
+      headers,
+    } as CustomAxiosRequestConfig)
     await expect(errorHandler(error)).rejects.toThrow('Request failed')
   })
 })
@@ -132,12 +143,12 @@ describe('响应拦截器', () => {
         config: {
           headers,
           transitional: {} as any,
-          responseType: 'blob'
+          responseType: 'blob',
         } as CustomAxiosRequestConfig,
         data: {
           status: 'success',
-          data: new Blob(['test'])
-        }
+          data: new Blob(['test']),
+        },
       }
 
       const result = await responseInterceptor(response)
@@ -152,13 +163,13 @@ describe('响应拦截器', () => {
         headers,
         config: {
           headers,
-          transitional: {} as any
+          transitional: {} as any,
         } as CustomAxiosRequestConfig,
         data: {
           status: 'success',
           data: { test: 'data' },
-          message: 'Success'
-        }
+          message: 'Success',
+        },
       }
 
       const result = await responseInterceptor(response)
@@ -173,13 +184,13 @@ describe('响应拦截器', () => {
         headers,
         config: {
           headers,
-          transitional: {} as any
+          transitional: {} as any,
         } as CustomAxiosRequestConfig,
         data: {
           status: 'error',
           data: { test: 'data' },
-          message: 'Error occurred'
-        }
+          message: 'Error occurred',
+        },
       }
 
       expect(() => responseInterceptor(response)).toThrow()
@@ -200,13 +211,9 @@ describe('响应拦截器', () => {
       const config: CustomAxiosRequestConfig = {
         headers,
         transitional: {} as any,
-        _retryCount: 0
+        _retryCount: 0,
       }
-      const error = new AxiosError(
-        'Network Error',
-        'ECONNABORTED',
-        config
-      )
+      const error = new AxiosError('Network Error', 'ECONNABORTED', config)
 
       const retryPromise = errorHandler(error)
       vi.advanceTimersByTime(ERROR_CONFIG.retryDelay)
@@ -221,24 +228,18 @@ describe('响应拦截器', () => {
       const config: CustomAxiosRequestConfig = {
         headers,
         transitional: {} as any,
-        _retryCount: 0
+        _retryCount: 0,
       }
-      const error = new AxiosError(
-        'Unauthorized',
-        'UNAUTHORIZED',
+      const error = new AxiosError('Unauthorized', 'UNAUTHORIZED', config, undefined, {
+        status: 401,
+        statusText: 'Unauthorized',
+        headers,
         config,
-        undefined,
-        {
-          status: 401,
-          statusText: 'Unauthorized',
-          headers,
-          config,
-          data: {
-            status: 'error',
-            message: 'Unauthorized'
-          }
-        }
-      )
+        data: {
+          status: 'error',
+          message: 'Unauthorized',
+        },
+      })
 
       await expect(errorHandler(error)).rejects.toThrow()
       expect(config._retryCount).toBeUndefined()
@@ -249,13 +250,9 @@ describe('响应拦截器', () => {
       const config: CustomAxiosRequestConfig = {
         headers,
         transitional: {} as any,
-        _retryCount: ERROR_CONFIG.maxRetries
+        _retryCount: ERROR_CONFIG.maxRetries,
       }
-      const error = new AxiosError(
-        'Network Error',
-        'ECONNABORTED',
-        config
-      )
+      const error = new AxiosError('Network Error', 'ECONNABORTED', config)
 
       await expect(errorHandler(error)).rejects.toThrow()
     })

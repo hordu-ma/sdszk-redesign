@@ -27,14 +27,12 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
-
 defineProps({
   schools: {
     type: Array,
-    required: true
-  }
-});
+    required: true,
+  },
+})
 </script>
 
 <style scoped>
@@ -66,7 +64,7 @@ defineProps({
 
 .header-icon {
   margin-right: 8px;
-  color: #409EFF;
+  color: #409eff;
 }
 
 .more-link {
@@ -78,7 +76,7 @@ defineProps({
 }
 
 .more-link:hover {
-  color: #409EFF;
+  color: #409eff;
 }
 
 .more-link i {

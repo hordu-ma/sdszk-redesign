@@ -56,7 +56,6 @@ const newsCategorySchema = new mongoose.Schema(
 
 // 创建索引
 newsCategorySchema.index({ order: 1 })
-newsCategorySchema.index({ key: 1 }, { unique: true })
 
 // 添加静态方法：获取核心分类
 newsCategorySchema.statics.getCoreCategories = function () {

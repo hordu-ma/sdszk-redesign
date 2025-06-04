@@ -32,7 +32,7 @@ const sidebarCollapsed = ref(false)
 // 切换侧边栏
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
-  
+
   // 在移动端，切换侧边栏的可见性
   if (window.innerWidth <= 768 && sidebarRef.value) {
     sidebarRef.value.toggleMobileVisibility()

@@ -98,7 +98,7 @@ export class UserApi extends BaseApi {
 
   // 上传头像
   uploadAvatar(formData: FormData): Promise<ApiResponse<{ user: UserProfile; avatarUrl: string }>> {
-    return this.request<{ user: UserProfile; avatarUrl: string }>({  
+    return this.request<{ user: UserProfile; avatarUrl: string }>({
       method: 'POST',
       url: '/users/upload-avatar',
       data: formData,
