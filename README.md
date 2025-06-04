@@ -103,29 +103,52 @@ sdszk-redesign/
 
 # PORT=3000
 
+````
+
+### 启动项目
+
+```bash
+# 启动后端服务
+cd server
+npm run dev
+
+# 启动前端开发服务器
+npm run dev
+````
+
+### 初始化数据
+
+```bash
+# 运行数据库迁移
+cd server
+npm run migrate:up
+
+# 创建种子数据
+npm run seed
 ```
 
-## 🤝 贡献指南
+## 部署说明
 
-1. Fork 本项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+详细的部署指南请参考 `scripts/deploy.sh`
 
-## 📝 许可证
+## 开发计划
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+详细的开发计划请查看 [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)
 
-## 📞 联系我们
+## 项目结构
 
-- **项目维护**: 开发团队
-- **技术支持**: 详见项目文档
-- **问题反馈**: 通过 GitHub Issues 提交
-
----
-
-> 📌 **重要提示**: 生产环境部署前请仔细阅读 [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+```
+├── src/                 # 前端源码
+│   ├── views/          # 页面组件
+│   ├── components/     # 公共组件
+│   ├── stores/         # 状态管理
+│   └── utils/          # 工具函数
+├── server/             # 后端源码
+│   ├── controllers/    # 控制器
+│   ├── models/         # 数据模型
+│   ├── routes/         # 路由
+│   └── middleware/     # 中间件
+└── public/             # 静态资源
 ```
 
 ## 贡献指南
