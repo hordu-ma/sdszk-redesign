@@ -42,10 +42,19 @@ defineProps({
   padding: 20px;
   margin-bottom: 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .block-header {
-  margin-bottom: 20px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  max-width: 1440px;
+  z-index: 2;
+  margin: 0 auto 20px auto;
+  padding: 0;
 }
 
 .block-header h3 {
@@ -84,6 +93,7 @@ defineProps({
 }
 
 .school-logos {
+  margin-top: 60px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 20px;

@@ -7,21 +7,7 @@
         <p>管理资源分类，包括创建、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button
-          typconst
-          showEditModal="(record:"
-          Resoconst
-          handleDelete="async"
-          (record:
-          ResourceCategory)=""
-        >
-          { try { const resourceCategoryApi = new ResourceCategoryApi() await
-          resourceCategoryApi.delete(record._id) message.success('删除成功') await fetchCategories()
-          } catch (error: any) { message.error(error.message || '删除失败') } }ory) => {
-          editingCategory.value = record modalForm.name = record.name modalForm.description =
-          record.description || '' modalForm.color = '#1890ff' // ResourceCategory 接口中没有 color
-          属性，使用默认值 modalForm.sort = record.order || 0 modalForm.status = record.isActive
-          modalVisible.value = true }y" @click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
             <PlusOutlined />
           </template>
@@ -36,7 +22,7 @@
         :columns="columns"
         :data-source="categories"
         :loading="loading"
-        row-key="id"
+        row-key="_id"
         :pagination="false"
       >
         <template #bodyCell="{ column, record }">
@@ -64,6 +50,8 @@
           <template v-if="column.key === 'status'">
             <a-switch
               v-model:checked="record.status"
+              :checked-value="true"
+              :un-checked-value="false"
               :loading="record.updating"
               @change="onStatusChange(record)"
             />
@@ -107,6 +95,15 @@
       @cancel="handleModalCancel"
     >
       <a-form ref="modalFormRef" :model="modalForm" :rules="modalRules" layout="vertical">
+        <a-form-item label="分类标识" name="key">
+          <a-input
+            v-model:value="modalForm.key"
+            placeholder="请输入分类标识"
+            :maxlength="20"
+            show-count
+          />
+        </a-form-item>
+
         <a-form-item label="分类名称" name="name">
           <a-input
             v-model:value="modalForm.name"
@@ -178,6 +175,7 @@ const modalFormRef = ref()
 
 // 模态框表单数据
 const modalForm = reactive({
+  key: '',
   name: '',
   description: '',
   color: '#1890ff',
@@ -238,6 +236,15 @@ const columns = [
 
 // 表单验证规则
 const modalRules: Record<string, Rule[]> = {
+  key: [
+    { required: true, message: '请输入分类标识', trigger: 'blur' },
+    {
+      pattern: /^[a-z][a-z0-9_]*$/,
+      message: '分类标识只能包含小写字母、数字和下划线，且必须以字母开头',
+      trigger: 'blur',
+    },
+    { min: 2, max: 20, message: '分类标识长度应在2-20个字符之间', trigger: 'blur' },
+  ],
   name: [
     { required: true, message: '请输入分类名称', trigger: 'blur' },
     { min: 2, max: 50, message: '分类名称长度应在2-50个字符之间', trigger: 'blur' },
@@ -249,9 +256,16 @@ const modalRules: Record<string, Rule[]> = {
 const fetchCategories = async () => {
   loading.value = true
   try {
-    const resourceCategoryApi = new ResourceCategoryApi()
-    const { data } = await resourceCategoryApi.getList()
-    categories.value = data.sort((a: any, b: any) => a.order - b.order)
+    const response = await resourceCategoryApi.getList()
+    const data = (response as any)?.data?.data || []
+    categories.value = data
+      .map((item: any) => ({
+        ...item,
+        sort: item.order,
+        status: item.isActive,
+      }))
+      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+    console.log('资源分类 categories', categories.value)
   } catch (error: any) {
     message.error(error.message || '获取分类列表失败')
   } finally {
@@ -269,6 +283,7 @@ const showCreateModal = () => {
 // 编辑分类
 const handleEdit = (record: ResourceCategory) => {
   editingCategory.value = record
+  modalForm.key = record.key
   modalForm.name = record.name
   modalForm.description = record.description || ''
   modalForm.color = record.color || '#1890ff'
@@ -319,6 +334,7 @@ const handleModalOk = async () => {
 
     // Transform form data to API format
     const apiData = {
+      key: modalForm.key,
       name: modalForm.name,
       description: modalForm.description,
       order: modalForm.sort,
@@ -356,6 +372,7 @@ const handleModalCancel = () => {
 
 // 重置模态框表单
 const resetModalForm = () => {
+  modalForm.key = ''
   modalForm.name = ''
   modalForm.description = ''
   modalForm.color = '#1890ff'

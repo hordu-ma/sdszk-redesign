@@ -3,6 +3,7 @@ import type { ApiResponse } from '../../types'
 
 export interface ResourceCategory {
   _id: string
+  key: string
   name: string
   description?: string
   order: number
@@ -18,6 +19,7 @@ export interface ResourceCategory {
 }
 
 export interface CreateResourceCategoryDTO {
+  key: string
   name: string
   description?: string
   order?: number

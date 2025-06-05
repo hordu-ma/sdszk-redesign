@@ -79,8 +79,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
-import { VueCropper } from 'vue-cropper'
-import 'vue-cropper/dist/index.css'
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
 
 interface Props {
   visible: boolean

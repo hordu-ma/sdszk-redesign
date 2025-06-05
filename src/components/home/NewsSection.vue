@@ -8,7 +8,13 @@
       </el-carousel>
     </div>
     <div class="center-news">
-      <BlockHeader title="中心动态" icon-class="fa-newspaper" more-link="/news/center" />
+      <h3>
+        <i class="fas fa-newspaper header-icon"></i>
+        <span class="title-text">中心动态</span>
+        <router-link to="/news/center" class="more-link">
+          更多<i class="fas fa-angle-right"></i>
+        </router-link>
+      </h3>
       <div class="news-container">
         <div v-for="news in centerNews" :key="news.id" class="news-item">
           <router-link :to="`/news/detail/${news.id}`" class="news-link">
@@ -31,7 +37,6 @@
 
 <script setup lang="ts">
 import { ref, defineComponent } from 'vue'
-import { default as BlockHeader } from '../common/BlockHeader.vue'
 import carousel1 from '../../assets/images/carousel1.jpg'
 import carousel2 from '../../assets/images/carousel2.jpg'
 import carousel3 from '../../assets/images/carousel3.jpg'
@@ -119,10 +124,54 @@ const formatMonthYear = (date: string): string => {
   height: 400px;
   display: flex;
   flex-direction: column;
-  background: var(--background-color);
+  background: #fff;
   border-radius: 8px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.center-news h3 {
+  font-family:
+    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  padding: 12px 20px;
+  background: linear-gradient(to right, #9a2314, #c44836);
+  margin: 0;
+  border-radius: 0;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.center-news .header-icon {
+  margin-right: 10px;
+  color: #fff;
+}
+
+.center-news .title-text {
+  flex: 1;
+}
+
+.center-news .more-link {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.center-news .more-link:hover {
+  color: #fff;
+}
+
+.center-news .more-link i {
+  margin-left: 5px;
 }
 
 .news-container {

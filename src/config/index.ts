@@ -53,21 +53,18 @@ export const DEBUG_CONFIG = {
   logger: import.meta.env.VITE_ENABLE_LOGGER === 'true',
 } as const
 
-// 新闻类别
+// 新闻类别（只包含后端新闻管理模块对应的分类）
 export const NEWS_CATEGORIES = [
   { key: 'center', name: '中心动态' },
   { key: 'notice', name: '通知公告' },
   { key: 'policy', name: '政策文件' },
-  { key: 'theory', name: '理论前沿' },
-  { key: 'teaching', name: '教学研究' },
 ] as const
 
-// 资源类别
+// 资源类别（包含后端资源管理模块对应的分类）
 export const RESOURCE_CATEGORIES = [
-  { key: 'document', name: '文档资料' },
-  { key: 'video', name: '视频资源' },
-  { key: 'case', name: '案例分析' },
-  { key: 'ppt', name: '课件资源' },
+  { key: 'theory', name: '理论前沿' },
+  { key: 'teaching', name: '教学研究' },
+  { key: 'video', name: '影像思政' },
 ] as const
 
 // 文件类型

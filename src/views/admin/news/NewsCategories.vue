@@ -22,7 +22,7 @@
         :columns="columns"
         :data-source="categories"
         :loading="loading"
-        row-key="id"
+        row-key="_id"
         :pagination="false"
       >
         <template #bodyCell="{ column, record }">
@@ -40,8 +40,8 @@
           <template v-if="column.key === 'status'">
             <a-switch
               v-model:checked="record.status"
-              :checked-value="'active'"
-              :un-checked-value="'inactive'"
+              :checked-value="true"
+              :un-checked-value="false"
               @change="handleStatusChange(record)"
             />
           </template>
@@ -85,7 +85,20 @@
             placeholder="请输入分类名称"
             :maxlength="50"
             show-count
+            @blur="generateKeyFromName"
           />
+        </a-form-item>
+
+        <a-form-item label="分类标识" name="key">
+          <a-input
+            v-model:value="modalForm.key"
+            placeholder="请输入分类标识，如：center、notice、policy"
+            :maxlength="50"
+            show-count
+          />
+          <div class="form-help">
+            分类标识用于系统内部识别，建议使用英文、数字、短横线，如：center、my-category
+          </div>
         </a-form-item>
 
         <a-form-item label="分类描述" name="description">
@@ -121,11 +134,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
+import type { TableColumnsType } from 'ant-design-vue'
+import type { Rule } from 'ant-design-vue/es/form'
+import type { AxiosResponse } from 'axios'
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi()
-import type { TableColumnsType } from 'ant-design-vue'
-import type { Rule } from 'ant-design-vue/es/form'
 
 // 数据状态
 const loading = ref(false)
@@ -141,6 +155,7 @@ const modalForm = reactive({
   description: '',
   sort: 0,
   status: true,
+  key: '',
 })
 
 // 表格列配置
@@ -196,6 +211,15 @@ const modalRules: Record<string, Rule[]> = {
     { required: true, message: '请输入分类名称', trigger: 'blur' },
     { min: 2, max: 50, message: '分类名称长度应在2-50个字符之间', trigger: 'blur' },
   ],
+  key: [
+    { required: true, message: '请输入分类标识', trigger: 'blur' },
+    { min: 2, max: 50, message: '分类标识长度应在2-50个字符之间', trigger: 'blur' },
+    {
+      pattern: /^[a-z0-9-_]+$/,
+      message: '分类标识只能包含小写字母、数字、短横线、下划线',
+      trigger: 'blur',
+    },
+  ],
   sort: [{ type: 'number', min: 0, max: 999, message: '排序值应在0-999之间', trigger: 'blur' }],
 }
 
@@ -209,26 +233,34 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
   })
-} // 获取分类列表
+}
+
+// 获取分类列表
 const fetchCategories = async () => {
   try {
+    console.log('fetchCategories 调用')
     loading.value = true
     const response = await newsCategoryApi.getList()
+    console.log('接口响应', response)
+    console.log('接口响应 data', response?.data)
 
-    // 简化数据处理逻辑
-    const data = response?.data || []
+    const data = (response as any)?.data?.data || []
     if (!Array.isArray(data)) {
       console.warn('响应数据不是数组格式:', data)
       categories.value = []
       return
     }
 
-    // 排序分类列表
-    categories.value = data.sort(
-      (a: NewsCategory, b: NewsCategory) => (a.order || 0) - (b.order || 0)
-    )
+    categories.value = data
+      .map((item: any) => ({
+        ...item,
+        sort: item.order, // 表格用 sort 字段
+        status: item.isActive, // 直接用布尔值
+      }))
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+    console.log('最终 categories', categories.value)
   } catch (error: any) {
-    console.error('获取分类列表错误:', error)
+    console.error('fetchCategories 报错', error)
     message.error(error.message || '获取分类列表失败')
     categories.value = []
   } finally {
@@ -244,6 +276,7 @@ const showCreateModal = () => {
     description: '',
     sort: 0,
     status: true,
+    key: '',
   })
   modalVisible.value = true
 }
@@ -256,6 +289,7 @@ const handleEdit = (record: NewsCategory) => {
     description: record.description || '',
     sort: record.order || 0,
     status: record.isActive,
+    key: record.key || '',
   })
   modalVisible.value = true
 }
@@ -297,16 +331,14 @@ const handleModalOk = async () => {
       description: modalForm.description,
       order: modalForm.sort,
       isActive: modalForm.status,
+      key: modalForm.key,
     }
 
     if (editingCategory.value) {
       await newsCategoryApi.update(editingCategory.value._id, data)
       message.success('编辑成功')
     } else {
-      await newsCategoryApi.create({
-        ...data,
-        key: modalForm.name.toLowerCase().replace(/\s+/g, '-'),
-      })
+      await newsCategoryApi.create(data)
       message.success('创建成功')
     }
 
@@ -314,9 +346,20 @@ const handleModalOk = async () => {
     fetchCategories()
   } catch (error: any) {
     if (error.errorFields) {
+      // 表单验证错误
       message.error('请检查表单填写是否正确')
     } else {
-      message.error(error.message || '操作失败')
+      // 处理API错误
+      let errorMessage = '操作失败，请重试'
+
+      // 检查是否是API错误对象
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      message.error(errorMessage)
     }
   } finally {
     modalLoading.value = false
@@ -327,6 +370,19 @@ const handleModalOk = async () => {
 const handleModalCancel = () => {
   modalVisible.value = false
   editingCategory.value = null
+}
+
+// 生成分类标识
+const generateKeyFromName = () => {
+  if (modalForm.name && !modalForm.key) {
+    // 将中文转为拼音或简化处理，这里简化为移除特殊字符
+    modalForm.key = modalForm.name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // 移除特殊字符
+      .replace(/\s+/g, '-') // 空格替换为短横线
+      .replace(/[^a-z0-9-_]/g, '') // 只保留允许的字符
+      .substring(0, 50) // 限制长度
+  }
 }
 
 onMounted(() => {
@@ -375,5 +431,12 @@ onMounted(() => {
       }
     }
   }
+}
+
+.form-help {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 </style>

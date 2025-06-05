@@ -123,9 +123,31 @@ export const createCategory = async (req, res) => {
       data: savedCategory,
     })
   } catch (err) {
-    res.status(400).json({
+    let statusCode = 400
+    let errorMessage = err.message
+
+    // 处理MongoDB重复键错误
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0]
+      const value = err.keyValue[field]
+
+      if (field === 'name') {
+        errorMessage = `分类名称"${value}"已存在，请使用其他名称`
+      } else if (field === 'key') {
+        errorMessage = `分类标识"${value}"已存在，请使用其他标识`
+      } else {
+        errorMessage = '该分类已存在，请检查名称和标识是否重复'
+      }
+    }
+    // 处理验证错误
+    else if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(e => e.message)
+      errorMessage = errors.join(', ')
+    }
+
+    res.status(statusCode).json({
       status: 'error',
-      message: err.message,
+      message: errorMessage,
     })
   }
 }

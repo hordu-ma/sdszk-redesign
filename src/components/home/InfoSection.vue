@@ -57,22 +57,21 @@
         <h3>
           <i class="fas fa-book header-icon"></i>
           <span class="title-text">理论前沿</span>
-          <router-link to="/resources/theory" class="more-link">
+          <router-link :to="`/resources/category/theory`" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
         <li v-for="theory in theories" :key="theory.id">
-          <router-link :to="`/news/detail/${theory.id}`" class="info-link">
+          <router-link :to="`/resources/detail/${theory.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ theory.title }}</span>
               </div>
               <div class="info-footer">
-                <span class="info-author">{{ theory.author }}</span>
-                <span class="info-affiliation">{{ theory.affiliation }}</span>
-                <span class="info-date">发布日期：{{ theory.date }}</span>
+                <span class="info-author">{{ theory.author?.name || '-' }}</span>
+                <span class="info-date">发布日期：{{ formatDate(theory.publishDate) }}</span>
               </div>
             </div>
           </router-link>
@@ -84,22 +83,21 @@
         <h3>
           <i class="fas fa-chalkboard-teacher header-icon"></i>
           <span class="title-text">教学研究</span>
-          <router-link to="/resources/teaching" class="more-link">
+          <router-link :to="`/resources/category/teaching`" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
         <li v-for="research in researches" :key="research.id">
-          <router-link :to="`/news/detail/${research.id}`" class="info-link">
+          <router-link :to="`/resources/detail/${research.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ research.title }}</span>
               </div>
               <div class="info-footer">
-                <span class="info-author">{{ research.author }}</span>
-                <span class="info-affiliation">{{ research.affiliation }}</span>
-                <span class="info-date">发布日期：{{ research.date }}</span>
+                <span class="info-author">{{ research.author?.name || '-' }}</span>
+                <span class="info-date">发布日期：{{ formatDate(research.publishDate) }}</span>
               </div>
             </div>
           </router-link>
@@ -110,7 +108,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   notices: {
     type: Array,
     required: true,
@@ -128,6 +128,12 @@ defineProps({
     required: true,
   },
 })
+
+const formatDate = date => {
+  if (!date) return ''
+  const d = new Date(date)
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
 </script>
 
 <style scoped>

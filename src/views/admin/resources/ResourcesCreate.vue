@@ -129,8 +129,8 @@
                   >
                     <a-select-option
                       v-for="category in categories"
-                      :key="category.id"
-                      :value="category.id"
+                      :key="category._id"
+                      :value="category._id"
                     >
                       {{ category.name }}
                     </a-select-option>
@@ -284,7 +284,8 @@ const isAudioFile = computed(() => {
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const { data } = await resourceCategoryApi.getList()
+    const response = await resourceCategoryApi.getList()
+    const data = (response as any)?.data?.data || []
     categories.value = data
   } catch (error: any) {
     message.error(error.message || '获取分类列表失败')

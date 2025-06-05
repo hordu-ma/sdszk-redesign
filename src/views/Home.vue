@@ -13,20 +13,16 @@
 
     <!-- 影像思政组件 -->
     <div class="video-section">
-      <div class="block-header">
-        <h3>
-          <div class="title-container">
-            <i class="fas fa-video header-icon"></i>
-            <span class="title-text">影像思政</span>
-          </div>
-          <router-link to="/resources/video" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
-          </router-link>
-        </h3>
-      </div>
+      <h3>
+        <i class="fas fa-video header-icon"></i>
+        <span class="title-text">影像思政</span>
+        <router-link to="/resources/category/video" class="more-link">
+          更多<i class="fas fa-angle-right"></i>
+        </router-link>
+      </h3>
       <div class="video-grid">
         <div v-for="video in videos" :key="video.id" class="video-card">
-          <video-player :src="video.url" :poster="video.poster" />
+          <video-player :src="video.url" :poster="video.poster || ''" />
           <p class="video-title">{{ video.title }}</p>
         </div>
       </div>
@@ -34,17 +30,13 @@
 
     <!-- 十佳百优思政教师组件 -->
     <div class="teachers-section">
-      <div class="block-header">
-        <h3>
-          <div class="title-container">
-            <i class="fas fa-user-tie header-icon"></i>
-            <span class="title-text">"十佳百优"思政教师</span>
-          </div>
-          <router-link to="/teachers" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
-          </router-link>
-        </h3>
-      </div>
+      <h3>
+        <i class="fas fa-user-tie header-icon"></i>
+        <span class="title-text">'十佳百优'思政教师</span>
+        <router-link to="/teachers" class="more-link">
+          更多<i class="fas fa-angle-right"></i>
+        </router-link>
+      </h3>
       <div class="teachers-grid">
         <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
           <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
@@ -57,17 +49,13 @@
 
     <!-- 一体化共同体组件 -->
     <div class="community-section">
-      <div class="block-header">
-        <h3>
-          <div class="title-container">
-            <i class="fas fa-university header-icon"></i>
-            <span class="title-text">一体化共同体</span>
-          </div>
-          <router-link to="/community" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
-          </router-link>
-        </h3>
-      </div>
+      <h3>
+        <i class="fas fa-university header-icon"></i>
+        <span class="title-text">一体化共同体</span>
+        <router-link to="/community" class="more-link">
+          更多<i class="fas fa-angle-right"></i>
+        </router-link>
+      </h3>
       <div class="school-logos">
         <a
           v-for="school in schools"
@@ -85,8 +73,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { resourceApi } from '@/api'
 import VideoPlayer from '../components/VideoPlayer.vue'
 import NewsSection from '../components/home/NewsSection.vue'
 import InfoSection from '../components/home/InfoSection.vue'
@@ -100,8 +89,8 @@ import video6 from '../assets/videos/video6.mp4'
 import poster1 from '../assets/images/posters/poster1.jpg'
 import poster2 from '../assets/images/posters/poster2.jpg'
 import poster3 from '../assets/images/posters/poster3.jpg'
+import SectionHeader from '../components/common/SectionHeader.vue'
 
-// 示例数据
 const notices = ref([
   {
     id: 1,
@@ -117,54 +106,31 @@ const notices = ref([
   },
 ])
 
-const policies = ref([
-  {
-    id: 3,
-    title: '关于加强新时代大中小学思政课一体化建设的指导意见',
-    date: '2023-08-20',
-    unit: '教育部',
-  },
-  {
-    id: 4,
-    title: '思政课改革创新实施方案（2023-2025）',
-    date: '2023-08-15',
-    unit: '省教育厅',
-  },
-])
+const policies = ref([])
+const theories = ref([])
+const researches = ref([])
+const videos = ref([])
 
-const theories = ref([
-  {
-    id: 5,
-    title: '新时代思政课教学方法创新研究',
-    author: '张教授',
-    affiliation: '北京师范大学',
-    date: '2023-09-01',
-  },
-  {
-    id: 6,
-    title: '大中小学思政课一体化协同育人机制探索',
-    author: '李教授',
-    affiliation: '华东师范大学',
-    date: '2023-08-25',
-  },
-])
+const fetchResourceBlock = async () => {
+  // 理论前沿
+  const theoryRes = await resourceApi.getList({ category: 'theory', limit: 5, status: 'published' })
+  if (theoryRes.success) theories.value = theoryRes.data
+  // 教学研究
+  const researchRes = await resourceApi.getList({
+    category: 'teaching',
+    limit: 5,
+    status: 'published',
+  })
+  if (researchRes.success) researches.value = researchRes.data
+  // 影像思政
+  const videoRes = await resourceApi.getList({ category: 'video', limit: 6, status: 'published' })
+  if (videoRes.success) videos.value = videoRes.data
+}
 
-const researches = ref([
-  {
-    id: 7,
-    title: '思政课程与课程思政协同育人实践研究',
-    author: '王教授',
-    affiliation: '复旦大学',
-    date: '2023-09-05',
-  },
-  {
-    id: 8,
-    title: '中小学思政课教学资源开发与应用',
-    author: '刘教授',
-    affiliation: '华中师范大学',
-    date: '2023-08-30',
-  },
-])
+onMounted(() => {
+  fetchResourceBlock()
+})
+
 import poster4 from '../assets/images/posters/poster4.jpg'
 import poster5 from '../assets/images/posters/poster5.jpg'
 import poster6 from '../assets/images/posters/poster6.jpg'
@@ -184,45 +150,6 @@ import school6Logo from '../assets/images/schools/school6.png'
 const router = useRouter()
 
 // 模拟数据
-
-const videos = ref([
-  {
-    id: 1,
-    title: '思政课程创新实践',
-    url: video1,
-    poster: poster1,
-  },
-  {
-    id: 2,
-    title: '红色教育示范课',
-    url: video2,
-    poster: poster2,
-  },
-  {
-    id: 3,
-    title: '思政理论实践探索',
-    url: video3,
-    poster: poster3,
-  },
-  {
-    id: 4,
-    title: '党史教育专题课',
-    url: video4,
-    poster: poster4,
-  },
-  {
-    id: 5,
-    title: '思政实践教学案例',
-    url: video5,
-    poster: poster5,
-  },
-  {
-    id: 6,
-    title: '教学方法创新讲座',
-    url: video6,
-    poster: poster6,
-  },
-])
 
 const teachers = ref([
   {
@@ -836,7 +763,11 @@ const handleLogin = () => {
 .video-section,
 .teachers-section,
 .community-section {
-  margin: 40px 0;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto 40px auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .video-grid,

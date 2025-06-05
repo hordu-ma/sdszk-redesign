@@ -1,18 +1,29 @@
 // resourceController.js - 资源控制器
 import Resource from '../models/Resource.js'
 import ActivityLog from '../models/ActivityLog.js'
+import ResourceCategory from '../models/ResourceCategory.js'
 
 // 获取资源列表
 export const getResourceList = async (req, res) => {
   try {
-    const { category, page = 1, limit = 10, search, featured } = req.query
+    let { category, page = 1, limit = 10, search, featured } = req.query
 
     // 构建查询条件
     const query = {}
 
     // 按类别筛选
     if (category) {
-      query.category = category
+      // 如果不是合法 ObjectId，则尝试用 key 查找
+      if (typeof category === 'string' && !category.match(/^[0-9a-fA-F]{24}$/)) {
+        const cat = await ResourceCategory.findOne({ key: category })
+        if (cat) {
+          query.category = cat._id
+        } else {
+          return res.status(400).json({ status: 'error', message: '无效的资源分类' })
+        }
+      } else {
+        query.category = category
+      }
     }
 
     // 按特色筛选

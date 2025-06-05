@@ -1,6 +1,12 @@
 <template>
   <div class="teachers-section">
-    <block-header title="'十佳百优'思政教师" icon-class="fa-user-tie" more-link="/teachers" />
+    <h3>
+      <i class="fas fa-user-tie header-icon"></i>
+      <span class="title-text">'十佳百优'思政教师</span>
+      <router-link to="/teachers" class="more-link">
+        更多<i class="fas fa-angle-right"></i>
+      </router-link>
+    </h3>
     <div class="teachers-grid">
       <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
         <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
@@ -13,8 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { default as BlockHeader } from '../common/BlockHeader.vue'
-
 interface Teacher {
   id: number
   name: string
@@ -35,6 +39,50 @@ defineProps<{
   padding: 20px;
   margin-bottom: 30px;
   box-shadow: var(--card-shadow, 0 2px 12px rgba(0, 0, 0, 0.1));
+}
+
+.teachers-section h3 {
+  font-family:
+    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  padding: 12px 20px;
+  background: linear-gradient(to right, #9a2314, #c44836);
+  margin: -20px -20px 20px -20px;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.teachers-section .header-icon {
+  margin-right: 10px;
+  color: #fff;
+}
+
+.teachers-section .title-text {
+  flex: 1;
+}
+
+.teachers-section .more-link {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.teachers-section .more-link:hover {
+  color: #fff;
+}
+
+.teachers-section .more-link i {
+  margin-left: 5px;
 }
 
 .teachers-grid {

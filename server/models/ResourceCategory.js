@@ -3,6 +3,12 @@ import mongoose from 'mongoose'
 
 const resourceCategorySchema = new mongoose.Schema(
   {
+    key: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
     name: {
       type: String,
       required: true,

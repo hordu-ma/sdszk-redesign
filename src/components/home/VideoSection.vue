@@ -1,9 +1,15 @@
 <template>
   <div class="video-section">
-    <block-header title="影像思政" icon-class="fa-video" more-link="/resources/video" />
+    <h3>
+      <i class="fas fa-video header-icon"></i>
+      <span class="title-text">影像思政</span>
+      <router-link to="/resources/video" class="more-link">
+        更多<i class="fas fa-angle-right"></i>
+      </router-link>
+    </h3>
     <div class="video-grid">
       <div v-for="video in videos" :key="video.id" class="video-card">
-        <video-player :src="video.url" :poster="video.poster" />
+        <VideoPlayer :src="video.url" :poster="video.poster" />
         <p class="video-title">{{ video.title }}</p>
       </div>
     </div>
@@ -11,24 +17,41 @@
 </template>
 
 <script setup lang="ts">
-import { default as BlockHeader } from '../common/BlockHeader.vue'
-import { default as VideoPlayer } from '../VideoPlayer.vue'
+import VideoPlayer from '../VideoPlayer.vue'
 
 interface Video {
   id: number
+  title: string
   url: string
   poster: string
-  title: string
 }
 
-defineProps<{
-  videos: Video[]
-}>()
+// 测试数据
+const videos = [
+  {
+    id: 1,
+    title: '思政课教学示范',
+    url: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+    poster: 'https://media.w3.org/2010/05/sintel/poster.png',
+  },
+  {
+    id: 2,
+    title: '红色文化教育',
+    url: 'https://media.w3.org/2010/05/bunny/trailer.mp4',
+    poster: 'https://media.w3.org/2010/05/bunny/poster.png',
+  },
+  {
+    id: 3,
+    title: '爱国主义教育',
+    url: 'https://media.w3.org/2010/05/video/movie_300.mp4',
+    poster: 'https://media.w3.org/2010/05/video/poster.png',
+  },
+]
 </script>
 
 <style scoped>
 .video-section {
-  background: #fff;
+  background: var(--background-color, #fff);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 30px;
@@ -39,13 +62,14 @@ defineProps<{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  margin-top: 20px;
 }
 
 .video-card {
+  background: var(--background-color-secondary, #f5f7fa);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--card-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.1));
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
 }
 
 .video-card:hover {
@@ -53,10 +77,49 @@ defineProps<{
 }
 
 .video-title {
-  margin: 10px;
-  font-size: 14px;
+  padding: 15px;
+  margin: 0;
+  font-size: 16px;
   color: var(--text-color, #303133);
-  line-height: 1.4;
   text-align: center;
+}
+
+h3 {
+  font-family:
+    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  padding: 10px 15px;
+  background: rgba(154, 35, 20, 0.05);
+  border-left: 4px solid #9a2314;
+  margin-bottom: 20px;
+  border-radius: 0 4px 4px 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.header-icon {
+  margin-right: 10px;
+  color: var(--primary-color, #9a2314);
+}
+
+.more-link {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-color-light, #909399);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.more-link:hover {
+  color: var(--primary-color, #9a2314);
+}
+
+.more-link i {
+  margin-left: 5px;
 }
 </style>

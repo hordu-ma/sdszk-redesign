@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
+    "build:gh-pages": "vite build --config vite.config.gh-pages.ts",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -17,7 +18,8 @@
     "format": "prettier --write src/",
     "server": "node server/index.js",
     "server:dev": "nodemon server/index.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "deploy": "npm run build:gh-pages && gh-pages -d dist"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -25,8 +27,10 @@
     "ant-design-vue": "^4.0.3",
     "axios": "^1.5.0",
     "dayjs": "^1.11.9",
+    "echarts": "^5.6.0",
     "element-plus": "^2.3.14",
     "pinia": "^2.1.6",
+    "pinia-plugin-persistedstate": "^4.3.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },

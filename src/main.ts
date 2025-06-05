@@ -8,7 +8,7 @@ import Antd from 'ant-design-vue'
 // 样式导入 - 修改导入顺序确保样式正确应用
 import './style.css'
 import 'element-plus/dist/index.css'
-import 'ant-design-vue/dist/antd.css'
+import 'ant-design-vue/dist/reset.css'
 import './styles/preview-fix.css' // 添加预览模式修复样式
 
 import App from './App.vue'

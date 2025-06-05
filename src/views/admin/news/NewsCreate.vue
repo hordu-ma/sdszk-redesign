@@ -202,7 +202,8 @@ const rules: Record<string, Rule[]> = {
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const { data } = await newsCategoryApi.getList()
+    const response = await newsCategoryApi.getList()
+    const data = (response as any)?.data?.data || []
     categories.value = data
   } catch (error: any) {
     message.error(error.message || '获取分类列表失败')

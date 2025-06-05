@@ -12,97 +12,62 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export interface BlockHeaderProps {
+<script setup lang="ts">
+defineProps<{
   title: string
   iconClass: string
   moreLink?: string
-}
-
-export default defineComponent({
-  name: 'BlockHeader',
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    iconClass: {
-      type: String,
-      required: true,
-    },
-    moreLink: {
-      type: String,
-      required: false,
-    },
-  },
-})
+}>()
 </script>
 
 <style scoped>
 .block-header {
-  margin-bottom: 20px;
+  width: 100%;
+  margin: 0 0 20px 0;
+  padding: 0;
 }
 
 .block-header h3 {
   display: flex;
   align-items: center;
-  background: linear-gradient(
-    to right,
-    var(--primary-color, #9a2314),
-    var(--primary-color-light, #c44836)
-  );
+  justify-content: space-between;
+  background: linear-gradient(to right, #9a2314, #c44836);
   color: white;
   padding: 12px 20px;
-  border-radius: 4px;
+  border-radius: 0;
   margin: 0;
   font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   position: relative;
-  transition: all 0.3s ease;
-}
-
-.block-header h3:hover {
-  transform: scale(1.02);
-  background: linear-gradient(
-    to right,
-    var(--primary-color-light, #c44836),
-    var(--primary-color, #9a2314)
-  );
 }
 
 .title-container {
   display: flex;
   align-items: center;
-  gap: 15px;
+  flex: 1;
 }
 
 .header-icon {
-  color: white;
-  font-size: 1.2em;
-  margin-right: 8px;
+  margin-right: 12px;
+  font-size: 18px;
 }
 
 .title-text {
-  font-size: 1em;
   font-weight: 500;
-  color: white;
 }
 
 .more-link {
-  margin-left: auto;
-  font-size: 14px;
-  color: white;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .more-link:hover {
-  opacity: 0.8;
   color: white;
+  opacity: 1;
 }
 
 .more-link i {

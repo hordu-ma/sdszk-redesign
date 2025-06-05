@@ -22,31 +22,7 @@
     <div class="news-content">
       <a-spin :spinning="loading">
         <div class="news-list">
-          <div v-for="news in filteredNews" :key="news._id" class="news-item">
-            <router-link :to="`/news/detail/${news._id}`" class="news-link">
-              <div class="news-wrapper">
-                <div class="date-block">
-                  <span class="day">{{ news.date.split('/')[1] || news.date.split('-')[2] }}</span>
-                  <span class="month-year"
-                    >{{ news.date.split('/')[0] || news.date.split('-')[1] }}/{{
-                      news.date.split('/')[2] || news.date.split('-')[0].slice(2)
-                    }}</span
-                  >
-                </div>
-                <div class="news-content-inner">
-                  <h3 class="news-title">{{ news.title }}</h3>
-                  <div class="news-meta">
-                    <span class="category-tag" :class="'category-' + news.categoryKey">{{
-                      news.categoryName
-                    }}</span>
-                    <span v-if="news.author" class="news-author">{{ news.author }}</span>
-                    <span v-if="news.source?.name" class="news-source">{{ news.source.name }}</span>
-                  </div>
-                  <p class="news-summary">{{ news.summary }}</p>
-                </div>
-              </div>
-            </router-link>
-          </div>
+          <news-list-item v-for="news in filteredNews" :key="news._id" :news="news" />
         </div>
 
         <!-- 分页 -->
@@ -72,6 +48,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { newsApi, newsCategoryApi } from '@/api'
+import NewsListItem from '../components/news/NewsListItem.vue'
 
 const route = useRoute()
 const router = useRouter()

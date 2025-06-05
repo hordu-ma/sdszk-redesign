@@ -27,11 +27,21 @@ const newsSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    // 保留旧的分类字段以确保向后兼容
-    legacyCategory: {
+    status: {
       type: String,
-      enum: ['center', 'notice', 'policy'],
-      select: false, // 默认不返回此字段
+      enum: ['draft', 'published', 'archived'],
+      default: 'draft',
+      index: true,
+    },
+    isTop: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
     publishDate: {
       type: Date,
@@ -41,9 +51,9 @@ const newsSchema = new mongoose.Schema(
       type: Date,
     },
     author: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
-      trim: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -76,10 +86,6 @@ const newsSchema = new mongoose.Schema(
         trim: true,
       },
     ],
-    isPublished: {
-      type: Boolean,
-      default: false,
-    },
     viewCount: {
       type: Number,
       default: 0,
@@ -131,14 +137,18 @@ newsSchema.index(
 
 // 创建静态方法：热门新闻
 newsSchema.statics.getPopularNews = async function (limit = 5) {
-  return this.find({ isPublished: true }).sort({ viewCount: -1, publishDate: -1 }).limit(limit)
+  return this.find({ status: 'published' })
+    .sort({ viewCount: -1, publishDate: -1 })
+    .limit(limit)
+    .populate('author', 'username')
+    .populate('category', 'name')
 }
 
 // 创建静态方法：按类别获取最新新闻
 newsSchema.statics.getLatestByCategory = async function (category, limit = 5) {
   return this.find({
     category,
-    isPublished: true,
+    status: 'published',
     publishDate: { $lte: new Date() },
     $or: [
       { expiryDate: { $exists: false } },
@@ -148,6 +158,34 @@ newsSchema.statics.getLatestByCategory = async function (category, limit = 5) {
   })
     .sort({ publishDate: -1 })
     .limit(limit)
+    .populate('author', 'username')
+    .populate('category', 'name')
+}
+
+// 创建静态方法：获取置顶新闻
+newsSchema.statics.getTopNews = async function (limit = 5) {
+  return this.find({
+    status: 'published',
+    isTop: true,
+    publishDate: { $lte: new Date() },
+  })
+    .sort({ publishDate: -1 })
+    .limit(limit)
+    .populate('author', 'username')
+    .populate('category', 'name')
+}
+
+// 创建静态方法：获取推荐新闻
+newsSchema.statics.getFeaturedNews = async function (limit = 5) {
+  return this.find({
+    status: 'published',
+    isFeatured: true,
+    publishDate: { $lte: new Date() },
+  })
+    .sort({ publishDate: -1 })
+    .limit(limit)
+    .populate('author', 'username')
+    .populate('category', 'name')
 }
 
 // 创建虚拟属性：是否已过期
@@ -167,6 +205,7 @@ newsSchema.pre('findOneAndUpdate', function (next) {
 // 添加自动填充中间件
 newsSchema.pre(['find', 'findOne'], function () {
   this.populate('category', 'name key color icon')
+  this.populate('author', 'username')
 })
 
 // 在保存前，确保legacyCategory与category匹配
