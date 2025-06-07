@@ -1,6 +1,10 @@
 // dashboard.js - 仪表盘路由
 import express from 'express'
-import { getOverviewStats, getRecentActivities } from '../controllers/dashboardController.js'
+import {
+  getOverviewStats,
+  getRecentActivities,
+  getVisitTrends,
+} from '../controllers/dashboardController.js'
 import { authenticateToken } from '../middleware/auth.js'
 
 const router = express.Router()
@@ -8,7 +12,10 @@ const router = express.Router()
 // 获取仪表盘总览数据
 router.get('/overview', authenticateToken, getOverviewStats)
 
-// 获取最近活动
-router.get('/recent-activities', authenticateToken, getRecentActivities)
+// 获取访问量趋势
+router.get('/visit-trends', authenticateToken, getVisitTrends)
+
+// 获取最新动态
+router.get('/activities', authenticateToken, getRecentActivities)
 
 export default router

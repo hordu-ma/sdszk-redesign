@@ -8,6 +8,8 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     adminOnly?: boolean
     permissions?: string[]
+    keepAlive?: boolean
+    title?: string
   }
 }
 
@@ -137,6 +139,10 @@ const routes: RouteRecordRaw[] = [
         path: 'dashboard',
         name: 'adminDashboard',
         component: () => import('../views/admin/dashboard/AdminDashboard.vue'),
+        meta: {
+          keepAlive: true,
+          title: '仪表板',
+        },
       },
       // 新闻管理路由
       {
@@ -147,7 +153,9 @@ const routes: RouteRecordRaw[] = [
             name: 'adminNewsList',
             component: () => import('../views/admin/news/NewsList.vue'),
             meta: {
+              keepAlive: true,
               permissions: ['news:read'],
+              title: '新闻列表',
             },
           },
           {
@@ -155,7 +163,9 @@ const routes: RouteRecordRaw[] = [
             name: 'adminNewsCreate',
             component: () => import('../views/admin/news/NewsCreate.vue'),
             meta: {
+              keepAlive: false,
               permissions: ['news:create'],
+              title: '发布新闻',
             },
           },
           {
@@ -164,7 +174,9 @@ const routes: RouteRecordRaw[] = [
             component: () => import('../views/admin/news/NewsEdit.vue'),
             props: true,
             meta: {
+              keepAlive: false,
               permissions: ['news:update'],
+              title: '编辑新闻',
             },
           },
           {
@@ -172,7 +184,9 @@ const routes: RouteRecordRaw[] = [
             name: 'adminNewsCategories',
             component: () => import('../views/admin/news/NewsCategories.vue'),
             meta: {
+              keepAlive: true,
               permissions: ['news:category'],
+              title: '分类管理',
             },
           },
         ],

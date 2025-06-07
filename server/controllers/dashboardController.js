@@ -83,24 +83,38 @@ export const getOverviewStats = async (req, res) => {
   }
 }
 
-// 获取最近活动日志
+// 获取访问量趋势
+export const getVisitTrends = async (req, res) => {
+  try {
+    const period = parseInt(req.query.period) || 7
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - period)
+    const ViewHistory = global.ViewHistory || (await import('../models/ViewHistory.js')).default
+    const trends = await ViewHistory.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+    res.json({ success: true, data: trends.map(t => ({ date: t._id, count: t.count })) })
+  } catch (error) {
+    console.error('getVisitTrends error:', error)
+    res.status(500).json({ success: false, message: '获取访问量趋势失败' })
+  }
+}
+
+// 获取最新动态
 export const getRecentActivities = async (req, res) => {
   try {
-    const logs = await ActivityLog.find()
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .populate('user', 'username')
-      .lean()
-
-    res.json({
-      success: true,
-      data: logs,
-    })
+    const ActivityLog = global.ActivityLog || (await import('../models/ActivityLog.js')).default
+    const activities = await ActivityLog.find().sort({ createdAt: -1 }).limit(10).lean()
+    res.json({ success: true, data: { items: activities } })
   } catch (error) {
-    console.error('获取最近活动失败:', error)
-    res.status(500).json({
-      success: false,
-      message: '获取最近活动失败',
-    })
+    console.error('getRecentActivities error:', error)
+    res.status(500).json({ success: false, message: '获取最新动态失败' })
   }
 }

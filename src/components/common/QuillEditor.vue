@@ -39,7 +39,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const quillRef = ref()
+const quillRef = ref<any>(null)
+let quillInstance: any = null
 
 // 编辑器配置
 const editorOptions = computed(() => ({
@@ -85,12 +86,14 @@ const handleContentChange = (content: string) => {
 
 // 编辑器准备就绪
 const onEditorReady = (quill: any) => {
+  quillInstance = quill
   // 设置编辑器高度
-  if (quillRef.value) {
-    const editorElement = quillRef.value.$el.querySelector('.ql-editor')
-    if (editorElement) {
-      editorElement.style.minHeight = props.height
+  try {
+    if (quill && quill.root) {
+      quill.root.style.minHeight = props.height
     }
+  } catch (e) {
+    // 容错
   }
 }
 
@@ -98,64 +101,44 @@ const onEditorReady = (quill: any) => {
 watch(
   () => props.modelValue,
   newValue => {
-    if (quillRef.value && quillRef.value.getHTML() !== newValue) {
-      quillRef.value.setHTML(newValue)
+    if (quillInstance && quillInstance.root && quillInstance.root.innerHTML !== newValue) {
+      quillInstance.root.innerHTML = newValue
     }
   }
 )
 
 // 获取编辑器实例方法
-const getQuill = () => {
-  return quillRef.value?.getQuill()
-}
-
-// 获取文本内容
-const getText = () => {
-  return quillRef.value?.getText() || ''
-}
-
-// 获取HTML内容
-const getHTML = () => {
-  return quillRef.value?.getHTML() || ''
-}
-
-// 设置内容
+const getQuill = () => quillInstance
+const getText = () => (quillInstance ? quillInstance.getText() : '')
+const getHTML = () => (quillInstance ? quillInstance.root.innerHTML : '')
 const setHTML = (html: string) => {
-  quillRef.value?.setHTML(html)
+  if (quillInstance && quillInstance.root) {
+    quillInstance.root.innerHTML = html
+  }
 }
-
-// 插入文本
 const insertText = (text: string, index?: number) => {
-  const quill = getQuill()
-  if (quill) {
-    const insertIndex = index !== undefined ? index : quill.getLength()
-    quill.insertText(insertIndex, text)
+  if (quillInstance) {
+    const insertIndex = index !== undefined ? index : quillInstance.getLength()
+    quillInstance.insertText(insertIndex, text)
   }
 }
-
-// 插入HTML
 const insertHTML = (html: string, index?: number) => {
-  const quill = getQuill()
-  if (quill) {
-    const insertIndex = index !== undefined ? index : quill.getLength()
-    quill.clipboard.dangerouslyPasteHTML(insertIndex, html)
+  if (quillInstance) {
+    const insertIndex = index !== undefined ? index : quillInstance.getLength()
+    quillInstance.clipboard.dangerouslyPasteHTML(insertIndex, html)
   }
 }
-
-// 清空内容
 const clear = () => {
-  quillRef.value?.setHTML('')
+  if (quillInstance) {
+    quillInstance.root.innerHTML = ''
+  }
 }
-
-// 聚焦编辑器
 const focus = () => {
-  const quill = getQuill()
-  if (quill) {
-    quill.focus()
+  if (quillInstance) {
+    quillInstance.focus()
   }
 }
 
-// 暴露方法给父组件
 defineExpose({
   getQuill,
   getText,
@@ -168,13 +151,11 @@ defineExpose({
 })
 
 onBeforeUnmount(() => {
-  // 清理编辑器
-  if (quillRef.value) {
-    const quill = getQuill()
-    if (quill) {
-      quill.off('text-change')
-    }
+  // 彻底销毁 quill 实例
+  if (quillInstance && typeof quillInstance.destroy === 'function') {
+    quillInstance.destroy()
   }
+  quillInstance = null
 })
 </script>
 

@@ -9,25 +9,42 @@
     <div class="admin-main" :class="{ 'admin-main--collapsed': sidebarCollapsed }">
       <AdminHeader @toggle-sidebar="toggleSidebar" @logout="handleLogout" />
       <div class="admin-content">
-        <router-view />
+        <router-view v-slot="{ Component, route }">
+          <keep-alive>
+            <component :is="Component" v-if="route.meta.keepAlive" :key="route.fullPath" />
+          </keep-alive>
+          <component :is="Component" v-if="!route.meta.keepAlive" :key="route.fullPath" />
+        </router-view>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import AdminSidebar from './AdminSidebar.vue'
 import AdminHeader from './AdminHeader.vue'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 const sidebarRef = ref<InstanceType<typeof AdminSidebar> | null>(null)
 
 // 侧边栏折叠状态
 const sidebarCollapsed = ref(false)
+
+// 监听路由变化
+watch(
+  () => route.path,
+  newPath => {
+    // 强制更新组件
+    if (sidebarRef.value) {
+      sidebarRef.value.$forceUpdate()
+    }
+  }
+)
 
 // 切换侧边栏
 const toggleSidebar = () => {
@@ -41,7 +58,13 @@ const toggleSidebar = () => {
 
 // 处理菜单点击
 const handleMenuClick = (path: string) => {
-  router.push(path)
+  if (route.path !== path) {
+    router.push(path).catch(err => {
+      if (err.name !== 'NavigationDuplicated') {
+        console.error('Navigation error:', err)
+      }
+    })
+  }
 }
 
 // 处理登出

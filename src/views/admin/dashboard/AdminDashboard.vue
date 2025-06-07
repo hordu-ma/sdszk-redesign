@@ -113,10 +113,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount, h, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
+import { dashboardApi } from '@/api/modules/admin'
 import {
   FileTextOutlined,
   FolderOutlined,
@@ -130,40 +131,43 @@ import {
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 const chartRef = ref<HTMLElement>()
 const chartPeriod = ref('7')
+let chart: echarts.ECharts | null = null
+let isUnmounted = false // 标志位，防止卸载后 setState
 
 // 统计数据
 const statsData = ref([
   {
     key: 'news',
     label: '新闻数量',
-    value: '1,234',
-    trend: 12.5,
+    value: '0',
+    trend: 0,
     color: '#1890ff',
     icon: FileTextOutlined,
   },
   {
     key: 'resources',
     label: '资源数量',
-    value: '856',
-    trend: 8.2,
+    value: '0',
+    trend: 0,
     color: '#52c41a',
     icon: FolderOutlined,
   },
   {
     key: 'users',
     label: '用户数量',
-    value: '2,468',
-    trend: 15.8,
+    value: '0',
+    trend: 0,
     color: '#722ed1',
     icon: UserOutlined,
   },
   {
     key: 'views',
     label: '总访问量',
-    value: '98.6K',
-    trend: -2.1,
+    value: '0',
+    trend: 0,
     color: '#fa541c',
     icon: EyeOutlined,
   },
@@ -201,6 +205,98 @@ const recentActivities = ref([
     createdAt: new Date(Date.now() - 1000 * 60 * 60), // 1小时前
   },
 ])
+
+// 加载统计数据
+const loadStats = async () => {
+  try {
+    const response = await dashboardApi.getStats()
+    if (isUnmounted) return
+    if (response.success && response.data) {
+      const data = response.data
+      statsData.value = [
+        {
+          key: 'news',
+          label: '新闻数量',
+          value: data.newsCount.toString(),
+          trend: data.newsGrowth,
+          color: '#1890ff',
+          icon: FileTextOutlined,
+        },
+        {
+          key: 'resources',
+          label: '资源数量',
+          value: data.resourceCount.toString(),
+          trend: data.resourceGrowth,
+          color: '#52c41a',
+          icon: FolderOutlined,
+        },
+        {
+          key: 'users',
+          label: '用户数量',
+          value: data.userCount.toString(),
+          trend: data.userGrowth,
+          color: '#722ed1',
+          icon: UserOutlined,
+        },
+        {
+          key: 'views',
+          label: '总访问量',
+          value: data.totalViews.toString(),
+          trend: data.viewsGrowth,
+          color: '#fa541c',
+          icon: EyeOutlined,
+        },
+      ]
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error('加载统计数据失败:', error)
+      message.error('加载统计数据失败')
+    }
+  }
+}
+
+// 加载访问量趋势
+const loadVisitTrends = async () => {
+  try {
+    const response = await dashboardApi.getVisitTrends(Number(chartPeriod.value))
+    if (isUnmounted) return
+    if (response.success && response.data && chart) {
+      const data = response.data
+      chart.setOption({
+        xAxis: {
+          data: data.map(item => item.date),
+        },
+        series: [
+          {
+            data: data.map(item => item.count),
+          },
+        ],
+      })
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error('加载访问量趋势失败:', error)
+      message.error('加载访问量趋势失败')
+    }
+  }
+}
+
+// 加载最新动态
+const loadRecentActivities = async () => {
+  try {
+    const response = await dashboardApi.getRecentActivities()
+    if (isUnmounted) return
+    if (response.success && response.data) {
+      recentActivities.value = response.data.items
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error('加载最新动态失败:', error)
+      message.error('加载最新动态失败')
+    }
+  }
+}
 
 // 处理快捷操作
 const handleQuickAction = (key: string) => {
@@ -246,9 +342,7 @@ const formatTime = (date: Date) => {
 // 初始化图表
 const initChart = () => {
   if (!chartRef.value) return
-
-  const chart = echarts.init(chartRef.value)
-
+  chart = echarts.init(chartRef.value)
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -265,7 +359,7 @@ const initChart = () => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      data: [],
     },
     yAxis: {
       type: 'value',
@@ -285,22 +379,41 @@ const initChart = () => {
         lineStyle: {
           color: '#1890ff',
         },
-        data: [1200, 1320, 1010, 1340, 900, 1230, 1100],
+        data: [],
       },
     ],
   }
-
   chart.setOption(option)
-
-  // 响应式处理
-  window.addEventListener('resize', () => {
-    chart.resize()
-  })
 }
 
-onMounted(() => {
-  initChart()
+// 监听图表周期变化
+watch(chartPeriod, () => {
+  loadVisitTrends()
 })
+
+// 组件挂载时初始化
+onMounted(async () => {
+  isUnmounted = false
+  initChart()
+  await Promise.all([loadStats(), loadVisitTrends(), loadRecentActivities()])
+  window.addEventListener('resize', handleResize)
+})
+
+// 组件卸载前清理
+onBeforeUnmount(() => {
+  isUnmounted = true
+  if (chart) {
+    chart.dispose()
+    chart = null
+  }
+  window.removeEventListener('resize', handleResize)
+})
+
+const handleResize = () => {
+  if (chart) {
+    chart.resize()
+  }
+}
 </script>
 
 <style scoped lang="scss">

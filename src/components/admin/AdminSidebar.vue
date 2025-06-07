@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -92,6 +92,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const route = useRoute()
+const router = useRouter()
 const selectedKeys = ref<string[]>([])
 const isMobileVisible = ref(false)
 
@@ -112,7 +113,13 @@ watch(
 const handleMenuClick = ({ key }: { key: string }) => {
   // 确保所有路径都正确处理
   if (key.startsWith('/admin/')) {
-    emit('menu-click', key)
+    selectedKeys.value = [key]
+    // 直接使用 router 进行导航
+    router.push(key).catch(err => {
+      if (err.name !== 'NavigationDuplicated') {
+        console.error('Navigation error:', err)
+      }
+    })
   } else {
     // 如果是子菜单标识而不是完整路径，则不进行导航
     console.log('非导航菜单项:', key)
@@ -124,33 +131,34 @@ const handleResize = () => {
   isMobileVisible.value = window.innerWidth > 768
 }
 
-onMounted(() => {
-  handleResize() // 初始化时设置状态
-  window.addEventListener('resize', handleResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
-
-// 提供给父组件的方法，用于切换移动端侧边栏的可见性
+// 暴露方法给父组件
 defineExpose({
   toggleMobileVisibility: () => {
     isMobileVisible.value = !isMobileVisible.value
   },
+})
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+  handleResize()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
 <style scoped lang="scss">
 .admin-sidebar {
   position: fixed;
-  left: 0;
   top: 0;
-  height: 100vh;
+  left: 0;
+  bottom: 0;
   width: 250px;
   background-color: #001529;
+  transition: all 0.3s;
   z-index: 1000;
-  transition: width 0.3s ease;
+  overflow-y: auto;
 
   &--collapsed {
     width: 80px;
@@ -160,80 +168,47 @@ defineExpose({
 .sidebar-header {
   height: 64px;
   padding: 16px;
-  border-bottom: 1px solid #ffffff1a;
   display: flex;
   align-items: center;
-  justify-content: center;
+  background-color: #002140;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  overflow: hidden;
+  gap: 8px;
 }
 
 .logo {
-  width: 32px;
   height: 32px;
-  margin-right: 8px;
+  width: auto;
 }
 
 .logo-text {
-  color: #fff;
+  color: white;
   font-size: 16px;
   font-weight: 600;
-  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.admin-sidebar--collapsed .logo-text {
+  opacity: 0;
 }
 
 .sidebar-menu {
-  height: calc(100vh - 64px);
-  overflow-y: auto;
-
-  :deep(.ant-menu) {
-    border-right: none;
-    background-color: transparent;
-  }
-
-  :deep(.ant-menu-item) {
-    color: rgba(255, 255, 255, 0.65);
-
-    &:hover {
-      color: #fff;
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    &.ant-menu-item-selected {
-      color: #fff;
-      background-color: #1890ff;
-    }
-  }
-
-  :deep(.ant-menu-submenu-title) {
-    color: rgba(255, 255, 255, 0.65);
-
-    &:hover {
-      color: #fff;
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  :deep(.ant-menu-submenu-open > .ant-menu-submenu-title) {
-    color: #fff;
-  }
+  padding: 16px 0;
 }
 
 @media (max-width: 768px) {
   .admin-sidebar {
     transform: translateX(-100%);
-
-    &--collapsed {
-      transform: translateX(-100%);
-    }
+    box-shadow: none;
 
     &.mobile-visible {
       transform: translateX(0);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     }
   }
 }
