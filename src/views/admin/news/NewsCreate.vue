@@ -51,9 +51,12 @@
 
               <!-- 内容编辑器 -->
               <a-form-item label="新闻内容" name="content">
-                <div class="editor-container">
-                  <div ref="editorRef" class="editor"></div>
-                </div>
+                <QuillEditor
+                  ref="quillEditorRef"
+                  v-model="formData.content"
+                  placeholder="请输入新闻内容..."
+                  height="400px"
+                />
               </a-form-item>
             </div>
           </a-col>
@@ -147,24 +150,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { adminNewsApi, type NewsFormData } from '@/api/modules/adminNews'
 import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
+import QuillEditor from '@/components/common/QuillEditor.vue'
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi()
 import type { Rule } from 'ant-design-vue/es/form'
 import type { UploadProps } from 'ant-design-vue'
 
-// 引入富文本编辑器（这里使用一个简单的示例，实际项目中可以使用更完善的编辑器）
-let editor: any = null
-
 const router = useRouter()
 const formRef = ref()
-const editorRef = ref<HTMLElement>()
+const quillEditorRef = ref()
 
 // 状态管理
 const saving = ref(false)
@@ -208,24 +209,6 @@ const fetchCategories = async () => {
   } catch (error: any) {
     message.error(error.message || '获取分类列表失败')
   }
-}
-
-// 初始化富文本编辑器
-const initEditor = () => {
-  if (!editorRef.value) return
-
-  // 这里使用一个简单的文本编辑器示例
-  // 实际项目中可以集成更完善的富文本编辑器，如 TinyMCE、Quill 等
-  const textarea = document.createElement('textarea')
-  textarea.className = 'editor-textarea'
-  textarea.rows = 20
-  textarea.placeholder = '请输入新闻内容...'
-  textarea.addEventListener('input', e => {
-    formData.content = (e.target as HTMLTextAreaElement).value
-  })
-
-  editorRef.value.appendChild(textarea)
-  editor = textarea
 }
 
 // 图片上传前验证
@@ -318,14 +301,6 @@ const handlePublish = async () => {
 
 onMounted(() => {
   fetchCategories()
-  initEditor()
-})
-
-onBeforeUnmount(() => {
-  // 清理编辑器
-  if (editor) {
-    editor.remove()
-  }
 })
 </script>
 
@@ -398,27 +373,6 @@ onBeforeUnmount(() => {
         :deep(.ant-card-body) {
           padding: 16px;
         }
-      }
-    }
-  }
-
-  .editor-container {
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
-    overflow: hidden;
-
-    .editor {
-      min-height: 400px;
-
-      :deep(.editor-textarea) {
-        width: 100%;
-        border: none;
-        outline: none;
-        padding: 16px;
-        font-size: 14px;
-        line-height: 1.6;
-        resize: vertical;
-        font-family: inherit;
       }
     }
   }

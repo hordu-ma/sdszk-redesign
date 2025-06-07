@@ -13,6 +13,7 @@ export interface News {
   cover?: string
   author?: string
   category?: string
+  source?: NewsSource
   tags?: string[]
   publishDate?: string
   status: 'draft' | 'published' | 'archived'

@@ -58,9 +58,12 @@
 
               <!-- 内容编辑器 -->
               <a-form-item label="新闻内容" name="content">
-                <div class="editor-container">
-                  <div ref="editorRef" class="editor"></div>
-                </div>
+                <QuillEditor
+                  ref="quillEditorRef"
+                  v-model="formData.content"
+                  placeholder="请输入新闻内容..."
+                  height="400px"
+                />
               </a-form-item>
             </div>
           </a-col>
@@ -168,12 +171,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { adminNewsApi, type NewsFormData, type NewsItem } from '@/api/modules/adminNews'
 import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
+import QuillEditor from '@/components/common/QuillEditor.vue'
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi()
@@ -187,7 +191,7 @@ const props = defineProps<Props>()
 const router = useRouter()
 const route = useRoute()
 const formRef = ref()
-const editorRef = ref<HTMLElement>()
+const quillEditorRef = ref()
 
 // 状态管理
 const loading = ref(true)
@@ -195,8 +199,6 @@ const saving = ref(false)
 const publishing = ref(false)
 const categories = ref<NewsCategory[]>([])
 const newsData = ref<NewsItem>()
-
-let editor: any = null
 
 // 表单数据
 const formData = reactive<NewsFormData>({
@@ -268,11 +270,6 @@ const fetchNewsDetail = async () => {
       isFeatured: data.isFeatured,
       publishTime: data.publishTime ? new Date(data.publishTime) : undefined,
     })
-
-    // 设置编辑器内容
-    if (editor) {
-      editor.value = data.content
-    }
   } catch (error: any) {
     message.error(error.message || '获取新闻详情失败')
     router.push('/admin/news/list')
@@ -289,22 +286,6 @@ const fetchCategories = async () => {
   } catch (error: any) {
     message.error(error.message || '获取分类列表失败')
   }
-}
-
-// 初始化富文本编辑器
-const initEditor = () => {
-  if (!editorRef.value) return
-
-  const textarea = document.createElement('textarea')
-  textarea.className = 'editor-textarea'
-  textarea.rows = 20
-  textarea.placeholder = '请输入新闻内容...'
-  textarea.addEventListener('input', e => {
-    formData.content = (e.target as HTMLTextAreaElement).value
-  })
-
-  editorRef.value.appendChild(textarea)
-  editor = textarea
 }
 
 // 移除图片
@@ -356,15 +337,8 @@ const handlePublish = async () => {
 }
 
 onMounted(async () => {
-  initEditor()
   await fetchCategories()
   await fetchNewsDetail()
-})
-
-onBeforeUnmount(() => {
-  if (editor) {
-    editor.remove()
-  }
 })
 </script>
 

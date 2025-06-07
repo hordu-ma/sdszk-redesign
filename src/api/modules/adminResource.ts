@@ -4,7 +4,7 @@ import type { ApiResponse, QueryParams, PaginatedResponse } from '../types'
 // 资源表单数据接口
 export interface ResourceFormData {
   title: string
-  description?: string
+  description: string
   summary?: string
   categoryId: number
   fileUrl: string
