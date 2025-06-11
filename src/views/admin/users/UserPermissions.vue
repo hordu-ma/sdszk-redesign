@@ -513,8 +513,8 @@ const loadPermissions = async () => {
   try {
     loading.value = true
     const { data } = await adminUserApi.getPermissions()
-    permissions.value = data
-    pagination.total = data.length
+    permissions.value = Array.isArray(data) ? data : (data?.data ?? [])
+    pagination.total = permissions.value.length
   } catch (error) {
     message.error('加载权限列表失败')
   } finally {

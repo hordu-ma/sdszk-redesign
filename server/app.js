@@ -23,6 +23,8 @@ import dashboardRoutes from './routes/dashboard.js'
 import favoriteRoutes from './routes/favorites.js'
 import viewHistoryRoutes from './routes/viewHistory.js'
 import adminNewsRoutes from './routes/adminNews.js'
+import rolesRoutes from './routes/roles.js'
+import permissionsRoutes from './routes/permissions.js'
 
 // 错误处理中间件
 import errorMiddleware from './middleware/errorMiddleware.js'
@@ -131,6 +133,7 @@ app.use('/api/news', newsRoutes)
 app.use('/api/news-categories', newsCategoryRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/admin/users', userRoutes)
 app.use('/api/uploads', uploadRoutes)
 app.use('/api/resources', resourceRoutes)
 app.use('/api/admin/resources', resourceRoutes) // 添加管理员资源路由
@@ -142,6 +145,10 @@ app.use('/api/admin/dashboard', dashboardRoutes)
 app.use('/api/favorites', favoriteRoutes)
 app.use('/api/view-history', viewHistoryRoutes)
 app.use('/api/admin/news', adminNewsRoutes)
+app.use('/api/roles', rolesRoutes)
+app.use('/api/admin/roles', rolesRoutes)
+app.use('/api/permissions', permissionsRoutes)
+app.use('/api/admin/permissions', permissionsRoutes)
 
 // 修复错误格式的路由
 app.get('/admin/news/page=:page&limit=:limit', (req, res) => {

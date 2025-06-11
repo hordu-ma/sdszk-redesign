@@ -302,7 +302,7 @@ const fetchNewsList = async () => {
 
     const { data } = await adminNewsApi.getList(params)
 
-    tableData.value = data.data || []
+    tableData.value = data.data && data.data.items ? data.data.items : []
     pagination.total = data.pagination?.total || 0
   } catch (error: any) {
     message.error(error.message || '获取新闻列表失败')

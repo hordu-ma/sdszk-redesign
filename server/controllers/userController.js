@@ -6,10 +6,9 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-__v')
     res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: {
-        users,
+      data: users,
+      pagination: {
+        total: users.length,
       },
     })
   } catch (err) {

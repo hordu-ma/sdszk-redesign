@@ -140,8 +140,8 @@ export class AdminUserApi extends BaseApi {
     return this.get('/permissions')
   }
 
-  // 获取权限树（按模块分组）
-  getPermissionTree(): Promise<ApiResponse<Record<string, PermissionItem[]>>> {
+  // 获取权限树
+  getPermissionTree(): Promise<ApiResponse<any>> {
     return this.get('/permissions/tree')
   }
 }

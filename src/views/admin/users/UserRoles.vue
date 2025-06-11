@@ -336,7 +336,7 @@ const loadRoles = async () => {
   try {
     loading.value = true
     const { data } = await adminUserApi.getRoles()
-    roles.value = data
+    roles.value = Array.isArray(data) ? data : (data?.data ?? [])
   } catch (error) {
     message.error('加载角色列表失败')
   } finally {
@@ -350,11 +350,13 @@ const loadPermissions = async () => {
       adminUserApi.getPermissions(),
       adminUserApi.getPermissionTree(),
     ])
-
-    permissions.value = permissionsRes.data
-
+    permissions.value = Array.isArray(permissionsRes.data)
+      ? permissionsRes.data
+      : (permissionsRes.data?.data ?? [])
+    const treeData =
+      treeRes.data && typeof treeRes.data === 'object' ? treeRes.data : (treeRes.data?.data ?? {})
     // 转换权限树格式
-    permissionTree.value = Object.entries(treeRes.data).map(([module, perms]) => ({
+    permissionTree.value = Object.entries(treeData).map(([module, perms]) => ({
       name: module,
       displayName: module,
       children: (perms as PermissionItem[]).map(p => ({
