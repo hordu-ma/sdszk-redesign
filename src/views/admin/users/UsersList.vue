@@ -447,9 +447,11 @@ const loadUsers = async () => {
 
 const loadRoles = async () => {
   try {
-    const { data } = await adminUserApi.getRoles()
-    roles.value = data
+    const response = await adminUserApi.getRoles()
+    const data = (response as any).data
+    roles.value = Array.isArray(data) ? data : (data?.data ?? [])
   } catch (error) {
+    console.error('角色加载错误:', error)
     message.error('加载角色列表失败')
   }
 }
@@ -457,16 +459,19 @@ const loadRoles = async () => {
 const loadPermissions = async () => {
   try {
     const { data } = await adminUserApi.getPermissionTree()
+    // 获取实际的权限数据，处理嵌套的data结构
+    const permissionData = data?.data || data
     // 转换权限树格式
-    permissionTree.value = Object.entries(data).map(([module, perms]) => ({
+    permissionTree.value = Object.entries(permissionData).map(([module, perms]) => ({
       name: module,
       displayName: module,
-      children: perms.map(p => ({
+      children: (perms as any[]).map(p => ({
         name: p.name,
         displayName: p.displayName,
       })),
     }))
   } catch (error) {
+    console.error('权限加载错误:', error)
     message.error('加载权限列表失败')
   }
 }

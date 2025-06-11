@@ -335,9 +335,11 @@ const getAllPermissionKeys = (): string[] => {
 const loadRoles = async () => {
   try {
     loading.value = true
-    const { data } = await adminUserApi.getRoles()
+    const response = await adminUserApi.getRoles()
+    const data = (response as any).data
     roles.value = Array.isArray(data) ? data : (data?.data ?? [])
   } catch (error) {
+    console.error('角色加载错误:', error)
     message.error('加载角色列表失败')
   } finally {
     loading.value = false
@@ -350,22 +352,31 @@ const loadPermissions = async () => {
       adminUserApi.getPermissions(),
       adminUserApi.getPermissionTree(),
     ])
-    permissions.value = Array.isArray(permissionsRes.data)
-      ? permissionsRes.data
-      : (permissionsRes.data?.data ?? [])
-    const treeData =
-      treeRes.data && typeof treeRes.data === 'object' ? treeRes.data : (treeRes.data?.data ?? {})
+
+    // 处理权限列表数据
+    const permData = (permissionsRes as any).data
+    permissions.value = Array.isArray(permData) ? permData : (permData?.data ?? [])
+
+    // 处理权限树数据的嵌套结构
+    let treeData = (treeRes as any).data
+    if (treeData && typeof treeData === 'object' && 'data' in treeData) {
+      treeData = treeData.data
+    }
+
     // 转换权限树格式
-    permissionTree.value = Object.entries(treeData).map(([module, perms]) => ({
-      name: module,
-      displayName: module,
-      children: (perms as PermissionItem[]).map(p => ({
-        name: p.name,
-        displayName: p.displayName,
-        description: p.description,
-      })),
-    }))
+    if (treeData && typeof treeData === 'object') {
+      permissionTree.value = Object.entries(treeData).map(([module, perms]) => ({
+        name: module,
+        displayName: module,
+        children: (perms as PermissionItem[]).map(p => ({
+          name: p.name,
+          displayName: p.displayName,
+          description: p.description,
+        })),
+      }))
+    }
   } catch (error) {
+    console.error('权限加载错误:', error)
     message.error('加载权限列表失败')
   }
 }

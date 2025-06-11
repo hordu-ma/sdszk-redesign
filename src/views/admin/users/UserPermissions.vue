@@ -512,10 +512,13 @@ const getPermissionUsageCount = (permissionName: string) => {
 const loadPermissions = async () => {
   try {
     loading.value = true
-    const { data } = await adminUserApi.getPermissions()
+    const response = await adminUserApi.getPermissions()
+    // 处理嵌套的data结构
+    const data = (response as any).data
     permissions.value = Array.isArray(data) ? data : (data?.data ?? [])
     pagination.total = permissions.value.length
   } catch (error) {
+    console.error('权限加载错误:', error)
     message.error('加载权限列表失败')
   } finally {
     loading.value = false
@@ -524,8 +527,10 @@ const loadPermissions = async () => {
 
 const loadRoles = async () => {
   try {
-    const { data } = await adminUserApi.getRoles()
-    roles.value = data
+    const response = await adminUserApi.getRoles()
+    // 处理嵌套的data结构
+    const data = (response as any).data
+    roles.value = Array.isArray(data) ? data : (data?.data ?? [])
   } catch (error) {
     console.error('加载角色列表失败', error)
   }
