@@ -18,4 +18,7 @@ router.get('/visit-trends', authenticateToken, getVisitTrends)
 // 获取最新动态
 router.get('/activities', authenticateToken, getRecentActivities)
 
+// 获取仪表盘统计数据（兼容前端 /stats 路径）
+router.get('/stats', authenticateToken, getOverviewStats)
+
 export default router
