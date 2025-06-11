@@ -29,7 +29,7 @@
         </a-form-item>
         <a-form-item label="分类">
           <a-select
-            v-model:value="searchForm.categoryId"
+            v-model:value="searchForm.category"
             placeholder="请选择分类"
             style="width: 150px"
             allow-clear
@@ -99,7 +99,7 @@
         :loading="loading"
         :pagination="pagination"
         :row-selection="{ selectedRowKeys, onChange: onSelectChange }"
-        row-key="id"
+        row-key="_id"
         @change="handleTableChange"
       >
         <template #bodyCell="{ column, record }">
@@ -116,7 +116,7 @@
           </template>
 
           <template v-if="column.key === 'category'">
-            <a-tag color="blue">{{ record.categoryName }}</a-tag>
+            <a-tag color="blue">{{ record.category?.name }}</a-tag>
           </template>
 
           <template v-if="column.key === 'status'">
@@ -126,11 +126,11 @@
           </template>
 
           <template v-if="column.key === 'views'">
-            <span>{{ formatNumber(record.views) }}</span>
+            <span>{{ formatNumber(record.viewCount) }}</span>
           </template>
 
           <template v-if="column.key === 'publishTime'">
-            <span>{{ formatDate(record.publishTime) }}</span>
+            <span>{{ formatDate(record.publishDate) }}</span>
           </template>
 
           <template v-if="column.key === 'actions'">
@@ -175,10 +175,22 @@ const tableData = ref<NewsItem[]>([])
 const categories = ref<NewsCategory[]>([])
 const selectedRowKeys = ref<number[]>([])
 
+// 防抖相关
+let fetchTimer: any = null
+const isFetching = ref(false)
+
+// 防抖函数
+const debounce = (fn: Function, delay: number) => {
+  return (...args: any[]) => {
+    if (fetchTimer) clearTimeout(fetchTimer)
+    fetchTimer = setTimeout(() => fn(...args), delay)
+  }
+}
+
 // 搜索表单
 const searchForm = reactive({
   keyword: '',
-  categoryId: undefined as number | undefined,
+  category: undefined as number | undefined,
   status: undefined as string | undefined,
   dateRange: undefined as [string, string] | undefined,
 })
@@ -205,7 +217,7 @@ const columns: TableColumnsType = [
   {
     title: '分类',
     key: 'category',
-    dataIndex: 'categoryName',
+    dataIndex: ['category', 'name'],
     width: 120,
   },
   {
@@ -217,7 +229,7 @@ const columns: TableColumnsType = [
   {
     title: '浏览量',
     key: 'views',
-    dataIndex: 'views',
+    dataIndex: 'viewCount',
     width: 100,
     sorter: true,
   },
@@ -230,7 +242,7 @@ const columns: TableColumnsType = [
   {
     title: '发布时间',
     key: 'publishTime',
-    dataIndex: 'publishTime',
+    dataIndex: 'publishDate',
     width: 160,
     sorter: true,
   },
@@ -284,14 +296,21 @@ const formatDate = (dateString: string) => {
 
 // 获取新闻列表
 const fetchNewsList = async () => {
+  // 防止重复请求
+  if (isFetching.value) {
+    console.log('请求进行中，跳过重复请求')
+    return
+  }
+
   try {
     loading.value = true
+    isFetching.value = true
 
     const params: NewsQueryParams = {
       page: pagination.current,
       limit: pagination.pageSize,
       keyword: searchForm.keyword || undefined,
-      categoryId: searchForm.categoryId,
+      category: searchForm.category,
       status: searchForm.status as any,
     }
 
@@ -300,44 +319,79 @@ const fetchNewsList = async () => {
       params.endDate = searchForm.dateRange[1]
     }
 
-    const { data } = await adminNewsApi.getList(params)
+    console.log('发起新闻列表请求:', params)
+    const response = (await adminNewsApi.getList(params)) as any
 
-    tableData.value = data.data && data.data.items ? data.data.items : []
-    pagination.total = data.pagination?.total || 0
+    // 处理axios响应结构
+    console.log('新闻列表响应:', response)
+
+    if (response && response.status === 'success' && response.data) {
+      const serverData = response.data
+      if (Array.isArray(serverData.data)) {
+        tableData.value = serverData.data
+        pagination.total = serverData.pagination?.total || 0
+        console.log('成功加载新闻数据:', tableData.value.length, '条记录')
+      } else {
+        console.warn('服务器数据格式异常 - data.data不是数组:', serverData)
+        tableData.value = []
+        pagination.total = 0
+      }
+    } else {
+      console.warn('服务器响应格式异常:', response)
+      tableData.value = []
+      pagination.total = 0
+    }
   } catch (error: any) {
+    console.error('获取新闻列表失败:', error)
     message.error(error.message || '获取新闻列表失败')
   } finally {
     loading.value = false
+    isFetching.value = false
   }
 }
 
+// 防抖版本的获取新闻列表
+const debouncedFetchNewsList = debounce(fetchNewsList, 300)
+
 // 获取分类列表
 const fetchCategories = async () => {
+  // 如果已经有分类数据，跳过重复请求
+  if (categories.value.length > 0) {
+    console.log('分类数据已存在，跳过重复请求')
+    return
+  }
+
   try {
+    console.log('获取分类列表...')
     const newsCategoryApi = new NewsCategoryApi()
     const { data } = await newsCategoryApi.getList()
     categories.value = data
+    console.log('成功获取分类:', data.length, '个')
   } catch (error: any) {
+    console.error('获取分类列表失败:', error)
     message.error(error.message || '获取分类列表失败')
   }
 }
 
+// 防抖版本的获取分类列表
+const debouncedFetchCategories = debounce(fetchCategories, 300)
+
 // 处理搜索
 const handleSearch = () => {
   pagination.current = 1
-  fetchNewsList()
+  debouncedFetchNewsList()
 }
 
 // 处理重置
 const handleReset = () => {
   Object.assign(searchForm, {
     keyword: '',
-    categoryId: undefined,
+    category: undefined,
     status: undefined,
     dateRange: undefined,
   })
   pagination.current = 1
-  fetchNewsList()
+  debouncedFetchNewsList()
 }
 
 // 处理表格变化
@@ -345,13 +399,13 @@ const handleTableChange: TableProps['onChange'] = (pag, filters, sorter) => {
   pagination.current = pag.current || 1
   pagination.pageSize = pag.pageSize || 20
 
-  // 更新URL，但不刷新页面
-  const newUrl = new URL(window.location.href)
-  newUrl.searchParams.set('page', pagination.current.toString())
-  newUrl.searchParams.set('limit', pagination.pageSize.toString())
-  window.history.pushState({}, '', newUrl.toString())
+  // 注释掉URL更新，避免可能的无限循环
+  // const newUrl = new URL(window.location.href)
+  // newUrl.searchParams.set('page', pagination.current.toString())
+  // newUrl.searchParams.set('limit', pagination.pageSize.toString())
+  // window.history.pushState({}, '', newUrl.toString())
 
-  fetchNewsList()
+  debouncedFetchNewsList()
 }
 
 // 处理选择变化
@@ -361,15 +415,15 @@ const onSelectChange = (newSelectedRowKeys: number[]) => {
 
 // 处理编辑
 const handleEdit = (record: NewsItem) => {
-  router.push(`/admin/news/edit/${record.id}`)
+  router.push(`/admin/news/edit/${record._id}`)
 }
 
 // 处理删除
 const handleDelete = async (record: NewsItem) => {
   try {
-    await adminNewsApi.delete(record.id)
+    await adminNewsApi.delete(record._id as any)
     message.success('删除成功')
-    fetchNewsList()
+    debouncedFetchNewsList()
   } catch (error: any) {
     message.error(error.message || '删除失败')
   }
@@ -381,7 +435,7 @@ const handleBatchDelete = async () => {
     await adminNewsApi.batchDelete(selectedRowKeys.value)
     message.success('批量删除成功')
     selectedRowKeys.value = []
-    fetchNewsList()
+    debouncedFetchNewsList()
   } catch (error: any) {
     message.error(error.message || '批量删除失败')
   }
@@ -392,7 +446,7 @@ const handleToggleTop = async (record: NewsItem) => {
   try {
     await adminNewsApi.toggleTop(record.id)
     message.success(record.isTop ? '取消置顶成功' : '置顶成功')
-    fetchNewsList()
+    debouncedFetchNewsList()
   } catch (error: any) {
     message.error(error.message || '操作失败')
   }
@@ -403,7 +457,7 @@ const handleTogglePublish = async (record: NewsItem) => {
   try {
     await adminNewsApi.togglePublish(record.id)
     message.success(record.status === 'published' ? '下线成功' : '发布成功')
-    fetchNewsList()
+    debouncedFetchNewsList()
   } catch (error: any) {
     message.error(error.message || '操作失败')
   }
@@ -422,12 +476,13 @@ const handleBatchArchive = async () => {
 }
 
 onMounted(() => {
-  // 获取URL查询参数
+  console.log('NewsList组件已挂载')
+
+  // 简化URL参数读取
   const urlParams = new URLSearchParams(window.location.search)
   const pageParam = urlParams.get('page')
   const limitParam = urlParams.get('limit')
 
-  // 如果存在URL参数，则使用它们
   if (pageParam) {
     pagination.current = parseInt(pageParam) || 1
   }
@@ -435,9 +490,13 @@ onMounted(() => {
     pagination.pageSize = parseInt(limitParam) || 20
   }
 
-  // 获取数据
-  fetchNewsList()
-  fetchCategories()
+  // 使用防抖版本获取数据，避免重复请求
+  debouncedFetchCategories()
+
+  // 延迟获取新闻列表，确保分类数据先加载
+  setTimeout(() => {
+    debouncedFetchNewsList()
+  }, 100)
 })
 </script>
 

@@ -12,7 +12,7 @@ export interface NewsFormData {
   title: string
   content: string
   summary?: string
-  categoryId: number
+  category: number
   featuredImage?: string
   tags?: string[]
   status: 'draft' | 'published' | 'archived'
@@ -23,11 +23,12 @@ export interface NewsFormData {
 
 // 新闻列表项接口
 export interface NewsItem {
+  _id: string
   id: number
   title: string
   summary: string
   content: string
-  categoryId: number
+  category: number
   categoryName: string
   featuredImage?: string
   tags: string[]
@@ -35,11 +36,13 @@ export interface NewsItem {
   isTop: boolean
   isFeatured: boolean
   views: number
+  viewCount: number
   author: {
     id: number
     username: string
   }
   publishTime: string
+  publishDate: string
   createdAt: string
   updatedAt: string
 }
@@ -47,7 +50,7 @@ export interface NewsItem {
 // 新闻查询参数接口
 export interface NewsQueryParams extends PaginationParams {
   keyword?: string
-  categoryId?: number
+  category?: number
   status?: 'draft' | 'published' | 'archived'
   isTop?: boolean
   isFeatured?: boolean
@@ -66,7 +69,7 @@ export const adminNewsApi = {
         page: validParams.page || 1,
         limit: validParams.limit || 20,
         keyword: validParams.keyword,
-        categoryId: validParams.categoryId,
+        category: validParams.category,
         status: validParams.status,
         startDate: validParams.startDate,
         endDate: validParams.endDate,

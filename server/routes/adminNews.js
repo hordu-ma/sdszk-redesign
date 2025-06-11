@@ -17,7 +17,7 @@ router.get(
       page = 1,
       limit = 20,
       keyword,
-      categoryId,
+      category,
       status,
       startDate,
       endDate,
@@ -35,8 +35,8 @@ router.get(
       ]
     }
 
-    if (categoryId) {
-      query.categoryId = categoryId
+    if (category) {
+      query.category = category
     }
 
     if (status) {

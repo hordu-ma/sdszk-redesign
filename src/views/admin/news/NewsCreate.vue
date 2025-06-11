@@ -66,12 +66,8 @@
             <div class="settings-panel">
               <!-- 发布设置 -->
               <a-card title="发布设置" size="small" class="setting-card">
-                <a-form-item label="新闻分类" name="categoryId">
-                  <a-select
-                    v-model:value="formData.categoryId"
-                    placeholder="请选择分类"
-                    allow-clear
-                  >
+                <a-form-item label="新闻分类" name="category">
+                  <a-select v-model:value="formData.category" placeholder="请选择分类" allow-clear>
                     <a-select-option
                       v-for="category in categories"
                       :key="category._id"
@@ -178,7 +174,7 @@ const formData = reactive<NewsFormData>({
   title: '',
   content: '',
   summary: '',
-  categoryId: undefined as any,
+  category: undefined as any,
   featuredImage: '',
   tags: [],
   status: 'draft',
@@ -193,7 +189,7 @@ const rules: Record<string, Rule[]> = {
     { required: true, message: '请输入新闻标题', trigger: 'blur' },
     { min: 5, max: 100, message: '标题长度应在5-100个字符之间', trigger: 'blur' },
   ],
-  categoryId: [{ required: true, message: '请选择新闻分类', trigger: 'change' }],
+  category: [{ required: true, message: '请选择新闻分类', trigger: 'change' }],
   content: [
     { required: true, message: '请输入新闻内容', trigger: 'blur' },
     { min: 50, message: '内容长度不能少于50个字符', trigger: 'blur' },
