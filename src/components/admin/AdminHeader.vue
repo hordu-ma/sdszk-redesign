@@ -38,7 +38,7 @@
           <DownOutlined class="dropdown-icon" />
         </div>
         <template #overlay>
-          <a-menu>
+          <a-menu @click="handleMenuClick">
             <a-menu-item key="profile">
               <UserOutlined />
               个人资料
@@ -48,7 +48,7 @@
               个人设置
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item key="logout" @click="emit('logout')">
+            <a-menu-item key="logout">
               <LogoutOutlined />
               退出登录
             </a-menu-item>
@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import {
   MenuFoldOutlined,
@@ -86,6 +86,7 @@ defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 // 用户信息
@@ -100,6 +101,23 @@ const userInfo = computed(
 
 // 通知数量
 const notificationCount = computed(() => 0) // 暂时设为0，后续可以从API获取
+
+// 处理菜单点击
+const handleMenuClick = ({ key }: { key: string }) => {
+  switch (key) {
+    case 'profile':
+      // 跳转到用户个人资料页面
+      router.push('/user/profile')
+      break
+    case 'settings':
+      // 跳转到用户设置页面
+      router.push('/user/settings')
+      break
+    case 'logout':
+      emit('logout')
+      break
+  }
+}
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
