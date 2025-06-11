@@ -108,6 +108,7 @@ router.post(
     const newsData = {
       ...req.body,
       author: req.user.id,
+      createdBy: req.user.id,
     }
 
     const news = new News(newsData)
