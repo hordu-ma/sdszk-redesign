@@ -98,9 +98,9 @@ export const useUserStore = defineStore(
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true
-        console.log('正在发送登录请求到:', '/api/auth/login', '携带数据:', payload)
+        console.log('【DEBUG】正在发送登录请求到:', '/api/auth/login', '携带数据:', payload)
         const response = await api.post('/api/auth/login', payload)
-        console.log('登录响应:', response.data)
+        console.log('【DEBUG】登录响应:', response.data)
 
         // 确保检查response.data是对象且有status属性
         if (
@@ -122,7 +122,8 @@ export const useUserStore = defineStore(
             }
 
             userInfo.value = userWithTransformedPermissions
-            console.log('转换后的权限:', transformedPermissions)
+            console.log('【DEBUG】转换后的权限:', transformedPermissions)
+            console.log('【DEBUG】userInfo:', userInfo.value)
 
             // 如果选择记住登录状态，保存token
             if (payload.remember) {
@@ -137,11 +138,11 @@ export const useUserStore = defineStore(
         }
 
         // 登录失败时抛出错误
-        console.error('登录请求成功但返回失败状态:', response.data)
+        console.error('【DEBUG】登录请求成功但返回失败状态:', response.data)
         throw new Error(response.data.message || '登录失败，请检查用户名和密码')
       } catch (error: any) {
-        console.error('登录错误:', error)
-        console.error('错误详情:', error.response?.data || '无响应数据')
+        console.error('【DEBUG】登录错误:', error)
+        console.error('【DEBUG】错误详情:', error.response?.data || '无响应数据')
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message || error.message || '登录失败，请检查网络连接'
@@ -195,27 +196,29 @@ export const useUserStore = defineStore(
 
     // 检查权限
     function hasPermission(permission: string): boolean {
-      console.log(`检查权限: ${permission}，当前权限列表:`, userPermissions.value)
-      console.log(`当前用户角色: ${userInfo.value?.role}`)
-
+      console.log(`【DEBUG】检查权限: ${permission}，当前权限列表:`, userPermissions.value)
+      console.log(`【DEBUG】当前用户角色: ${userInfo.value?.role}`)
       // 如果是管理员，始终有权限
       if (userInfo.value?.role === 'admin') {
-        console.log('管理员具有所有权限，返回 true')
+        console.log('【DEBUG】管理员具有所有权限，返回 true')
         return true
       }
-
-      return userPermissions.value.includes(permission)
+      const result = userPermissions.value.includes(permission)
+      console.log(`【DEBUG】hasPermission(${permission}) =`, result)
+      return result
     }
 
     // 初始化用户信息
     async function initUserInfo(): Promise<void> {
       const savedToken = localStorage.getItem('token')
+      console.log('【DEBUG】initUserInfo, localStorage token:', savedToken)
       if (savedToken) {
         token.value = savedToken
         // 设置全局请求头
         api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
         try {
           const { data } = await api.get('/api/auth/me')
+          console.log('【DEBUG】/api/auth/me 响应:', data)
           if (data.status === 'success') {
             const userData = data.data.user
 
@@ -227,12 +230,13 @@ export const useUserStore = defineStore(
             }
 
             userInfo.value = userWithTransformedPermissions
-            console.log('初始化时转换后的权限:', transformedPermissions)
+            console.log('【DEBUG】initUserInfo 转换后的权限:', transformedPermissions)
+            console.log('【DEBUG】initUserInfo userInfo:', userInfo.value)
           } else {
             throw new Error('获取用户信息失败')
           }
         } catch (error) {
-          console.error('初始化用户信息失败:', error)
+          console.error('【DEBUG】initUserInfo 获取用户信息失败:', error)
           await logout()
         }
       }

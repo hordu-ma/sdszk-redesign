@@ -95,15 +95,15 @@ const rules: Record<string, Rule[]> = {
 const handleLogin = async () => {
   try {
     loading.value = true
-
+    console.log('【DEBUG】登录表单提交，formData:', JSON.parse(JSON.stringify(formData)))
     await userStore.login({
       username: formData.username,
       password: formData.password,
       remember: formData.rememberMe,
     })
-
+    // 登录后检测 localStorage token
+    console.log('【DEBUG】登录后 localStorage token:', localStorage.getItem('token'))
     message.success('登录成功')
-
     // 获取重定向路径或默认跳转到仪表板
     const redirectPath = (route.query.redirect as string) || '/admin/dashboard'
     router.push(redirectPath)
