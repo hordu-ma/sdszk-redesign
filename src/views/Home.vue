@@ -4,12 +4,7 @@
 
     <news-section />
 
-    <info-section
-      :notices="notices"
-      :policies="policies"
-      :theories="theories"
-      :researches="researches"
-    />
+    <info-section :theories="theories" :researches="researches" />
 
     <!-- 影像思政组件 -->
     <div class="video-section">
@@ -91,22 +86,6 @@ import poster2 from '../assets/images/posters/poster2.jpg'
 import poster3 from '../assets/images/posters/poster3.jpg'
 import SectionHeader from '../components/common/SectionHeader.vue'
 
-const notices = ref([
-  {
-    id: 1,
-    title: '关于开展2023年度思政课教学研究项目申报工作的通知',
-    date: '2023-09-15',
-    unit: '思政课程部',
-  },
-  {
-    id: 2,
-    title: '2023年秋季学期思政课教研活动安排',
-    date: '2023-09-10',
-    unit: '教务处',
-  },
-])
-
-const policies = ref([])
 const theories = ref([])
 const researches = ref([])
 const videos = ref([])

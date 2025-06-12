@@ -63,7 +63,7 @@
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="theory in theories" :key="theory.id">
+        <li v-for="theory in theories as any[]" :key="theory.id">
           <router-link :to="`/resources/detail/${theory.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
@@ -89,7 +89,7 @@
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="research in researches" :key="research.id">
+        <li v-for="research in researches as any[]" :key="research.id">
           <router-link :to="`/resources/detail/${research.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
@@ -107,18 +107,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { newsApi, newsCategoryApi } from '@/api'
 import { computed } from 'vue'
 
 const props = defineProps({
-  notices: {
-    type: Array,
-    required: true,
-  },
-  policies: {
-    type: Array,
-    required: true,
-  },
   theories: {
     type: Array,
     required: true,
@@ -129,7 +123,53 @@ const props = defineProps({
   },
 })
 
-const formatDate = date => {
+const notices = ref<any[]>([])
+const policies = ref<any[]>([])
+const noticeCategoryId = ref<string>('')
+const policyCategoryId = ref<string>('')
+
+const fetchCoreCategoryIds = async () => {
+  const res = await newsCategoryApi.getCoreCategories()
+  if (res.success && Array.isArray(res.data)) {
+    const notice = res.data.find((cat: any) => cat.key === 'notice')
+    const policy = res.data.find((cat: any) => cat.key === 'policy')
+    if (notice) noticeCategoryId.value = notice._id
+    if (policy) policyCategoryId.value = policy._id
+  }
+}
+
+const fetchNotices = async () => {
+  if (!noticeCategoryId.value) return
+  const res = await newsApi.getList({ category: noticeCategoryId.value, limit: 5 })
+  if (res.success) {
+    notices.value = res.data.map((item: any) => ({
+      id: item._id || item.id,
+      title: item.title,
+      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
+      unit: item.source?.name || '',
+    }))
+  }
+}
+
+const fetchPolicies = async () => {
+  if (!policyCategoryId.value) return
+  const res = await newsApi.getList({ category: policyCategoryId.value, limit: 5 })
+  if (res.success) {
+    policies.value = res.data.map((item: any) => ({
+      id: item._id || item.id,
+      title: item.title,
+      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
+      unit: item.source?.name || '',
+    }))
+  }
+}
+
+onMounted(async () => {
+  await fetchCoreCategoryIds()
+  await Promise.all([fetchNotices(), fetchPolicies()])
+})
+
+const formatDate = (date: any) => {
   if (!date) return ''
   const d = new Date(date)
   return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })

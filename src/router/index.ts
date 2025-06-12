@@ -48,6 +48,21 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/News.vue'),
   },
   {
+    path: '/news/center',
+    name: 'newsCenter',
+    component: () => import('../views/news/NewsList.vue'),
+  },
+  {
+    path: '/news/notice',
+    name: 'newsNotice',
+    component: () => import('../views/news/NewsList.vue'),
+  },
+  {
+    path: '/news/policy',
+    name: 'newsPolicy',
+    component: () => import('../views/news/NewsList.vue'),
+  },
+  {
     path: '/news/detail/:id',
     name: 'newsDetail',
     component: () => import('../views/NewsDetail.vue'),

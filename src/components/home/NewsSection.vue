@@ -36,7 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent } from 'vue'
+import { ref, onMounted } from 'vue'
+import { newsApi, newsCategoryApi } from '@/api'
 import carousel1 from '../../assets/images/carousel1.jpg'
 import carousel2 from '../../assets/images/carousel2.jpg'
 import carousel3 from '../../assets/images/carousel3.jpg'
@@ -48,10 +49,9 @@ interface CarouselItem {
 }
 
 interface NewsItem {
-  id: number
+  id: string
   title: string
   date: string
-  url: string
   summary: string
 }
 
@@ -61,38 +61,40 @@ const carouselItems = ref<CarouselItem[]>([
   { id: 3, image: carousel3, title: '新闻3' },
 ])
 
-const centerNews = ref<NewsItem[]>([
-  {
-    id: 1,
-    title: "校际协同，星辰引航：'星空下的思政课'开讲",
-    date: '2025-04-29',
-    url: 'https://www.sdszk.cn/home/information/item/2/87',
-    summary:
-      "青岛理工大学马克思主义学院、理学院联合青岛第五十三中学教育集团，举办'星空下的思政课'大中小学一体化课程思政实践，共同探索大中小学一体化课程思政新方式。",
-  },
-  {
-    id: 2,
-    title: '菏泽家政职业学院组织开展大中小学乡村振兴劳动教育实践活动',
-    date: '2025-04-26',
-    url: 'https://www.sdszk.cn/home/information/item/2/85',
-    summary:
-      "菏泽家政职业学院依托菏泽市大中小学思政课一体化建设共同体平台，组织大中小学学生走进全国文明村、全国乡村治理示范村——单县龙王庙镇刘土城村，开展了以'劳动铸魂 青春筑梦'为主题的乡村振兴劳动教育实践活动。",
-  },
-  {
-    id: 3,
-    title: '济宁市新时代学校思政课建设推进会召开',
-    date: '2025-04-20',
-    url: 'https://www.sdszk.cn/home/information/item/2/84',
-    summary:
-      '济宁市新时代学校思政课建设推进会召开，市委常委、宣传部部长董冰出席并讲话，副市长宫晓芳主持会议。',
-  },
-])
+const centerNews = ref<NewsItem[]>([])
+const centerCategoryId = ref<string>('')
 
-const formatDay = (date: string): string => date.split('-')[2]
+const fetchCenterCategoryId = async () => {
+  const res = await newsCategoryApi.getCoreCategories()
+  if (res.success && Array.isArray(res.data)) {
+    const center = res.data.find((cat: any) => cat.key === 'center')
+    if (center) centerCategoryId.value = center._id
+  }
+}
+
+const fetchCenterNews = async () => {
+  if (!centerCategoryId.value) return
+  const res = await newsApi.getList({ category: centerCategoryId.value, limit: 3 })
+  if (res.success) {
+    centerNews.value = res.data.map((item: any) => ({
+      id: item._id || item.id,
+      title: item.title,
+      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
+      summary: item.summary || '',
+    }))
+  }
+}
+
+const formatDay = (date: string): string => date.split('-')[2] || ''
 const formatMonthYear = (date: string): string => {
   const parts = date.split('-')
-  return `${parts[1]}/${parts[0].slice(2)}`
+  return parts.length >= 2 ? `${parts[1]}/${parts[0].slice(2)}` : ''
 }
+
+onMounted(async () => {
+  await fetchCenterCategoryId()
+  await fetchCenterNews()
+})
 </script>
 
 <style scoped>

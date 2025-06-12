@@ -55,6 +55,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { newsApi, newsCategoryApi } from '@/api'
 import type { News, NewsCategory } from '@/types/news'
@@ -71,15 +72,21 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+const route = useRoute()
+
 // 获取新闻列表
 const fetchNewsList = async () => {
   loading.value = true
   try {
+    console.log('【调试】fetchNewsList 请求参数:', {
+      page: currentPage.value,
+      limit: pageSize.value,
+      category: selectedCategory.value,
+    })
     const response = await newsApi.getList({
       page: currentPage.value,
       limit: pageSize.value,
       category: selectedCategory.value || undefined,
-      status: 'published',
     })
 
     if (response.success) {
@@ -96,12 +103,39 @@ const fetchNewsList = async () => {
   }
 }
 
-// 获取分类列表
+const updateSelectedCategoryByRoute = () => {
+  const key = route.path.split('/').pop() || ''
+  console.log('【调试】当前路由key:', key)
+  console.log(
+    '【调试】categories.value 类型:',
+    Array.isArray(categories.value),
+    typeof categories.value
+  )
+  console.log('【调试】当前categories:', categories.value)
+  if (categories.value.length > 0) {
+    categories.value.forEach((c, i) => {
+      console.log(`【调试】分类[${i}] key:`, c.key, typeof c.key)
+    })
+  }
+  if (['center', 'notice', 'policy'].includes(key)) {
+    const cat = categories.value.find((c: any) => c.key === key)
+    console.log('【调试】匹配到的分类cat:', cat)
+    if (cat) selectedCategory.value = cat._id
+  } else {
+    selectedCategory.value = ''
+  }
+}
+
 const fetchCategories = async () => {
   try {
     const response = await newsCategoryApi.getList({ includeInactive: false })
+    console.log('【调试】newsCategoryApi.getList返回：', response)
+    console.log('【调试】response.data 类型:', Array.isArray(response.data), typeof response.data)
+    console.log('【调试】response.data 详细:', response.data)
     if (response.success) {
-      categories.value = response.data
+      categories.value = (response.data as any).data
+      console.log('【调试】赋值后的categories:', categories.value)
+      updateSelectedCategoryByRoute()
     }
   } catch (error) {
     console.error('获取分类列表失败', error)
@@ -127,10 +161,17 @@ watch(selectedCategory, () => {
   fetchNewsList()
 })
 
+watch(
+  () => route.path,
+  () => {
+    updateSelectedCategoryByRoute()
+    fetchNewsList()
+  }
+)
+
 // 初始化
 onMounted(() => {
-  fetchCategories()
-  fetchNewsList()
+  fetchCategories().then(fetchNewsList)
 })
 </script>
 
