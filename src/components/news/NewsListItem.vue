@@ -1,57 +1,66 @@
 <template>
   <div class="news-item">
-    <router-link :to="`/news/detail/${news._id}`" class="news-link">
-      <div class="news-wrapper">
-        <div class="date-block">
-          <span class="day">{{ formattedDate.day }}</span>
-          <span class="month-year">{{ formattedDate.month }}/{{ formattedDate.year }}</span>
-        </div>
-        <div class="news-content-inner">
-          <h3 class="news-title">{{ news.title }}</h3>
-          <div class="news-meta">
-            <span class="category-tag" :class="'category-' + news.categoryKey">{{
-              news.categoryName
-            }}</span>
-            <span v-if="news.author" class="news-author">{{ news.author }}</span>
-            <span v-if="news.source?.name" class="news-source">{{ news.source.name }}</span>
-          </div>
-          <p class="news-summary">{{ news.summary }}</p>
-        </div>
+    <div class="news-content">
+      <h3 class="news-title">
+        <router-link :to="`/news/detail/${news._id || news.id}`">{{ news.title }}</router-link>
+      </h3>
+      <p class="news-summary">
+        {{ displaySummary }}
+      </p>
+      <div class="news-meta">
+        <span class="news-date">{{ formatDate(news.publishDate || news.createdAt) }}</span>
+        <span class="news-author" v-if="news.author">作者：{{ displayAuthor }}</span>
+        <span class="news-views" v-if="news.viewCount">阅读：{{ news.viewCount }}</span>
       </div>
-    </router-link>
+    </div>
+    <div class="news-cover" v-if="news.cover">
+      <img :src="news.cover" :alt="news.title" />
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue'
+<script lang="ts">
+import { defineComponent, computed } from 'vue'
+import type { News } from '@/types/news'
 
-interface NewsSource {
-  name: string
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]+>/g, '')
 }
 
-interface News {
-  _id: string
-  title: string
-  summary: string
-  author?: string
-  source?: NewsSource
-  categoryKey: string
-  categoryName: string
-  publishDate?: string
-  createdAt: string
-}
-
-const props = defineProps<{
-  news: News
-}>()
-
-const formattedDate = computed(() => {
-  const date = new Date(props.news.publishDate || props.news.createdAt)
-  return {
-    day: date.getDate().toString().padStart(2, '0'),
-    month: (date.getMonth() + 1).toString().padStart(2, '0'),
-    year: date.getFullYear().toString().slice(2),
-  }
+export default defineComponent({
+  name: 'NewsListItem',
+  props: {
+    news: {
+      type: Object as () => any,
+      required: true,
+    },
+  },
+  setup(props) {
+    // 优先显示摘要，无则取正文前100字
+    const displaySummary = computed(() => {
+      if (props.news.summary) return props.news.summary
+      if (props.news.content) return stripHtml(props.news.content).slice(0, 100) + '...'
+      return ''
+    })
+    // 显示作者名
+    const displayAuthor = computed(() => {
+      const author = props.news.author as any
+      if (typeof author === 'string') return author
+      if (author && (author.username || author.name)) {
+        return author.username || author.name
+      }
+      return ''
+    })
+    // 日期格式化
+    const formatDate = (date: string) => {
+      return new Date(date).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+    }
+    return { displaySummary, displayAuthor, formatDate }
+  },
 })
 </script>
 

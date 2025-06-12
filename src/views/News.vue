@@ -100,7 +100,6 @@ const fetchNews = async () => {
     const params = {
       page: currentPage.value,
       limit: pageSize.value,
-      isPublished: true,
     }
 
     // 如果有选择分类，添加分类筛选
@@ -113,10 +112,11 @@ const fetchNews = async () => {
     }
 
     const response = await newsApi.getList(params)
+    console.log('新闻接口响应', response)
 
-    if (response.status === 'success') {
-      newsList.value = response.data
-      totalNews.value = response.pagination?.total || 0
+    if (response.data.status === 'success') {
+      newsList.value = response.data.data
+      totalNews.value = response.data.pagination?.total || 0
     }
   } catch (error) {
     console.error('获取新闻失败:', error)

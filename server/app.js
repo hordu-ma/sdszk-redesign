@@ -53,25 +53,20 @@ app.use(cookieParser())
 app.use(
   cors({
     origin: function (origin, callback) {
-      // 允许来自多个前端开发端口的请求
       const allowedOrigins = [
         'http://localhost:5180',
         'http://localhost:5182',
         'http://localhost:5179',
         'http://localhost:5178',
-        'http://localhost:5173', // Vite默认端口
+        'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:5175',
         process.env.FRONTEND_URL,
+        undefined, // 允许无origin的请求（如curl、本地测试）
       ].filter(Boolean)
-
-      // 记录请求来源
-      console.log('收到跨域请求:', { origin })
-
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true)
       } else {
-        console.log('不允许的跨域访问:', origin)
         callback(null, false)
       }
     },
@@ -81,9 +76,11 @@ app.use(
     exposedHeaders: ['set-cookie', 'Set-Cookie'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
-    maxAge: 3600, // 预检请求的缓存时间（秒）
+    maxAge: 3600,
   })
 )
+// 处理所有OPTIONS预检请求，确保返回CORS头
+app.options('*', cors())
 app.use(
   helmet({
     contentSecurityPolicy: false, // 在开发中禁用CSP，生产环境应启用

@@ -1,6 +1,6 @@
 <!-- NewsDetail.vue - 用于显示单个新闻文章详情 -->
 <template>
-  <div class="news-detail-container">
+  <div v-if="newsData" class="news-detail-container">
     <a-spin :spinning="loading" tip="加载中...">
       <!-- 面包屑导航 -->
       <breadcrumb-nav :items="breadcrumbItems" />
@@ -10,7 +10,11 @@
         <h1 class="article-title">{{ newsData.title }}</h1>
         <article-meta
           :date="newsData.publishDate || newsData.createdAt"
-          :author="newsData.author"
+          :author="
+            typeof newsData.author === 'object'
+              ? (newsData.author as any).username || (newsData.author as any).name || ''
+              : newsData.author
+          "
           :source="newsData.source?.name"
           :view-count="newsData.viewCount"
         />
@@ -77,12 +81,18 @@ const relatedNews = ref<Array<{ id: string; title: string; date: string }>>([])
 const fetchNewsData = async (id: string) => {
   loading.value = true
   try {
-    const response = (await newsApi.getDetail(id)) as unknown as NewsResponse
-    if (response.success) {
-      newsData.value = response.data
+    const response = await newsApi.getDetail(id)
+    console.log('新闻详情响应', response)
+    // 兼容不同响应结构
+    const resData = response.data || (response as any)
+    if ((resData as any) && ((resData as any).success || (resData as any).status === 'success')) {
+      newsData.value = (resData as any).data
       // 获取相关文章（同一分类的其他文章）
-      if (response.data.category) {
-        await fetchRelatedNews(response.data.category, response.data.id)
+      if ((resData as any).data && (resData as any).data.category) {
+        await fetchRelatedNews(
+          (resData as any).data.category,
+          (resData as any).data.id || (resData as any).data._id
+        )
       }
     } else {
       message.error('找不到对应的文章')
@@ -96,20 +106,17 @@ const fetchNewsData = async (id: string) => {
 }
 
 // 获取相关文章
-const fetchRelatedNews = async (categoryId: string, currentId: string) => {
+const fetchRelatedNews = async (_category: any, currentId: string) => {
   try {
-    const response = (await newsApi.getList({
-      category: categoryId,
+    const response = await newsApi.getList({
       limit: 5,
-      isPublished: true,
-    })) as unknown as NewsListResponse
-
-    if (response.success) {
-      // 过滤掉当前文章
-      relatedNews.value = response.data
-        .filter((item: News) => item.id !== currentId)
-        .map((item: News) => ({
-          id: item.id,
+    })
+    const resData = (response.data || response) as any
+    if (resData && (resData.success || resData.status === 'success')) {
+      relatedNews.value = resData.data
+        .filter((item: any) => (item.id || item._id) !== currentId)
+        .map((item: any) => ({
+          id: item.id || item._id,
           title: item.title,
           date: item.publishDate || item.createdAt,
         }))
