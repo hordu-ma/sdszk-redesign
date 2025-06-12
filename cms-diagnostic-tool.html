@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMS新闻管理诊断工具</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .test-section {
+        background: #f5f5f5;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+      }
+      .result {
+        background: #fff;
+        padding: 15px;
+        margin: 10px 0;
+        border-left: 4px solid #007cba;
+      }
+      .success {
+        border-left-color: #28a745;
+      }
+      .error {
+        border-left-color: #dc3545;
+      }
+      .warning {
+        border-left-color: #ffc107;
+      }
+      button {
+        background: #007cba;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005a8b;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .token-display {
+        background: #e9ecef;
+        padding: 10px;
+        border-radius: 4px;
+        word-break: break-all;
+      }
+      .form-group {
+        margin: 15px 0;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .form-group textarea {
+        height: 100px;
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 CMS新闻管理诊断工具</h1>
+      <p>这个工具可以帮助诊断CMS新闻创建和列表显示的问题</p>
+
+      <!-- 第一步：检查登录状态 -->
+      <div class="test-section">
+        <h2>步骤1：检查用户登录状态</h2>
+        <button onclick="checkLoginStatus()">检查登录状态</button>
+        <button onclick="testLogin()">测试登录</button>
+        <div id="loginResult" class="result"></div>
+      </div>
+
+      <!-- 第二步：测试新闻列表API -->
+      <div class="test-section">
+        <h2>步骤2：测试新闻列表API</h2>
+        <button onclick="testNewsListAPI()">获取新闻列表</button>
+        <div id="newsListResult" class="result"></div>
+      </div>
+
+      <!-- 第三步：测试新闻创建API -->
+      <div class="test-section">
+        <h2>步骤3：测试新闻创建API</h2>
+        <div class="form-group">
+          <label>新闻标题：</label>
+          <input type="text" id="newsTitle" value="浏览器测试新闻" />
+        </div>
+        <div class="form-group">
+          <label>新闻内容：</label>
+          <textarea id="newsContent">
+这是通过浏览器诊断工具创建的测试新闻，用于验证API功能。</textarea
+          >
+        </div>
+        <div class="form-group">
+          <label>新闻摘要：</label>
+          <input type="text" id="newsSummary" value="浏览器测试摘要" />
+        </div>
+        <div class="form-group">
+          <label>分类：</label>
+          <select id="newsCategory">
+            <option value="">请选择分类</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>状态：</label>
+          <select id="newsStatus">
+            <option value="draft">草稿</option>
+            <option value="published" selected>发布</option>
+          </select>
+        </div>
+        <button onclick="loadCategories()">加载分类列表</button>
+        <button onclick="testNewsCreateAPI()">创建新闻</button>
+        <div id="newsCreateResult" class="result"></div>
+      </div>
+
+      <!-- 第四步：验证创建结果 -->
+      <div class="test-section">
+        <h2>步骤4：验证新闻创建结果</h2>
+        <button onclick="verifyNewsCreation()">重新获取新闻列表验证</button>
+        <div id="verifyResult" class="result"></div>
+      </div>
+
+      <!-- 调试信息 -->
+      <div class="test-section">
+        <h2>🔍 调试信息</h2>
+        <div id="debugInfo" class="result">
+          <p>服务器地址：<span id="serverUrl">http://localhost:3000</span></p>
+          <p>前端地址：<span id="frontendUrl">http://localhost:5173</span></p>
+          <p>当前时间：<span id="currentTime"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 配置
+      const API_BASE = 'http://localhost:3000'
+      let authToken = ''
+      let newsCount = 0
+
+      // 更新时间显示
+      function updateTime() {
+        document.getElementById('currentTime').textContent = new Date().toLocaleString('zh-CN')
+      }
+      setInterval(updateTime, 1000)
+      updateTime()
+
+      // 工具函数：显示结果
+      function showResult(elementId, content, type = 'info') {
+        const element = document.getElementById(elementId)
+        element.innerHTML = content
+        element.className = `result ${type}`
+      }
+
+      // 工具函数：API请求
+      async function apiRequest(url, options = {}) {
+        const defaultOptions = {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          },
+        }
+
+        const finalOptions = {
+          ...defaultOptions,
+          ...options,
+          headers: { ...defaultOptions.headers, ...options.headers },
+        }
+
+        try {
+          const response = await fetch(API_BASE + url, finalOptions)
+          const data = await response.json()
+          return { ok: response.ok, status: response.status, data }
+        } catch (error) {
+          return { ok: false, error: error.message }
+        }
+      }
+
+      // 1. 检查登录状态
+      function checkLoginStatus() {
+        const token = localStorage.getItem('token')
+        if (token) {
+          authToken = token
+          showResult(
+            'loginResult',
+            `✅ 找到token: <div class="token-display">${token.substring(0, 50)}...</div>`,
+            'success'
+          )
+        } else {
+          showResult('loginResult', '❌ 未找到登录token，需要先登录', 'error')
+        }
+      }
+
+      // 2. 测试登录
+      async function testLogin() {
+        showResult('loginResult', '🔄 正在测试登录...')
+
+        const result = await apiRequest('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: 'admin',
+            password: 'admin123',
+          }),
+        })
+
+        if (result.ok && result.data.token) {
+          authToken = result.data.token
+          localStorage.setItem('token', authToken)
+          showResult(
+            'loginResult',
+            `✅ 登录成功！<br>用户：${result.data.user?.username || 'admin'}<br>Token: <div class="token-display">${authToken.substring(0, 50)}...</div>`,
+            'success'
+          )
+        } else {
+          showResult(
+            'loginResult',
+            `❌ 登录失败<br>状态码: ${result.status}<br>错误: ${result.data?.message || result.error}`,
+            'error'
+          )
+        }
+      }
+
+      // 3. 测试新闻列表API
+      async function testNewsListAPI() {
+        if (!authToken) {
+          showResult('newsListResult', '❌ 请先登录获取token', 'error')
+          return
+        }
+
+        showResult('newsListResult', '🔄 正在获取新闻列表...')
+
+        const result = await apiRequest('/api/admin/news?page=1&limit=10')
+
+        if (result.ok) {
+          const data = result.data
+          if (data.status === 'success' && data.data && Array.isArray(data.data.data)) {
+            newsCount = data.data.pagination?.total || 0
+            showResult(
+              'newsListResult',
+              `✅ 新闻列表获取成功<br>
+                        总数: ${newsCount}<br>
+                        当前页: ${data.data.data.length} 条<br>
+                        最新新闻: ${data.data.data[0]?.title || '无'}<br>
+                        <pre>${JSON.stringify(data.data.pagination, null, 2)}</pre>`,
+              'success'
+            )
+          } else {
+            showResult(
+              'newsListResult',
+              `⚠️ 数据格式异常<br><pre>${JSON.stringify(data, null, 2)}</pre>`,
+              'warning'
+            )
+          }
+        } else {
+          showResult(
+            'newsListResult',
+            `❌ 请求失败<br>状态码: ${result.status}<br>错误: ${result.data?.message || result.error}`,
+            'error'
+          )
+        }
+      }
+
+      // 4. 加载分类列表
+      async function loadCategories() {
+        if (!authToken) {
+          alert('请先登录')
+          return
+        }
+
+        const result = await apiRequest('/api/admin/news-categories')
+        const select = document.getElementById('newsCategory')
+
+        if (result.ok && result.data.data) {
+          select.innerHTML = '<option value="">请选择分类</option>'
+          result.data.data.forEach(cat => {
+            const option = document.createElement('option')
+            option.value = cat._id
+            option.textContent = cat.name
+            select.appendChild(option)
+          })
+          showResult('newsCreateResult', '✅ 分类列表加载成功', 'success')
+        } else {
+          showResult('newsCreateResult', '❌ 分类列表加载失败', 'error')
+        }
+      }
+
+      // 5. 测试新闻创建
+      async function testNewsCreateAPI() {
+        if (!authToken) {
+          showResult('newsCreateResult', '❌ 请先登录获取token', 'error')
+          return
+        }
+
+        const title = document.getElementById('newsTitle').value
+        const content = document.getElementById('newsContent').value
+        const summary = document.getElementById('newsSummary').value
+        const category = document.getElementById('newsCategory').value
+        const status = document.getElementById('newsStatus').value
+
+        if (!title || !content || !category) {
+          showResult('newsCreateResult', '❌ 请填写完整信息（标题、内容、分类）', 'error')
+          return
+        }
+
+        showResult('newsCreateResult', '🔄 正在创建新闻...')
+
+        const newsData = {
+          title: title + ` - ${new Date().toLocaleString('zh-CN')}`,
+          content,
+          summary,
+          category,
+          status,
+          tags: ['浏览器测试', '诊断工具'],
+          isTop: false,
+          isFeatured: false,
+        }
+
+        const result = await apiRequest('/api/admin/news', {
+          method: 'POST',
+          body: JSON.stringify(newsData),
+        })
+
+        if (result.ok) {
+          showResult(
+            'newsCreateResult',
+            `✅ 新闻创建成功！<br>
+                    ID: ${result.data._id}<br>
+                    标题: ${result.data.title}<br>
+                    状态: ${result.data.status}<br>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>`,
+            'success'
+          )
+        } else {
+          showResult(
+            'newsCreateResult',
+            `❌ 新闻创建失败<br>状态码: ${result.status}<br>错误: ${result.data?.message || result.error}<br>
+                    <pre>${JSON.stringify(result.data || result.error, null, 2)}</pre>`,
+            'error'
+          )
+        }
+      }
+
+      // 6. 验证创建结果
+      async function verifyNewsCreation() {
+        if (!authToken) {
+          showResult('verifyResult', '❌ 请先登录获取token', 'error')
+          return
+        }
+
+        showResult('verifyResult', '🔄 正在验证新闻创建结果...')
+
+        const result = await apiRequest('/api/admin/news?page=1&limit=10')
+
+        if (result.ok && result.data.status === 'success') {
+          const newTotal = result.data.data.pagination?.total || 0
+          const increase = newTotal - newsCount
+
+          showResult(
+            'verifyResult',
+            `✅ 验证完成<br>
+                    之前总数: ${newsCount}<br>
+                    当前总数: ${newTotal}<br>
+                    新增数量: ${increase}<br>
+                    最新新闻: ${result.data.data.data[0]?.title || '无'}<br>
+                    ${increase > 0 ? '🎉 新闻创建成功！' : '⚠️ 可能创建失败'}`,
+            increase > 0 ? 'success' : 'warning'
+          )
+
+          newsCount = newTotal // 更新计数
+        } else {
+          showResult(
+            'verifyResult',
+            `❌ 验证失败<br>状态码: ${result.status}<br>错误: ${result.data?.message || result.error}`,
+            'error'
+          )
+        }
+      }
+
+      // 自动检查登录状态
+      window.onload = function () {
+        checkLoginStatus()
+      }
+    </script>
+  </body>
+</html>

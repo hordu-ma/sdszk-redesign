@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>快速登录并跳转</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 50px;
+        text-align: center;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 10px;
+        font-size: 16px;
+      }
+      button:hover {
+        background: #40a9ff;
+      }
+      .status {
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .loading {
+        background: #cce5f7;
+        color: #0c5460;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🚀 快速登录并跳转</h1>
+      <p>一键登录管理员账号并跳转到新闻列表页面</p>
+
+      <button onclick="quickLogin()">🔑 快速登录并跳转</button>
+      <button onclick="justLogin()">🔐 仅登录</button>
+      <button onclick="goToNewsList()">📰 跳转到新闻列表</button>
+
+      <div id="status"></div>
+    </div>
+
+    <script>
+      const BASE_URL = 'http://localhost:3000'
+      const FRONTEND_URL = 'http://localhost:5173'
+
+      function showStatus(message, type = 'loading') {
+        const statusDiv = document.getElementById('status')
+        statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`
+      }
+
+      async function justLogin() {
+        showStatus('🔄 正在登录...', 'loading')
+
+        try {
+          const response = await fetch(`${BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: 'admin',
+              password: 'admin123',
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error(`登录请求失败: ${response.status}`)
+          }
+
+          const data = await response.json()
+
+          if (data.status === 'success' && data.token) {
+            localStorage.setItem('token', data.token)
+            showStatus('✅ 登录成功！token已保存到本地存储', 'success')
+            console.log('Token:', data.token)
+            return data.token
+          } else {
+            throw new Error(data.message || '登录失败')
+          }
+        } catch (error) {
+          showStatus(`❌ 登录失败: ${error.message}`, 'error')
+          console.error('登录错误:', error)
+          return null
+        }
+      }
+
+      function goToNewsList() {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          showStatus('❌ 未找到登录token，请先登录', 'error')
+          return
+        }
+
+        showStatus('🔄 正在跳转到新闻列表页面...', 'loading')
+
+        // 在新标签页中打开新闻列表
+        const newsListUrl = `${FRONTEND_URL}/admin/news/list`
+        window.open(newsListUrl, '_blank')
+
+        showStatus('✅ 已在新标签页中打开新闻列表', 'success')
+      }
+
+      async function quickLogin() {
+        const token = await justLogin()
+        if (token) {
+          // 等待一秒确保token保存
+          setTimeout(() => {
+            goToNewsList()
+          }, 1000)
+        }
+      }
+
+      // 页面加载时检查现有token
+      window.onload = function () {
+        const existingToken = localStorage.getItem('token')
+        if (existingToken) {
+          showStatus(`ℹ️ 发现已保存的token: ${existingToken.substring(0, 20)}...`, 'success')
+        } else {
+          showStatus('ℹ️ 未发现已保存的token，请先登录', 'loading')
+        }
+      }
+    </script>
+  </body>
+</html>

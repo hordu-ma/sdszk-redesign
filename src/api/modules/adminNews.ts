@@ -12,7 +12,7 @@ export interface NewsFormData {
   title: string
   content: string
   summary?: string
-  category: number
+  category: string // ✅ 修复：改为string类型以匹配ObjectId
   featuredImage?: string
   tags?: string[]
   status: 'draft' | 'published' | 'archived'
@@ -24,11 +24,11 @@ export interface NewsFormData {
 // 新闻列表项接口
 export interface NewsItem {
   _id: string
-  id: number
+  id: string // 兼容性：保留id字段
   title: string
   summary: string
   content: string
-  category: number
+  category: string | { _id: string; name: string } // ✅ 修复：支持ObjectId和populate结果
   categoryName: string
   featuredImage?: string
   tags: string[]
@@ -38,7 +38,7 @@ export interface NewsItem {
   views: number
   viewCount: number
   author: {
-    id: number
+    _id: string // ✅ 修复：使用ObjectId格式
     username: string
   }
   publishTime: string
@@ -50,7 +50,7 @@ export interface NewsItem {
 // 新闻查询参数接口
 export interface NewsQueryParams extends PaginationParams {
   keyword?: string
-  category?: number
+  category?: string // ✅ 修复：改为string类型以匹配ObjectId
   status?: 'draft' | 'published' | 'archived'
   isTop?: boolean
   isFeatured?: boolean
@@ -80,7 +80,7 @@ export const adminNewsApi = {
   },
 
   // 获取新闻详情
-  getDetail(id: number): Promise<ApiResponse<NewsItem>> {
+  getDetail(id: string): Promise<ApiResponse<NewsItem>> {
     return api.get(`/api/admin/news/${id}`)
   },
 
@@ -90,32 +90,32 @@ export const adminNewsApi = {
   },
 
   // 更新新闻
-  update(id: number, data: Partial<NewsFormData>): Promise<ApiResponse<NewsItem>> {
+  update(id: string, data: Partial<NewsFormData>): Promise<ApiResponse<NewsItem>> {
     return api.put(`/api/admin/news/${id}`, data)
   },
 
   // 删除新闻
-  delete(id: number): Promise<ApiResponse<void>> {
+  delete(id: string): Promise<ApiResponse<void>> {
     return api.delete(`/api/admin/news/${id}`)
   },
 
   // 批量删除新闻
-  batchDelete(ids: number[]): Promise<ApiResponse<void>> {
+  batchDelete(ids: string[]): Promise<ApiResponse<void>> {
     return api.post('/api/admin/news/batch-delete', { ids })
   },
 
   // 发布/取消发布新闻
-  togglePublish(id: number): Promise<ApiResponse<NewsItem>> {
+  togglePublish(id: string): Promise<ApiResponse<NewsItem>> {
     return api.patch(`/api/admin/news/${id}/toggle-publish`)
   },
 
   // 置顶/取消置顶新闻
-  toggleTop(id: number): Promise<ApiResponse<NewsItem>> {
+  toggleTop(id: string): Promise<ApiResponse<NewsItem>> {
     return api.patch(`/api/admin/news/${id}/toggle-top`)
   },
 
   // 设置/取消精选新闻
-  toggleFeatured(id: number): Promise<ApiResponse<NewsItem>> {
+  toggleFeatured(id: string): Promise<ApiResponse<NewsItem>> {
     return api.patch(`/api/admin/news/${id}/toggle-featured`)
   },
 }

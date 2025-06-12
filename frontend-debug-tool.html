@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>前端状态调试工具</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .test-section {
+        margin-bottom: 24px;
+        padding: 16px;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+      }
+      .test-section h3 {
+        margin: 0 0 12px 0;
+        color: #333;
+      }
+      .status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-right: 8px;
+      }
+      .success {
+        background: #f6ffed;
+        color: #52c41a;
+        border: 1px solid #b7eb8f;
+      }
+      .error {
+        background: #fff2f0;
+        color: #ff4d4f;
+        border: 1px solid #ffccc7;
+      }
+      .warning {
+        background: #fffbe6;
+        color: #faad14;
+        border: 1px solid #ffe58f;
+      }
+      .info {
+        background: #e6f7ff;
+        color: #1890ff;
+        border: 1px solid #91d5ff;
+      }
+      button {
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+      button:hover {
+        background: #40a9ff;
+      }
+      button:disabled {
+        background: #d9d9d9;
+        cursor: not-allowed;
+      }
+      .log-area {
+        background: #f8f8f8;
+        padding: 12px;
+        border-radius: 4px;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        margin-top: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .result-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 前端状态调试工具</h1>
+      <p>检查CMS新闻管理系统的前端状态和问题</p>
+
+      <div class="grid">
+        <div class="test-section">
+          <h3>🔑 认证状态检查</h3>
+          <button onclick="checkAuthStatus()">检查认证状态</button>
+          <button onclick="clearAuthCache()">清除认证缓存</button>
+          <div id="auth-results"></div>
+        </div>
+
+        <div class="test-section">
+          <h3>🌐 网络请求测试</h3>
+          <button onclick="testNetworkRequests()">测试网络请求</button>
+          <button onclick="testDirectAPI()">直接API测试</button>
+          <div id="network-results"></div>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h3>📦 浏览器存储检查</h3>
+        <button onclick="checkBrowserStorage()">检查存储状态</button>
+        <button onclick="clearAllStorage()">清除所有存储</button>
+        <div id="storage-results"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>🔗 前端应用状态</h3>
+        <button onclick="checkFrontendApp()">检查应用状态</button>
+        <button onclick="navigateToNewsList()">跳转到新闻列表</button>
+        <button onclick="forceRefresh()">强制刷新</button>
+        <div id="app-results"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>📝 实时日志</h3>
+        <button onclick="clearLogs()">清除日志</button>
+        <div id="logs" class="log-area"></div>
+      </div>
+    </div>
+
+    <script>
+      const BASE_URL = 'http://localhost:3000'
+      const FRONTEND_URL = 'http://localhost:5173'
+
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString()
+        const logArea = document.getElementById('logs')
+        const prefix =
+          type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'
+        logArea.textContent += `[${timestamp}] ${prefix} ${message}\n`
+        logArea.scrollTop = logArea.scrollHeight
+        console.log(`[${type.toUpperCase()}]`, message)
+      }
+
+      function showResult(containerId, status, message, details = '') {
+        const container = document.getElementById(containerId)
+        const statusClass =
+          status === 'success'
+            ? 'success'
+            : status === 'error'
+              ? 'error'
+              : status === 'warning'
+                ? 'warning'
+                : 'info'
+        container.innerHTML = `
+                <div class="result-item">
+                    <span class="status ${statusClass}">${status.toUpperCase()}</span>
+                    <span>${message}</span>
+                </div>
+                ${details ? `<div class="log-area">${details}</div>` : ''}
+            `
+      }
+
+      async function checkAuthStatus() {
+        log('开始检查认证状态...')
+
+        try {
+          // 检查localStorage中的token
+          const token = localStorage.getItem('token')
+          const sessionToken = sessionStorage.getItem('token')
+
+          if (!token && !sessionToken) {
+            showResult('auth-results', 'error', '未找到认证令牌', '请先登录')
+            log('未找到认证令牌', 'error')
+            return
+          }
+
+          const currentToken = token || sessionToken
+          log(`找到令牌: ${currentToken.substring(0, 20)}...`)
+
+          // 验证token是否有效
+          const response = await fetch(`${BASE_URL}/api/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${currentToken}`,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (response.ok) {
+            const userData = await response.json()
+            showResult('auth-results', 'success', '认证状态正常', JSON.stringify(userData, null, 2))
+            log('认证状态正常', 'success')
+          } else {
+            showResult(
+              'auth-results',
+              'error',
+              `认证失败: ${response.status}`,
+              await response.text()
+            )
+            log(`认证失败: ${response.status}`, 'error')
+          }
+        } catch (error) {
+          showResult('auth-results', 'error', '认证检查出错', error.message)
+          log(`认证检查出错: ${error.message}`, 'error')
+        }
+      }
+
+      async function testNetworkRequests() {
+        log('开始测试网络请求...')
+
+        try {
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+          if (!token) {
+            showResult('network-results', 'error', '需要先登录')
+            return
+          }
+
+          // 测试新闻列表API
+          const response = await fetch(`${BASE_URL}/api/admin/news?page=1&limit=5`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            const newsCount = data.data?.data?.length || 0
+            const total = data.data?.pagination?.total || 0
+            showResult(
+              'network-results',
+              'success',
+              `API请求成功`,
+              `返回 ${newsCount} 条记录，总计 ${total} 条`
+            )
+            log(`API请求成功: ${newsCount}/${total} 条记录`, 'success')
+          } else {
+            showResult(
+              'network-results',
+              'error',
+              `API请求失败: ${response.status}`,
+              await response.text()
+            )
+            log(`API请求失败: ${response.status}`, 'error')
+          }
+        } catch (error) {
+          showResult('network-results', 'error', '网络请求出错', error.message)
+          log(`网络请求出错: ${error.message}`, 'error')
+        }
+      }
+
+      async function testDirectAPI() {
+        log('开始直接API测试...')
+
+        try {
+          // 先登录获取新token
+          const loginResponse = await fetch(`${BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: 'admin',
+              password: 'admin123',
+            }),
+          })
+
+          if (!loginResponse.ok) {
+            throw new Error(`登录失败: ${loginResponse.status}`)
+          }
+
+          const loginData = await loginResponse.json()
+          const newToken = loginData.token
+          log(`获得新token: ${newToken.substring(0, 20)}...`)
+
+          // 测试新闻列表
+          const newsResponse = await fetch(`${BASE_URL}/api/admin/news?page=1&limit=5`, {
+            headers: {
+              Authorization: `Bearer ${newToken}`,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (newsResponse.ok) {
+            const newsData = await newsResponse.json()
+            const newsCount = newsData.data?.data?.length || 0
+            const total = newsData.data?.pagination?.total || 0
+
+            // 更新本地token
+            localStorage.setItem('token', newToken)
+
+            showResult(
+              'network-results',
+              'success',
+              `直接API测试成功`,
+              `返回 ${newsCount} 条记录，总计 ${total} 条\n已更新本地token`
+            )
+            log(`直接API测试成功: ${newsCount}/${total} 条记录`, 'success')
+          } else {
+            throw new Error(`新闻API请求失败: ${newsResponse.status}`)
+          }
+        } catch (error) {
+          showResult('network-results', 'error', '直接API测试失败', error.message)
+          log(`直接API测试失败: ${error.message}`, 'error')
+        }
+      }
+
+      function checkBrowserStorage() {
+        log('检查浏览器存储...')
+
+        try {
+          const localStorage_data = {
+            token: localStorage.getItem('token'),
+            userInfo: localStorage.getItem('userInfo'),
+            keys: Object.keys(localStorage),
+          }
+
+          const sessionStorage_data = {
+            token: sessionStorage.getItem('token'),
+            userInfo: sessionStorage.getItem('userInfo'),
+            keys: Object.keys(sessionStorage),
+          }
+
+          const storageInfo = {
+            localStorage: localStorage_data,
+            sessionStorage: sessionStorage_data,
+            cookies: document.cookie,
+          }
+
+          showResult(
+            'storage-results',
+            'info',
+            '浏览器存储状态',
+            JSON.stringify(storageInfo, null, 2)
+          )
+          log('浏览器存储检查完成', 'success')
+        } catch (error) {
+          showResult('storage-results', 'error', '存储检查失败', error.message)
+          log(`存储检查失败: ${error.message}`, 'error')
+        }
+      }
+
+      function clearAllStorage() {
+        log('清除所有浏览器存储...')
+
+        try {
+          localStorage.clear()
+          sessionStorage.clear()
+
+          // 清除cookies (尽可能)
+          document.cookie.split(';').forEach(function (c) {
+            document.cookie = c
+              .replace(/^ +/, '')
+              .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/')
+          })
+
+          showResult('storage-results', 'success', '已清除所有存储', '请重新登录')
+          log('存储清除完成', 'success')
+        } catch (error) {
+          showResult('storage-results', 'error', '存储清除失败', error.message)
+          log(`存储清除失败: ${error.message}`, 'error')
+        }
+      }
+
+      function checkFrontendApp() {
+        log('检查前端应用状态...')
+
+        try {
+          const currentUrl = window.location.href
+          const isVueApp = window.Vue !== undefined
+          const hasRouter = window.__VUE_ROUTER__ !== undefined
+
+          const appInfo = {
+            currentUrl,
+            isVueApp,
+            hasRouter,
+            userAgent: navigator.userAgent,
+            localTime: new Date().toLocaleString(),
+          }
+
+          showResult('app-results', 'info', '前端应用状态', JSON.stringify(appInfo, null, 2))
+          log('前端应用检查完成', 'success')
+        } catch (error) {
+          showResult('app-results', 'error', '应用检查失败', error.message)
+          log(`应用检查失败: ${error.message}`, 'error')
+        }
+      }
+
+      function navigateToNewsList() {
+        log('跳转到新闻列表页面...')
+        window.open(`${FRONTEND_URL}/admin/news/list`, '_blank')
+      }
+
+      function forceRefresh() {
+        log('强制刷新页面...')
+        window.location.reload(true)
+      }
+
+      function clearAuthCache() {
+        log('清除认证缓存...')
+        localStorage.removeItem('token')
+        sessionStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
+        sessionStorage.removeItem('userInfo')
+        showResult('auth-results', 'success', '认证缓存已清除', '请重新登录')
+        log('认证缓存清除完成', 'success')
+      }
+
+      function clearLogs() {
+        document.getElementById('logs').textContent = ''
+      }
+
+      // 页面加载时自动检查
+      window.onload = function () {
+        log('调试工具已加载，点击按钮开始检查')
+      }
+    </script>
+  </body>
+</html>

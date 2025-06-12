@@ -36,7 +36,15 @@ router.get(
     }
 
     if (category) {
-      query.category = category
+      // 兼容 ObjectId 和字符串
+      try {
+        const mongoose = require('mongoose')
+        query.category = mongoose.Types.ObjectId.isValid(category)
+          ? mongoose.Types.ObjectId(category)
+          : category
+      } catch {
+        query.category = category
+      }
     }
 
     if (status) {

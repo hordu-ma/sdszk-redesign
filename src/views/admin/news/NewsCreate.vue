@@ -174,7 +174,7 @@ const formData = reactive<NewsFormData>({
   title: '',
   content: '',
   summary: '',
-  category: undefined as any,
+  category: '', // ✅ 修复：改为空字符串，匹配string类型
   featuredImage: '',
   tags: [],
   status: 'draft',
@@ -254,6 +254,14 @@ const handleRemoveImage = () => {
 // 保存草稿
 const handleSaveDraft = async () => {
   try {
+    // 检查认证状态
+    const token = localStorage.getItem('token')
+    if (!token) {
+      message.error('请先登录')
+      router.push('/admin/login')
+      return
+    }
+
     saving.value = true
     formData.status = 'draft'
 
@@ -265,6 +273,9 @@ const handleSaveDraft = async () => {
   } catch (error: any) {
     if (error.errorFields) {
       message.error('请检查表单填写是否正确')
+    } else if (error.response?.status === 401) {
+      message.error('登录已过期，请重新登录')
+      router.push('/admin/login')
     } else {
       message.error(error.message || '保存草稿失败')
     }
@@ -276,6 +287,14 @@ const handleSaveDraft = async () => {
 // 发布新闻
 const handlePublish = async () => {
   try {
+    // 检查认证状态
+    const token = localStorage.getItem('token')
+    if (!token) {
+      message.error('请先登录')
+      router.push('/admin/login')
+      return
+    }
+
     publishing.value = true
     formData.status = 'published'
 
@@ -287,6 +306,9 @@ const handlePublish = async () => {
   } catch (error: any) {
     if (error.errorFields) {
       message.error('请检查表单填写是否正确')
+    } else if (error.response?.status === 401) {
+      message.error('登录已过期，请重新登录')
+      router.push('/admin/login')
     } else {
       message.error(error.message || '发布失败')
     }

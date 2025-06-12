@@ -173,7 +173,7 @@ const router = useRouter()
 const loading = ref(false)
 const tableData = ref<NewsItem[]>([])
 const categories = ref<NewsCategory[]>([])
-const selectedRowKeys = ref<number[]>([])
+const selectedRowKeys = ref<(string | number)[]>([])
 
 // 防抖相关
 let fetchTimer: any = null
@@ -190,7 +190,7 @@ const debounce = (fn: Function, delay: number) => {
 // 搜索表单
 const searchForm = reactive({
   keyword: '',
-  category: undefined as number | undefined,
+  category: undefined as string | undefined, // ✅ 修复：改为string类型
   status: undefined as string | undefined,
   dateRange: undefined as [string, string] | undefined,
 })
@@ -320,24 +320,29 @@ const fetchNewsList = async () => {
     }
 
     console.log('发起新闻列表请求:', params)
-    const response = (await adminNewsApi.getList(params)) as any
-
-    // 处理axios响应结构
+    const response = await adminNewsApi.getList(params)
     console.log('新闻列表响应:', response)
 
-    if (response && response.status === 'success' && response.data) {
-      const serverData = response.data
-      if (Array.isArray(serverData.data)) {
-        tableData.value = serverData.data
-        pagination.total = serverData.pagination?.total || 0
-        console.log('成功加载新闻数据:', tableData.value.length, '条记录')
-      } else {
-        console.warn('服务器数据格式异常 - data.data不是数组:', serverData)
-        tableData.value = []
-        pagination.total = 0
-      }
+    // 兼容后端响应结构 { status: 'success', data: { data: [...], pagination: {...} } }
+    const resData = response.data as any
+    if (
+      resData &&
+      resData.status === 'success' &&
+      resData.data &&
+      Array.isArray(resData.data.data)
+    ) {
+      tableData.value = resData.data.data.map((item: any) => ({
+        ...item,
+        id: item._id,
+        categoryName:
+          item.category && typeof item.category === 'object' && item.category.name
+            ? item.category.name
+            : '未知分类',
+      }))
+      pagination.total = resData.data.pagination?.total || 0
+      console.log('✅ 成功加载新闻数据:', tableData.value.length, '条记录')
     } else {
-      console.warn('服务器响应格式异常:', response)
+      console.warn('❌ 服务器响应格式异常或数据为空:', response)
       tableData.value = []
       pagination.total = 0
     }
@@ -409,7 +414,7 @@ const handleTableChange: TableProps['onChange'] = (pag, filters, sorter) => {
 }
 
 // 处理选择变化
-const onSelectChange = (newSelectedRowKeys: number[]) => {
+const onSelectChange = (newSelectedRowKeys: (string | number)[]) => {
   selectedRowKeys.value = newSelectedRowKeys
 }
 
@@ -432,7 +437,7 @@ const handleDelete = async (record: NewsItem) => {
 // 处理批量删除
 const handleBatchDelete = async () => {
   try {
-    await adminNewsApi.batchDelete(selectedRowKeys.value)
+    await adminNewsApi.batchDelete(selectedRowKeys.value.map(String))
     message.success('批量删除成功')
     selectedRowKeys.value = []
     debouncedFetchNewsList()
@@ -444,7 +449,7 @@ const handleBatchDelete = async () => {
 // 处理置顶切换
 const handleToggleTop = async (record: NewsItem) => {
   try {
-    await adminNewsApi.toggleTop(record.id)
+    await adminNewsApi.toggleTop(String(record.id))
     message.success(record.isTop ? '取消置顶成功' : '置顶成功')
     debouncedFetchNewsList()
   } catch (error: any) {
@@ -455,7 +460,7 @@ const handleToggleTop = async (record: NewsItem) => {
 // 处理发布状态切换
 const handleTogglePublish = async (record: NewsItem) => {
   try {
-    await adminNewsApi.togglePublish(record.id)
+    await adminNewsApi.togglePublish(String(record.id))
     message.success(record.status === 'published' ? '下线成功' : '发布成功')
     debouncedFetchNewsList()
   } catch (error: any) {
@@ -477,6 +482,14 @@ const handleBatchArchive = async () => {
 
 onMounted(() => {
   console.log('NewsList组件已挂载')
+
+  // 检查认证状态
+  const token = localStorage.getItem('token')
+  if (!token) {
+    message.error('请先登录')
+    router.push('/admin/login')
+    return
+  }
 
   // 简化URL参数读取
   const urlParams = new URLSearchParams(window.location.search)

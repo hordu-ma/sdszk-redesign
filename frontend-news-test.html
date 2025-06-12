@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>前端新闻列表测试</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #40a9ff;
+      }
+      .log {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 15px;
+        margin: 15px 0;
+        font-family: monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .status {
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin: 5px 0;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 前端新闻列表测试</h1>
+
+      <div>
+        <button onclick="testCompleteFlow()">🚀 完整测试流程</button>
+        <button onclick="testLoginOnly()">🔑 仅测试登录</button>
+        <button onclick="testNewsListOnly()">📰 仅测试新闻列表</button>
+        <button onclick="openNewsList()">🔗 打开新闻列表页</button>
+        <button onclick="clearLog()">🧹 清空日志</button>
+      </div>
+
+      <div id="results"></div>
+      <div id="logs" class="log"></div>
+    </div>
+
+    <script>
+      const BASE_URL = 'http://localhost:3000'
+      const FRONTEND_URL = 'http://localhost:5173'
+
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString()
+        const logArea = document.getElementById('logs')
+        const prefix =
+          type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'
+        logArea.textContent += `[${timestamp}] ${prefix} ${message}\n`
+        logArea.scrollTop = logArea.scrollHeight
+      }
+
+      function showStatus(type, message) {
+        const results = document.getElementById('results')
+        results.innerHTML = `<div class="status ${type}">${message}</div>`
+      }
+
+      async function testLoginOnly() {
+        log('开始登录测试...')
+
+        try {
+          const response = await fetch(`${BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: 'admin',
+              password: 'admin123',
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          }
+
+          const data = await response.json()
+
+          if (data.status === 'success') {
+            const token = data.token
+            localStorage.setItem('token', token)
+            log(`登录成功，token: ${token.substring(0, 20)}...`, 'success')
+            showStatus('success', '登录成功，token已保存')
+            return { success: true, token }
+          } else {
+            throw new Error(data.message || '登录失败')
+          }
+        } catch (error) {
+          log(`登录失败: ${error.message}`, 'error')
+          showStatus('error', `登录失败: ${error.message}`)
+          return { success: false, error: error.message }
+        }
+      }
+
+      async function testNewsListOnly() {
+        log('开始新闻列表测试...')
+
+        const token = localStorage.getItem('token')
+        if (!token) {
+          log('未找到token，请先登录', 'error')
+          showStatus('error', '未找到token，请先登录')
+          return
+        }
+
+        try {
+          const response = await fetch(`${BASE_URL}/api/admin/news?page=1&limit=5`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          }
+
+          const data = await response.json()
+
+          if (data.status === 'success') {
+            const newsCount = data.data?.data?.length || 0
+            const total = data.data?.pagination?.total || 0
+            log(`新闻列表获取成功: ${newsCount}/${total} 条`, 'success')
+            showStatus('success', `获取 ${newsCount} 条新闻，总计 ${total} 条`)
+
+            // 显示第一条新闻的详细信息
+            if (newsCount > 0) {
+              const firstNews = data.data.data[0]
+              log(`第一条新闻:`, 'info')
+              log(`- ID: ${firstNews._id}`, 'info')
+              log(`- 标题: ${firstNews.title}`, 'info')
+              log(`- 状态: ${firstNews.status}`, 'info')
+              log(`- 分类: ${JSON.stringify(firstNews.category)}`, 'info')
+            }
+
+            return { success: true, data }
+          } else {
+            throw new Error(data.message || '获取新闻列表失败')
+          }
+        } catch (error) {
+          log(`新闻列表获取失败: ${error.message}`, 'error')
+          showStatus('error', `新闻列表获取失败: ${error.message}`)
+          return { success: false, error: error.message }
+        }
+      }
+
+      async function testCompleteFlow() {
+        log('开始完整测试流程...')
+        showStatus('info', '正在执行完整测试流程...')
+
+        // 1. 登录测试
+        const loginResult = await testLoginOnly()
+        if (!loginResult.success) {
+          return
+        }
+
+        // 等待一秒
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // 2. 新闻列表测试
+        const newsResult = await testNewsListOnly()
+        if (newsResult.success) {
+          log('完整测试流程成功！', 'success')
+          showStatus('success', '✅ 完整测试流程成功')
+        }
+      }
+
+      function openNewsList() {
+        log('打开新闻列表页面...')
+        const url = `${FRONTEND_URL}/admin/news/list`
+        window.open(url, '_blank')
+      }
+
+      function clearLog() {
+        document.getElementById('logs').textContent = ''
+        document.getElementById('results').innerHTML = ''
+      }
+
+      // 页面加载时的初始化
+      window.onload = function () {
+        log('前端新闻列表测试工具已加载')
+
+        // 检查当前token状态
+        const token = localStorage.getItem('token')
+        if (token) {
+          log(`发现已保存的token: ${token.substring(0, 20)}...`, 'info')
+        } else {
+          log('未发现保存的token', 'warning')
+        }
+      }
+    </script>
+  </body>
+</html>

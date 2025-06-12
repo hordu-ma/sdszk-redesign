@@ -23,7 +23,7 @@ async function testCMSWorkflow() {
 
     // 步骤2: 获取新闻分类
     console.log('\n步骤2: 📂 获取新闻分类')
-    const categoriesResponse = await axios.get('http://localhost:3000/api/admin/news-categories', {
+    const categoriesResponse = await axios.get('http://localhost:3000/api/news-categories', {
       headers: { Authorization: `Bearer ${token}` },
     })
 
