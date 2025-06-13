@@ -45,6 +45,13 @@ const api = axios.create({
   withCredentials: true, // 允许跨域携带 cookie
 })
 
+// 调试信息
+console.log('🚀 API Configuration:')
+console.log('- baseURL:', API_CONFIG.baseURL || 'http://localhost:3000')
+console.log('- timeout:', API_CONFIG.timeout)
+console.log('- Environment:', import.meta.env.MODE)
+console.log('- API_CONFIG:', API_CONFIG)
+
 // 请求拦截器：添加 token
 api.interceptors.request.use(
   config => {

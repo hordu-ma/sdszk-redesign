@@ -164,13 +164,9 @@ export const handleFileUpload = (req, res) => {
       return res.status(200).json({
         status: 'success',
         data: {
-          file: {
-            filename: req.file.filename,
-            originalname: req.file.originalname,
-            mimetype: req.file.mimetype,
-            size: req.file.size,
-            url: fileUrl,
-          },
+          fileUrl: fileUrl,
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
         },
       })
     }

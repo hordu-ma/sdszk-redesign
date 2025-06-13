@@ -28,7 +28,7 @@ export abstract class BaseApi {
     try {
       return await this.api.request<any, ApiResponse<T>>({
         ...config,
-        url: this.getUrl(config.url || ''),
+        url: config.url?.startsWith('/api') ? config.url : this.getUrl(config.url || ''),
       })
     } catch (error) {
       if (error instanceof Error) {

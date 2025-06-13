@@ -23,6 +23,11 @@ const mapFrontendToBackend = data => {
     delete mapped.isFeatured
   }
 
+  if (mapped.fileType !== undefined) {
+    mapped.mimeType = mapped.fileType
+    delete mapped.fileType
+  }
+
   // status 到 isPublished 的转换
   if (mapped.status !== undefined) {
     mapped.isPublished = mapped.status === 'published'
@@ -52,6 +57,11 @@ const mapBackendToFrontend = data => {
   if (mapped.featured !== undefined) {
     mapped.isFeatured = mapped.featured
     delete mapped.featured
+  }
+
+  if (mapped.mimeType !== undefined) {
+    mapped.fileType = mapped.mimeType
+    delete mapped.mimeType
   }
 
   // isPublished 到 status 的转换
@@ -186,8 +196,9 @@ export const createResource = async (req, res) => {
     // 字段映射：前端 -> 后端
     const mappedData = mapFrontendToBackend(req.body)
 
-    // 设置创建者
+    // 设置创建者和作者信息
     mappedData.createdBy = req.user._id
+    mappedData.author = req.user.name || req.user.username // 使用用户名作为作者
 
     const resource = new Resource(mappedData)
     const savedResource = await resource.save()

@@ -147,9 +147,12 @@ export class AdminResourceApi extends BaseApi {
     formData: FormData,
     onProgress?: (progressEvent: any) => void
   ): Promise<ApiResponse<{ fileUrl: string; fileName: string; fileSize: number }>> {
+    const uploadUrl = '/api/uploads/resource'
+    console.log('🔄 Upload request:', uploadUrl)
+
     return this.request<{ fileUrl: string; fileName: string; fileSize: number }>({
       method: 'POST',
-      url: '/upload/resource',
+      url: uploadUrl, // 使用绝对路径，绕过baseURL
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',

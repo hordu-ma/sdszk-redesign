@@ -31,7 +31,13 @@ export const setupInterceptors = (axios: AxiosInstance) => {
 
   // 响应拦截器
   axios.interceptors.response.use(
-    response => response,
+    response => {
+      // 转换后端响应格式以匹配前端期望
+      if (response.data && response.data.status) {
+        response.data.success = response.data.status === 'success'
+      }
+      return response
+    },
     error => {
       return handleApiError(error)
     }

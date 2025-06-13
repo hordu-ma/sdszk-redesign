@@ -268,7 +268,7 @@ const rules: Record<string, Rule[]> = {
   ],
   description: [{ required: true, message: '请输入资源描述', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择资源分类', trigger: 'change' }],
-  type: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
+  fileUrl: [{ required: true, message: '请上传资源文件', trigger: 'change' }],
 }
 
 // 文件类型判断
@@ -330,24 +330,62 @@ const beforeUpload: UploadProps['beforeUpload'] = file => {
 }
 
 // 文件变化处理
-const handleFileChange = (info: any) => {
+const handleFileChange = async (info: any) => {
   if (info.file) {
     const file = info.file
+    console.log('📁 File selected:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+    })
+
     formData.fileName = file.name
     formData.fileSize = file.size
     formData.fileType = file.type
 
-    // 模拟上传进度
-    uploadProgress.value = 0
-    const interval = setInterval(() => {
-      uploadProgress.value += 10
-      if (uploadProgress.value >= 100) {
-        clearInterval(interval)
-        // 这里应该是实际的文件上传逻辑
-        formData.fileUrl = URL.createObjectURL(file)
+    // 实际文件上传
+    try {
+      uploadProgress.value = 10
+      console.log('🚀 Starting file upload...')
+
+      const formDataUpload = new FormData()
+      formDataUpload.append('file', file)
+
+      uploadProgress.value = 30
+
+      const response = await adminResourceApi.upload(formDataUpload, (progressEvent: any) => {
+        if (progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          uploadProgress.value = Math.min(30 + percent * 0.7, 100) // 30% + 70% for actual upload
+        }
+      })
+
+      console.log('✅ Upload response:', response)
+
+      // 兼容不同的响应格式
+      const uploadData = (response as any).data?.data || response.data
+      if (uploadData?.fileUrl) {
+        formData.fileUrl = uploadData.fileUrl
+        uploadProgress.value = 100
         message.success('文件上传成功')
+        console.log('📎 File URL set:', formData.fileUrl)
+      } else {
+        throw new Error('上传响应格式错误: ' + JSON.stringify((response as any).data))
       }
-    }, 200)
+    } catch (error: any) {
+      console.error('❌ Upload error:', error)
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+
+      uploadProgress.value = 0
+      message.error(error.message || error.response?.data?.message || '文件上传失败')
+
+      // 清除文件信息
+      formData.fileName = ''
+      formData.fileSize = 0
+      formData.fileType = ''
+      formData.fileUrl = ''
+    }
   }
 }
 
@@ -366,16 +404,20 @@ const handleSaveDraft = async () => {
     saving.value = true
     formData.status = 'draft'
 
-    await formRef.value.validate()
-    await adminResourceApi.create(formData)
+    console.log('💾 Saving draft with data:', formData)
 
+    await formRef.value.validate()
+    const response = await adminResourceApi.create(formData)
+
+    console.log('✅ Draft saved:', response)
     message.success('草稿保存成功')
     router.push('/admin/resources/list')
   } catch (error: any) {
+    console.error('❌ Save draft error:', error)
     if (error.errorFields) {
       message.error('请检查表单填写是否正确')
     } else {
-      message.error(error.message || '保存草稿失败')
+      message.error(error.message || error.response?.data?.message || '保存草稿失败')
     }
   } finally {
     saving.value = false
@@ -388,16 +430,20 @@ const handlePublish = async () => {
     publishing.value = true
     formData.status = 'published'
 
-    await formRef.value.validate()
-    await adminResourceApi.create(formData)
+    console.log('📢 Publishing with data:', formData)
 
+    await formRef.value.validate()
+    const response = await adminResourceApi.create(formData)
+
+    console.log('✅ Published:', response)
     message.success('资源发布成功')
     router.push('/admin/resources/list')
   } catch (error: any) {
+    console.error('❌ Publish error:', error)
     if (error.errorFields) {
       message.error('请检查表单填写是否正确')
     } else {
-      message.error(error.message || '发布失败')
+      message.error(error.message || error.response?.data?.message || '发布失败')
     }
   } finally {
     publishing.value = false
@@ -405,6 +451,16 @@ const handlePublish = async () => {
 }
 
 onMounted(() => {
+  // 检查认证状态
+  const token = localStorage.getItem('token')
+  console.log('🔐 Auth token:', token ? 'Present' : 'Missing')
+
+  if (!token) {
+    message.error('请先登录')
+    router.push('/admin/login')
+    return
+  }
+
   fetchCategories()
 })
 </script>
