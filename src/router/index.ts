@@ -78,6 +78,25 @@ const routes: RouteRecordRaw[] = [
     name: 'resources',
     component: () => import('../views/Resources.vue'),
   },
+  // 添加缺失的资源子路由
+  {
+    path: '/resources/theory',
+    name: 'resourcesTheory',
+    component: () => import('../views/resources/ResourcesByCategory.vue'),
+    props: { category: 'theory' },
+  },
+  {
+    path: '/resources/teaching',
+    name: 'resourcesTeaching',
+    component: () => import('../views/resources/ResourcesByCategory.vue'),
+    props: { category: 'teaching' },
+  },
+  {
+    path: '/resources/video',
+    name: 'resourcesVideo',
+    component: () => import('../views/resources/ResourcesByCategory.vue'),
+    props: { category: 'video' },
+  },
   {
     path: '/resources/category/:category',
     name: 'resourcesByCategory',

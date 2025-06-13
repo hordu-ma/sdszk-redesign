@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, h } from 'vue'
+import { ref, reactive, h, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
@@ -113,6 +113,24 @@ const handleLogin = async () => {
     loading.value = false
   }
 }
+
+// 组件挂载时的初始化
+onMounted(() => {
+  console.log('【DEBUG】AdminLogin组件挂载')
+
+  // 检查是否有无效的token并清除
+  const savedToken = localStorage.getItem('token')
+  if (savedToken) {
+    console.log('【DEBUG】发现保存的token，长度:', savedToken.length)
+    // 可以选择在这里验证token有效性，如果无效则清除
+  }
+
+  // 如果已经登录，直接跳转到仪表板
+  if (userStore.isAuthenticated) {
+    console.log('【DEBUG】用户已登录，跳转到仪表板')
+    router.push('/admin/dashboard')
+  }
+})
 </script>
 
 <style scoped lang="scss">
