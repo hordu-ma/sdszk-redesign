@@ -78,11 +78,14 @@ const route = useRoute()
 const fetchNewsList = async () => {
   loading.value = true
   try {
-    console.log('【调试】fetchNewsList 请求参数:', {
-      page: currentPage.value,
-      limit: pageSize.value,
-      category: selectedCategory.value,
-    })
+    console.log(
+      '【调试】fetchNewsList 请求参数:',
+      JSON.stringify({
+        page: currentPage.value,
+        limit: pageSize.value,
+        category: selectedCategory.value,
+      })
+    )
     const response = await newsApi.getList({
       page: currentPage.value,
       limit: pageSize.value,
@@ -90,8 +93,22 @@ const fetchNewsList = async () => {
     })
 
     if (response.success) {
-      newsList.value = response.data
-      total.value = response.pagination.total
+      let list: any[] = []
+      let totalCount = 0
+      if (response && typeof response === 'object') {
+        if (Array.isArray(response.data)) {
+          list = response.data
+          totalCount = (response as any).pagination?.total || 0
+        } else if (response.data && Array.isArray((response.data as any).data)) {
+          list = (response.data as any).data
+          totalCount = (response.data as any).pagination?.total || 0
+        }
+      }
+      newsList.value = list
+      total.value = totalCount
+      if (!list.length) {
+        message.error('暂无新闻')
+      }
     } else {
       message.error('获取新闻列表失败')
     }
@@ -103,7 +120,23 @@ const fetchNewsList = async () => {
   }
 }
 
+const fetchCategories = async () => {
+  try {
+    const response = await newsCategoryApi.getList({ includeInactive: false })
+    console.log('【调试】newsCategoryApi.getList返回：', response)
+    console.log('【调试】response.data 类型:', Array.isArray(response.data), typeof response.data)
+    console.log('【调试】response.data 详细:', response.data)
+    console.log('【终极调试】response.success:', response.success)
+    categories.value = (response.data as any).data
+    console.log('【终极调试】categories.value 赋值后:', JSON.stringify(categories.value, null, 2))
+    updateSelectedCategoryByRoute()
+  } catch (error) {
+    console.error('获取分类列表失败', error)
+  }
+}
+
 const updateSelectedCategoryByRoute = () => {
+  console.log('【终极调试】updateSelectedCategoryByRoute 被调用')
   const key = route.path.split('/').pop() || ''
   console.log('【调试】当前路由key:', key)
   console.log(
@@ -111,34 +144,18 @@ const updateSelectedCategoryByRoute = () => {
     Array.isArray(categories.value),
     typeof categories.value
   )
-  console.log('【调试】当前categories:', categories.value)
+  console.log('【调试】categories.value 详细:', JSON.stringify(categories.value, null, 2))
   if (categories.value.length > 0) {
     categories.value.forEach((c, i) => {
       console.log(`【调试】分类[${i}] key:`, c.key, typeof c.key)
     })
   }
   if (['center', 'notice', 'policy'].includes(key)) {
-    const cat = categories.value.find((c: any) => c.key === key)
+    const cat = categories.value.find((c: any) => String(c.key).trim().toLowerCase() === key)
     console.log('【调试】匹配到的分类cat:', cat)
     if (cat) selectedCategory.value = cat._id
   } else {
     selectedCategory.value = ''
-  }
-}
-
-const fetchCategories = async () => {
-  try {
-    const response = await newsCategoryApi.getList({ includeInactive: false })
-    console.log('【调试】newsCategoryApi.getList返回：', response)
-    console.log('【调试】response.data 类型:', Array.isArray(response.data), typeof response.data)
-    console.log('【调试】response.data 详细:', response.data)
-    if (response.success) {
-      categories.value = (response.data as any).data
-      console.log('【调试】赋值后的categories:', categories.value)
-      updateSelectedCategoryByRoute()
-    }
-  } catch (error) {
-    console.error('获取分类列表失败', error)
   }
 }
 

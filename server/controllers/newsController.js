@@ -1,11 +1,17 @@
 import News from '../models/News.js'
 import response from '../utils/responseHelper.js'
+import mongoose from 'mongoose'
 
 // 获取新闻列表
 export const getNewsList = async (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query
-    const query = category ? { category } : {}
+    let query = {}
+    if (category) {
+      query.category = mongoose.Types.ObjectId.isValid(category)
+        ? new mongoose.Types.ObjectId(category)
+        : category
+    }
 
     const news = await News.find(query)
       .sort({ publishDate: -1 })
