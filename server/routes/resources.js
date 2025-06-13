@@ -9,6 +9,8 @@ import {
   togglePublishStatus,
   toggleFeaturedStatus,
   toggleTopStatus,
+  updateStatus,
+  incrementDownloadCount,
   getResourceStats,
   batchDeleteResources,
   batchUpdateResources,
@@ -35,8 +37,10 @@ router.post('/batch-status', batchUpdateResources)
 router.post('/', createResource)
 router.put('/:id', updateResource)
 router.delete('/:id', deleteResource)
+router.patch('/:id/status', updateStatus)
 router.patch('/:id/toggle-publish', togglePublishStatus)
 router.patch('/:id/toggle-top', toggleTopStatus)
 router.patch('/:id/toggle-featured', toggleFeaturedStatus)
+router.post('/:id/download', incrementDownloadCount)
 
 export default router

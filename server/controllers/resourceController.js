@@ -50,8 +50,15 @@ const mapBackendToFrontend = data => {
   }
 
   if (mapped.category !== undefined) {
-    mapped.categoryId = mapped.category
-    delete mapped.category
+    // 如果category是对象（已populate），保留对象信息并添加categoryId
+    if (typeof mapped.category === 'object' && mapped.category !== null) {
+      mapped.categoryId = mapped.category._id || mapped.category.id
+      // 保留category对象以供前端显示
+    } else {
+      // 如果category是字符串ID，转换为categoryId
+      mapped.categoryId = mapped.category
+      delete mapped.category
+    }
   }
 
   if (mapped.featured !== undefined) {
@@ -106,8 +113,12 @@ export const getResourceList = async (req, res) => {
       query.$text = { $search: search }
     }
 
-    // 默认只返回已发布的资源，除非明确请求所有资源
-    if (req.query.all !== 'true') {
+    // 对于管理员API调用，显示所有状态的资源
+    // 对于公开API，只显示已发布的资源
+    if (req.baseUrl.includes('/admin') || req.query.all === 'true') {
+      // 管理员可以看到所有状态的资源
+    } else {
+      // 公开接口只显示已发布的资源
       query.isPublished = true
     }
 
@@ -118,6 +129,7 @@ export const getResourceList = async (req, res) => {
       .limit(parseInt(limit))
       .populate('createdBy', 'username name')
       .populate('updatedBy', 'username name')
+      .populate('category', 'name key color')
 
     // 获取总数
     const total = await Resource.countDocuments(query)
@@ -655,6 +667,74 @@ export const batchUpdateResources = async (req, res) => {
     res.json({
       status: 'success',
       message: `成功更新 ${resources.length} 个资源`,
+    })
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err.message,
+    })
+  }
+}
+
+// 更新资源状态
+export const updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+
+    // 验证状态值
+    if (!['draft', 'published', 'archived'].includes(status)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: '无效的状态值',
+      })
+    }
+
+    // 查找资源
+    const resource = await Resource.findById(id)
+    if (!resource) {
+      return res.status(404).json({
+        status: 'fail',
+        message: '资源不存在',
+      })
+    }
+
+    // 更新状态 - 将status转换为isPublished
+    const isPublished = status === 'published'
+    const updatedResource = await Resource.findByIdAndUpdate(
+      id,
+      {
+        isPublished,
+        updatedAt: new Date(),
+      },
+      { new: true }
+    ).populate('category', 'name slug')
+
+    // 记录活动日志
+    await ActivityLog.create({
+      action: 'UPDATE_STATUS',
+      resourceType: 'Resource',
+      resourceId: id,
+      userId: req.user.id,
+      details: {
+        title: resource.title,
+        oldStatus: resource.isPublished ? 'published' : 'draft',
+        newStatus: status,
+      },
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+    })
+
+    // 转换响应数据
+    const responseData = {
+      ...updatedResource.toObject(),
+      status: updatedResource.isPublished ? 'published' : 'draft',
+    }
+
+    res.json({
+      status: 'success',
+      data: responseData,
+      message: '状态更新成功',
     })
   } catch (err) {
     res.status(500).json({

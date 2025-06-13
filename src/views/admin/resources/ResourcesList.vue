@@ -213,6 +213,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
   PlusOutlined,
@@ -226,10 +227,13 @@ import {
 } from '@ant-design/icons-vue'
 import { adminResourceApi, type ResourceItem } from '@/api/modules/adminResource'
 import { ResourceCategoryApi, type ResourceCategory } from '@/api/modules/resourceCategory'
+import dayjs from 'dayjs'
+
+// 路由
+const router = useRouter()
 
 // 创建分类API实例
 const resourceCategoryApi = new ResourceCategoryApi()
-import dayjs from 'dayjs'
 
 // 状态管理
 const loading = ref(false)
@@ -353,13 +357,42 @@ const handleTableChange = (pag: any, filters: any, sorter: any) => {
 // 编辑资源
 const handleEdit = (record: ResourceItem) => {
   // 路由跳转到编辑页面
-  console.log('编辑资源:', record)
+  router.push(`/admin/resources/edit/${record.id}`)
 }
 
 // 预览资源
 const handlePreview = (record: ResourceItem) => {
   previewResource.value = record
   previewVisible.value = true
+}
+
+// 下载资源
+const handleDownload = (record: ResourceItem) => {
+  if (!record.fileUrl) {
+    message.warning('该资源没有可下载的文件')
+    return
+  }
+
+  try {
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = record.fileUrl
+    link.download = record.fileName || record.title
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    message.success('下载开始')
+
+    // 调用API记录下载统计
+    adminResourceApi.incrementDownloadCount(record.id).catch(() => {
+      // 下载统计失败不影响用户体验，只是静默处理
+      console.warn('Failed to update download count')
+    })
+  } catch (error) {
+    message.error('下载失败，请重试')
+  }
 }
 
 // 操作处理
@@ -369,8 +402,7 @@ const handleAction = async (action: string, record: ResourceItem) => {
       handlePreview(record)
       break
     case 'download':
-      // 下载逻辑
-      message.info('下载功能待实现')
+      handleDownload(record)
       break
     case 'publish':
       await handleStatusChange(record.id, 'published')

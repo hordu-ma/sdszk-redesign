@@ -142,6 +142,11 @@ export class AdminResourceApi extends BaseApi {
     return this.post('/batch-status', { ids, status })
   }
 
+  // 增加下载次数
+  incrementDownloadCount(id: string): Promise<ApiResponse<{ downloadCount: number }>> {
+    return this.post(`/${id}/download`)
+  }
+
   // 上传文件
   upload(
     formData: FormData,
