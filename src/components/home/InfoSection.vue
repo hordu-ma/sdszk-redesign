@@ -129,44 +129,115 @@ const noticeCategoryId = ref<string>('')
 const policyCategoryId = ref<string>('')
 
 const fetchCoreCategoryIds = async () => {
-  const res = await newsCategoryApi.getCoreCategories()
-  if (res.success && Array.isArray(res.data)) {
-    const notice = res.data.find((cat: any) => cat.key === 'notice')
-    const policy = res.data.find((cat: any) => cat.key === 'policy')
-    if (notice) noticeCategoryId.value = notice._id
-    if (policy) policyCategoryId.value = policy._id
+  try {
+    const res = await newsCategoryApi.getCoreCategories()
+    console.log('【InfoSection】获取核心分类响应:', res)
+
+    // 处理API响应格式
+    let categories = []
+    if ((res as any).data && (res as any).data.status === 'success') {
+      categories = (res as any).data.data
+    } else if (res.success || (res as any).success) {
+      categories = res.data || (res as any).data
+    }
+
+    if (Array.isArray(categories)) {
+      const notice = categories.find((cat: any) => cat.key === 'notice')
+      const policy = categories.find((cat: any) => cat.key === 'policy')
+      if (notice) noticeCategoryId.value = notice._id
+      if (policy) policyCategoryId.value = policy._id
+
+      console.log('【InfoSection】分类ID获取结果:', {
+        notice: noticeCategoryId.value,
+        policy: policyCategoryId.value,
+      })
+    } else {
+      console.error('【InfoSection】分类数据格式不正确:', categories)
+    }
+  } catch (error) {
+    console.error('【InfoSection】获取分类失败:', error)
   }
 }
 
 const fetchNotices = async () => {
-  if (!noticeCategoryId.value) return
-  const res = await newsApi.getList({ category: noticeCategoryId.value, limit: 5 })
-  const rawData = Array.isArray(res.data) ? res.data : (res.data as any)?.data || []
+  if (!noticeCategoryId.value) {
+    console.log('【InfoSection】通知公告分类ID为空')
+    return
+  }
 
-  if (res.success && Array.isArray(rawData)) {
-    noticeNews.value = rawData.map((item: any) => ({
-      id: item._id || item.id,
-      title: item.title,
-      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
-      author: item.author?.username || item.author?.name,
-      source: item.source?.name || '',
-    }))
+  try {
+    console.log('【InfoSection】开始获取通知公告，分类ID:', noticeCategoryId.value)
+    const res = await newsApi.getList({ category: noticeCategoryId.value, limit: 5 })
+    console.log('【InfoSection】通知公告API响应:', res)
+
+    // 处理API响应格式
+    let newsList = []
+    if ((res as any).success && Array.isArray((res as any).data)) {
+      newsList = (res as any).data
+    } else if ((res as any).data && (res as any).data.success) {
+      newsList = (res as any).data.data || []
+    }
+
+    if (Array.isArray(newsList)) {
+      noticeNews.value = newsList.map((item: any) => ({
+        id: item._id || item.id,
+        title: item.title,
+        date: item.publishDate
+          ? item.publishDate.slice(0, 10)
+          : item.createdAt
+            ? item.createdAt.slice(0, 10)
+            : '',
+        author: item.author?.username || item.author?.name || '',
+        source: item.source?.name || '',
+      }))
+
+      console.log('【InfoSection】通知公告数据处理结果:', noticeNews.value)
+    } else {
+      console.error('【InfoSection】通知公告数据格式不正确:', newsList)
+    }
+  } catch (error) {
+    console.error('【InfoSection】获取通知公告失败:', error)
   }
 }
 
 const fetchPolicies = async () => {
-  if (!policyCategoryId.value) return
-  const res = await newsApi.getList({ category: policyCategoryId.value, limit: 5 })
-  const rawData = Array.isArray(res.data) ? res.data : (res.data as any)?.data || []
+  if (!policyCategoryId.value) {
+    console.log('【InfoSection】政策文件分类ID为空')
+    return
+  }
 
-  if (res.success && Array.isArray(rawData)) {
-    policyNews.value = rawData.map((item: any) => ({
-      id: item._id || item.id,
-      title: item.title,
-      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
-      author: item.author?.username || item.author?.name,
-      source: item.source?.name || '',
-    }))
+  try {
+    console.log('【InfoSection】开始获取政策文件，分类ID:', policyCategoryId.value)
+    const res = await newsApi.getList({ category: policyCategoryId.value, limit: 5 })
+    console.log('【InfoSection】政策文件API响应:', res)
+
+    // 处理API响应格式
+    let newsList = []
+    if ((res as any).success && Array.isArray((res as any).data)) {
+      newsList = (res as any).data
+    } else if ((res as any).data && (res as any).data.success) {
+      newsList = (res as any).data.data || []
+    }
+
+    if (Array.isArray(newsList)) {
+      policyNews.value = newsList.map((item: any) => ({
+        id: item._id || item.id,
+        title: item.title,
+        date: item.publishDate
+          ? item.publishDate.slice(0, 10)
+          : item.createdAt
+            ? item.createdAt.slice(0, 10)
+            : '',
+        author: item.author?.username || item.author?.name || '',
+        source: item.source?.name || '',
+      }))
+
+      console.log('【InfoSection】政策文件数据处理结果:', policyNews.value)
+    } else {
+      console.error('【InfoSection】政策文件数据格式不正确:', newsList)
+    }
+  } catch (error) {
+    console.error('【InfoSection】获取政策文件失败:', error)
   }
 }
 
