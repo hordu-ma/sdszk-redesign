@@ -10,6 +10,18 @@
         <span class="news-date">{{ formatDate(news.publishDate || news.createdAt) }}</span>
         <span class="news-author" v-if="news.author">作者：{{ news.author }}</span>
         <span class="news-views" v-if="news.viewCount">阅读：{{ news.viewCount }}</span>
+        <span
+          class="news-category"
+          v-if="
+            news.category &&
+            (typeof (news.category as any) === 'object'
+              ? (news.category as any).name
+              : news.category)
+          "
+          >分类：{{
+            typeof (news.category as any) === 'object' ? (news.category as any).name : news.category
+          }}</span
+        >
       </div>
     </div>
     <div class="news-cover" v-if="news.cover">
