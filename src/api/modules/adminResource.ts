@@ -6,7 +6,7 @@ export interface ResourceFormData {
   title: string
   description: string
   summary?: string
-  categoryId: number
+  categoryId: string
   fileUrl: string
   fileName: string
   fileSize: number
@@ -26,11 +26,11 @@ export interface ResourceFormData {
 
 // 资源列表项接口
 export interface ResourceItem {
-  id: number
+  id: string
   title: string
   description: string
   summary?: string
-  categoryId: number
+  categoryId: string
   categoryName: string
   fileUrl: string
   fileName: string
@@ -50,12 +50,12 @@ export interface ResourceItem {
   downloadCount: number
   downloadPermission: 'public' | 'login' | 'vip'
   author?: {
-    id: number
+    id: string
     username: string
     name: string
   }
   uploader: {
-    id: number
+    id: string
     username: string
   }
   createdAt: string
@@ -65,7 +65,7 @@ export interface ResourceItem {
 // 资源查询参数接口
 export interface ResourceQueryParams extends QueryParams {
   keyword?: string
-  categoryId?: number
+  categoryId?: string
   status?: 'draft' | 'published' | 'archived'
   fileType?: string
   isTop?: boolean
@@ -87,7 +87,7 @@ export class AdminResourceApi extends BaseApi {
   }
 
   // 获取资源详情
-  getDetail(id: number): Promise<ApiResponse<ResourceItem>> {
+  getDetail(id: string): Promise<ApiResponse<ResourceItem>> {
     return this.get(`/${id}`)
   }
 
@@ -97,38 +97,38 @@ export class AdminResourceApi extends BaseApi {
   }
 
   // 更新资源
-  update(id: number, data: Partial<ResourceFormData>): Promise<ApiResponse<ResourceItem>> {
+  update(id: string, data: Partial<ResourceFormData>): Promise<ApiResponse<ResourceItem>> {
     return this.put(`/${id}`, data)
   }
 
   // 删除资源
-  deleteResource(id: number): Promise<ApiResponse<void>> {
+  deleteResource(id: string): Promise<ApiResponse<void>> {
     return this.delete(`/${id}`)
   }
 
   // 批量删除资源
-  batchDelete(ids: number[]): Promise<ApiResponse<void>> {
+  batchDelete(ids: string[]): Promise<ApiResponse<void>> {
     return this.post('/batch-delete', { ids })
   }
 
   // 发布/取消发布资源
-  togglePublish(id: number): Promise<ApiResponse<ResourceItem>> {
+  togglePublish(id: string): Promise<ApiResponse<ResourceItem>> {
     return this.patch(`/${id}/toggle-publish`)
   }
 
   // 置顶/取消置顶资源
-  toggleTop(id: number): Promise<ApiResponse<ResourceItem>> {
+  toggleTop(id: string): Promise<ApiResponse<ResourceItem>> {
     return this.patch(`/${id}/toggle-top`)
   }
 
   // 设置/取消精选资源
-  toggleFeatured(id: number): Promise<ApiResponse<ResourceItem>> {
+  toggleFeatured(id: string): Promise<ApiResponse<ResourceItem>> {
     return this.patch(`/${id}/toggle-featured`)
   }
 
   // 更新资源状态
   updateStatus(
-    id: number,
+    id: string,
     status: 'draft' | 'published' | 'archived'
   ): Promise<ApiResponse<ResourceItem>> {
     return this.patch(`/${id}/status`, { status })
@@ -136,7 +136,7 @@ export class AdminResourceApi extends BaseApi {
 
   // 批量更新资源状态
   batchUpdateStatus(
-    ids: number[],
+    ids: string[],
     status: 'draft' | 'published' | 'archived'
   ): Promise<ApiResponse<void>> {
     return this.post('/batch-status', { ids, status })

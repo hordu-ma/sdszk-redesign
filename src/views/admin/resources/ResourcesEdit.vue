@@ -324,7 +324,7 @@ const newFileList = ref<any[]>([])
 const formData = reactive<ResourceFormData>({
   title: '',
   description: '',
-  categoryId: 0,
+  categoryId: '',
   fileUrl: '',
   fileName: '',
   fileSize: 0,
@@ -367,7 +367,7 @@ const fetchResourceDetail = async () => {
 
   loading.value = true
   try {
-    const { data } = await adminResourceApi.getDetail(Number(id))
+    const { data } = await adminResourceApi.getDetail(id)
     resourceData.value = data
 
     // 填充表单数据
@@ -511,7 +511,7 @@ const handleSave = async () => {
     saving.value = true
 
     await formRef.value.validate()
-    await adminResourceApi.update(Number(route.params.id), formData)
+    await adminResourceApi.update(route.params.id as string, formData)
 
     message.success('保存成功')
     router.push('/admin/resources/list')
@@ -533,7 +533,7 @@ const handlePublish = async () => {
     formData.status = 'published'
 
     await formRef.value.validate()
-    await adminResourceApi.update(Number(route.params.id), formData)
+    await adminResourceApi.update(route.params.id as string, formData)
 
     message.success('发布成功')
     router.push('/admin/resources/list')

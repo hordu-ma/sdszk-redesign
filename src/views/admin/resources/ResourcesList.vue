@@ -235,7 +235,7 @@ import dayjs from 'dayjs'
 const loading = ref(false)
 const resources = ref<ResourceItem[]>([])
 const categories = ref<ResourceCategory[]>([])
-const selectedRowKeys = ref<number[]>([])
+const selectedRowKeys = ref<string[]>([])
 const previewVisible = ref(false)
 const previewResource = ref<ResourceItem | null>(null)
 
@@ -302,7 +302,7 @@ const columns = [
 // 行选择配置
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
-  onChange: (keys: number[]) => {
+  onChange: (keys: string[]) => {
     selectedRowKeys.value = keys
   },
 }))
@@ -390,7 +390,7 @@ const onMenuClick = (record: ResourceItem) => (event: { key: string }) => {
 }
 
 // 状态变更
-const handleStatusChange = async (id: number, status: 'draft' | 'published' | 'archived') => {
+const handleStatusChange = async (id: string, status: 'draft' | 'published' | 'archived') => {
   try {
     await adminResourceApi.updateStatus(id, status)
     message.success('状态更新成功')
@@ -401,7 +401,7 @@ const handleStatusChange = async (id: number, status: 'draft' | 'published' | 'a
 }
 
 // 删除资源
-const handleDelete = async (id: number) => {
+const handleDelete = async (id: string) => {
   try {
     await adminResourceApi.deleteResource(id)
     message.success('删除成功')

@@ -248,7 +248,7 @@ const fileList = ref([])
 const formData = reactive<ResourceFormData>({
   title: '',
   description: '',
-  categoryId: 0,
+  categoryId: '',
   fileUrl: '',
   fileName: '',
   fileSize: 0,
