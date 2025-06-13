@@ -64,25 +64,76 @@ const carouselItems = ref<CarouselItem[]>([
 const centerNews = ref<NewsItem[]>([])
 const centerCategoryId = ref<string>('')
 
-const fetchCenterCategoryId = async () => {
-  const res = await newsCategoryApi.getCoreCategories()
-  if (res.success && Array.isArray(res.data)) {
-    const center = res.data.find((cat: any) => cat.key === 'center')
-    if (center) centerCategoryId.value = center._id
+const fetchCategoryIds = async () => {
+  try {
+    const res = await newsCategoryApi.getCoreCategories()
+    console.log('【首页】获取核心分类响应:', res)
+
+    // 处理API响应格式
+    let categories = []
+    if ((res as any).data && (res as any).data.status === 'success') {
+      categories = (res as any).data.data
+    } else if (res.success || (res as any).success) {
+      categories = res.data || (res as any).data
+    }
+
+    if (Array.isArray(categories)) {
+      const center = categories.find((cat: any) => cat.key === 'center')
+
+      if (center) centerCategoryId.value = center._id
+
+      console.log('【首页】分类ID获取结果:', {
+        center: centerCategoryId.value,
+      })
+    } else {
+      console.error('【首页】分类数据格式不正确:', categories)
+    }
+  } catch (error) {
+    console.error('【首页】获取分类失败:', error)
   }
 }
 
-const fetchCenterNews = async () => {
-  if (!centerCategoryId.value) return
-  const res = await newsApi.getList({ category: centerCategoryId.value, limit: 3 })
-  if (res.success) {
-    centerNews.value = res.data.map((item: any) => ({
-      id: item._id || item.id,
-      title: item.title,
-      date: item.publishDate ? item.publishDate.slice(0, 10) : '',
-      summary: item.summary || '',
-    }))
+const fetchNews = async (categoryId: string, limit = 3) => {
+  if (!categoryId) return []
+
+  try {
+    const res = await newsApi.getList({ category: categoryId, limit })
+
+    // 处理API响应格式
+    let newsList = []
+    if ((res as any).success && Array.isArray((res as any).data)) {
+      newsList = (res as any).data
+    } else if ((res as any).data && (res as any).data.success) {
+      newsList = (res as any).data.data || []
+    }
+
+    if (Array.isArray(newsList)) {
+      return newsList.map((item: any) => ({
+        id: item._id || item.id,
+        title: item.title,
+        date: item.publishDate
+          ? item.publishDate.slice(0, 10)
+          : item.createdAt
+            ? item.createdAt.slice(0, 10)
+            : '',
+        summary: item.summary || '',
+      }))
+    }
+  } catch (error) {
+    console.error('【首页】获取新闻失败:', error)
   }
+
+  return []
+}
+
+const fetchAllNews = async () => {
+  const center = await fetchNews(centerCategoryId.value)
+
+  centerNews.value = center
+
+  console.log('【首页】中心动态获取完成:', {
+    center: center.length,
+  })
 }
 
 const formatDay = (date: string): string => date.split('-')[2] || ''
@@ -92,8 +143,8 @@ const formatMonthYear = (date: string): string => {
 }
 
 onMounted(async () => {
-  await fetchCenterCategoryId()
-  await fetchCenterNews()
+  await fetchCategoryIds()
+  await fetchAllNews()
 })
 </script>
 

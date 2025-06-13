@@ -11,7 +11,7 @@
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="notice in notices" :key="notice.id">
+        <li v-for="notice in noticeNews" :key="notice.id">
           <router-link :to="`/news/detail/${notice.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
@@ -19,7 +19,7 @@
               </div>
               <div class="info-footer">
                 <span class="info-date">发布日期：{{ notice.date }}</span>
-                <span class="info-unit">{{ notice.unit }}</span>
+                <span class="info-unit">{{ notice.author || notice.source || '' }}</span>
               </div>
             </div>
           </router-link>
@@ -37,7 +37,7 @@
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="policy in policies" :key="policy.id">
+        <li v-for="policy in policyNews" :key="policy.id">
           <router-link :to="`/news/detail/${policy.id}`" class="info-link">
             <div class="info-content">
               <div class="info-header">
@@ -45,7 +45,7 @@
               </div>
               <div class="info-footer">
                 <span class="info-date">发布日期：{{ policy.date }}</span>
-                <span class="info-unit">{{ policy.unit }}</span>
+                <span class="info-unit">{{ policy.author || policy.source || '' }}</span>
               </div>
             </div>
           </router-link>
@@ -123,8 +123,8 @@ const props = defineProps({
   },
 })
 
-const notices = ref<any[]>([])
-const policies = ref<any[]>([])
+const noticeNews = ref<any[]>([])
+const policyNews = ref<any[]>([])
 const noticeCategoryId = ref<string>('')
 const policyCategoryId = ref<string>('')
 
@@ -141,12 +141,15 @@ const fetchCoreCategoryIds = async () => {
 const fetchNotices = async () => {
   if (!noticeCategoryId.value) return
   const res = await newsApi.getList({ category: noticeCategoryId.value, limit: 5 })
-  if (res.success) {
-    notices.value = res.data.map((item: any) => ({
+  const rawData = Array.isArray(res.data) ? res.data : (res.data as any)?.data || []
+
+  if (res.success && Array.isArray(rawData)) {
+    noticeNews.value = rawData.map((item: any) => ({
       id: item._id || item.id,
       title: item.title,
       date: item.publishDate ? item.publishDate.slice(0, 10) : '',
-      unit: item.source?.name || '',
+      author: item.author?.username || item.author?.name,
+      source: item.source?.name || '',
     }))
   }
 }
@@ -154,12 +157,15 @@ const fetchNotices = async () => {
 const fetchPolicies = async () => {
   if (!policyCategoryId.value) return
   const res = await newsApi.getList({ category: policyCategoryId.value, limit: 5 })
-  if (res.success) {
-    policies.value = res.data.map((item: any) => ({
+  const rawData = Array.isArray(res.data) ? res.data : (res.data as any)?.data || []
+
+  if (res.success && Array.isArray(rawData)) {
+    policyNews.value = rawData.map((item: any) => ({
       id: item._id || item.id,
       title: item.title,
       date: item.publishDate ? item.publishDate.slice(0, 10) : '',
-      unit: item.source?.name || '',
+      author: item.author?.username || item.author?.name,
+      source: item.source?.name || '',
     }))
   }
 }
@@ -182,6 +188,8 @@ const formatDate = (date: any) => {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-bottom: 30px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .info-block {
