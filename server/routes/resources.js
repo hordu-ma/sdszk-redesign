@@ -6,7 +6,9 @@ import {
   createResource,
   updateResource,
   deleteResource,
+  togglePublishStatus,
   toggleFeaturedStatus,
+  toggleTopStatus,
   getResourceStats,
   batchDeleteResources,
   batchUpdateResources,
@@ -27,12 +29,14 @@ router.get('/stats/overview', getResourceStats)
 
 // 批量操作路由
 router.post('/batch-delete', batchDeleteResources)
-router.post('/batch-update', batchUpdateResources)
+router.post('/batch-status', batchUpdateResources)
 
 // 资源 CRUD 路由
 router.post('/', createResource)
 router.put('/:id', updateResource)
 router.delete('/:id', deleteResource)
-router.patch('/:id/featured', toggleFeaturedStatus)
+router.patch('/:id/toggle-publish', togglePublishStatus)
+router.patch('/:id/toggle-top', toggleTopStatus)
+router.patch('/:id/toggle-featured', toggleFeaturedStatus)
 
 export default router

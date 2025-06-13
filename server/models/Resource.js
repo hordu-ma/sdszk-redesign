@@ -95,6 +95,10 @@ const resourceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isTop: {
+      type: Boolean,
+      default: false,
+    },
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,

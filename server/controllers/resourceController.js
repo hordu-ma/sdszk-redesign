@@ -3,6 +3,66 @@ import Resource from '../models/Resource.js'
 import ActivityLog from '../models/ActivityLog.js'
 import ResourceCategory from '../models/ResourceCategory.js'
 
+// 字段映射函数：前端字段名 -> 后端字段名
+const mapFrontendToBackend = data => {
+  const mapped = { ...data }
+
+  // 字段名映射
+  if (mapped.description !== undefined) {
+    mapped.content = mapped.description
+    delete mapped.description
+  }
+
+  if (mapped.categoryId !== undefined) {
+    mapped.category = mapped.categoryId
+    delete mapped.categoryId
+  }
+
+  if (mapped.isFeatured !== undefined) {
+    mapped.featured = mapped.isFeatured
+    delete mapped.isFeatured
+  }
+
+  // status 到 isPublished 的转换
+  if (mapped.status !== undefined) {
+    mapped.isPublished = mapped.status === 'published'
+    delete mapped.status
+  }
+
+  return mapped
+}
+
+// 字段映射函数：后端字段名 -> 前端字段名
+const mapBackendToFrontend = data => {
+  if (!data) return data
+
+  const mapped = { ...(data.toObject ? data.toObject() : data) }
+
+  // 字段名映射
+  if (mapped.content !== undefined) {
+    mapped.description = mapped.content
+    delete mapped.content
+  }
+
+  if (mapped.category !== undefined) {
+    mapped.categoryId = mapped.category
+    delete mapped.category
+  }
+
+  if (mapped.featured !== undefined) {
+    mapped.isFeatured = mapped.featured
+    delete mapped.featured
+  }
+
+  // isPublished 到 status 的转换
+  if (mapped.isPublished !== undefined) {
+    mapped.status = mapped.isPublished ? 'published' : 'draft'
+    delete mapped.isPublished
+  }
+
+  return mapped
+}
+
 // 获取资源列表
 export const getResourceList = async (req, res) => {
   try {
@@ -52,9 +112,12 @@ export const getResourceList = async (req, res) => {
     // 获取总数
     const total = await Resource.countDocuments(query)
 
+    // 映射返回数据
+    const mappedResources = resources.map(resource => mapBackendToFrontend(resource))
+
     res.json({
       status: 'success',
-      data: resources,
+      data: mappedResources,
       pagination: {
         total,
         page: parseInt(page),
@@ -102,9 +165,12 @@ export const getResourceById = async (req, res) => {
     resource.viewCount += 1
     await resource.save({ validateBeforeSave: false })
 
+    // 返回映射后的数据
+    const responseData = mapBackendToFrontend(resource)
+
     res.json({
       status: 'success',
-      data: resource,
+      data: responseData,
     })
   } catch (err) {
     res.status(500).json({
@@ -117,10 +183,13 @@ export const getResourceById = async (req, res) => {
 // 创建资源
 export const createResource = async (req, res) => {
   try {
-    // 设置创建者
-    req.body.createdBy = req.user._id
+    // 字段映射：前端 -> 后端
+    const mappedData = mapFrontendToBackend(req.body)
 
-    const resource = new Resource(req.body)
+    // 设置创建者
+    mappedData.createdBy = req.user._id
+
+    const resource = new Resource(mappedData)
     const savedResource = await resource.save()
 
     // 记录活动
@@ -138,9 +207,12 @@ export const createResource = async (req, res) => {
       userAgent: req.headers['user-agent'],
     })
 
+    // 返回映射后的数据
+    const responseData = mapBackendToFrontend(savedResource)
+
     res.status(201).json({
       status: 'success',
-      data: savedResource,
+      data: responseData,
     })
   } catch (err) {
     res.status(400).json({
@@ -153,10 +225,13 @@ export const createResource = async (req, res) => {
 // 更新资源
 export const updateResource = async (req, res) => {
   try {
-    // 设置更新者
-    req.body.updatedBy = req.user._id
+    // 字段映射：前端 -> 后端
+    const mappedData = mapFrontendToBackend(req.body)
 
-    const resource = await Resource.findByIdAndUpdate(req.params.id, req.body, {
+    // 设置更新者
+    mappedData.updatedBy = req.user._id
+
+    const resource = await Resource.findByIdAndUpdate(req.params.id, mappedData, {
       new: true,
       runValidators: true,
     })
@@ -184,9 +259,12 @@ export const updateResource = async (req, res) => {
       userAgent: req.headers['user-agent'],
     })
 
+    // 返回映射后的数据
+    const responseData = mapBackendToFrontend(resource)
+
     res.json({
       status: 'success',
-      data: resource,
+      data: responseData,
     })
   } catch (err) {
     res.status(400).json({
@@ -270,7 +348,7 @@ export const togglePublishStatus = async (req, res) => {
 
     res.json({
       status: 'success',
-      data: resource,
+      data: mapBackendToFrontend(resource),
       message: resource.isPublished ? '资源已发布' : '资源已取消发布',
     })
   } catch (err) {
@@ -299,8 +377,37 @@ export const toggleFeaturedStatus = async (req, res) => {
 
     res.json({
       status: 'success',
-      data: resource,
+      data: mapBackendToFrontend(resource),
       message: resource.featured ? '已设为精选资源' : '已取消精选资源',
+    })
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err.message,
+    })
+  }
+}
+
+// 设置/取消置顶资源
+export const toggleTopStatus = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id)
+
+    if (!resource) {
+      return res.status(404).json({
+        status: 'fail',
+        message: '资源不存在',
+      })
+    }
+
+    resource.isTop = !resource.isTop
+    resource.updatedBy = req.user._id
+    await resource.save()
+
+    res.json({
+      status: 'success',
+      data: mapBackendToFrontend(resource),
+      message: resource.isTop ? '已设为置顶资源' : '已取消置顶资源',
     })
   } catch (err) {
     res.status(500).json({
