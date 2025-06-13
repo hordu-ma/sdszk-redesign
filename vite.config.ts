@@ -82,6 +82,14 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    // API代理配置
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 
   // CSS预处理器优化
