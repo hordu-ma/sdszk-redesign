@@ -250,7 +250,7 @@ const formatDate = (dateString?: string) => {
 const fetchNewsDetail = async () => {
   try {
     loading.value = true
-    const { data } = await adminNewsApi.getDetail(Number(props.id))
+    const { data } = await adminNewsApi.getDetail(props.id)
     newsData.value = data
 
     // 填充表单数据
@@ -295,7 +295,7 @@ const handleSave = async () => {
     saving.value = true
 
     await formRef.value.validate()
-    await adminNewsApi.update(Number(props.id), formData)
+    await adminNewsApi.update(props.id, formData)
 
     message.success('保存成功')
     router.push('/admin/news/list')
@@ -317,7 +317,7 @@ const handlePublish = async () => {
     formData.status = 'published'
 
     await formRef.value.validate()
-    await adminNewsApi.update(Number(props.id), formData)
+    await adminNewsApi.update(props.id, formData)
 
     message.success('发布成功')
     router.push('/admin/news/list')

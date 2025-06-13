@@ -333,7 +333,8 @@ const fetchNewsList = async () => {
     ) {
       tableData.value = resData.data.data.map((item: any) => ({
         ...item,
-        id: item._id,
+        _id: item._id || item.id, // 确保_id字段存在
+        id: item._id || item.id, // 保持兼容性
         categoryName:
           item.category && typeof item.category === 'object' && item.category.name
             ? item.category.name
@@ -449,7 +450,7 @@ const handleBatchDelete = async () => {
 // 处理置顶切换
 const handleToggleTop = async (record: NewsItem) => {
   try {
-    await adminNewsApi.toggleTop(String(record.id))
+    await adminNewsApi.toggleTop(record._id)
     message.success(record.isTop ? '取消置顶成功' : '置顶成功')
     debouncedFetchNewsList()
   } catch (error: any) {
@@ -460,7 +461,7 @@ const handleToggleTop = async (record: NewsItem) => {
 // 处理发布状态切换
 const handleTogglePublish = async (record: NewsItem) => {
   try {
-    await adminNewsApi.togglePublish(String(record.id))
+    await adminNewsApi.togglePublish(record._id)
     message.success(record.status === 'published' ? '下线成功' : '发布成功')
     debouncedFetchNewsList()
   } catch (error: any) {
