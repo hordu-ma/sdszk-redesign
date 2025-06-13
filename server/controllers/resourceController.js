@@ -159,6 +159,7 @@ export const getResourceList = async (req, res) => {
 export const getResourceById = async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id)
+      .populate('category', 'name slug key color')
       .populate('createdBy', 'username name')
       .populate('updatedBy', 'username name')
       .populate('relatedResources', 'title thumbnail category')
@@ -170,8 +171,12 @@ export const getResourceById = async (req, res) => {
       })
     }
 
-    // 如果资源未发布，只有创建者或管理员可以查看
+    // 对于管理员API路径，跳过权限检查
+    const isAdminAPI = req.originalUrl.includes('/admin/')
+
+    // 如果不是管理员API且资源未发布，只有创建者或管理员可以查看
     if (
+      !isAdminAPI &&
       !resource.isPublished &&
       (!req.user ||
         (req.user._id.toString() !== resource.createdBy._id.toString() &&
@@ -183,9 +188,11 @@ export const getResourceById = async (req, res) => {
       })
     }
 
-    // 更新浏览量
-    resource.viewCount += 1
-    await resource.save({ validateBeforeSave: false })
+    // 更新浏览量（仅限非管理员API）
+    if (!isAdminAPI) {
+      resource.viewCount += 1
+      await resource.save({ validateBeforeSave: false })
+    }
 
     // 返回映射后的数据
     const responseData = mapBackendToFrontend(resource)
@@ -624,7 +631,7 @@ export const batchDeleteResources = async (req, res) => {
 // 批量更新资源
 export const batchUpdateResources = async (req, res) => {
   try {
-    const { ids, ...updateData } = req.body
+    const { ids, status, ...otherData } = req.body
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({
@@ -643,22 +650,38 @@ export const batchUpdateResources = async (req, res) => {
       })
     }
 
-    // 设置更新者
+    // 准备更新数据
+    const updateData = { ...otherData }
+
+    // 如果有status字段，转换为isPublished
+    if (status !== undefined) {
+      if (!['draft', 'published', 'archived'].includes(status)) {
+        return res.status(400).json({
+          status: 'fail',
+          message: '无效的状态值',
+        })
+      }
+      updateData.isPublished = status === 'published'
+    }
+
+    // 设置更新者和更新时间
     updateData.updatedBy = req.user._id
+    updateData.updatedAt = new Date()
 
     // 执行批量更新
     await Resource.updateMany({ _id: { $in: ids } }, { $set: updateData })
 
     // 记录批量更新活动
-    await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
-      action: 'batch_update',
+    await ActivityLog.create({
+      action: 'update',
       entityType: 'resource',
+      userId: req.user.id,
+      username: req.user.username,
       details: {
         count: resources.length,
         resourceTitles: resources.map(r => r.title),
         updatedFields: Object.keys(updateData),
+        status: status,
       },
       ip: req.ip,
       userAgent: req.headers['user-agent'],
@@ -712,10 +735,11 @@ export const updateStatus = async (req, res) => {
 
     // 记录活动日志
     await ActivityLog.create({
-      action: 'UPDATE_STATUS',
-      resourceType: 'Resource',
-      resourceId: id,
+      action: 'update',
+      entityType: 'resource',
+      entityId: id,
       userId: req.user.id,
+      username: req.user.username,
       details: {
         title: resource.title,
         oldStatus: resource.isPublished ? 'published' : 'draft',
