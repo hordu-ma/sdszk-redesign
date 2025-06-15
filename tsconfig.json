@@ -40,9 +40,7 @@
     "**/*.test.ts",
     "**/*.spec.tsx",
     "**/*.test.tsx",
-    "**/fixed-*.vue",
-    "**/NewsSimple.vue",
-    "**/NewsTest.vue"
+    "**/fixed-*.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
