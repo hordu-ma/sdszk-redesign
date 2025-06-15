@@ -2,7 +2,30 @@
   <page-layout title="资源中心" description="大中小学思政课一体化教育资源库">
     <div class="resources-content">
       <!-- 分类导航 -->
-      <div class="category-nav">
+  // 初始化时从路由参数获取分类
+onMounted(() => {
+  // 不需要手动设置activeCategory，由路由监听处理
+  // 也不需要手动调用fetchResources，由分类监听处理
+});
+
+// 监听路由查询参数变化
+watch(() => route.query.category, (newCategory) => {
+  activeCategory.value = (newCategory as string) || 'all';
+}, { immediate: true });
+
+// 监听分类变化，更新路由参数
+watch(activeCategory, (newCategory) => {
+  // 避免路由循环：只在分类真正改变时推送路由
+  const currentQueryCategory = route.query.category || 'all';
+  if (newCategory !== currentQueryCategory) {
+    router.push({
+      path: "/resources",
+      query: { ...(newCategory !== 'all' ? { category: newCategory } : {}) },
+    });
+  }
+  currentPage.value = 1;
+  fetchResources();
+});ategory-nav">
         <a-tabs
           v-model:activeKey="activeCategory"
           @change="handleCategoryChange"
@@ -134,24 +157,12 @@ onMounted(() => {
   fetchResources();
 });
 
-// 监听路由查询参数变化
-watch(() => route.query.category, (newCategory) => {
-  const targetCategory = (newCategory as string) || 'all';
-  if (activeCategory.value !== targetCategory) {
-    activeCategory.value = targetCategory;
-  }
-}, { immediate: false });
-
 // 监听分类变化，更新路由参数
 watch(activeCategory, (newCategory) => {
-  const currentQueryCategory = route.query.category || 'all';
-  // 只有当分类真正变化时才更新路由
-  if (newCategory !== currentQueryCategory) {
-    router.push({
-      path: "/resources",
-      query: { ...(newCategory !== "all" ? { category: newCategory } : {}) },
-    });
-  }
+  router.push({
+    path: "/resources",
+    query: { ...(newCategory !== "all" ? { category: newCategory } : {}) },
+  });
   currentPage.value = 1;
   fetchResources();
 });

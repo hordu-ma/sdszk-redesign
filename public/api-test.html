@@ -7,6 +7,7 @@
     <h1>API 测试</h1>
     <button onclick="testNewsCategories()">测试新闻分类API</button>
     <button onclick="testResourceCategories()">测试资源分类API</button>
+    <button onclick="testResourcesByCategory()">测试资源分类查询</button>
     <div id="output"></div>
 
     <script>
@@ -47,6 +48,26 @@
         } catch (error) {
           document.getElementById("output").innerHTML =
             "<h3>资源分类API错误:</h3><pre>" + error.message + "</pre>";
+        }
+      }
+
+      async function testResourcesByCategory() {
+        try {
+          const response = await fetch("/api/resources?category=theory", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          const data = await response.json();
+          document.getElementById("output").innerHTML =
+            "<h3>理论前沿资源API响应:</h3><pre>" +
+            JSON.stringify(data, null, 2) +
+            "</pre>";
+        } catch (error) {
+          document.getElementById("output").innerHTML =
+            "<h3>理论前沿资源API错误:</h3><pre>" + error.message + "</pre>";
         }
       }
     </script>
