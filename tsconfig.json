@@ -30,10 +30,7 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/views/**/*.vue",
-    "src/components/**/*.vue",
-    "src/layouts/**/*.vue",
-    "src/App.vue",
+    "src/**/*.vue",
     "src/env.d.ts"
   ],
   "exclude": [
@@ -43,7 +40,9 @@
     "**/*.test.ts",
     "**/*.spec.tsx",
     "**/*.test.tsx",
-    "**/fixed-*.vue"
+    "**/fixed-*.vue",
+    "**/NewsSimple.vue",
+    "**/NewsTest.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
