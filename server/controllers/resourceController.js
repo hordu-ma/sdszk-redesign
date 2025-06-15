@@ -2,6 +2,8 @@
 import Resource from '../models/Resource.js'
 import ActivityLog from '../models/ActivityLog.js'
 import ResourceCategory from '../models/ResourceCategory.js'
+import response from '../utils/responseHelper.js'
+import mongoose from 'mongoose'
 
 // 字段映射函数：前端字段名 -> 后端字段名
 const mapFrontendToBackend = data => {
@@ -109,129 +111,69 @@ const mapBackendToFrontend = data => {
 // 获取资源列表
 export const getResourceList = async (req, res) => {
   try {
-    let { category, page = 1, limit = 10, search, featured } = req.query
+    const { category, page = 1, limit = 10 } = req.query
+    let query = {}
 
-    // 构建查询条件
-    const query = {}
-
-    // 按类别筛选
     if (category) {
-      // 如果不是合法 ObjectId，则尝试用 key 查找
-      if (typeof category === 'string' && !category.match(/^[0-9a-fA-F]{24}$/)) {
-        const cat = await ResourceCategory.findOne({ key: category })
-        if (cat) {
-          query.category = cat._id
-        } else {
-          return res.status(400).json({ status: 'error', message: '无效的资源分类' })
-        }
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        // 如果是有效的ObjectId，直接使用
+        query.category = new mongoose.Types.ObjectId(category)
       } else {
-        query.category = category
+        // 如果不是ObjectId，尝试通过key查找分类
+        const categoryDoc = await ResourceCategory.findOne({ key: category })
+        if (categoryDoc) {
+          query.category = categoryDoc._id
+        } else {
+          // 如果找不到分类，返回空结果而不是错误
+          return response.paginated(
+            res,
+            [],
+            {
+              page: parseInt(page),
+              limit: parseInt(limit),
+              total: 0,
+            },
+            '获取资源列表成功'
+          )
+        }
       }
     }
 
-    // 按特色筛选
-    if (featured === 'true') {
-      query.featured = true
-    }
-
-    // 全文搜索
-    if (search) {
-      query.$text = { $search: search }
-    }
-
-    // 对于管理员API调用，显示所有状态的资源
-    // 对于公开API，只显示已发布的资源
-    if (req.baseUrl.includes('/admin') || req.query.all === 'true') {
-      // 管理员可以看到所有状态的资源
-    } else {
-      // 公开接口只显示已发布的资源
-      query.isPublished = true
-    }
-
-    // 执行查询
     const resources = await Resource.find(query)
-      .sort(search ? { score: { $meta: 'textScore' } } : { createdAt: -1 })
+      .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate('createdBy', 'username name')
-      .populate('updatedBy', 'username name')
-      .populate('category', 'name key color')
 
-    // 获取总数
     const total = await Resource.countDocuments(query)
 
-    // 映射返回数据
-    const mappedResources = resources.map(resource => mapBackendToFrontend(resource))
-
-    res.json({
-      status: 'success',
-      data: mappedResources,
-      pagination: {
-        total,
+    return response.paginated(
+      res,
+      resources,
+      {
         page: parseInt(page),
         limit: parseInt(limit),
-        pages: Math.ceil(total / limit),
+        total,
       },
-    })
+      '获取资源列表成功'
+    )
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    return response.serverError(res, '获取资源列表失败', err)
   }
 }
 
-// 获取单个资源
+// 获取单个资源详情
 export const getResourceById = async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id)
-      .populate('category', 'name slug key color')
-      .populate('createdBy', 'username name')
-      .populate('updatedBy', 'username name')
-      .populate('relatedResources', 'title thumbnail category')
-
     if (!resource) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '资源不存在',
-      })
+      return response.notFound(res, '资源不存在')
     }
-
-    // 对于管理员API路径，跳过权限检查
-    const isAdminAPI = req.originalUrl.includes('/admin/')
-
-    // 如果不是管理员API且资源未发布，只有创建者或管理员可以查看
-    if (
-      !isAdminAPI &&
-      !resource.isPublished &&
-      (!req.user ||
-        (req.user._id.toString() !== resource.createdBy._id.toString() &&
-          req.user.role !== 'admin'))
-    ) {
-      return res.status(403).json({
-        status: 'fail',
-        message: '您没有权限查看此资源',
-      })
-    }
-
-    // 更新浏览量（仅限非管理员API）
-    if (!isAdminAPI) {
-      resource.viewCount += 1
-      await resource.save({ validateBeforeSave: false })
-    }
-
-    // 返回映射后的数据
-    const responseData = mapBackendToFrontend(resource)
-
-    res.json({
-      status: 'success',
-      data: responseData,
-    })
+    // 更新浏览量
+    resource.viewCount += 1
+    await resource.save()
+    return response.success(res, resource, '获取资源详情成功')
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    return response.serverError(res, '获取资源详情失败', err)
   }
 }
 

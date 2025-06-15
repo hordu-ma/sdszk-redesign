@@ -109,22 +109,8 @@ export class ResourceApi extends BaseApi {
   }
 
   // 获取资源列表
-  async getList(params?: ResourceQueryParams): Promise<PaginatedResponse<Resource>> {
-    const response = await this.get<Resource[]>('', params)
-
-    // 确保response.data是数组
-    const data = Array.isArray(response.data) ? response.data : []
-
-    return {
-      success: response.success,
-      data: data,
-      message: response.message,
-      pagination: response.pagination || {
-        total: response.total || 0,
-        page: params?.page || 1,
-        limit: params?.limit || 10,
-      },
-    }
+  async getList(params?: ResourceQueryParams): Promise<ApiResponse<Resource[]>> {
+    return await this.get<Resource[]>('', params)
   }
 
   // 获取资源详情

@@ -106,22 +106,37 @@ const categories = ref(RESOURCE_CATEGORIES)
 const fetchResources = async () => {
   loading.value = true
   try {
-    const response = await resourceApi.getList({
+    const params: any = {
       page: currentPage.value,
       limit: pageSize.value,
-      category: activeCategory.value === 'all' ? undefined : activeCategory.value,
-      status: 'published',
-    })
+    }
 
-    if (response.success) {
-      resources.value = response.data
-      total.value = response.pagination.total
+    // 如果有选择分类，添加分类筛选
+    if (activeCategory.value !== 'all') {
+      // 直接传递分类key，让后端处理key到ObjectId的转换
+      params.category = activeCategory.value
+    }
+
+    const response: any = await resourceApi.getList(params)
+    console.log('API响应详情:', response)
+    console.log('响应success字段:', response.data.success)
+    console.log('响应data长度:', response.data.data?.length)
+
+    if (response.data.success) {
+      resources.value = response.data.data
+      total.value = response.data.pagination?.total || 0
+      console.log('数据设置成功, 资源数量:', resources.value.length)
     } else {
+      console.error('API响应success为false:', response.data)
       message.error('获取资源列表失败')
     }
-  } catch (error) {
-    console.error('获取资源列表失败', error)
-    message.error('获取资源列表失败')
+  } catch (error: any) {
+    console.error('获取资源列表异常:', error)
+    console.error('错误类型:', typeof error)
+    console.error('错误名称:', error?.constructor?.name)
+    console.error('错误消息:', error?.message)
+    // 暂时注释掉自动错误提示，先诊断问题
+    // message.error('获取资源列表失败')
   } finally {
     loading.value = false
   }
