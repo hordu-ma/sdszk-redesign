@@ -287,9 +287,12 @@ router.beforeEach(async (to, _from, next) => {
   // 如果需要验证
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!userStore.isAuthenticated) {
-      // 未登录，重定向到登录页
+      // 未登录，根据路径判断重定向到不同的登录页
+      const isAdminRoute = to.path.startsWith("/admin");
+      const loginPath = isAdminRoute ? "/admin/login" : "/auth";
+
       return next({
-        path: "/admin/login",
+        path: loginPath,
         query: { redirect: to.fullPath },
       });
     }
