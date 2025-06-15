@@ -40,13 +40,21 @@
 
             <a-form-item>
               <div class="login-options">
-                <a-checkbox v-model:checked="formData.rememberMe"> 记住我 </a-checkbox>
+                <a-checkbox v-model:checked="formData.rememberMe">
+                  记住我
+                </a-checkbox>
                 <a href="#" class="forgot-password">忘记密码？</a>
               </div>
             </a-form-item>
 
             <a-form-item>
-              <a-button type="primary" html-type="submit" size="large" block :loading="loading">
+              <a-button
+                type="primary"
+                html-type="submit"
+                size="large"
+                block
+                :loading="loading"
+              >
                 登录
               </a-button>
             </a-form-item>
@@ -58,79 +66,71 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, h, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { useUserStore } from '@/stores/user'
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
-import type { Rule } from 'ant-design-vue/es/form'
+import { ref, reactive, h, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { message } from "ant-design-vue";
+import { useUserStore } from "@/stores/user";
+import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
+import type { Rule } from "ant-design-vue/es/form";
 
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
-const loading = ref(false)
-const formRef = ref()
+const loading = ref(false);
+const formRef = ref();
 
 // 表单数据
 const formData = reactive({
-  username: '',
-  password: '',
+  username: "",
+  password: "",
   rememberMe: false,
-})
+});
 
 // 表单验证规则
 const rules: Record<string, Rule[]> = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度应在3-20个字符之间', trigger: 'blur' },
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    {
+      min: 3,
+      max: 20,
+      message: "用户名长度应在3-20个字符之间",
+      trigger: "blur",
+    },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6个字符', trigger: 'blur' },
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 6, message: "密码长度不能少于6个字符", trigger: "blur" },
   ],
-}
+};
 
 // 处理登录
 const handleLogin = async () => {
   try {
-    loading.value = true
-    console.log('【DEBUG】登录表单提交，formData:', JSON.parse(JSON.stringify(formData)))
+    loading.value = true;
     await userStore.login({
       username: formData.username,
       password: formData.password,
       remember: formData.rememberMe,
-    })
-    // 登录后检测 localStorage token
-    console.log('【DEBUG】登录后 localStorage token:', localStorage.getItem('token'))
-    message.success('登录成功')
+    });
+    message.success("登录成功");
     // 获取重定向路径或默认跳转到仪表板
-    const redirectPath = (route.query.redirect as string) || '/admin/dashboard'
-    router.push(redirectPath)
+    const redirectPath = (route.query.redirect as string) || "/admin/dashboard";
+    router.push(redirectPath);
   } catch (error: any) {
-    message.error(error.message || '登录失败，请检查用户名和密码')
+    message.error(error.message || "登录失败，请检查用户名和密码");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 组件挂载时的初始化
 onMounted(() => {
-  console.log('【DEBUG】AdminLogin组件挂载')
-
-  // 检查是否有无效的token并清除
-  const savedToken = localStorage.getItem('token')
-  if (savedToken) {
-    console.log('【DEBUG】发现保存的token，长度:', savedToken.length)
-    // 可以选择在这里验证token有效性，如果无效则清除
-  }
-
   // 如果已经登录，直接跳转到仪表板
   if (userStore.isAuthenticated) {
-    console.log('【DEBUG】用户已登录，跳转到仪表板')
-    router.push('/admin/dashboard')
+    router.push("/admin/dashboard");
   }
-})
+});
 </script>
 
 <style scoped lang="scss">
