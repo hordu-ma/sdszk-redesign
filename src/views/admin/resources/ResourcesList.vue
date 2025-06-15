@@ -352,8 +352,8 @@ const fetchResources = async () => {
     };
 
     const response = await adminResourceApi.getList(params);
-    resources.value = response.data;
-    pagination.total = response.pagination.total;
+    resources.value = response.data.data || response.data;
+    pagination.total = response.pagination?.total || 0;
   } catch (error: any) {
     message.error(error.message || "获取资源列表失败");
   } finally {

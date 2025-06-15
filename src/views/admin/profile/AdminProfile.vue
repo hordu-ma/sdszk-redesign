@@ -26,7 +26,8 @@
             <h3>{{ formData.username }}</h3>
             <a-tag color="blue">管理员</a-tag>
             <p class="join-time">
-              加入时间: {{ formatDate(userInfo.createdAt) }}
+              加入时间:
+              {{ userInfo.createdAt ? formatDate(userInfo.createdAt) : "未知" }}
             </p>
           </div>
         </div>
@@ -100,7 +101,11 @@
           <h4>登录信息</h4>
           <a-descriptions :column="2" size="small">
             <a-descriptions-item label="上次登录时间">
-              {{ formatDate(userInfo.lastLoginAt) }}
+              {{
+                userInfo.lastLoginAt
+                  ? formatDate(userInfo.lastLoginAt)
+                  : "未记录"
+              }}
             </a-descriptions-item>
             <a-descriptions-item label="登录IP">
               {{ userInfo.lastLoginIp || "未记录" }}
@@ -174,6 +179,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import { EditOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "@/stores/user";
+import type { UserInfo } from "@/stores/user";
 import api from "@/utils/api";
 
 const userStore = useUserStore();
@@ -184,7 +190,9 @@ const changingPassword = ref(false);
 const passwordFormRef = ref();
 
 // 用户信息
-const userInfo = computed(() => userStore.userInfo || {});
+const userInfo = computed(
+  () => userStore.userInfo || ({} as Partial<UserInfo>)
+);
 
 // 用户权限
 const userPermissions = computed(() => {
@@ -264,7 +272,7 @@ const saveProfile = async () => {
 
     const response = await api.put("/api/auth/profile", updateData);
 
-    if (response.status === "success") {
+    if (response.data && response.status === 200) {
       message.success("个人资料更新成功");
       // 更新用户信息
       await userStore.initUserInfo();
@@ -289,7 +297,7 @@ const changePassword = async () => {
       newPassword: passwordForm.newPassword,
     });
 
-    if (response.status === "success") {
+    if (response.data && response.status === 200) {
       message.success("密码修改成功");
       showPasswordModal.value = false;
       resetPasswordForm();

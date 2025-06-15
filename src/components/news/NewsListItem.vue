@@ -1,6 +1,6 @@
 <template>
   <div class="news-item">
-    <router-link :to="`/news/detail/${news._id || news.id}`" class="news-link">
+    <router-link :to="`/news/detail/${news.id}`" class="news-link">
       <div class="news-wrapper">
         <div class="date-block">
           <div class="day">

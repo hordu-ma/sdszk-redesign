@@ -2,14 +2,20 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "../utils/api";
 
-interface UserInfo {
+export interface UserInfo {
   id: string;
   username: string;
   name: string;
   avatar?: string;
   email?: string;
+  phone?: string;
   role: "admin" | "editor" | "user";
   permissions: string[];
+  status?: "active" | "inactive" | "banned";
+  createdAt?: string;
+  lastLoginAt?: string;
+  lastLoginIp?: string;
+  loginCount?: number;
 }
 
 interface LoginPayload {

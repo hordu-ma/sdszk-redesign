@@ -494,6 +494,74 @@ import dayjs from "dayjs";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons-vue";
 import { settingsApi } from "@/api";
 
+// 设置类型定义
+interface SiteSettings {
+  [key: string]: any;
+  siteName: string;
+  siteTitle: string;
+  siteDescription: string;
+  siteKeywords: string[];
+  siteLogo: string;
+  siteFavicon: string;
+  contactEmail: string;
+  contactPhone: string;
+  siteUrl: string;
+  icpNumber: string;
+}
+
+interface SystemSettings {
+  [key: string]: any;
+  siteStatus: string;
+  maintenanceMessage: string;
+  allowRegistration: boolean;
+  requireEmailVerification: boolean;
+  requireAdminApproval: boolean;
+  maxFileSize: number;
+  allowedFileTypes: string[];
+  enableComments: boolean;
+  moderateComments: boolean;
+  cacheTime: number;
+}
+
+interface EmailSettings {
+  [key: string]: any;
+  enabled: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  encryption: string;
+  username: string;
+  password: string;
+  fromName: string;
+  fromEmail: string;
+}
+
+interface SecuritySettings {
+  [key: string]: any;
+  maxLoginAttempts: number;
+  lockoutDuration: number;
+  passwordComplexity: string[];
+  minPasswordLength: number;
+  passwordExpiry: number;
+  sessionTimeout: number;
+  forceHttps: boolean;
+  ipWhitelist: string;
+}
+
+interface BackupSettings {
+  [key: string]: any;
+  autoBackup: boolean;
+  backupFrequency: string;
+  backupTime: any;
+  backupRetention: number;
+}
+
+interface SettingUpdateItem {
+  key: string;
+  value: any;
+  group: string;
+  type: string;
+}
+
 // 响应式数据
 const activeTab = ref("site");
 const saveLoading = ref(false);
@@ -520,7 +588,7 @@ const emailFormRef = ref();
 const securityFormRef = ref();
 
 // 网站设置
-const siteSettings = reactive({
+const siteSettings: SiteSettings = reactive({
   siteName: "山东省大中小学思政课一体化中心平台",
   siteTitle: "思政课一体化中心平台 - 首页",
   siteDescription:
@@ -535,7 +603,7 @@ const siteSettings = reactive({
 });
 
 // 系统设置
-const systemSettings = reactive({
+const systemSettings: SystemSettings = reactive({
   siteStatus: "online",
   maintenanceMessage:
     "网站正在维护中，预计1小时后恢复正常，给您带来不便敬请谅解。",
@@ -560,7 +628,7 @@ const systemSettings = reactive({
 });
 
 // 邮件设置
-const emailSettings = reactive({
+const emailSettings: EmailSettings = reactive({
   enabled: true,
   smtpHost: "smtp.qq.com",
   smtpPort: 587,
@@ -572,7 +640,7 @@ const emailSettings = reactive({
 });
 
 // 安全设置
-const securitySettings = reactive({
+const securitySettings: SecuritySettings = reactive({
   maxLoginAttempts: 5,
   lockoutDuration: 30,
   passwordComplexity: ["lowercase", "numbers"],
@@ -584,7 +652,7 @@ const securitySettings = reactive({
 });
 
 // 备份设置
-const backupSettings = reactive({
+const backupSettings: BackupSettings = reactive({
   autoBackup: true,
   backupFrequency: "daily",
   backupTime: dayjs("03:00", "HH:mm"),
@@ -687,7 +755,7 @@ const saveAllSettings = async () => {
     saveLoading.value = true;
 
     // 构建批量更新的设置数组
-    const settingsToUpdate = [];
+    const settingsToUpdate: SettingUpdateItem[] = [];
 
     // 网站基本信息设置
     Object.keys(siteSettings).forEach((key) => {
@@ -746,7 +814,7 @@ const saveAllSettings = async () => {
     // 调用API批量更新设置
     const response = await settingsApi.bulkUpdateSettings(settingsToUpdate);
 
-    if (response.status === "success") {
+    if (response.success) {
       message.success("设置保存成功");
       console.log("Settings update results:", response.data.results);
     } else {
@@ -839,7 +907,7 @@ const loadSettings = async () => {
   try {
     const response = await settingsApi.getAllSettings();
 
-    if (response.status === "success" && response.data) {
+    if (response.success && response.data) {
       const settings = response.data;
 
       // 更新网站设置

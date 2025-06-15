@@ -1,7 +1,7 @@
 <template>
   <page-layout
     title="资讯中心"
-    description="大中小学思政课一体化教育相关新闻、通知、政策及研究资料"
+    description="大中小学思政课一体化建设相关资讯、政策及研究资料"
   >
     <div class="news-content">
       <!-- 分类导航 -->
@@ -25,7 +25,7 @@
           <div class="news-items">
             <news-list-item
               v-for="news in filteredNews"
-              :key="news._id"
+              :key="news.id"
               :news="news"
             />
           </div>
@@ -67,8 +67,8 @@ interface NewsCategory {
 }
 
 interface NewsItem {
-  _id: string;
-  id?: string;
+  id: string;
+  _id?: string; // 兼容字段
   title: string;
   content: string;
   summary?: string;
@@ -134,7 +134,7 @@ watch(
 const fetchCategories = async () => {
   try {
     const response = await newsCategoryApi.getList();
-    if (response.status === "success") {
+    if (response.success) {
       categories.value = response.data;
     }
   } catch (error) {
@@ -147,7 +147,7 @@ const fetchCategories = async () => {
 const fetchNews = async () => {
   loading.value = true;
   try {
-    const params = {
+    const params: { page: number; limit: number; category?: string } = {
       page: currentPage.value,
       limit: pageSize.value,
     };
@@ -174,9 +174,10 @@ const fetchNews = async () => {
     console.log("新闻接口响应", response);
 
     if (response.success) {
-      newsList.value = response.data.map((item) => ({
+      newsList.value = response.data.map((item: any) => ({
         ...item,
-        id: item._id, // 映射字段
+        id: item.id,
+        publishDate: item.publishDate || item.createdAt, // 确保有值
       }));
       totalNews.value = response.pagination?.total || 0;
     } else {

@@ -277,12 +277,9 @@ const fetchCategories = async () => {
     console.log("📊 响应类型:", typeof response);
     console.log("📋 响应键:", Object.keys(response || {}));
 
-    // 修复数据响应处理逻辑 - 尝试多种可能的数据路径
-    let data = [];
-    if (response?.data?.data) {
-      data = response.data.data;
-      console.log("✅ 使用 response.data.data 路径");
-    } else if (response?.data) {
+    // 修复数据响应处理逻辑 - 直接使用 response.data
+    let data: NewsCategory[] = [];
+    if (response?.data && Array.isArray(response.data)) {
       data = response.data;
       console.log("✅ 使用 response.data 路径");
     } else if (Array.isArray(response)) {

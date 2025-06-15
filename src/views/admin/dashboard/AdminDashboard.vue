@@ -234,8 +234,20 @@ const quickActions = ref([
   },
 ]);
 
+// 最新动态类型定义
+interface ActivityItem {
+  id: number;
+  user: {
+    username: string;
+    avatar: string;
+  };
+  action: string;
+  target: string;
+  createdAt: Date;
+}
+
 // 最新动态
-const recentActivities = ref([]);
+const recentActivities = ref<ActivityItem[]>([]);
 
 // 加载统计数据
 const loadStats = async () => {

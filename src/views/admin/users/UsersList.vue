@@ -474,8 +474,8 @@ const loadUsers = async () => {
   try {
     loading.value = true;
     const response = await adminUserApi.getList(searchForm);
-    users.value = response.data;
-    pagination.total = response.pagination.total;
+    users.value = response.data.data || response.data;
+    pagination.total = response.pagination?.total || 0;
   } catch (error) {
     message.error("加载用户列表失败");
   } finally {

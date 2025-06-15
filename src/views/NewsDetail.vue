@@ -104,15 +104,15 @@ const fetchNewsData = async (id: string) => {
     console.log("新闻详情响应", response);
 
     // 检查API响应是否成功
-    if (response.success || response.status === "success") {
+    if (response.success) {
       const rawData = response.data;
       // 转换后端数据格式以匹配前端类型定义
       newsData.value = {
         ...rawData,
-        id: rawData._id || rawData.id, // 兼容_id和id字段
+        id: rawData.id,
         author:
-          typeof rawData.author === "object"
-            ? rawData.author.username || rawData.author.name
+          typeof rawData.author === "object" && rawData.author
+            ? (rawData.author as any).username || (rawData.author as any).name
             : rawData.author,
       };
 
@@ -120,7 +120,7 @@ const fetchNewsData = async (id: string) => {
 
       // 获取相关文章
       if (rawData.category) {
-        await fetchRelatedNews(rawData.category, rawData._id || rawData.id);
+        await fetchRelatedNews(rawData.category, rawData.id);
       }
     } else {
       console.error("API响应失败:", response);
@@ -143,7 +143,7 @@ const fetchRelatedNews = async (_category: any, currentId: string) => {
 
     console.log("相关文章响应", response);
 
-    if (response.success || response.status === "success") {
+    if (response.success) {
       const articles = response.data || [];
       relatedNews.value = articles
         .filter((item: any) => (item._id || item.id) !== currentId)

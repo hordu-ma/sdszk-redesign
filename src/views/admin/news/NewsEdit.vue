@@ -292,8 +292,10 @@ const fetchNewsDetail = async () => {
       tags: response.data.tags,
       status: response.data.status,
       isTop: response.data.isTop,
-      isFeatured: data.isFeatured,
-      publishTime: data.publishTime ? new Date(data.publishTime) : undefined,
+      isFeatured: response.data.isFeatured,
+      publishTime: response.data.publishTime
+        ? new Date(response.data.publishTime)
+        : undefined,
     });
   } catch (error: any) {
     message.error(error.message || "获取新闻详情失败");
