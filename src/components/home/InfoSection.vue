@@ -61,7 +61,7 @@
         <h3>
           <i class="fas fa-book header-icon"></i>
           <span class="title-text">理论前沿</span>
-          <router-link to="/resources/theory" class="more-link">
+          <router-link to="/resources?category=theory" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
@@ -91,7 +91,7 @@
         <h3>
           <i class="fas fa-chalkboard-teacher header-icon"></i>
           <span class="title-text">教学研究</span>
-          <router-link to="/resources/teaching" class="more-link">
+          <router-link to="/resources?category=teaching" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
