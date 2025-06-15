@@ -19,7 +19,9 @@
               </div>
               <div class="info-footer">
                 <span class="info-date">发布日期：{{ notice.date }}</span>
-                <span class="info-unit">{{ notice.author || notice.source || '' }}</span>
+                <span class="info-unit">{{
+                  notice.author || notice.source || ""
+                }}</span>
               </div>
             </div>
           </router-link>
@@ -45,7 +47,9 @@
               </div>
               <div class="info-footer">
                 <span class="info-date">发布日期：{{ policy.date }}</span>
-                <span class="info-unit">{{ policy.author || policy.source || '' }}</span>
+                <span class="info-unit">{{
+                  policy.author || policy.source || ""
+                }}</span>
               </div>
             </div>
           </router-link>
@@ -57,7 +61,7 @@
         <h3>
           <i class="fas fa-book header-icon"></i>
           <span class="title-text">理论前沿</span>
-          <router-link :to="`/resources/category/theory`" class="more-link">
+          <router-link to="/resources/theory" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
@@ -70,8 +74,12 @@
                 <span class="info-title">{{ theory.title }}</span>
               </div>
               <div class="info-footer">
-                <span class="info-author">{{ theory.author?.name || '-' }}</span>
-                <span class="info-date">发布日期：{{ formatDate(theory.publishDate) }}</span>
+                <span class="info-author">{{
+                  theory.author?.name || "-"
+                }}</span>
+                <span class="info-date"
+                  >发布日期：{{ formatDate(theory.publishDate) }}</span
+                >
               </div>
             </div>
           </router-link>
@@ -83,21 +91,28 @@
         <h3>
           <i class="fas fa-chalkboard-teacher header-icon"></i>
           <span class="title-text">教学研究</span>
-          <router-link :to="`/resources/category/teaching`" class="more-link">
+          <router-link to="/resources/teaching" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
         <li v-for="research in researches as any[]" :key="research.id">
-          <router-link :to="`/resources/detail/${research.id}`" class="info-link">
+          <router-link
+            :to="`/resources/detail/${research.id}`"
+            class="info-link"
+          >
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ research.title }}</span>
               </div>
               <div class="info-footer">
-                <span class="info-author">{{ research.author?.name || '-' }}</span>
-                <span class="info-date">发布日期：{{ formatDate(research.publishDate) }}</span>
+                <span class="info-author">{{
+                  research.author?.name || "-"
+                }}</span>
+                <span class="info-date"
+                  >发布日期：{{ formatDate(research.publishDate) }}</span
+                >
               </div>
             </div>
           </router-link>
@@ -108,9 +123,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { newsApi, newsCategoryApi } from '@/api'
-import { computed } from 'vue'
+import { ref, onMounted } from "vue";
+import { newsApi, newsCategoryApi } from "@/api";
+import { computed } from "vue";
 
 const props = defineProps({
   theories: {
@@ -121,61 +136,67 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-})
+});
 
-const noticeNews = ref<any[]>([])
-const policyNews = ref<any[]>([])
-const noticeCategoryId = ref<string>('')
-const policyCategoryId = ref<string>('')
+const noticeNews = ref<any[]>([]);
+const policyNews = ref<any[]>([]);
+const noticeCategoryId = ref<string>("");
+const policyCategoryId = ref<string>("");
 
 const fetchCoreCategoryIds = async () => {
   try {
-    const res = await newsCategoryApi.getCoreCategories()
-    console.log('【InfoSection】获取核心分类响应:', res)
+    const res = await newsCategoryApi.getCoreCategories();
+    console.log("【InfoSection】获取核心分类响应:", res);
 
     // 处理API响应格式
-    let categories = []
-    if ((res as any).data && (res as any).data.status === 'success') {
-      categories = (res as any).data.data
+    let categories = [];
+    if ((res as any).data && (res as any).data.status === "success") {
+      categories = (res as any).data.data;
     } else if (res.success || (res as any).success) {
-      categories = res.data || (res as any).data
+      categories = res.data || (res as any).data;
     }
 
     if (Array.isArray(categories)) {
-      const notice = categories.find((cat: any) => cat.key === 'notice')
-      const policy = categories.find((cat: any) => cat.key === 'policy')
-      if (notice) noticeCategoryId.value = notice._id
-      if (policy) policyCategoryId.value = policy._id
+      const notice = categories.find((cat: any) => cat.key === "notice");
+      const policy = categories.find((cat: any) => cat.key === "policy");
+      if (notice) noticeCategoryId.value = notice._id;
+      if (policy) policyCategoryId.value = policy._id;
 
-      console.log('【InfoSection】分类ID获取结果:', {
+      console.log("【InfoSection】分类ID获取结果:", {
         notice: noticeCategoryId.value,
         policy: policyCategoryId.value,
-      })
+      });
     } else {
-      console.error('【InfoSection】分类数据格式不正确:', categories)
+      console.error("【InfoSection】分类数据格式不正确:", categories);
     }
   } catch (error) {
-    console.error('【InfoSection】获取分类失败:', error)
+    console.error("【InfoSection】获取分类失败:", error);
   }
-}
+};
 
 const fetchNotices = async () => {
   if (!noticeCategoryId.value) {
-    console.log('【InfoSection】通知公告分类ID为空')
-    return
+    console.log("【InfoSection】通知公告分类ID为空");
+    return;
   }
 
   try {
-    console.log('【InfoSection】开始获取通知公告，分类ID:', noticeCategoryId.value)
-    const res = await newsApi.getList({ category: noticeCategoryId.value, limit: 5 })
-    console.log('【InfoSection】通知公告API响应:', res)
+    console.log(
+      "【InfoSection】开始获取通知公告，分类ID:",
+      noticeCategoryId.value
+    );
+    const res = await newsApi.getList({
+      category: noticeCategoryId.value,
+      limit: 5,
+    });
+    console.log("【InfoSection】通知公告API响应:", res);
 
     // 处理API响应格式
-    let newsList = []
+    let newsList = [];
     if ((res as any).success && Array.isArray((res as any).data)) {
-      newsList = (res as any).data
+      newsList = (res as any).data;
     } else if ((res as any).data && (res as any).data.success) {
-      newsList = (res as any).data.data || []
+      newsList = (res as any).data.data || [];
     }
 
     if (Array.isArray(newsList)) {
@@ -186,37 +207,43 @@ const fetchNotices = async () => {
           ? item.publishDate.slice(0, 10)
           : item.createdAt
             ? item.createdAt.slice(0, 10)
-            : '',
-        author: item.author?.username || item.author?.name || '',
-        source: item.source?.name || '',
-      }))
+            : "",
+        author: item.author?.username || item.author?.name || "",
+        source: item.source?.name || "",
+      }));
 
-      console.log('【InfoSection】通知公告数据处理结果:', noticeNews.value)
+      console.log("【InfoSection】通知公告数据处理结果:", noticeNews.value);
     } else {
-      console.error('【InfoSection】通知公告数据格式不正确:', newsList)
+      console.error("【InfoSection】通知公告数据格式不正确:", newsList);
     }
   } catch (error) {
-    console.error('【InfoSection】获取通知公告失败:', error)
+    console.error("【InfoSection】获取通知公告失败:", error);
   }
-}
+};
 
 const fetchPolicies = async () => {
   if (!policyCategoryId.value) {
-    console.log('【InfoSection】政策文件分类ID为空')
-    return
+    console.log("【InfoSection】政策文件分类ID为空");
+    return;
   }
 
   try {
-    console.log('【InfoSection】开始获取政策文件，分类ID:', policyCategoryId.value)
-    const res = await newsApi.getList({ category: policyCategoryId.value, limit: 5 })
-    console.log('【InfoSection】政策文件API响应:', res)
+    console.log(
+      "【InfoSection】开始获取政策文件，分类ID:",
+      policyCategoryId.value
+    );
+    const res = await newsApi.getList({
+      category: policyCategoryId.value,
+      limit: 5,
+    });
+    console.log("【InfoSection】政策文件API响应:", res);
 
     // 处理API响应格式
-    let newsList = []
+    let newsList = [];
     if ((res as any).success && Array.isArray((res as any).data)) {
-      newsList = (res as any).data
+      newsList = (res as any).data;
     } else if ((res as any).data && (res as any).data.success) {
-      newsList = (res as any).data.data || []
+      newsList = (res as any).data.data || [];
     }
 
     if (Array.isArray(newsList)) {
@@ -227,30 +254,34 @@ const fetchPolicies = async () => {
           ? item.publishDate.slice(0, 10)
           : item.createdAt
             ? item.createdAt.slice(0, 10)
-            : '',
-        author: item.author?.username || item.author?.name || '',
-        source: item.source?.name || '',
-      }))
+            : "",
+        author: item.author?.username || item.author?.name || "",
+        source: item.source?.name || "",
+      }));
 
-      console.log('【InfoSection】政策文件数据处理结果:', policyNews.value)
+      console.log("【InfoSection】政策文件数据处理结果:", policyNews.value);
     } else {
-      console.error('【InfoSection】政策文件数据格式不正确:', newsList)
+      console.error("【InfoSection】政策文件数据格式不正确:", newsList);
     }
   } catch (error) {
-    console.error('【InfoSection】获取政策文件失败:', error)
+    console.error("【InfoSection】获取政策文件失败:", error);
   }
-}
+};
 
 onMounted(async () => {
-  await fetchCoreCategoryIds()
-  await Promise.all([fetchNotices(), fetchPolicies()])
-})
+  await fetchCoreCategoryIds();
+  await Promise.all([fetchNotices(), fetchPolicies()]);
+});
 
 const formatDate = (date: any) => {
-  if (!date) return ''
-  const d = new Date(date)
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-}
+  if (!date) return "";
+  const d = new Date(date);
+  return d.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
 </script>
 
 <style scoped>
@@ -282,7 +313,7 @@ const formatDate = (date: any) => {
   padding: 12px 20px;
   border-radius: 4px;
   margin: 0;
-  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
   font-size: 20px;
   position: relative;
   transition: all 0.3s ease;
@@ -352,6 +383,7 @@ const formatDate = (date: any) => {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

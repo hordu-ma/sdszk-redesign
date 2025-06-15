@@ -14,49 +14,59 @@
             </a-card>
           </a-col>
         </a-row>
-        <a-empty v-if="!loading && resources.length === 0" description="暂无资源" />
+        <a-empty
+          v-if="!loading && resources.length === 0"
+          description="暂无资源"
+        />
       </a-spin>
     </div>
   </page-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { resourceApi } from '@/api'
-import PageLayout from '@/components/common/PageLayout.vue'
-import type { Resource } from '@/api'
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { resourceApi } from "@/api";
+import PageLayout from "@/components/common/PageLayout.vue";
+import type { Resource } from "@/api";
 
-const route = useRoute()
-const router = useRouter()
-const resources = ref<Resource[]>([])
-const loading = ref(false)
+const props = defineProps<{
+  category?: string;
+}>();
 
-const category = computed(() => route.params.category as string)
+const route = useRoute();
+const router = useRouter();
+const resources = ref<Resource[]>([]);
+const loading = ref(false);
+
+// 支持两种方式：props传递 或 路由参数传递
+const category = computed(
+  () => props.category || (route.params.category as string)
+);
 const categoryTitle = computed(() => {
-  if (category.value === 'theory') return '理论前沿'
-  if (category.value === 'teaching') return '教学研究'
-  if (category.value === 'video') return '影像思政'
-  return '资源分类'
-})
+  if (category.value === "theory") return "理论前沿";
+  if (category.value === "teaching") return "教学研究";
+  if (category.value === "video") return "影像思政";
+  return "资源分类";
+});
 
 const fetchResources = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await resourceApi.getList({ category: category.value, status: 'published' })
-    if (res.success) resources.value = res.data
+    const res: any = await resourceApi.getList({ category: category.value });
+    if (res.data.success) resources.value = res.data.data;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const goToDetail = (id: string) => {
-  router.push(`/resources/detail/${id}`)
-}
+  router.push(`/resources/detail/${id}`);
+};
 
 onMounted(() => {
-  fetchResources()
-})
+  fetchResources();
+});
 </script>
 
 <style scoped>
