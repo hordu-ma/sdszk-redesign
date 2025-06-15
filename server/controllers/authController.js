@@ -1,17 +1,17 @@
 // authController.js - 认证控制器
-import jwt from 'jsonwebtoken'
-import User from '../models/User.js'
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 // 生成JWT令牌
-const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'your-secret-key', {
-    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
-  })
-}
+const signToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET || "your-secret-key", {
+    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+  });
+};
 
 // 创建并发送令牌
 const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id)
+  const token = signToken(user._id);
 
   // 设置cookie选项
   const cookieOptions = {
@@ -19,19 +19,19 @@ const createSendToken = (user, statusCode, res) => {
       Date.now() + 24 * 60 * 60 * 1000 // 1天
     ),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-  }
+    secure: process.env.NODE_ENV === "production",
+  };
 
   // 发送cookie
-  res.cookie('jwt', token, cookieOptions)
+  res.cookie("jwt", token, cookieOptions);
 
   // 移除密码
-  user.password = undefined
+  user.password = undefined;
 
   // 发送响应
   res.status(statusCode).json({
-    status: 'success',
-    message: '登录成功',
+    status: "success",
+    message: "登录成功",
     token,
     data: {
       user: {
@@ -44,129 +44,255 @@ const createSendToken = (user, statusCode, res) => {
         avatar: user.avatar,
       },
     },
-  })
-}
+  });
+};
 
 // 登录
 export const login = async (req, res, next) => {
   try {
-    const { username, password } = req.body
+    const { username, password } = req.body;
 
     // 1) 检查用户名和密码是否存在
     if (!username || !password) {
       return res.status(400).json({
-        status: 'error',
-        message: '请提供用户名和密码',
-      })
+        status: "error",
+        message: "请提供用户名和密码",
+      });
     }
 
     // 2) 检查用户是否存在及密码是否正确
-    const user = await User.findOne({ username }).select('+password')
+    const user = await User.findOne({ username }).select("+password");
     if (!user || !(await user.correctPassword(password, user.password))) {
       return res.status(401).json({
-        status: 'error',
-        message: '用户名或密码错误',
-      })
+        status: "error",
+        message: "用户名或密码错误",
+      });
     }
 
     // 3) 检查用户是否激活
     if (!user.active) {
       return res.status(401).json({
-        status: 'error',
-        message: '该账户已被禁用',
-      })
+        status: "error",
+        message: "该账户已被禁用",
+      });
     }
 
     // 4) 如果一切正常，发送令牌给客户端
-    createSendToken(user, 200, res)
+    createSendToken(user, 200, res);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 // 退出登录
 export const logout = (req, res) => {
-  res.cookie('jwt', 'loggedout', {
+  res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
-  })
-  res.status(200).json({ status: 'success' })
-}
+  });
+  res.status(200).json({ status: "success" });
+};
 
 // 获取当前用户信息
 export const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id)
+    const user = await User.findById(req.user.id);
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
-    })
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
+
+// 更新个人资料
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { username, name, email, phone, avatar } = req.body;
+    const userId = req.user.id;
+
+    // 检查用户名是否已被其他用户使用
+    if (username && username !== req.user.username) {
+      const existingUser = await User.findOne({
+        username,
+        _id: { $ne: userId },
+      });
+      if (existingUser) {
+        return res.status(400).json({
+          status: "error",
+          message: "用户名已被使用",
+        });
+      }
+    }
+
+    // 检查邮箱是否已被其他用户使用
+    if (email && email !== req.user.email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({
+          status: "error",
+          message: "邮箱已被使用",
+        });
+      }
+    }
+
+    // 更新用户信息
+    const updateData = {};
+    if (username) updateData.username = username;
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (avatar) updateData.avatar = avatar;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "个人资料更新成功",
+      data: {
+        user: {
+          id: updatedUser._id,
+          username: updatedUser.username,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          avatar: updatedUser.avatar,
+          role: updatedUser.role,
+          permissions: updatedUser.permissions,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 修改密码
+export const changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // 验证输入
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "请提供当前密码和新密码",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: "error",
+        message: "新密码长度不能少于6位",
+      });
+    }
+
+    // 获取用户信息（包含密码）
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "用户不存在",
+      });
+    }
+
+    // 验证当前密码
+    const isCurrentPasswordCorrect = await user.correctPassword(
+      oldPassword,
+      user.password
+    );
+    if (!isCurrentPasswordCorrect) {
+      return res.status(400).json({
+        status: "error",
+        message: "当前密码错误",
+      });
+    }
+
+    // 更新密码
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "密码修改成功",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // 保护路由的中间件
 export const protect = async (req, res, next) => {
   try {
-    let token
+    let token;
 
     // 1) 从请求头或cookie中获取token
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1]
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies.jwt) {
-      token = req.cookies.jwt
+      token = req.cookies.jwt;
     }
 
     if (!token) {
       return res.status(401).json({
-        status: 'error',
-        message: '您未登录，请先登录',
-      })
+        status: "error",
+        message: "您未登录，请先登录",
+      });
     }
 
     // 2) 验证token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-secret-key"
+    );
 
     // 3) 检查用户是否仍然存在
-    const currentUser = await User.findById(decoded.id)
+    const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
-        status: 'error',
-        message: '此token的用户已不存在',
-      })
+        status: "error",
+        message: "此token的用户已不存在",
+      });
     }
 
     // 4) 检查用户是否已经激活
     if (!currentUser.active) {
       return res.status(401).json({
-        status: 'error',
-        message: '该账户已被禁用',
-      })
+        status: "error",
+        message: "该账户已被禁用",
+      });
     }
 
     // 5) 将用户信息添加到请求对象中
-    req.user = currentUser
-    next()
+    req.user = currentUser;
+    next();
   } catch (error) {
     return res.status(401).json({
-      status: 'error',
-      message: 'Token无效或已过期',
-    })
+      status: "error",
+      message: "Token无效或已过期",
+    });
   }
-}
+};
 
 // 基于角色的访问控制中间件
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        status: 'error',
-        message: '您没有权限执行此操作',
-      })
+        status: "error",
+        message: "您没有权限执行此操作",
+      });
     }
-    next()
-  }
-}
+    next();
+  };
+};

@@ -262,6 +262,16 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      // 管理员个人资料路由
+      {
+        path: "profile",
+        name: "adminProfile",
+        component: () => import("../views/admin/profile/AdminProfile.vue"),
+        meta: {
+          keepAlive: false,
+          title: "个人资料",
+        },
+      },
       // 系统设置路由
       {
         path: "settings",

@@ -1,7 +1,11 @@
 <template>
   <div class="admin-header">
     <div class="header-left">
-      <a-button type="text" class="sidebar-toggle" @click="emit('toggle-sidebar')">
+      <a-button
+        type="text"
+        class="sidebar-toggle"
+        @click="emit('toggle-sidebar')"
+      >
         <template #icon>
           <MenuFoldOutlined v-if="!collapsed" />
           <MenuUnfoldOutlined v-else />
@@ -60,9 +64,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -71,135 +75,135 @@ import {
   SettingOutlined,
   LogoutOutlined,
   DownOutlined,
-} from '@ant-design/icons-vue'
+} from "@ant-design/icons-vue";
 
 interface Props {
-  collapsed?: boolean
+  collapsed?: boolean;
 }
 
 interface Emits {
-  (e: 'toggle-sidebar'): void
-  (e: 'logout'): void
+  (e: "toggle-sidebar"): void;
+  (e: "logout"): void;
 }
 
-defineProps<Props>()
-const emit = defineEmits<Emits>()
+defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
+const route = useRoute();
+const router = useRouter();
+const userStore = useUserStore();
 
 // 用户信息
 const userInfo = computed(
   () =>
     userStore.userInfo || {
-      username: '未登录',
-      avatar: '',
-      name: '未登录用户',
+      username: "未登录",
+      avatar: "",
+      name: "未登录用户",
     }
-)
+);
 
 // 通知数量
-const notificationCount = computed(() => 0) // 暂时设为0，后续可以从API获取
+const notificationCount = computed(() => 0); // 暂时设为0，后续可以从API获取
 
 // 处理菜单点击
 const handleMenuClick = ({ key }: { key: string }) => {
   switch (key) {
-    case 'profile':
-      // 跳转到用户个人资料页面
-      router.push('/user/profile')
-      break
-    case 'settings':
-      // 跳转到用户设置页面
-      router.push('/user/settings')
-      break
-    case 'logout':
-      emit('logout')
-      break
+    case "profile":
+      // 跳转到管理员个人资料页面
+      router.push("/admin/profile");
+      break;
+    case "settings":
+      // 跳转到系统设置页面
+      router.push("/admin/settings");
+      break;
+    case "logout":
+      emit("logout");
+      break;
   }
-}
+};
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
-  const pathArray = route.path.split('/').filter(Boolean)
-  const items = []
+  const pathArray = route.path.split("/").filter(Boolean);
+  const items = [];
 
   // 添加首页
-  items.push({ title: '首页', path: '/admin/dashboard' })
+  items.push({ title: "首页", path: "/admin/dashboard" });
 
   // 根据路径生成面包屑
   if (pathArray.length > 1) {
-    const moduleName = pathArray[1]
+    const moduleName = pathArray[1];
 
     switch (moduleName) {
-      case 'dashboard':
-        items.push({ title: '仪表板', path: null })
-        break
-      case 'news':
-        items.push({ title: '新闻管理', path: null })
+      case "dashboard":
+        items.push({ title: "仪表板", path: null });
+        break;
+      case "news":
+        items.push({ title: "新闻管理", path: null });
         if (pathArray[2]) {
-          const subModule = pathArray[2]
+          const subModule = pathArray[2];
           switch (subModule) {
-            case 'list':
-              items.push({ title: '新闻列表', path: null })
-              break
-            case 'create':
-              items.push({ title: '发布新闻', path: null })
-              break
-            case 'edit':
-              items.push({ title: '编辑新闻', path: null })
-              break
-            case 'categories':
-              items.push({ title: '分类管理', path: null })
-              break
+            case "list":
+              items.push({ title: "新闻列表", path: null });
+              break;
+            case "create":
+              items.push({ title: "发布新闻", path: null });
+              break;
+            case "edit":
+              items.push({ title: "编辑新闻", path: null });
+              break;
+            case "categories":
+              items.push({ title: "分类管理", path: null });
+              break;
           }
         }
-        break
-      case 'resources':
-        items.push({ title: '资源管理', path: null })
+        break;
+      case "resources":
+        items.push({ title: "资源管理", path: null });
         if (pathArray[2]) {
-          const subModule = pathArray[2]
+          const subModule = pathArray[2];
           switch (subModule) {
-            case 'list':
-              items.push({ title: '资源列表', path: null })
-              break
-            case 'create':
-              items.push({ title: '上传资源', path: null })
-              break
-            case 'edit':
-              items.push({ title: '编辑资源', path: null })
-              break
-            case 'categories':
-              items.push({ title: '分类管理', path: null })
-              break
+            case "list":
+              items.push({ title: "资源列表", path: null });
+              break;
+            case "create":
+              items.push({ title: "上传资源", path: null });
+              break;
+            case "edit":
+              items.push({ title: "编辑资源", path: null });
+              break;
+            case "categories":
+              items.push({ title: "分类管理", path: null });
+              break;
           }
         }
-        break
-      case 'users':
-        items.push({ title: '用户管理', path: null })
+        break;
+      case "users":
+        items.push({ title: "用户管理", path: null });
         if (pathArray[2]) {
-          const subModule = pathArray[2]
+          const subModule = pathArray[2];
           switch (subModule) {
-            case 'list':
-              items.push({ title: '用户列表', path: null })
-              break
-            case 'roles':
-              items.push({ title: '角色管理', path: null })
-              break
-            case 'permissions':
-              items.push({ title: '权限管理', path: null })
-              break
+            case "list":
+              items.push({ title: "用户列表", path: null });
+              break;
+            case "roles":
+              items.push({ title: "角色管理", path: null });
+              break;
+            case "permissions":
+              items.push({ title: "权限管理", path: null });
+              break;
           }
         }
-        break
-      case 'settings':
-        items.push({ title: '系统设置', path: null })
-        break
+        break;
+      case "settings":
+        items.push({ title: "系统设置", path: null });
+        break;
     }
   }
 
-  return items
-})
+  return items;
+});
 </script>
 
 <style scoped lang="scss">
