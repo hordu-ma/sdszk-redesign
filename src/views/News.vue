@@ -53,151 +53,167 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { newsApi, newsCategoryApi } from '@/api'
-import PageLayout from '../components/common/PageLayout.vue'
-import NewsListItem from '../components/news/NewsListItem.vue'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import { newsApi, newsCategoryApi } from "@/api";
+import PageLayout from "../components/common/PageLayout.vue";
+import NewsListItem from "../components/news/NewsListItem.vue";
 
 interface NewsCategory {
-  _id: string
-  name: string
-  key: string
+  _id: string;
+  name: string;
+  key: string;
 }
 
 interface NewsItem {
-  _id: string
-  id?: string
-  title: string
-  content: string
-  summary?: string
-  publishDate: string
-  createdAt: string
-  author: any
-  category: NewsCategory
-  viewCount?: number
+  _id: string;
+  id?: string;
+  title: string;
+  content: string;
+  summary?: string;
+  publishDate: string;
+  createdAt: string;
+  author: any;
+  category: NewsCategory;
+  viewCount?: number;
 }
 
-const route = useRoute()
-const router = useRouter()
-const loading = ref(false)
-const activeCategory = ref('all')
-const currentPage = ref(1)
-const pageSize = ref(10)
-const totalNews = ref(0)
+const route = useRoute();
+const router = useRouter();
+const loading = ref(false);
+const activeCategory = ref("all");
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalNews = ref(0);
 
 // 数据状态
-const newsList = ref<NewsItem[]>([])
-const categories = ref<NewsCategory[]>([])
+const newsList = ref<NewsItem[]>([]);
+const categories = ref<NewsCategory[]>([]);
 
 // 初始化时从路由参数获取分类
 onMounted(async () => {
-  await fetchCategories() // 先获取分类
+  await fetchCategories(); // 先获取分类
   if (route.query.category) {
-    activeCategory.value = route.query.category as string
+    activeCategory.value = route.query.category as string;
   }
   // 确保初始数据加载
-  fetchNews()
-})
+  fetchNews();
+});
 
 // 监听路由查询参数变化
-watch(() => route.query.category, (newCategory) => {
-  const targetCategory = (newCategory as string) || 'all';
-  if (activeCategory.value !== targetCategory) {
-    activeCategory.value = targetCategory;
-    currentPage.value = 1;
-    fetchNews();
-  }
-}, { immediate: false });
+watch(
+  () => route.query.category,
+  (newCategory) => {
+    const targetCategory = (newCategory as string) || "all";
+    if (activeCategory.value !== targetCategory) {
+      activeCategory.value = targetCategory;
+      currentPage.value = 1;
+      fetchNews();
+    }
+  },
+  { immediate: false }
+);
 
 // 监听分类变化，更新路由参数
-watch(activeCategory, (newCategory) => {
-  const currentQueryCategory = route.query.category || 'all';
-  // 只有当分类真正变化时才更新路由
-  if (newCategory !== currentQueryCategory) {
+watch(
+  activeCategory,
+  (newCategory) => {
+    // 每次分类变化都更新路由和重新获取数据
     router.push({
-      path: '/news',
-      query: { ...(newCategory !== 'all' ? { category: newCategory } : {}) },
+      path: "/news",
+      query: { ...(newCategory !== "all" ? { category: newCategory } : {}) },
     });
-  }
-}, { immediate: false })
+    currentPage.value = 1;
+    fetchNews();
+  },
+  { immediate: false }
+);
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const response = await newsCategoryApi.getList()
-    if (response.status === 'success') {
-      categories.value = response.data
+    const response = await newsCategoryApi.getList();
+    if (response.status === "success") {
+      categories.value = response.data;
     }
   } catch (error) {
-    console.error('获取分类失败:', error)
-    message.error('获取分类失败')
+    console.error("获取分类失败:", error);
+    message.error("获取分类失败");
   }
-}
+};
 
 // 获取新闻数据
 const fetchNews = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const params = {
       page: currentPage.value,
       limit: pageSize.value,
-    }
+    };
 
     // 如果有选择分类，添加分类筛选
-    if (activeCategory.value !== 'all') {
+    if (activeCategory.value !== "all") {
       // 根据分类key查找分类ID
-      const selectedCategory = categories.value.find(cat => cat.key === activeCategory.value)
+      const selectedCategory = categories.value.find(
+        (cat) => cat.key === activeCategory.value
+      );
       if (selectedCategory) {
-        params.category = selectedCategory._id
+        params.category = selectedCategory._id;
       } else {
-        console.warn('未找到分类:', activeCategory.value, '可用分类:', categories.value)
+        console.warn(
+          "未找到分类:",
+          activeCategory.value,
+          "可用分类:",
+          categories.value
+        );
       }
     }
 
-    const response = await newsApi.getList(params)
-    console.log('新闻接口响应', response)
+    const response = await newsApi.getList(params);
+    console.log("新闻接口响应", response);
 
     if (response.success) {
-      newsList.value = response.data.map(item => ({
+      newsList.value = response.data.map((item) => ({
         ...item,
-        id: item._id // 映射字段
-      }))
-      totalNews.value = response.pagination?.total || 0
+        id: item._id, // 映射字段
+      }));
+      totalNews.value = response.pagination?.total || 0;
     } else {
-      message.error('获取新闻失败')
+      message.error("获取新闻失败");
     }
   } catch (error) {
-    console.error('获取新闻失败:', error)
-    message.error('获取新闻失败')
+    console.error("获取新闻失败:", error);
+    message.error("获取新闻失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 计算显示的新闻列表
 const filteredNews = computed(() => {
-  return newsList.value.map(news => ({
+  return newsList.value.map((news) => ({
     ...news,
     // 格式化显示数据
-    date: new Date(news.publishDate || news.createdAt).toLocaleDateString('zh-CN'),
-    categoryKey: news.category?.key || 'center',
-    categoryName: news.category?.name || '中心动态',
-  }))
-})
+    date: new Date(news.publishDate || news.createdAt).toLocaleDateString(
+      "zh-CN"
+    ),
+    categoryKey: news.category?.key || "center",
+    categoryName: news.category?.name || "中心动态",
+  }));
+});
 
 // 分类变更处理
 const handleCategoryChange = (key: string) => {
-  activeCategory.value = key
-}
+  activeCategory.value = key;
+};
 
 // 分页变更处理
 const handlePageChange = (page: number) => {
-  currentPage.value = page
-  fetchNews()
-  window.scrollTo(0, 0) // 回到顶部
-}
+  currentPage.value = page;
+  fetchNews();
+  window.scrollTo(0, 0); // 回到顶部
+};
 </script>
 
 <style scoped>
