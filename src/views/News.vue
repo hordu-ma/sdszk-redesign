@@ -52,13 +52,32 @@
   </page-layout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { newsApi, newsCategoryApi } from '@/api'
 import PageLayout from '../components/common/PageLayout.vue'
 import NewsListItem from '../components/news/NewsListItem.vue'
+
+interface NewsCategory {
+  _id: string
+  name: string
+  key: string
+}
+
+interface NewsItem {
+  _id: string
+  id?: string
+  title: string
+  content: string
+  summary?: string
+  publishDate: string
+  createdAt: string
+  author: any
+  category: NewsCategory
+  viewCount?: number
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -69,18 +88,17 @@ const pageSize = ref(10)
 const totalNews = ref(0)
 
 // 数据状态
-const newsList = ref([])
-const categories = ref([])
+const newsList = ref<NewsItem[]>([])
+const categories = ref<NewsCategory[]>([])
 
 // 初始化时从路由参数获取分类
 onMounted(async () => {
   await fetchCategories() // 先获取分类
   if (route.query.category) {
     activeCategory.value = route.query.category as string
-  } else {
-    // 确保初始数据加载
-    fetchNews()
   }
+  // 确保初始数据加载
+  fetchNews()
 })
 
 // 监听路由查询参数变化
@@ -88,11 +106,13 @@ watch(() => route.query.category, (newCategory) => {
   const targetCategory = (newCategory as string) || 'all';
   if (activeCategory.value !== targetCategory) {
     activeCategory.value = targetCategory;
+    currentPage.value = 1;
+    fetchNews();
   }
 }, { immediate: false });
 
 // 监听分类变化，更新路由参数
-watch(activeCategory, newCategory => {
+watch(activeCategory, (newCategory) => {
   const currentQueryCategory = route.query.category || 'all';
   // 只有当分类真正变化时才更新路由
   if (newCategory !== currentQueryCategory) {
@@ -101,9 +121,7 @@ watch(activeCategory, newCategory => {
       query: { ...(newCategory !== 'all' ? { category: newCategory } : {}) },
     });
   }
-  currentPage.value = 1;
-  fetchNews();
-})
+}, { immediate: false })
 
 // 获取分类列表
 const fetchCategories = async () => {
@@ -170,12 +188,12 @@ const filteredNews = computed(() => {
 })
 
 // 分类变更处理
-const handleCategoryChange = key => {
+const handleCategoryChange = (key: string) => {
   activeCategory.value = key
 }
 
 // 分页变更处理
-const handlePageChange = page => {
+const handlePageChange = (page: number) => {
   currentPage.value = page
   fetchNews()
   window.scrollTo(0, 0) // 回到顶部
