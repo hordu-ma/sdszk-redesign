@@ -265,12 +265,20 @@ const loadStats = async () => {
     console.log("开始加载统计数据...");
     const response = await dashboardApi.getStats();
     console.log("API响应:", response);
+    console.log("API响应类型:", typeof response);
+    console.log("API响应keys:", Object.keys(response));
+    console.log("response.success:", response.success);
+    console.log("response.data:", response.data);
 
     if (isUnmounted) return;
 
     if (response.success && response.data) {
       const data = response.data;
       console.log("收到的数据:", data);
+      console.log("数据类型:", typeof data);
+      console.log("数据keys:", Object.keys(data));
+      console.log("newsCount:", data.newsCount);
+      console.log("resourceCount:", data.resourceCount);
 
       const newStatsData = [
         {
@@ -308,10 +316,16 @@ const loadStats = async () => {
       ];
 
       console.log("更新前的statsData:", statsData.value);
+      console.log("准备设置的newStatsData:", newStatsData);
       statsData.value = newStatsData;
       console.log("更新后的statsData:", statsData.value);
+
+      // 强制触发响应式更新
+      console.log("强制触发Vue响应式更新...");
     } else {
       console.error("API响应格式错误:", response);
+      console.error("response.success:", response.success);
+      console.error("response.data:", response.data);
     }
   } catch (error) {
     if (!isUnmounted) {

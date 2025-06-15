@@ -1,81 +1,90 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
-import type { ApiModuleConfig, ApiResponse, QueryParams } from './types'
-import api from '@/utils/api'
-import type { ApiErrorResponse } from '@/types/error.types'
-import { handleApiError } from '@/utils/apiErrorHandler'
+import type { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
+import type { ApiModuleConfig, ApiResponse, QueryParams } from "./types";
+import api from "@/utils/api";
+import type { ApiErrorResponse } from "@/types/error.types";
+import { handleApiError } from "@/utils/apiErrorHandler";
 
 export abstract class BaseApi {
-  protected api: AxiosInstance
-  protected baseURL: string
-  protected prefix: string
+  protected api: AxiosInstance;
+  protected baseURL: string;
+  protected prefix: string;
 
   constructor(config: ApiModuleConfig | string = {}) {
-    this.api = api
-    if (typeof config === 'string') {
-      this.baseURL = ''
-      this.prefix = config
+    this.api = api;
+    if (typeof config === "string") {
+      this.baseURL = "";
+      this.prefix = config;
     } else {
-      this.baseURL = config.baseURL || ''
-      this.prefix = config.prefix || ''
+      this.baseURL = config.baseURL || "";
+      this.prefix = config.prefix || "";
     }
   }
 
   protected getUrl(path: string): string {
-    return `/api${this.prefix}${path}`
+    return `/api${this.prefix}${path}`;
   }
 
-  protected async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  protected async request<T>(
+    config: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
-      return await this.api.request<any, ApiResponse<T>>({
+      const response = await this.api.request<any, any>({
         ...config,
-        url: config.url?.startsWith('/api') ? config.url : this.getUrl(config.url || ''),
-      })
+        url: config.url?.startsWith("/api")
+          ? config.url
+          : this.getUrl(config.url || ""),
+      });
+      // 返回response.data，这才是真正的API响应数据
+      return response.data;
     } catch (error) {
       if (error instanceof Error) {
-        return handleApiError(error as AxiosError<ApiErrorResponse>)
+        return handleApiError(error as AxiosError<ApiErrorResponse>);
       }
-      throw error
+      throw error;
     }
   }
 
-  protected async get<T>(path: string, params?: QueryParams): Promise<ApiResponse<T>> {
+  protected async get<T>(
+    path: string,
+    params?: QueryParams
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'GET',
+      method: "GET",
       url: path,
       params,
-    })
+    });
   }
 
   protected async post<T>(path: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'POST',
+      method: "POST",
       url: path,
       data,
-    })
+    });
   }
 
   protected async put<T>(path: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'PUT',
+      method: "PUT",
       url: path,
       data,
-    })
+    });
   }
 
   protected async delete(path: string): Promise<ApiResponse<void>> {
     return this.request<void>({
-      method: 'DELETE',
+      method: "DELETE",
       url: path,
-    })
+    });
   }
 
   protected async patch<T>(path: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'PATCH',
+      method: "PATCH",
       url: path,
       data,
-    })
+    });
   }
 }
 
-export { api }
+export { api };
