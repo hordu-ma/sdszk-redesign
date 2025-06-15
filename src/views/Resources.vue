@@ -3,7 +3,10 @@
     <div class="resources-content">
       <!-- 分类导航 -->
       <div class="category-nav">
-        <a-tabs v-model:activeKey="activeCategory" @change="handleCategoryChange">
+        <a-tabs
+          v-model:activeKey="activeCategory"
+          @change="handleCategoryChange"
+        >
           <a-tab-pane key="all" tab="全部资源"></a-tab-pane>
           <a-tab-pane
             v-for="category in categories"
@@ -18,13 +21,23 @@
         <a-spin :spinning="loading">
           <a-row :gutter="[24, 24]">
             <a-col :span="8" v-for="resource in resources" :key="resource.id">
-              <a-card hoverable class="resource-card" @click="goToDetail(resource.id)">
+              <a-card
+                hoverable
+                class="resource-card"
+                @click="goToDetail(resource.id)"
+              >
                 <template #cover>
                   <div class="resource-cover">
-                    <img v-if="resource.url" :src="resource.url" :alt="resource.title" />
+                    <img
+                      v-if="resource.url"
+                      :src="resource.url"
+                      :alt="resource.title"
+                    />
                     <div v-else class="resource-icon">
                       <FileOutlined v-if="resource.type === 'document'" />
-                      <VideoCameraOutlined v-else-if="resource.type === 'video'" />
+                      <VideoCameraOutlined
+                        v-else-if="resource.type === 'video'"
+                      />
                       <PictureOutlined v-else-if="resource.type === 'image'" />
                       <SoundOutlined v-else-if="resource.type === 'audio'" />
                       <FileOutlined v-else />
@@ -39,14 +52,24 @@
                         <span
                           ><UserOutlined />
                           {{
-                            typeof resource.author === 'string'
+                            typeof resource.author === "string"
                               ? resource.author
-                              : resource.author?.name || resource.createdBy?.name || 'Unknown'
+                              : resource.author?.name ||
+                                resource.createdBy?.name ||
+                                "Unknown"
                           }}</span
                         >
-                        <span><CalendarOutlined /> {{ formatDate(resource.publishDate) }}</span>
-                        <span><EyeOutlined /> {{ resource.viewCount || 0 }}</span>
-                        <span><DownloadOutlined /> {{ resource.downloadCount || 0 }}</span>
+                        <span
+                          ><CalendarOutlined />
+                          {{ formatDate(resource.publishDate) }}</span
+                        >
+                        <span
+                          ><EyeOutlined /> {{ resource.viewCount || 0 }}</span
+                        >
+                        <span
+                          ><DownloadOutlined />
+                          {{ resource.downloadCount || 0 }}</span
+                        >
                       </div>
                     </div>
                   </template>
@@ -75,9 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
+import { ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
 import {
   FileOutlined,
   VideoCameraOutlined,
@@ -87,84 +110,84 @@ import {
   CalendarOutlined,
   EyeOutlined,
   DownloadOutlined,
-} from '@ant-design/icons-vue'
-import PageLayout from '../components/common/PageLayout.vue'
-import { RESOURCE_CATEGORIES } from '../config'
-import { resourceApi } from '@/api'
-import type { Resource } from '@/api'
+} from "@ant-design/icons-vue";
+import PageLayout from "../components/common/PageLayout.vue";
+import { RESOURCE_CATEGORIES } from "../config";
+import { resourceApi } from "@/api";
+import type { Resource } from "@/api";
 
-const router = useRouter()
-const loading = ref(false)
-const activeCategory = ref('all')
-const currentPage = ref(1)
-const pageSize = ref(12)
-const total = ref(0)
-const resources = ref<Resource[]>([])
-const categories = ref(RESOURCE_CATEGORIES)
+const router = useRouter();
+const loading = ref(false);
+const activeCategory = ref("all");
+const currentPage = ref(1);
+const pageSize = ref(12);
+const total = ref(0);
+const resources = ref<Resource[]>([]);
+const categories = ref(RESOURCE_CATEGORIES);
 
 // 获取资源列表
 const fetchResources = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const params: any = {
       page: currentPage.value,
       limit: pageSize.value,
-    }
+    };
 
     // 如果有选择分类，添加分类筛选
-    if (activeCategory.value !== 'all') {
+    if (activeCategory.value !== "all") {
       // 直接传递分类key，让后端处理key到ObjectId的转换
-      params.category = activeCategory.value
+      params.category = activeCategory.value;
     }
 
-    const response: any = await resourceApi.getList(params)
+    const response: any = await resourceApi.getList(params);
 
-    if (response.data.success) {
-      resources.value = response.data.data
-      total.value = response.data.pagination?.total || 0
+    if (response.success) {
+      resources.value = response.data;
+      total.value = response.pagination?.total || 0;
     } else {
-      message.error('获取资源列表失败')
+      message.error("获取资源列表失败");
     }
   } catch (error: any) {
-    console.error('获取资源列表失败', error)
-    message.error('获取资源列表失败')
+    console.error("获取资源列表失败", error);
+    message.error("获取资源列表失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 处理分类变化
 const handleCategoryChange = (key: string) => {
-  activeCategory.value = key
-  currentPage.value = 1
-  fetchResources()
-}
+  activeCategory.value = key;
+  currentPage.value = 1;
+  fetchResources();
+};
 
 // 处理分页变化
 const handlePageChange = (page: number) => {
-  currentPage.value = page
-  fetchResources()
-}
+  currentPage.value = page;
+  fetchResources();
+};
 
 // 跳转到详情页
 const goToDetail = (id: string) => {
-  router.push(`/resources/detail/${id}`)
-}
+  router.push(`/resources/detail/${id}`);
+};
 
 // 格式化日期
 const formatDate = (date?: string) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-}
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
 
 // 初始化
 onMounted(() => {
-  fetchResources()
-})
+  fetchResources();
+});
 </script>
 
 <style scoped>

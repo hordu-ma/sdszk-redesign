@@ -69,7 +69,9 @@
             </template>
             搜索
           </a-button>
-          <a-button @click="handleReset" style="margin-left: 8px"> 重置 </a-button>
+          <a-button @click="handleReset" style="margin-left: 8px">
+            重置
+          </a-button>
         </a-form-item>
       </a-form>
     </div>
@@ -110,7 +112,9 @@
               </a-tooltip>
               <div class="title-tags">
                 <a-tag v-if="record.isTop" color="red" size="small">置顶</a-tag>
-                <a-tag v-if="record.isFeatured" color="gold" size="small">精选</a-tag>
+                <a-tag v-if="record.isFeatured" color="gold" size="small"
+                  >精选</a-tag
+                >
               </div>
             </div>
           </template>
@@ -135,12 +139,22 @@
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link" size="small" @click="handleEdit(record)"> 编辑 </a-button>
-              <a-button type="link" size="small" @click="handleToggleTop(record)">
-                {{ record.isTop ? '取消置顶' : '置顶' }}
+              <a-button type="link" size="small" @click="handleEdit(record)">
+                编辑
               </a-button>
-              <a-button type="link" size="small" @click="handleTogglePublish(record)">
-                {{ record.status === 'published' ? '下线' : '发布' }}
+              <a-button
+                type="link"
+                size="small"
+                @click="handleToggleTop(record)"
+              >
+                {{ record.isTop ? "取消置顶" : "置顶" }}
+              </a-button>
+              <a-button
+                type="link"
+                size="small"
+                @click="handleTogglePublish(record)"
+              >
+                {{ record.status === "published" ? "下线" : "发布" }}
               </a-button>
               <a-popconfirm
                 title="确定要删除这条新闻吗？"
@@ -159,41 +173,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons-vue'
-import { adminNewsApi, type NewsItem, type NewsQueryParams } from '@/api/modules/adminNews'
-import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
-import type { TableColumnsType, TableProps } from 'ant-design-vue'
+import { ref, reactive, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons-vue";
+import {
+  adminNewsApi,
+  type NewsItem,
+  type NewsQueryParams,
+} from "@/api/modules/adminNews";
+import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
+import type { TableColumnsType, TableProps } from "ant-design-vue";
 
-const router = useRouter()
+const router = useRouter();
 
 // 数据状态
-const loading = ref(false)
-const tableData = ref<NewsItem[]>([])
-const categories = ref<NewsCategory[]>([])
-const selectedRowKeys = ref<(string | number)[]>([])
+const loading = ref(false);
+const tableData = ref<NewsItem[]>([]);
+const categories = ref<NewsCategory[]>([]);
+const selectedRowKeys = ref<(string | number)[]>([]);
 
 // 防抖相关
-let fetchTimer: any = null
-const isFetching = ref(false)
+let fetchTimer: any = null;
+const isFetching = ref(false);
 
 // 防抖函数
 const debounce = (fn: Function, delay: number) => {
   return (...args: any[]) => {
-    if (fetchTimer) clearTimeout(fetchTimer)
-    fetchTimer = setTimeout(() => fn(...args), delay)
-  }
-}
+    if (fetchTimer) clearTimeout(fetchTimer);
+    fetchTimer = setTimeout(() => fn(...args), delay);
+  };
+};
 
 // 搜索表单
 const searchForm = reactive({
-  keyword: '',
+  keyword: "",
   category: undefined as string | undefined, // ✅ 修复：改为string类型
   status: undefined as string | undefined,
   dateRange: undefined as [string, string] | undefined,
-})
+});
 
 // 分页配置
 const pagination = reactive({
@@ -203,108 +221,108 @@ const pagination = reactive({
   showSizeChanger: true,
   showQuickJumper: true,
   showTotal: (total: number) => `共 ${total} 条记录`,
-})
+});
 
 // 表格列配置
 const columns: TableColumnsType = [
   {
-    title: '标题',
-    key: 'title',
-    dataIndex: 'title',
+    title: "标题",
+    key: "title",
+    dataIndex: "title",
     ellipsis: true,
     width: 300,
   },
   {
-    title: '分类',
-    key: 'category',
-    dataIndex: ['category', 'name'],
+    title: "分类",
+    key: "category",
+    dataIndex: ["category", "name"],
     width: 120,
   },
   {
-    title: '状态',
-    key: 'status',
-    dataIndex: 'status',
+    title: "状态",
+    key: "status",
+    dataIndex: "status",
     width: 100,
   },
   {
-    title: '浏览量',
-    key: 'views',
-    dataIndex: 'viewCount',
+    title: "浏览量",
+    key: "views",
+    dataIndex: "viewCount",
     width: 100,
     sorter: true,
   },
   {
-    title: '作者',
-    key: 'author',
-    dataIndex: ['author', 'username'],
+    title: "作者",
+    key: "author",
+    dataIndex: ["author", "username"],
     width: 120,
   },
   {
-    title: '发布时间',
-    key: 'publishTime',
-    dataIndex: 'publishDate',
+    title: "发布时间",
+    key: "publishTime",
+    dataIndex: "publishDate",
     width: 160,
     sorter: true,
   },
   {
-    title: '操作',
-    key: 'actions',
+    title: "操作",
+    key: "actions",
     width: 250,
-    fixed: 'right',
+    fixed: "right",
   },
-]
+];
 
 // 获取状态颜色
 const getStatusColor = (status: string) => {
   const colorMap: Record<string, string> = {
-    draft: 'default',
-    published: 'success',
-    archived: 'warning',
-  }
-  return colorMap[status] || 'default'
-}
+    draft: "default",
+    published: "success",
+    archived: "warning",
+  };
+  return colorMap[status] || "default";
+};
 
 // 获取状态文本
 const getStatusText = (status: string) => {
   const textMap: Record<string, string> = {
-    draft: '草稿',
-    published: '已发布',
-    archived: '已归档',
-  }
-  return textMap[status] || status
-}
+    draft: "草稿",
+    published: "已发布",
+    archived: "已归档",
+  };
+  return textMap[status] || status;
+};
 
 // 格式化数字
 const formatNumber = (num: number) => {
   if (num >= 10000) {
-    return (num / 10000).toFixed(1) + 'w'
+    return (num / 10000).toFixed(1) + "w";
   }
-  return num.toString()
-}
+  return num.toString();
+};
 
 // 格式化日期
 const formatDate = (dateString: string) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 // 获取新闻列表
 const fetchNewsList = async () => {
   // 防止重复请求
   if (isFetching.value) {
-    console.log('请求进行中，跳过重复请求')
-    return
+    console.log("请求进行中，跳过重复请求");
+    return;
   }
 
   try {
-    loading.value = true
-    isFetching.value = true
+    loading.value = true;
+    isFetching.value = true;
 
     const params: NewsQueryParams = {
       page: pagination.current,
@@ -312,22 +330,22 @@ const fetchNewsList = async () => {
       keyword: searchForm.keyword || undefined,
       category: searchForm.category,
       status: searchForm.status as any,
-    }
+    };
 
     if (searchForm.dateRange) {
-      params.startDate = searchForm.dateRange[0]
-      params.endDate = searchForm.dateRange[1]
+      params.startDate = searchForm.dateRange[0];
+      params.endDate = searchForm.dateRange[1];
     }
 
-    console.log('发起新闻列表请求:', params)
-    const response = await adminNewsApi.getList(params)
-    console.log('新闻列表响应:', response)
+    console.log("发起新闻列表请求:", params);
+    const response = await adminNewsApi.getList(params);
+    console.log("新闻列表响应:", response);
 
     // 兼容后端响应结构 { status: 'success', data: { data: [...], pagination: {...} } }
-    const resData = response.data as any
+    const resData = response.data as any;
     if (
       resData &&
-      resData.status === 'success' &&
+      resData.status === "success" &&
       resData.data &&
       Array.isArray(resData.data.data)
     ) {
@@ -336,74 +354,76 @@ const fetchNewsList = async () => {
         _id: item._id || item.id, // 确保_id字段存在
         id: item._id || item.id, // 保持兼容性
         categoryName:
-          item.category && typeof item.category === 'object' && item.category.name
+          item.category &&
+          typeof item.category === "object" &&
+          item.category.name
             ? item.category.name
-            : '未知分类',
-      }))
-      pagination.total = resData.data.pagination?.total || 0
-      console.log('✅ 成功加载新闻数据:', tableData.value.length, '条记录')
+            : "未知分类",
+      }));
+      pagination.total = resData.data.pagination?.total || 0;
+      console.log("✅ 成功加载新闻数据:", tableData.value.length, "条记录");
     } else {
-      console.warn('❌ 服务器响应格式异常或数据为空:', response)
-      tableData.value = []
-      pagination.total = 0
+      console.warn("❌ 服务器响应格式异常或数据为空:", response);
+      tableData.value = [];
+      pagination.total = 0;
     }
   } catch (error: any) {
-    console.error('获取新闻列表失败:', error)
-    message.error(error.message || '获取新闻列表失败')
+    console.error("获取新闻列表失败:", error);
+    message.error(error.message || "获取新闻列表失败");
   } finally {
-    loading.value = false
-    isFetching.value = false
+    loading.value = false;
+    isFetching.value = false;
   }
-}
+};
 
 // 防抖版本的获取新闻列表
-const debouncedFetchNewsList = debounce(fetchNewsList, 300)
+const debouncedFetchNewsList = debounce(fetchNewsList, 300);
 
 // 获取分类列表
 const fetchCategories = async () => {
   // 如果已经有分类数据，跳过重复请求
   if (categories.value.length > 0) {
-    console.log('分类数据已存在，跳过重复请求')
-    return
+    console.log("分类数据已存在，跳过重复请求");
+    return;
   }
 
   try {
-    console.log('获取分类列表...')
-    const newsCategoryApi = new NewsCategoryApi()
-    const { data } = await newsCategoryApi.getList()
-    categories.value = data
-    console.log('成功获取分类:', data.length, '个')
+    console.log("获取分类列表...");
+    const newsCategoryApi = new NewsCategoryApi();
+    const response = await newsCategoryApi.getList();
+    categories.value = response.data;
+    console.log("成功获取分类:", response.data.length, "个");
   } catch (error: any) {
-    console.error('获取分类列表失败:', error)
-    message.error(error.message || '获取分类列表失败')
+    console.error("获取分类列表失败:", error);
+    message.error(error.message || "获取分类列表失败");
   }
-}
+};
 
 // 防抖版本的获取分类列表
-const debouncedFetchCategories = debounce(fetchCategories, 300)
+const debouncedFetchCategories = debounce(fetchCategories, 300);
 
 // 处理搜索
 const handleSearch = () => {
-  pagination.current = 1
-  debouncedFetchNewsList()
-}
+  pagination.current = 1;
+  debouncedFetchNewsList();
+};
 
 // 处理重置
 const handleReset = () => {
   Object.assign(searchForm, {
-    keyword: '',
+    keyword: "",
     category: undefined,
     status: undefined,
     dateRange: undefined,
-  })
-  pagination.current = 1
-  debouncedFetchNewsList()
-}
+  });
+  pagination.current = 1;
+  debouncedFetchNewsList();
+};
 
 // 处理表格变化
-const handleTableChange: TableProps['onChange'] = (pag, filters, sorter) => {
-  pagination.current = pag.current || 1
-  pagination.pageSize = pag.pageSize || 20
+const handleTableChange: TableProps["onChange"] = (pag, filters, sorter) => {
+  pagination.current = pag.current || 1;
+  pagination.pageSize = pag.pageSize || 20;
 
   // 注释掉URL更新，避免可能的无限循环
   // const newUrl = new URL(window.location.href)
@@ -411,107 +431,107 @@ const handleTableChange: TableProps['onChange'] = (pag, filters, sorter) => {
   // newUrl.searchParams.set('limit', pagination.pageSize.toString())
   // window.history.pushState({}, '', newUrl.toString())
 
-  debouncedFetchNewsList()
-}
+  debouncedFetchNewsList();
+};
 
 // 处理选择变化
 const onSelectChange = (newSelectedRowKeys: (string | number)[]) => {
-  selectedRowKeys.value = newSelectedRowKeys
-}
+  selectedRowKeys.value = newSelectedRowKeys;
+};
 
 // 处理编辑
 const handleEdit = (record: NewsItem) => {
-  router.push(`/admin/news/edit/${record._id}`)
-}
+  router.push(`/admin/news/edit/${record._id}`);
+};
 
 // 处理删除
 const handleDelete = async (record: NewsItem) => {
   try {
-    await adminNewsApi.delete(record._id as any)
-    message.success('删除成功')
-    debouncedFetchNewsList()
+    await adminNewsApi.delete(record._id as any);
+    message.success("删除成功");
+    debouncedFetchNewsList();
   } catch (error: any) {
-    message.error(error.message || '删除失败')
+    message.error(error.message || "删除失败");
   }
-}
+};
 
 // 处理批量删除
 const handleBatchDelete = async () => {
   try {
-    await adminNewsApi.batchDelete(selectedRowKeys.value.map(String))
-    message.success('批量删除成功')
-    selectedRowKeys.value = []
-    debouncedFetchNewsList()
+    await adminNewsApi.batchDelete(selectedRowKeys.value.map(String));
+    message.success("批量删除成功");
+    selectedRowKeys.value = [];
+    debouncedFetchNewsList();
   } catch (error: any) {
-    message.error(error.message || '批量删除失败')
+    message.error(error.message || "批量删除失败");
   }
-}
+};
 
 // 处理置顶切换
 const handleToggleTop = async (record: NewsItem) => {
   try {
-    await adminNewsApi.toggleTop(record._id)
-    message.success(record.isTop ? '取消置顶成功' : '置顶成功')
-    debouncedFetchNewsList()
+    await adminNewsApi.toggleTop(record._id);
+    message.success(record.isTop ? "取消置顶成功" : "置顶成功");
+    debouncedFetchNewsList();
   } catch (error: any) {
-    message.error(error.message || '操作失败')
+    message.error(error.message || "操作失败");
   }
-}
+};
 
 // 处理发布状态切换
 const handleTogglePublish = async (record: NewsItem) => {
   try {
-    await adminNewsApi.togglePublish(record._id)
-    message.success(record.status === 'published' ? '下线成功' : '发布成功')
-    debouncedFetchNewsList()
+    await adminNewsApi.togglePublish(record._id);
+    message.success(record.status === "published" ? "下线成功" : "发布成功");
+    debouncedFetchNewsList();
   } catch (error: any) {
-    message.error(error.message || '操作失败')
+    message.error(error.message || "操作失败");
   }
-}
+};
 
 // 处理批量发布
 const handleBatchPublish = async () => {
   // 实现批量发布逻辑
-  message.info('功能开发中...')
-}
+  message.info("功能开发中...");
+};
 
 // 处理批量归档
 const handleBatchArchive = async () => {
   // 实现批量归档逻辑
-  message.info('功能开发中...')
-}
+  message.info("功能开发中...");
+};
 
 onMounted(() => {
-  console.log('NewsList组件已挂载')
+  console.log("NewsList组件已挂载");
 
   // 检查认证状态
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem("token");
   if (!token) {
-    message.error('请先登录')
-    router.push('/admin/login')
-    return
+    message.error("请先登录");
+    router.push("/admin/login");
+    return;
   }
 
   // 简化URL参数读取
-  const urlParams = new URLSearchParams(window.location.search)
-  const pageParam = urlParams.get('page')
-  const limitParam = urlParams.get('limit')
+  const urlParams = new URLSearchParams(window.location.search);
+  const pageParam = urlParams.get("page");
+  const limitParam = urlParams.get("limit");
 
   if (pageParam) {
-    pagination.current = parseInt(pageParam) || 1
+    pagination.current = parseInt(pageParam) || 1;
   }
   if (limitParam) {
-    pagination.pageSize = parseInt(limitParam) || 20
+    pagination.pageSize = parseInt(limitParam) || 20;
   }
 
   // 使用防抖版本获取数据，避免重复请求
-  debouncedFetchCategories()
+  debouncedFetchCategories();
 
   // 延迟获取新闻列表，确保分类数据先加载
   setTimeout(() => {
-    debouncedFetchNewsList()
-  }, 100)
-})
+    debouncedFetchNewsList();
+  }, 100);
+});
 </script>
 
 <style scoped lang="scss">

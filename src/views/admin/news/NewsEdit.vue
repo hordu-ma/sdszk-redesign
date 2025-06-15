@@ -17,7 +17,7 @@
       <div class="header-right">
         <a-button @click="handleSave" :loading="saving"> 保存修改 </a-button>
         <a-button type="primary" @click="handlePublish" :loading="publishing">
-          {{ formData.status === 'published' ? '更新发布' : '发布新闻' }}
+          {{ formData.status === "published" ? "更新发布" : "发布新闻" }}
         </a-button>
       </div>
     </div>
@@ -74,7 +74,11 @@
               <!-- 发布设置 -->
               <a-card title="发布设置" size="small" class="setting-card">
                 <a-form-item label="新闻分类" name="category">
-                  <a-select v-model:value="formData.category" placeholder="请选择分类" allow-clear>
+                  <a-select
+                    v-model:value="formData.category"
+                    placeholder="请选择分类"
+                    allow-clear
+                  >
                     <a-select-option
                       v-for="category in categories"
                       :key="category._id"
@@ -116,7 +120,11 @@
                   <div v-if="formData.featuredImage" class="image-preview">
                     <img :src="formData.featuredImage" alt="特色图片" />
                     <div class="image-actions">
-                      <a-button type="text" size="small" @click="handleRemoveImage">
+                      <a-button
+                        type="text"
+                        size="small"
+                        @click="handleRemoveImage"
+                      >
                         <template #icon>
                           <DeleteOutlined />
                         </template>
@@ -134,10 +142,14 @@
               <!-- 高级设置 -->
               <a-card title="高级设置" size="small" class="setting-card">
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isTop"> 置顶新闻 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isTop">
+                    置顶新闻
+                  </a-checkbox>
                 </a-form-item>
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isFeatured"> 精选新闻 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isFeatured">
+                    精选新闻
+                  </a-checkbox>
                 </a-form-item>
               </a-card>
 
@@ -150,11 +162,15 @@
                   </div>
                   <div class="stat-item">
                     <span class="label">创建时间：</span>
-                    <span class="value">{{ formatDate(newsData?.createdAt) }}</span>
+                    <span class="value">{{
+                      formatDate(newsData?.createdAt)
+                    }}</span>
                   </div>
                   <div class="stat-item">
                     <span class="label">更新时间：</span>
-                    <span class="value">{{ formatDate(newsData?.updatedAt) }}</span>
+                    <span class="value">{{
+                      formatDate(newsData?.updatedAt)
+                    }}</span>
                   </div>
                 </div>
               </a-card>
@@ -167,175 +183,188 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
-import { adminNewsApi, type NewsFormData, type NewsItem } from '@/api/modules/adminNews'
-import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
-import QuillEditor from '@/components/common/QuillEditor.vue'
+import { ref, reactive, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { message } from "ant-design-vue";
+import {
+  ArrowLeftOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons-vue";
+import {
+  adminNewsApi,
+  type NewsFormData,
+  type NewsItem,
+} from "@/api/modules/adminNews";
+import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
+import QuillEditor from "@/components/common/QuillEditor.vue";
 
 // 创建分类API实例
-const newsCategoryApi = new NewsCategoryApi()
-import type { Rule } from 'ant-design-vue/es/form'
+const newsCategoryApi = new NewsCategoryApi();
+import type { Rule } from "ant-design-vue/es/form";
 
 interface Props {
-  id: string
+  id: string;
 }
 
-const props = defineProps<Props>()
-const router = useRouter()
-const route = useRoute()
-const formRef = ref()
-const quillEditorRef = ref()
+const props = defineProps<Props>();
+const router = useRouter();
+const route = useRoute();
+const formRef = ref();
+const quillEditorRef = ref();
 
 // 状态管理
-const loading = ref(true)
-const saving = ref(false)
-const publishing = ref(false)
-const categories = ref<NewsCategory[]>([])
-const newsData = ref<NewsItem>()
+const loading = ref(true);
+const saving = ref(false);
+const publishing = ref(false);
+const categories = ref<NewsCategory[]>([]);
+const newsData = ref<NewsItem>();
 
 // 表单数据
 const formData = reactive<NewsFormData>({
-  title: '',
-  content: '',
-  summary: '',
+  title: "",
+  content: "",
+  summary: "",
   category: undefined as any,
-  featuredImage: '',
+  featuredImage: "",
   tags: [],
-  status: 'draft',
+  status: "draft",
   isTop: false,
   isFeatured: false,
   publishTime: undefined,
-})
+});
 
 // 表单验证规则
 const rules: Record<string, Rule[]> = {
   title: [
-    { required: true, message: '请输入新闻标题', trigger: 'blur' },
-    { min: 5, max: 100, message: '标题长度应在5-100个字符之间', trigger: 'blur' },
+    { required: true, message: "请输入新闻标题", trigger: "blur" },
+    {
+      min: 5,
+      max: 100,
+      message: "标题长度应在5-100个字符之间",
+      trigger: "blur",
+    },
   ],
-  category: [{ required: true, message: '请选择新闻分类', trigger: 'change' }],
-  content: [{ required: true, message: '请输入新闻内容', trigger: 'blur' }],
-}
+  category: [{ required: true, message: "请选择新闻分类", trigger: "change" }],
+  content: [{ required: true, message: "请输入新闻内容", trigger: "blur" }],
+};
 
 // 获取状态颜色
 const getStatusColor = (status: string) => {
   const colorMap: Record<string, string> = {
-    draft: 'default',
-    published: 'success',
-    archived: 'warning',
-  }
-  return colorMap[status] || 'default'
-}
+    draft: "default",
+    published: "success",
+    archived: "warning",
+  };
+  return colorMap[status] || "default";
+};
 
 // 获取状态文本
 const getStatusText = (status: string) => {
   const textMap: Record<string, string> = {
-    draft: '草稿',
-    published: '已发布',
-    archived: '已归档',
-  }
-  return textMap[status] || status
-}
+    draft: "草稿",
+    published: "已发布",
+    archived: "已归档",
+  };
+  return textMap[status] || status;
+};
 
 // 格式化日期
 const formatDate = (dateString?: string) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN')
-}
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleString("zh-CN");
+};
 
 // 获取新闻详情
 const fetchNewsDetail = async () => {
   try {
-    loading.value = true
-    const { data } = await adminNewsApi.getDetail(props.id)
-    newsData.value = data
+    loading.value = true;
+    const response = await adminNewsApi.getDetail(props.id);
+    newsData.value = response.data;
 
     // 填充表单数据
     Object.assign(formData, {
-      title: data.title,
-      content: data.content,
-      summary: data.summary,
-      category: data.category,
-      featuredImage: data.featuredImage,
-      tags: data.tags,
-      status: data.status,
-      isTop: data.isTop,
+      title: response.data.title,
+      content: response.data.content,
+      summary: response.data.summary,
+      category: response.data.category,
+      featuredImage: response.data.featuredImage,
+      tags: response.data.tags,
+      status: response.data.status,
+      isTop: response.data.isTop,
       isFeatured: data.isFeatured,
       publishTime: data.publishTime ? new Date(data.publishTime) : undefined,
-    })
+    });
   } catch (error: any) {
-    message.error(error.message || '获取新闻详情失败')
-    router.push('/admin/news/list')
+    message.error(error.message || "获取新闻详情失败");
+    router.push("/admin/news/list");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const { data } = await newsCategoryApi.getList()
-    categories.value = data
+    const response = await newsCategoryApi.getList();
+    categories.value = response.data;
   } catch (error: any) {
-    message.error(error.message || '获取分类列表失败')
+    message.error(error.message || "获取分类列表失败");
   }
-}
+};
 
 // 移除图片
 const handleRemoveImage = () => {
-  formData.featuredImage = ''
-}
+  formData.featuredImage = "";
+};
 
 // 保存修改
 const handleSave = async () => {
   try {
-    saving.value = true
+    saving.value = true;
 
-    await formRef.value.validate()
-    await adminNewsApi.update(props.id, formData)
+    await formRef.value.validate();
+    await adminNewsApi.update(props.id, formData);
 
-    message.success('保存成功')
-    router.push('/admin/news/list')
+    message.success("保存成功");
+    router.push("/admin/news/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else {
-      message.error(error.message || '保存失败')
+      message.error(error.message || "保存失败");
     }
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // 发布新闻
 const handlePublish = async () => {
   try {
-    publishing.value = true
-    formData.status = 'published'
+    publishing.value = true;
+    formData.status = "published";
 
-    await formRef.value.validate()
-    await adminNewsApi.update(props.id, formData)
+    await formRef.value.validate();
+    await adminNewsApi.update(props.id, formData);
 
-    message.success('发布成功')
-    router.push('/admin/news/list')
+    message.success("发布成功");
+    router.push("/admin/news/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else {
-      message.error(error.message || '发布失败')
+      message.error(error.message || "发布失败");
     }
   } finally {
-    publishing.value = false
+    publishing.value = false;
   }
-}
+};
 
 onMounted(async () => {
-  await fetchCategories()
-  await fetchNewsDetail()
-})
+  await fetchCategories();
+  await fetchNewsDetail();
+});
 </script>
 
 <style scoped lang="scss">

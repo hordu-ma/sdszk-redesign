@@ -97,18 +97,18 @@ const videos = ref([]);
 const fetchResourceBlock = async () => {
   // 理论前沿
   const theoryRes = await resourceApi.getList({ category: "theory", limit: 5 });
-  if (theoryRes.data.success) theories.value = theoryRes.data.data;
+  if (theoryRes.success) theories.value = theoryRes.data;
 
   // 教学研究
   const researchRes = await resourceApi.getList({
     category: "teaching",
     limit: 5,
   });
-  if (researchRes.data.success) researches.value = researchRes.data.data;
+  if (researchRes.success) researches.value = researchRes.data;
 
   // 影像思政
   const videoRes = await resourceApi.getList({ category: "video", limit: 6 });
-  if (videoRes.data.success) videos.value = videoRes.data.data;
+  if (videoRes.success) videos.value = videoRes.data;
 };
 
 onMounted(() => {

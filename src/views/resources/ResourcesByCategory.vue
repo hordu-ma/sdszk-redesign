@@ -54,7 +54,7 @@ const fetchResources = async () => {
   loading.value = true;
   try {
     const res: any = await resourceApi.getList({ category: category.value });
-    if (res.data.success) resources.value = res.data.data;
+    if (res.success) resources.value = res.data;
   } finally {
     loading.value = false;
   }

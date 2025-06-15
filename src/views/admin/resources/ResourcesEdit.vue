@@ -17,7 +17,7 @@
       <div class="header-right">
         <a-button @click="handleSave" :loading="saving"> 保存修改 </a-button>
         <a-button type="primary" @click="handlePublish" :loading="publishing">
-          {{ formData.status === 'published' ? '更新发布' : '发布资源' }}
+          {{ formData.status === "published" ? "更新发布" : "发布资源" }}
         </a-button>
       </div>
     </div>
@@ -77,12 +77,20 @@
 
                     <!-- 视频预览 -->
                     <div v-else-if="isVideoFile" class="video-preview">
-                      <video :src="formData.fileUrl" controls width="100%"></video>
+                      <video
+                        :src="formData.fileUrl"
+                        controls
+                        width="100%"
+                      ></video>
                     </div>
 
                     <!-- 音频预览 -->
                     <div v-else-if="isAudioFile" class="audio-preview">
-                      <audio :src="formData.fileUrl" controls style="width: 100%"></audio>
+                      <audio
+                        :src="formData.fileUrl"
+                        controls
+                        style="width: 100%"
+                      ></audio>
                     </div>
 
                     <!-- 文档文件信息 -->
@@ -156,7 +164,10 @@
                 </a-form-item>
 
                 <a-form-item label="资源类型" name="type">
-                  <a-select v-model:value="formData.type" placeholder="请选择类型">
+                  <a-select
+                    v-model:value="formData.type"
+                    placeholder="请选择类型"
+                  >
                     <a-select-option value="document">文档</a-select-option>
                     <a-select-option value="video">视频</a-select-option>
                     <a-select-option value="image">图片</a-select-option>
@@ -195,22 +206,30 @@
                 </a-form-item>
 
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.allowDownload"> 允许下载 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.allowDownload">
+                    允许下载
+                  </a-checkbox>
                 </a-form-item>
 
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.allowComment"> 允许评论 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.allowComment">
+                    允许评论
+                  </a-checkbox>
                 </a-form-item>
               </a-card>
 
               <!-- 高级设置 -->
               <a-card title="高级设置" size="small" class="setting-card">
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isFeatured"> 推荐资源 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isFeatured">
+                    推荐资源
+                  </a-checkbox>
                 </a-form-item>
 
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isTop"> 置顶显示 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isTop">
+                    置顶显示
+                  </a-checkbox>
                 </a-form-item>
 
                 <a-form-item label="排序权重" name="sortOrder">
@@ -229,19 +248,27 @@
                 <div class="stats-info">
                   <div class="stat-item">
                     <span class="label">浏览量：</span>
-                    <span class="value">{{ resourceData?.viewCount || 0 }}</span>
+                    <span class="value">{{
+                      resourceData?.viewCount || 0
+                    }}</span>
                   </div>
                   <div class="stat-item">
                     <span class="label">下载量：</span>
-                    <span class="value">{{ resourceData?.downloadCount || 0 }}</span>
+                    <span class="value">{{
+                      resourceData?.downloadCount || 0
+                    }}</span>
                   </div>
                   <div class="stat-item">
                     <span class="label">创建时间：</span>
-                    <span class="value">{{ formatDate(resourceData?.createdAt) }}</span>
+                    <span class="value">{{
+                      formatDate(resourceData?.createdAt)
+                    }}</span>
                   </div>
                   <div class="stat-item">
                     <span class="label">更新时间：</span>
-                    <span class="value">{{ formatDate(resourceData?.updatedAt) }}</span>
+                    <span class="value">{{
+                      formatDate(resourceData?.updatedAt)
+                    }}</span>
                   </div>
                 </div>
               </a-card>
@@ -278,9 +305,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
+import { ref, reactive, onMounted, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { message } from "ant-design-vue";
 import {
   ArrowLeftOutlined,
   FileOutlined,
@@ -288,270 +315,282 @@ import {
   DeleteOutlined,
   UploadOutlined,
   InboxOutlined,
-} from '@ant-design/icons-vue'
+} from "@ant-design/icons-vue";
 import {
   adminResourceApi,
   type ResourceFormData,
   type ResourceItem,
-} from '@/api/modules/adminResource'
-import { ResourceCategoryApi, type ResourceCategory } from '@/api/modules/resourceCategory'
-import QuillEditor from '@/components/common/QuillEditor.vue'
+} from "@/api/modules/adminResource";
+import {
+  ResourceCategoryApi,
+  type ResourceCategory,
+} from "@/api/modules/resourceCategory";
+import QuillEditor from "@/components/common/QuillEditor.vue";
 
 // 创建分类API实例
-const resourceCategoryApi = new ResourceCategoryApi()
-import type { Rule } from 'ant-design-vue/es/form'
-import type { UploadProps } from 'ant-design-vue'
-import dayjs from 'dayjs'
+const resourceCategoryApi = new ResourceCategoryApi();
+import type { Rule } from "ant-design-vue/es/form";
+import type { UploadProps } from "ant-design-vue";
+import dayjs from "dayjs";
 
 // 引入富文本编辑器
 
-const router = useRouter()
-const route = useRoute()
-const formRef = ref()
-const quillEditorRef = ref()
+const router = useRouter();
+const route = useRoute();
+const formRef = ref();
+const quillEditorRef = ref();
 
 // 状态管理
-const loading = ref(false)
-const saving = ref(false)
-const publishing = ref(false)
-const uploading = ref(false)
-const categories = ref<ResourceCategory[]>([])
-const resourceData = ref<ResourceItem | null>(null)
-const replaceModalVisible = ref(false)
-const newFileList = ref<any[]>([])
+const loading = ref(false);
+const saving = ref(false);
+const publishing = ref(false);
+const uploading = ref(false);
+const categories = ref<ResourceCategory[]>([]);
+const resourceData = ref<ResourceItem | null>(null);
+const replaceModalVisible = ref(false);
+const newFileList = ref<any[]>([]);
 
 // 表单数据
 const formData = reactive<ResourceFormData>({
-  title: '',
-  description: '',
-  categoryId: '',
-  fileUrl: '',
-  fileName: '',
+  title: "",
+  description: "",
+  categoryId: "",
+  fileUrl: "",
+  fileName: "",
   fileSize: 0,
-  fileType: '',
+  fileType: "",
   tags: [],
-  status: 'draft',
+  status: "draft",
   isTop: false,
   isFeatured: false,
-  downloadPermission: 'public',
-})
+  downloadPermission: "public",
+});
 
 // 表单验证规则
 const rules: Record<string, Rule[]> = {
   title: [
-    { required: true, message: '请输入资源标题', trigger: 'blur' },
-    { min: 2, max: 100, message: '标题长度应在2-100个字符之间', trigger: 'blur' },
+    { required: true, message: "请输入资源标题", trigger: "blur" },
+    {
+      min: 2,
+      max: 100,
+      message: "标题长度应在2-100个字符之间",
+      trigger: "blur",
+    },
   ],
-  description: [{ required: true, message: '请输入资源描述', trigger: 'blur' }],
-  categoryId: [{ required: true, message: '请选择资源分类', trigger: 'change' }],
-  type: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
-}
+  description: [{ required: true, message: "请输入资源描述", trigger: "blur" }],
+  categoryId: [
+    { required: true, message: "请选择资源分类", trigger: "change" },
+  ],
+  type: [{ required: true, message: "请选择资源类型", trigger: "change" }],
+};
 
 // 文件类型判断
 const isImageFile = computed(() => {
-  return formData.fileType?.includes('image')
-})
+  return formData.fileType?.includes("image");
+});
 
 const isVideoFile = computed(() => {
-  return formData.fileType?.includes('video')
-})
+  return formData.fileType?.includes("video");
+});
 
 const isAudioFile = computed(() => {
-  return formData.fileType?.includes('audio')
-})
+  return formData.fileType?.includes("audio");
+});
 
 // 获取资源详情
 const fetchResourceDetail = async () => {
-  const id = route.params.id as string
-  if (!id) return
+  const id = route.params.id as string;
+  if (!id) return;
 
-  loading.value = true
+  loading.value = true;
   try {
-    const { data } = await adminResourceApi.getDetail(id)
-    resourceData.value = data
+    const response = await adminResourceApi.getDetail(id);
+    resourceData.value = response.data;
 
     // 填充表单数据
     Object.assign(formData, {
-      ...data,
-      publishDate: data.publishDate ? dayjs(data.publishDate) : undefined,
-    })
+      ...response.data,
+      publishDate: response.data.publishDate
+        ? dayjs(response.data.publishDate)
+        : undefined,
+    });
   } catch (error: any) {
-    message.error(error.message || '获取资源详情失败')
-    router.push('/admin/resources/list')
+    message.error(error.message || "获取资源详情失败");
+    router.push("/admin/resources/list");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const { data } = await resourceCategoryApi.getList()
-    categories.value = data
+    const response = await resourceCategoryApi.getList();
+    categories.value = response.data;
   } catch (error: any) {
-    message.error(error.message || '获取分类列表失败')
+    message.error(error.message || "获取分类列表失败");
   }
-}
+};
 
 // 文件上传前验证
-const beforeUpload: UploadProps['beforeUpload'] = file => {
+const beforeUpload: UploadProps["beforeUpload"] = (file) => {
   const allowedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/zip',
-    'application/x-rar-compressed',
-    'video/mp4',
-    'audio/mp3',
-    'audio/mpeg',
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-  ]
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/zip",
+    "application/x-rar-compressed",
+    "video/mp4",
+    "audio/mp3",
+    "audio/mpeg",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+  ];
 
   if (!allowedTypes.includes(file.type)) {
-    message.error('不支持的文件格式!')
-    return false
+    message.error("不支持的文件格式!");
+    return false;
   }
 
-  const isLt100M = file.size / 1024 / 1024 < 100
+  const isLt100M = file.size / 1024 / 1024 < 100;
   if (!isLt100M) {
-    message.error('文件大小不能超过 100MB!')
-    return false
+    message.error("文件大小不能超过 100MB!");
+    return false;
   }
 
-  return false // 阻止自动上传，手动处理
-}
+  return false; // 阻止自动上传，手动处理
+};
 
 // 新文件变化处理
 const handleNewFileChange = (info: any) => {
-  console.log('新文件选择:', info)
-}
+  console.log("新文件选择:", info);
+};
 
 // 显示替换文件模态框
 const showReplaceModal = () => {
-  replaceModalVisible.value = true
-  newFileList.value = []
-}
+  replaceModalVisible.value = true;
+  newFileList.value = [];
+};
 
 // 处理文件替换
 const handleFileReplace = async () => {
   if (newFileList.value.length === 0) {
-    message.error('请选择要上传的文件')
-    return
+    message.error("请选择要上传的文件");
+    return;
   }
 
-  uploading.value = true
+  uploading.value = true;
   try {
     // 这里应该是实际的文件上传逻辑
-    const file = newFileList.value[0]
-    formData.fileName = file.name
-    formData.fileSize = file.size
-    formData.fileType = file.type
-    formData.fileUrl = URL.createObjectURL(file)
+    const file = newFileList.value[0];
+    formData.fileName = file.name;
+    formData.fileSize = file.size;
+    formData.fileType = file.type;
+    formData.fileUrl = URL.createObjectURL(file);
 
-    message.success('文件替换成功')
-    replaceModalVisible.value = false
+    message.success("文件替换成功");
+    replaceModalVisible.value = false;
   } catch (error: any) {
-    message.error(error.message || '文件替换失败')
+    message.error(error.message || "文件替换失败");
   } finally {
-    uploading.value = false
+    uploading.value = false;
   }
-}
+};
 
 // 删除文件
 const removeFile = () => {
-  formData.fileUrl = ''
-  formData.fileName = ''
-  formData.fileSize = 0
-  formData.fileType = ''
-  message.success('文件已删除')
-}
+  formData.fileUrl = "";
+  formData.fileName = "";
+  formData.fileSize = 0;
+  formData.fileType = "";
+  message.success("文件已删除");
+};
 
 // 格式化文件大小
 const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
 
 // 格式化日期
 const formatDate = (date?: string) => {
-  return date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-'
-}
+  return date ? dayjs(date).format("YYYY-MM-DD HH:mm") : "-";
+};
 
 // 获取状态颜色和文本
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    published: 'success',
-    draft: 'default',
-    archived: 'warning',
-  }
-  return colors[status] || 'default'
-}
+    published: "success",
+    draft: "default",
+    archived: "warning",
+  };
+  return colors[status] || "default";
+};
 
 const getStatusText = (status: string) => {
   const texts: Record<string, string> = {
-    published: '已发布',
-    draft: '草稿',
-    archived: '归档',
-  }
-  return texts[status] || status
-}
+    published: "已发布",
+    draft: "草稿",
+    archived: "归档",
+  };
+  return texts[status] || status;
+};
 
 // 保存修改
 const handleSave = async () => {
   try {
-    saving.value = true
+    saving.value = true;
 
-    await formRef.value.validate()
-    await adminResourceApi.update(route.params.id as string, formData)
+    await formRef.value.validate();
+    await adminResourceApi.update(route.params.id as string, formData);
 
-    message.success('保存成功')
-    router.push('/admin/resources/list')
+    message.success("保存成功");
+    router.push("/admin/resources/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else {
-      message.error(error.message || '保存失败')
+      message.error(error.message || "保存失败");
     }
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // 发布资源
 const handlePublish = async () => {
   try {
-    publishing.value = true
-    formData.status = 'published'
+    publishing.value = true;
+    formData.status = "published";
 
-    await formRef.value.validate()
-    await adminResourceApi.update(route.params.id as string, formData)
+    await formRef.value.validate();
+    await adminResourceApi.update(route.params.id as string, formData);
 
-    message.success('发布成功')
-    router.push('/admin/resources/list')
+    message.success("发布成功");
+    router.push("/admin/resources/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else {
-      message.error(error.message || '发布失败')
+      message.error(error.message || "发布失败");
     }
   } finally {
-    publishing.value = false
+    publishing.value = false;
   }
-}
+};
 
 onMounted(async () => {
-  await fetchCategories()
-  await fetchResourceDetail()
-})
+  await fetchCategories();
+  await fetchResourceDetail();
+});
 </script>
 
 <style scoped lang="scss">
