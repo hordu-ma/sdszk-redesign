@@ -118,25 +118,16 @@ const fetchResources = async () => {
     }
 
     const response: any = await resourceApi.getList(params)
-    console.log('API响应详情:', response)
-    console.log('响应success字段:', response.data.success)
-    console.log('响应data长度:', response.data.data?.length)
 
     if (response.data.success) {
       resources.value = response.data.data
       total.value = response.data.pagination?.total || 0
-      console.log('数据设置成功, 资源数量:', resources.value.length)
     } else {
-      console.error('API响应success为false:', response.data)
       message.error('获取资源列表失败')
     }
   } catch (error: any) {
-    console.error('获取资源列表异常:', error)
-    console.error('错误类型:', typeof error)
-    console.error('错误名称:', error?.constructor?.name)
-    console.error('错误消息:', error?.message)
-    // 暂时注释掉自动错误提示，先诊断问题
-    // message.error('获取资源列表失败')
+    console.error('获取资源列表失败', error)
+    message.error('获取资源列表失败')
   } finally {
     loading.value = false
   }
@@ -236,6 +227,7 @@ onMounted(() => {
   color: #666;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
