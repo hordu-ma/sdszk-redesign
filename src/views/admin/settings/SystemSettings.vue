@@ -672,6 +672,15 @@ const previewFavicon = (file: any) => {
   previewVisible.value = true;
 };
 
+// 工具函数
+const getSettingType = (value: any): string => {
+  if (typeof value === "boolean") return "boolean";
+  if (typeof value === "number") return "number";
+  if (Array.isArray(value)) return "array";
+  if (typeof value === "object" && value !== null) return "json";
+  return "text"; // string 类型映射为 text
+};
+
 // 事件处理
 const saveAllSettings = async () => {
   try {
@@ -686,14 +695,7 @@ const saveAllSettings = async () => {
         key: `site.${key}`,
         value: siteSettings[key],
         group: "site",
-        type:
-          typeof siteSettings[key] === "boolean"
-            ? "boolean"
-            : Array.isArray(siteSettings[key])
-              ? "array"
-              : typeof siteSettings[key] === "number"
-                ? "number"
-                : "string",
+        type: getSettingType(siteSettings[key]),
       });
     });
 
@@ -703,14 +705,7 @@ const saveAllSettings = async () => {
         key: `system.${key}`,
         value: systemSettings[key],
         group: "system",
-        type:
-          typeof systemSettings[key] === "boolean"
-            ? "boolean"
-            : Array.isArray(systemSettings[key])
-              ? "array"
-              : typeof systemSettings[key] === "number"
-                ? "number"
-                : "string",
+        type: getSettingType(systemSettings[key]),
       });
     });
 
@@ -720,12 +715,7 @@ const saveAllSettings = async () => {
         key: `email.${key}`,
         value: emailSettings[key],
         group: "email",
-        type:
-          typeof emailSettings[key] === "boolean"
-            ? "boolean"
-            : typeof emailSettings[key] === "number"
-              ? "number"
-              : "string",
+        type: getSettingType(emailSettings[key]),
       });
     });
 
@@ -735,14 +725,7 @@ const saveAllSettings = async () => {
         key: `security.${key}`,
         value: securitySettings[key],
         group: "security",
-        type:
-          typeof securitySettings[key] === "boolean"
-            ? "boolean"
-            : Array.isArray(securitySettings[key])
-              ? "array"
-              : typeof securitySettings[key] === "number"
-                ? "number"
-                : "string",
+        type: getSettingType(securitySettings[key]),
       });
     });
 
@@ -756,12 +739,7 @@ const saveAllSettings = async () => {
         key: `backup.${key}`,
         value: value,
         group: "backup",
-        type:
-          typeof value === "boolean"
-            ? "boolean"
-            : typeof value === "number"
-              ? "number"
-              : "string",
+        type: getSettingType(value),
       });
     });
 
