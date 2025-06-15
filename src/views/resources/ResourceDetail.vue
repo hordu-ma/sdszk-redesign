@@ -21,7 +21,14 @@
         <a-card>
           <div class="resource-info">
             <div class="resource-meta">
-              <span><UserOutlined /> {{ resource?.author?.name || 'Unknown' }}</span>
+              <span
+                ><UserOutlined />
+                {{
+                  typeof resource?.author === 'string'
+                    ? resource.author
+                    : resource?.author?.name || resource?.createdBy?.name || 'Unknown'
+                }}</span
+              >
               <span><CalendarOutlined /> {{ formatDate(resource?.publishDate) }}</span>
               <span><EyeOutlined /> {{ resource?.viewCount || 0 }} 查看</span>
               <span><DownloadOutlined /> {{ resource?.downloadCount || 0 }} 下载</span>

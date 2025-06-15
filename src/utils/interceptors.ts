@@ -34,7 +34,11 @@ export const setupInterceptors = (axios: AxiosInstance) => {
     response => {
       // 转换后端响应格式以匹配前端期望
       if (response.data && response.data.status) {
+        // 统一转换 status 为 success 字段
         response.data.success = response.data.status === 'success'
+
+        // 保持向后兼容性，同时保留 status 字段
+        // response.data.status 保持不变
       }
       return response
     },

@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Resources Page Error Debug</title>
+    <script>
+      // 捕获所有JavaScript错误
+      window.addEventListener('error', function (e) {
+        console.error('JavaScript Error:', e.error)
+        console.error('Error details:', {
+          message: e.message,
+          filename: e.filename,
+          lineno: e.lineno,
+          colno: e.colno,
+          stack: e.error ? e.error.stack : 'No stack trace',
+        })
+      })
+
+      // 捕获Promise rejection错误
+      window.addEventListener('unhandledrejection', function (e) {
+        console.error('Unhandled Promise Rejection:', e.reason)
+      })
+
+      async function testResourcesPage() {
+        try {
+          console.log('Testing resources page...')
+
+          // 测试API调用
+          const response = await fetch('/api/resources?status=published&page=1&limit=12')
+          const data = await response.json()
+
+          console.log('API Response:', data)
+
+          // 检查数据结构
+          if (data.success || data.status === 'success') {
+            console.log('✅ API call successful')
+            console.log('Data count:', data.data ? data.data.length : 0)
+
+            if (data.data && data.data.length > 0) {
+              console.log('Sample resource:', data.data[0])
+
+              // 检查必要字段
+              const resource = data.data[0]
+              const missingFields = []
+
+              if (!resource.id) missingFields.push('id')
+              if (!resource.title) missingFields.push('title')
+              if (!resource.description) missingFields.push('description')
+
+              if (missingFields.length > 0) {
+                console.warn('Missing fields:', missingFields)
+              } else {
+                console.log('✅ All required fields present')
+              }
+            }
+          } else {
+            console.error('❌ API call failed:', data)
+          }
+        } catch (error) {
+          console.error('❌ Error testing resources page:', error)
+        }
+      }
+
+      // 页面加载后执行测试
+      window.onload = function () {
+        testResourcesPage()
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Resources Page Error Debug</h1>
+    <p>Check the console for error details...</p>
+
+    <div id="results"></div>
+
+    <script>
+      // 重定向console.log到页面
+      const originalLog = console.log
+      const originalError = console.error
+      const resultsDiv = document.getElementById('results')
+
+      function addToResults(type, message) {
+        const div = document.createElement('div')
+        div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black'
+        div.style.fontFamily = 'monospace'
+        div.style.margin = '5px 0'
+        div.textContent = `[${type}] ${message}`
+        resultsDiv.appendChild(div)
+      }
+
+      console.log = function (...args) {
+        originalLog.apply(console, args)
+        addToResults('log', args.join(' '))
+      }
+
+      console.error = function (...args) {
+        originalError.apply(console, args)
+        addToResults('error', args.join(' '))
+      }
+
+      console.warn = function (...args) {
+        console.warn.apply(console, args)
+        addToResults('warn', args.join(' '))
+      }
+    </script>
+  </body>
+</html>

@@ -11,7 +11,7 @@
       <h3>
         <i class="fas fa-video header-icon"></i>
         <span class="title-text">影像思政</span>
-        <router-link to="/resources/category/video" class="more-link">
+        <router-link to="/resources/video" class="more-link">
           更多<i class="fas fa-angle-right"></i>
         </router-link>
       </h3>

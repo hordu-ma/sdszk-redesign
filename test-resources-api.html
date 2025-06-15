@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Resources API</title>
+  </head>
+  <body>
+    <h1>Test Resources API</h1>
+    <div id="result"></div>
+
+    <script>
+      async function testResourcesAPI() {
+        try {
+          const response = await fetch(
+            'http://localhost:3000/api/resources?status=published&page=1&limit=12'
+          )
+          const data = await response.json()
+
+          document.getElementById('result').innerHTML = `
+                    <h2>API Response:</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `
+
+          console.log('API Response:', data)
+        } catch (error) {
+          document.getElementById('result').innerHTML = `
+                    <h2>Error:</h2>
+                    <pre>${error.message}</pre>
+                `
+          console.error('API Error:', error)
+        }
+      }
+
+      // Test on page load
+      testResourcesAPI()
+    </script>
+  </body>
+</html>

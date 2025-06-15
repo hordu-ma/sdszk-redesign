@@ -43,20 +43,29 @@ export interface Resource {
   id: string
   title: string
   description?: string
-  content: string
-  type: 'document' | 'video' | 'image' | 'audio' | 'other'
-  category?: string
-  url: string
+  content?: string
+  type?: 'document' | 'video' | 'image' | 'audio' | 'other'
+  category?:
+    | string
+    | {
+        id: string
+        key: string
+        name: string
+      }
+  categoryId?: string
+  url?: string
   fileSize?: number
+  fileType?: string
   mimeType?: string
   downloadCount?: number
   viewCount?: number
-  author?: ResourceAuthor
+  author?: ResourceAuthor | string
   authorAffiliation?: string
   publishDate?: string
   comments?: Comment[]
   shares?: Share[]
-  status: 'draft' | 'published'
+  status?: 'draft' | 'published'
+  isFeatured?: boolean
   featured?: boolean
   tags?: string[]
   seo?: {
@@ -64,8 +73,18 @@ export interface Resource {
     metaDescription?: string
     keywords?: string[]
   }
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
+  createdBy?: {
+    id: string
+    username: string
+    name: string
+  }
+  updatedBy?: {
+    id: string
+    username: string
+    name: string
+  }
   data?: any
 }
 
@@ -92,13 +111,18 @@ export class ResourceApi extends BaseApi {
   // 获取资源列表
   async getList(params?: ResourceQueryParams): Promise<PaginatedResponse<Resource>> {
     const response = await this.get<Resource[]>('', params)
+
+    // 确保response.data是数组
+    const data = Array.isArray(response.data) ? response.data : []
+
     return {
-      ...response,
-      data: response.data,
+      success: response.success,
+      data: data,
+      message: response.message,
       pagination: response.pagination || {
-        total: 0,
-        page: 1,
-        limit: 10,
+        total: response.total || 0,
+        page: params?.page || 1,
+        limit: params?.limit || 10,
       },
     }
   }

@@ -43,6 +43,22 @@ const mapBackendToFrontend = data => {
 
   const mapped = { ...(data.toObject ? data.toObject() : data) }
 
+  // 首先处理_id到id的转换
+  if (mapped._id !== undefined) {
+    mapped.id = mapped._id.toString()
+    // 删除_id字段以避免冗余
+    delete mapped._id
+  }
+
+  // 递归处理嵌套对象的_id字段
+  const processNestedObject = obj => {
+    if (obj && typeof obj === 'object' && obj._id) {
+      obj.id = obj._id.toString()
+      delete obj._id
+    }
+    return obj
+  }
+
   // 字段名映射
   if (mapped.content !== undefined) {
     mapped.description = mapped.content
@@ -52,13 +68,23 @@ const mapBackendToFrontend = data => {
   if (mapped.category !== undefined) {
     // 如果category是对象（已populate），保留对象信息并添加categoryId
     if (typeof mapped.category === 'object' && mapped.category !== null) {
-      mapped.categoryId = mapped.category._id || mapped.category.id
+      mapped.category = processNestedObject(mapped.category)
+      mapped.categoryId = mapped.category.id || mapped.category._id
       // 保留category对象以供前端显示
     } else {
       // 如果category是字符串ID，转换为categoryId
       mapped.categoryId = mapped.category
       delete mapped.category
     }
+  }
+
+  // 处理其他可能包含_id的嵌套对象
+  if (mapped.createdBy) {
+    mapped.createdBy = processNestedObject(mapped.createdBy)
+  }
+
+  if (mapped.updatedBy) {
+    mapped.updatedBy = processNestedObject(mapped.updatedBy)
   }
 
   if (mapped.featured !== undefined) {
