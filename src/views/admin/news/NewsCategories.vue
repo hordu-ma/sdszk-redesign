@@ -29,7 +29,9 @@
           <template v-if="column.key === 'name'">
             <div class="category-name">
               <span class="name-text">{{ record.name }}</span>
-              <a-tag v-if="record.isDefault" color="blue" size="small">默认</a-tag>
+              <a-tag v-if="record.isDefault" color="blue" size="small"
+                >默认</a-tag
+              >
             </div>
           </template>
 
@@ -52,7 +54,9 @@
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link" size="small" @click="handleEdit(record)"> 编辑 </a-button>
+              <a-button type="link" size="small" @click="handleEdit(record)">
+                编辑
+              </a-button>
               <a-popconfirm
                 :title="`确定要删除分类「${record.name}」吗？`"
                 ok-text="确定"
@@ -60,7 +64,12 @@
                 @confirm="handleDelete(record)"
                 :disabled="record.isDefault"
               >
-                <a-button type="link" size="small" danger :disabled="record.isDefault">
+                <a-button
+                  type="link"
+                  size="small"
+                  danger
+                  :disabled="record.isDefault"
+                >
                   删除
                 </a-button>
               </a-popconfirm>
@@ -78,7 +87,12 @@
       @ok="handleModalOk"
       @cancel="handleModalCancel"
     >
-      <a-form ref="modalFormRef" :model="modalForm" :rules="modalRules" layout="vertical">
+      <a-form
+        ref="modalFormRef"
+        :model="modalForm"
+        :rules="modalRules"
+        layout="vertical"
+      >
         <a-form-item label="分类名称" name="name">
           <a-input
             v-model:value="modalForm.name"
@@ -130,201 +144,252 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
-import { PlusOutlined } from '@ant-design/icons-vue'
-import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
-import type { TableColumnsType } from 'ant-design-vue'
-import type { Rule } from 'ant-design-vue/es/form'
-import type { AxiosResponse } from 'axios'
+import { ref, reactive, onMounted } from "vue";
+import { message } from "ant-design-vue";
+import { PlusOutlined } from "@ant-design/icons-vue";
+import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
+import type { TableColumnsType } from "ant-design-vue";
+import type { Rule } from "ant-design-vue/es/form";
+import type { AxiosResponse } from "axios";
 
 // 创建分类API实例
-const newsCategoryApi = new NewsCategoryApi()
+const newsCategoryApi = new NewsCategoryApi();
 
 // 数据状态
-const loading = ref(false)
-const categories = ref<NewsCategory[]>([])
-const modalVisible = ref(false)
-const modalLoading = ref(false)
-const editingCategory = ref<NewsCategory | null>(null)
-const modalFormRef = ref()
+const loading = ref(false);
+const categories = ref<NewsCategory[]>([]);
+const modalVisible = ref(false);
+const modalLoading = ref(false);
+const editingCategory = ref<NewsCategory | null>(null);
+const modalFormRef = ref();
 
 // 模态框表单
 const modalForm = reactive({
-  name: '',
-  description: '',
+  name: "",
+  description: "",
   sort: 0,
   status: true,
-  key: '',
-})
+  key: "",
+});
 
 // 表格列配置
 const columns: TableColumnsType = [
   {
-    title: '分类名称',
-    key: 'name',
-    dataIndex: 'name',
+    title: "分类名称",
+    key: "name",
+    dataIndex: "name",
     width: 200,
   },
   {
-    title: '描述',
-    key: 'description',
-    dataIndex: 'description',
+    title: "描述",
+    key: "description",
+    dataIndex: "description",
     ellipsis: true,
   },
   {
-    title: '新闻数量',
-    key: 'newsCount',
-    dataIndex: 'newsCount',
+    title: "新闻数量",
+    key: "newsCount",
+    dataIndex: "newsCount",
     width: 120,
   },
   {
-    title: '排序',
-    key: 'sort',
-    dataIndex: 'sort',
+    title: "排序",
+    key: "sort",
+    dataIndex: "sort",
     width: 100,
     sorter: (a: any, b: any) => a.sort - b.sort,
   },
   {
-    title: '状态',
-    key: 'status',
-    dataIndex: 'status',
+    title: "状态",
+    key: "status",
+    dataIndex: "status",
     width: 100,
   },
   {
-    title: '创建时间',
-    key: 'createdAt',
-    dataIndex: 'createdAt',
+    title: "创建时间",
+    key: "createdAt",
+    dataIndex: "createdAt",
     width: 180,
   },
   {
-    title: '操作',
-    key: 'actions',
+    title: "操作",
+    key: "actions",
     width: 150,
-    fixed: 'right',
+    fixed: "right",
   },
-]
+];
 
 // 表单验证规则
 const modalRules: Record<string, Rule[]> = {
   name: [
-    { required: true, message: '请输入分类名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '分类名称长度应在2-50个字符之间', trigger: 'blur' },
-  ],
-  key: [
-    { required: true, message: '请输入分类标识', trigger: 'blur' },
-    { min: 2, max: 50, message: '分类标识长度应在2-50个字符之间', trigger: 'blur' },
+    { required: true, message: "请输入分类名称", trigger: "blur" },
     {
-      pattern: /^[a-z0-9-_]+$/,
-      message: '分类标识只能包含小写字母、数字、短横线、下划线',
-      trigger: 'blur',
+      min: 2,
+      max: 50,
+      message: "分类名称长度应在2-50个字符之间",
+      trigger: "blur",
     },
   ],
-  sort: [{ type: 'number', min: 0, max: 999, message: '排序值应在0-999之间', trigger: 'blur' }],
-}
+  key: [
+    { required: true, message: "请输入分类标识", trigger: "blur" },
+    {
+      min: 2,
+      max: 50,
+      message: "分类标识长度应在2-50个字符之间",
+      trigger: "blur",
+    },
+    {
+      pattern: /^[a-z0-9-_]+$/,
+      message: "分类标识只能包含小写字母、数字、短横线、下划线",
+      trigger: "blur",
+    },
+  ],
+  sort: [
+    {
+      type: "number",
+      min: 0,
+      max: 999,
+      message: "排序值应在0-999之间",
+      trigger: "blur",
+    },
+  ],
+};
 
 // 格式化日期
 const formatDate = (dateString: string) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    console.log('fetchCategories 调用')
-    loading.value = true
-    const response = await newsCategoryApi.getList()
-    console.log('接口响应', response)
-    console.log('接口响应 data', response?.data)
+    console.log("🔄 fetchCategories 开始调用");
+    loading.value = true;
+    const response = await newsCategoryApi.getList();
+    console.log("📡 原始响应:", response);
+    console.log("📊 响应类型:", typeof response);
+    console.log("📋 响应键:", Object.keys(response || {}));
 
-    const data = (response as any)?.data?.data || []
+    // 修复数据响应处理逻辑 - 尝试多种可能的数据路径
+    let data = [];
+    if (response?.data?.data) {
+      data = response.data.data;
+      console.log("✅ 使用 response.data.data 路径");
+    } else if (response?.data) {
+      data = response.data;
+      console.log("✅ 使用 response.data 路径");
+    } else if (Array.isArray(response)) {
+      data = response;
+      console.log("✅ 使用 response 直接路径");
+    } else {
+      console.warn("⚠️ 无法解析响应数据结构:", response);
+    }
+
+    console.log("📦 解析后的数据:", data);
+    console.log(
+      "🔢 数据类型:",
+      typeof data,
+      "是否为数组:",
+      Array.isArray(data)
+    );
+
     if (!Array.isArray(data)) {
-      console.warn('响应数据不是数组格式:', data)
-      categories.value = []
-      return
+      console.warn("❌ 响应数据不是数组格式:", data);
+      categories.value = [];
+      return;
     }
 
     categories.value = data
-      .map((item: any) => ({
-        ...item,
-        sort: item.order, // 表格用 sort 字段
-        status: item.isActive, // 直接用布尔值
-      }))
-      .sort((a, b) => (a.order || 0) - (b.order || 0))
-    console.log('最终 categories', categories.value)
+      .map((item: any) => {
+        console.log("🔄 处理项目:", item);
+        return {
+          ...item,
+          sort: item.order, // 表格用 sort 字段
+          status: item.isActive, // 直接用布尔值
+        };
+      })
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+    console.log("✅ 最终 categories 数量:", categories.value.length);
+    console.log("📋 最终 categories:", categories.value);
   } catch (error: any) {
-    console.error('fetchCategories 报错', error)
-    message.error(error.message || '获取分类列表失败')
-    categories.value = []
+    console.error("❌ fetchCategories 报错:", error);
+    console.error("📊 错误详情:", {
+      message: error.message,
+      response: error.response,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    message.error(error.message || "获取分类列表失败");
+    categories.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 显示创建模态框
 const showCreateModal = () => {
-  editingCategory.value = null
+  editingCategory.value = null;
   Object.assign(modalForm, {
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     sort: 0,
     status: true,
-    key: '',
-  })
-  modalVisible.value = true
-}
+    key: "",
+  });
+  modalVisible.value = true;
+};
 
 // 处理编辑
 const handleEdit = (record: NewsCategory) => {
-  editingCategory.value = record
+  editingCategory.value = record;
   Object.assign(modalForm, {
     name: record.name,
-    description: record.description || '',
+    description: record.description || "",
     sort: record.order || 0,
     status: record.isActive,
-    key: record.key || '',
-  })
-  modalVisible.value = true
-}
+    key: record.key || "",
+  });
+  modalVisible.value = true;
+};
 
 // 处理状态变化
 const handleStatusChange = async (record: NewsCategory) => {
   try {
     await newsCategoryApi.update(record._id, {
       isActive: !record.isActive,
-    })
-    record.isActive = !record.isActive
-    message.success('状态更新成功')
+    });
+    record.isActive = !record.isActive;
+    message.success("状态更新成功");
   } catch (error: any) {
     // 恢复原状态
-    record.isActive = !record.isActive
-    message.error(error.message || '状态更新失败')
+    record.isActive = !record.isActive;
+    message.error(error.message || "状态更新失败");
   }
-}
+};
 
 // 处理删除
 const handleDelete = async (record: NewsCategory) => {
   try {
-    await newsCategoryApi.delete(record._id)
-    message.success('删除成功')
-    fetchCategories()
+    await newsCategoryApi.delete(record._id);
+    message.success("删除成功");
+    fetchCategories();
   } catch (error: any) {
-    message.error(error.message || '删除失败')
+    message.error(error.message || "删除失败");
   }
-}
+};
 
 // 处理模态框确认
 const handleModalOk = async () => {
   try {
-    await modalFormRef.value.validate()
-    modalLoading.value = true
+    await modalFormRef.value.validate();
+    modalLoading.value = true;
 
     const data = {
       name: modalForm.name,
@@ -332,45 +397,49 @@ const handleModalOk = async () => {
       order: modalForm.sort,
       isActive: modalForm.status,
       key: modalForm.key,
-    }
+    };
 
     if (editingCategory.value) {
-      await newsCategoryApi.update(editingCategory.value._id, data)
-      message.success('编辑成功')
+      await newsCategoryApi.update(editingCategory.value._id, data);
+      message.success("编辑成功");
     } else {
-      await newsCategoryApi.create(data)
-      message.success('创建成功')
+      await newsCategoryApi.create(data);
+      message.success("创建成功");
     }
 
-    modalVisible.value = false
-    fetchCategories()
+    modalVisible.value = false;
+    fetchCategories();
   } catch (error: any) {
     if (error.errorFields) {
       // 表单验证错误
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else {
       // 处理API错误
-      let errorMessage = '操作失败，请重试'
+      let errorMessage = "操作失败，请重试";
 
       // 检查是否是API错误对象
-      if (error.response && error.response.data && error.response.data.message) {
-        errorMessage = error.response.data.message
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        errorMessage = error.response.data.message;
       } else if (error.message) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
-      message.error(errorMessage)
+      message.error(errorMessage);
     }
   } finally {
-    modalLoading.value = false
+    modalLoading.value = false;
   }
-}
+};
 
 // 处理模态框取消
 const handleModalCancel = () => {
-  modalVisible.value = false
-  editingCategory.value = null
-}
+  modalVisible.value = false;
+  editingCategory.value = null;
+};
 
 // 生成分类标识
 const generateKeyFromName = () => {
@@ -378,16 +447,16 @@ const generateKeyFromName = () => {
     // 将中文转为拼音或简化处理，这里简化为移除特殊字符
     modalForm.key = modalForm.name
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // 移除特殊字符
-      .replace(/\s+/g, '-') // 空格替换为短横线
-      .replace(/[^a-z0-9-_]/g, '') // 只保留允许的字符
-      .substring(0, 50) // 限制长度
+      .replace(/[^\w\s-]/g, "") // 移除特殊字符
+      .replace(/\s+/g, "-") // 空格替换为短横线
+      .replace(/[^a-z0-9-_]/g, "") // 只保留允许的字符
+      .substring(0, 50); // 限制长度
   }
-}
+};
 
 onMounted(() => {
-  fetchCategories()
-})
+  fetchCategories();
+});
 </script>
 
 <style scoped lang="scss">

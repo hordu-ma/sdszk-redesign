@@ -28,15 +28,38 @@ export abstract class BaseApi {
     config: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
+      const fullUrl = config.url?.startsWith("/api")
+        ? config.url
+        : this.getUrl(config.url || "");
+
+      console.log("🌐 API 请求:", {
+        method: config.method,
+        url: fullUrl,
+        params: config.params,
+        data: config.data,
+      });
+
       const response = await this.api.request<any, any>({
         ...config,
-        url: config.url?.startsWith("/api")
-          ? config.url
-          : this.getUrl(config.url || ""),
+        url: fullUrl,
       });
+
+      console.log("📡 API 响应:", {
+        status: response.status,
+        statusText: response.statusText,
+        data: response.data,
+        headers: response.headers,
+      });
+
       // 返回response.data，这才是真正的API响应数据
       return response.data;
     } catch (error) {
+      console.error("❌ API 请求失败:", {
+        url: config.url,
+        error: error,
+        response: (error as any)?.response,
+      });
+
       if (error instanceof Error) {
         return handleApiError(error as AxiosError<ApiErrorResponse>);
       }

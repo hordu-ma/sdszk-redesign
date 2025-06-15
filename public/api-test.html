@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <title>API 测试</title>
+  </head>
+  <body>
+    <h1>API 测试</h1>
+    <button onclick="testNewsCategories()">测试新闻分类API</button>
+    <button onclick="testResourceCategories()">测试资源分类API</button>
+    <div id="output"></div>
+
+    <script>
+      async function testNewsCategories() {
+        try {
+          const response = await fetch("/api/news-categories", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          const data = await response.json();
+          document.getElementById("output").innerHTML =
+            "<h3>新闻分类API响应:</h3><pre>" +
+            JSON.stringify(data, null, 2) +
+            "</pre>";
+        } catch (error) {
+          document.getElementById("output").innerHTML =
+            "<h3>新闻分类API错误:</h3><pre>" + error.message + "</pre>";
+        }
+      }
+
+      async function testResourceCategories() {
+        try {
+          const response = await fetch("/api/resource-categories", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          const data = await response.json();
+          document.getElementById("output").innerHTML =
+            "<h3>资源分类API响应:</h3><pre>" +
+            JSON.stringify(data, null, 2) +
+            "</pre>";
+        } catch (error) {
+          document.getElementById("output").innerHTML =
+            "<h3>资源分类API错误:</h3><pre>" + error.message + "</pre>";
+        }
+      }
+    </script>
+  </body>
+</html>
