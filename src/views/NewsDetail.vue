@@ -1,44 +1,61 @@
 <!-- NewsDetail.vue - 用于显示单个新闻文章详情 -->
 <template>
-  <div v-if="newsData" class="news-detail-container">
+  <div class="news-detail-container">
     <a-spin :spinning="loading" tip="加载中...">
-      <!-- 面包屑导航 -->
-      <breadcrumb-nav :items="breadcrumbItems" />
+      <div v-if="newsData && newsData.id">
+        <!-- 面包屑导航 -->
+        <breadcrumb-nav :items="breadcrumbItems" />
 
-      <!-- 文章标题 -->
-      <div class="article-header">
-        <h1 class="article-title">{{ newsData.title }}</h1>
-        <article-meta
-          :date="newsData.publishDate || newsData.createdAt"
-          :author="
-            typeof newsData.author === 'object'
-              ? (newsData.author as any).username || (newsData.author as any).name || ''
-              : newsData.author
-          "
-          :source="newsData.source?.name"
-          :view-count="newsData.viewCount"
-        />
-      </div>
-
-      <!-- 文章内容 -->
-      <div class="article-content">
-        <!-- 文章摘要 -->
-        <div class="article-summary" v-if="newsData.summary">
-          <p>{{ newsData.summary }}</p>
+        <!-- 文章标题 -->
+        <div class="article-header">
+          <h1 class="article-title">{{ newsData.title }}</h1>
+          <article-meta
+            :date="newsData.publishDate || newsData.createdAt"
+            :author="
+              typeof newsData.author === 'object'
+                ? (newsData.author as any).username || (newsData.author as any).name || ''
+                : newsData.author
+            "
+            :source="newsData.source?.name"
+            :view-count="newsData.viewCount"
+          />
         </div>
 
-        <!-- 主要内容 -->
-        <div class="article-body" v-html="newsData.content"></div>
-      </div>
+        <!-- 文章内容 -->
+        <div class="article-content">
+          <!-- 文章摘要 -->
+          <div class="article-summary" v-if="newsData.summary">
+            <p>{{ newsData.summary }}</p>
+          </div>
 
-      <!-- 相关文章 -->
-      <related-list
-        v-if="relatedNews.length > 0"
-        title="相关文章"
-        icon="fas fa-newspaper"
-        :items="relatedNews"
-        link-prefix="/news/detail"
-      />
+          <!-- 主要内容 -->
+          <div class="article-body" v-html="newsData.content"></div>
+        </div>
+
+        <!-- 相关文章 -->
+        <related-list
+          v-if="relatedNews.length > 0"
+          title="相关文章"
+          icon="fas fa-newspaper"
+          :items="relatedNews"
+          link-prefix="/news/detail"
+        />
+      </div>
+      
+      <!-- 文章不存在的提示 -->
+      <div v-else-if="!loading" class="not-found">
+        <a-result
+          status="404"
+          title="文章未找到"
+          sub-title="抱歉，您访问的文章不存在或已被删除。"
+        >
+          <template #extra>
+            <a-button type="primary" @click="$router.push('/news')">
+              返回新闻列表
+            </a-button>
+          </template>
+        </a-result>
+      </div>
     </a-spin>
   </div>
 </template>
@@ -83,18 +100,30 @@ const fetchNewsData = async (id: string) => {
   try {
     const response = await newsApi.getDetail(id)
     console.log('新闻详情响应', response)
-    // 兼容不同响应结构
-    const resData = response.data || (response as any)
-    if ((resData as any) && ((resData as any).success || (resData as any).status === 'success')) {
-      newsData.value = (resData as any).data
-      // 获取相关文章（同一分类的其他文章）
-      if ((resData as any).data && (resData as any).data.category) {
+    
+    // 检查API响应是否成功
+    if (response.success || response.status === 'success') {
+      const rawData = response.data
+      // 转换后端数据格式以匹配前端类型定义
+      newsData.value = {
+        ...rawData,
+        id: rawData._id || rawData.id, // 兼容_id和id字段
+        author: typeof rawData.author === 'object' 
+          ? rawData.author.username || rawData.author.name 
+          : rawData.author
+      }
+      
+      console.log('处理后的新闻数据', newsData.value)
+      
+      // 获取相关文章
+      if (rawData.category) {
         await fetchRelatedNews(
-          (resData as any).data.category,
-          (resData as any).data.id || (resData as any).data._id
+          rawData.category,
+          rawData._id || rawData.id
         )
       }
     } else {
+      console.error('API响应失败:', response)
       message.error('找不到对应的文章')
     }
   } catch (error) {
@@ -111,12 +140,16 @@ const fetchRelatedNews = async (_category: any, currentId: string) => {
     const response = await newsApi.getList({
       limit: 5,
     })
-    const resData = (response.data || response) as any
-    if (resData && (resData.success || resData.status === 'success')) {
-      relatedNews.value = resData.data
-        .filter((item: any) => (item.id || item._id) !== currentId)
+    
+    console.log('相关文章响应', response)
+    
+    if (response.success || response.status === 'success') {
+      const articles = response.data || []
+      relatedNews.value = articles
+        .filter((item: any) => (item._id || item.id) !== currentId)
+        .slice(0, 4) // 只显示4篇相关文章
         .map((item: any) => ({
-          id: item.id || item._id,
+          id: item._id || item.id,
           title: item.title,
           date: item.publishDate || item.createdAt,
         }))
@@ -187,5 +220,14 @@ onMounted(() => {
   color: #666;
   font-size: 14px;
   margin-top: 8px;
+}
+
+.not-found {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.not-found .ant-result {
+  background: #fff;
 }
 </style>
