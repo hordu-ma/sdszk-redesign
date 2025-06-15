@@ -64,20 +64,35 @@ const categories = ref([])
 
 // 初始化时从路由参数获取分类
 onMounted(async () => {
+  await fetchCategories() // 先获取分类
   if (route.query.category) {
-    activeCategory.value = route.query.category
+    activeCategory.value = route.query.category as string
+  } else {
+    // 确保初始数据加载
+    fetchNews()
   }
-  await Promise.all([fetchCategories(), fetchNews()])
 })
+
+// 监听路由查询参数变化
+watch(() => route.query.category, (newCategory) => {
+  const targetCategory = (newCategory as string) || 'all';
+  if (activeCategory.value !== targetCategory) {
+    activeCategory.value = targetCategory;
+  }
+}, { immediate: false });
 
 // 监听分类变化，更新路由参数
 watch(activeCategory, newCategory => {
-  router.push({
-    path: '/news',
-    query: { ...(newCategory !== 'all' ? { category: newCategory } : {}) },
-  })
-  currentPage.value = 1
-  fetchNews()
+  const currentQueryCategory = route.query.category || 'all';
+  // 只有当分类真正变化时才更新路由
+  if (newCategory !== currentQueryCategory) {
+    router.push({
+      path: '/news',
+      query: { ...(newCategory !== 'all' ? { category: newCategory } : {}) },
+    });
+  }
+  currentPage.value = 1;
+  fetchNews();
 })
 
 // 获取分类列表
@@ -307,6 +322,7 @@ const handlePageChange = page => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -336,6 +352,7 @@ const handlePageChange = page => {
 
   .news-summary {
     -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 }
 </style>
