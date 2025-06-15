@@ -1,46 +1,55 @@
 <template>
-  <div class="news-container">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <h1>资讯中心</h1>
-      <p>大中小学思政课一体化教育相关新闻、通知、政策及研究资料</p>
-    </div>
-
-    <!-- 分类导航 -->
-    <div class="category-nav">
-      <a-tabs v-model:activeKey="activeCategory" @change="handleCategoryChange">
-        <a-tab-pane key="all" tab="全部资讯"></a-tab-pane>
-        <a-tab-pane
-          v-for="category in categories"
-          :key="category.key"
-          :tab="category.name"
-        ></a-tab-pane>
-      </a-tabs>
-    </div>
-
-    <!-- 新闻列表 -->
+  <page-layout
+    title="资讯中心"
+    description="大中小学思政课一体化教育相关新闻、通知、政策及研究资料"
+  >
     <div class="news-content">
-      <a-spin :spinning="loading">
-        <div class="news-list">
-          <news-list-item v-for="news in filteredNews" :key="news._id" :news="news" />
-        </div>
+      <!-- 分类导航 -->
+      <div class="category-nav">
+        <a-tabs
+          v-model:activeKey="activeCategory"
+          @change="handleCategoryChange"
+        >
+          <a-tab-pane key="all" tab="全部资讯"></a-tab-pane>
+          <a-tab-pane
+            v-for="category in categories"
+            :key="category.key"
+            :tab="category.name"
+          ></a-tab-pane>
+        </a-tabs>
+      </div>
 
-        <!-- 分页 -->
-        <div class="pagination-container" v-if="totalNews > 0">
-          <a-pagination
-            v-model:current="currentPage"
-            :total="totalNews"
-            :pageSize="pageSize"
-            @change="handlePageChange"
-            show-less-items
+      <!-- 新闻列表 -->
+      <div class="news-list">
+        <a-spin :spinning="loading">
+          <div class="news-items">
+            <news-list-item
+              v-for="news in filteredNews"
+              :key="news._id"
+              :news="news"
+            />
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-container" v-if="totalNews > 0">
+            <a-pagination
+              v-model:current="currentPage"
+              :total="totalNews"
+              :pageSize="pageSize"
+              @change="handlePageChange"
+              show-less-items
+            />
+          </div>
+
+          <!-- 无数据提示 -->
+          <a-empty
+            v-if="filteredNews.length === 0"
+            description="暂无相关资讯"
           />
-        </div>
-
-        <!-- 无数据提示 -->
-        <a-empty v-if="filteredNews.length === 0" description="暂无相关资讯" />
-      </a-spin>
+        </a-spin>
+      </div>
     </div>
-  </div>
+  </page-layout>
 </template>
 
 <script setup>
@@ -48,6 +57,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { newsApi, newsCategoryApi } from '@/api'
+import PageLayout from '../components/common/PageLayout.vue'
 import NewsListItem from '../components/news/NewsListItem.vue'
 
 const route = useRoute()
@@ -123,15 +133,22 @@ const fetchNews = async () => {
       const selectedCategory = categories.value.find(cat => cat.key === activeCategory.value)
       if (selectedCategory) {
         params.category = selectedCategory._id
+      } else {
+        console.warn('未找到分类:', activeCategory.value, '可用分类:', categories.value)
       }
     }
 
     const response = await newsApi.getList(params)
     console.log('新闻接口响应', response)
 
-    if (response.data.status === 'success') {
-      newsList.value = response.data.data
-      totalNews.value = response.data.pagination?.total || 0
+    if (response.success) {
+      newsList.value = response.data.map(item => ({
+        ...item,
+        id: item._id // 映射字段
+      }))
+      totalNews.value = response.pagination?.total || 0
+    } else {
+      message.error('获取新闻失败')
     }
   } catch (error) {
     console.error('获取新闻失败:', error)
@@ -147,8 +164,8 @@ const filteredNews = computed(() => {
     ...news,
     // 格式化显示数据
     date: new Date(news.publishDate || news.createdAt).toLocaleDateString('zh-CN'),
-    categoryKey: categories.value.find(cat => cat._id === news.category)?.key || 'center',
-    categoryName: categories.value.find(cat => cat._id === news.category)?.name || '中心动态',
+    categoryKey: news.category?.key || 'center',
+    categoryName: news.category?.name || '中心动态',
   }))
 })
 
@@ -166,193 +183,34 @@ const handlePageChange = page => {
 </script>
 
 <style scoped>
-.news-container {
+.news-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.page-header {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.page-header h1 {
-  font-size: 32px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
-}
-
-.page-header p {
-  font-size: 16px;
-  color: #666;
-}
-
 .category-nav {
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 24px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .news-list {
+  margin-top: 24px;
+}
+
+.news-items {
   display: flex;
   flex-direction: column;
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.news-item {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-  overflow: hidden;
-}
-
-.news-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
-}
-
-.news-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-.news-wrapper {
-  display: flex;
-  padding: 20px;
-}
-
-.date-block {
-  min-width: 80px;
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-light) 100%);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-right: 20px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.date-block .day {
-  font-size: 28px;
-  font-weight: bold;
-  line-height: 1;
-  margin-bottom: 5px;
-}
-
-.date-block .month-year {
-  font-size: 14px;
-}
-
-.news-content-inner {
-  flex: 1;
-}
-
-.news-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
-  line-height: 1.5;
-  transition: color 0.3s;
-}
-
-.news-item:hover .news-title {
-  color: #9a2314;
-}
-
-.news-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.category-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: white;
-  background-color: #1890ff;
-}
-
-.category-center {
-  background-color: #1890ff;
-}
-
-.category-notice {
-  background-color: #52c41a;
-}
-
-.category-policy {
-  background-color: #722ed1;
-}
-
-.category-theory {
-  background-color: #fa8c16;
-}
-
-.category-teaching {
-  background-color: #eb2f96;
-}
-
-.news-author,
-.news-source {
-  font-size: 13px;
-  color: #666;
-}
-
-.news-summary {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  margin-top: 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .pagination-container {
   display: flex;
   justify-content: center;
-  margin-top: 30px;
-}
-
-@media (max-width: 768px) {
-  .news-wrapper {
-    flex-direction: column;
-  }
-
-  .date-block {
-    margin-bottom: 15px;
-    margin-right: 0;
-    width: 60px;
-    height: 60px;
-  }
-
-  .news-title {
-    font-size: 16px;
-  }
-
-  .news-summary {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
+  margin-top: 24px;
 }
 </style>

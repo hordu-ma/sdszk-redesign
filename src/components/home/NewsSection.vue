@@ -11,7 +11,7 @@
       <h3>
         <i class="fas fa-newspaper header-icon"></i>
         <span class="title-text">中心动态</span>
-        <router-link to="/news/center" class="more-link">
+        <router-link to="/news?category=center" class="more-link">
           更多<i class="fas fa-angle-right"></i>
         </router-link>
       </h3>
@@ -36,75 +36,75 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { newsApi, newsCategoryApi } from '@/api'
-import carousel1 from '../../assets/images/carousel1.jpg'
-import carousel2 from '../../assets/images/carousel2.jpg'
-import carousel3 from '../../assets/images/carousel3.jpg'
+import { ref, onMounted } from "vue";
+import { newsApi, newsCategoryApi } from "@/api";
+import carousel1 from "../../assets/images/carousel1.jpg";
+import carousel2 from "../../assets/images/carousel2.jpg";
+import carousel3 from "../../assets/images/carousel3.jpg";
 
 interface CarouselItem {
-  id: number
-  image: string
-  title: string
+  id: number;
+  image: string;
+  title: string;
 }
 
 interface NewsItem {
-  id: string
-  title: string
-  date: string
-  summary: string
+  id: string;
+  title: string;
+  date: string;
+  summary: string;
 }
 
 const carouselItems = ref<CarouselItem[]>([
-  { id: 1, image: carousel1, title: '新闻1' },
-  { id: 2, image: carousel2, title: '新闻2' },
-  { id: 3, image: carousel3, title: '新闻3' },
-])
+  { id: 1, image: carousel1, title: "新闻1" },
+  { id: 2, image: carousel2, title: "新闻2" },
+  { id: 3, image: carousel3, title: "新闻3" },
+]);
 
-const centerNews = ref<NewsItem[]>([])
-const centerCategoryId = ref<string>('')
+const centerNews = ref<NewsItem[]>([]);
+const centerCategoryId = ref<string>("");
 
 const fetchCategoryIds = async () => {
   try {
-    const res = await newsCategoryApi.getCoreCategories()
-    console.log('【首页】获取核心分类响应:', res)
+    const res = await newsCategoryApi.getCoreCategories();
+    console.log("【首页】获取核心分类响应:", res);
 
     // 处理API响应格式
-    let categories = []
-    if ((res as any).data && (res as any).data.status === 'success') {
-      categories = (res as any).data.data
+    let categories = [];
+    if ((res as any).data && (res as any).data.status === "success") {
+      categories = (res as any).data.data;
     } else if (res.success || (res as any).success) {
-      categories = res.data || (res as any).data
+      categories = res.data || (res as any).data;
     }
 
     if (Array.isArray(categories)) {
-      const center = categories.find((cat: any) => cat.key === 'center')
+      const center = categories.find((cat: any) => cat.key === "center");
 
-      if (center) centerCategoryId.value = center._id
+      if (center) centerCategoryId.value = center._id;
 
-      console.log('【首页】分类ID获取结果:', {
+      console.log("【首页】分类ID获取结果:", {
         center: centerCategoryId.value,
-      })
+      });
     } else {
-      console.error('【首页】分类数据格式不正确:', categories)
+      console.error("【首页】分类数据格式不正确:", categories);
     }
   } catch (error) {
-    console.error('【首页】获取分类失败:', error)
+    console.error("【首页】获取分类失败:", error);
   }
-}
+};
 
 const fetchNews = async (categoryId: string, limit = 3) => {
-  if (!categoryId) return []
+  if (!categoryId) return [];
 
   try {
-    const res = await newsApi.getList({ category: categoryId, limit })
+    const res = await newsApi.getList({ category: categoryId, limit });
 
     // 处理API响应格式
-    let newsList = []
+    let newsList = [];
     if ((res as any).success && Array.isArray((res as any).data)) {
-      newsList = (res as any).data
+      newsList = (res as any).data;
     } else if ((res as any).data && (res as any).data.success) {
-      newsList = (res as any).data.data || []
+      newsList = (res as any).data.data || [];
     }
 
     if (Array.isArray(newsList)) {
@@ -115,37 +115,37 @@ const fetchNews = async (categoryId: string, limit = 3) => {
           ? item.publishDate.slice(0, 10)
           : item.createdAt
             ? item.createdAt.slice(0, 10)
-            : '',
-        summary: item.summary || '',
-      }))
+            : "",
+        summary: item.summary || "",
+      }));
     }
   } catch (error) {
-    console.error('【首页】获取新闻失败:', error)
+    console.error("【首页】获取新闻失败:", error);
   }
 
-  return []
-}
+  return [];
+};
 
 const fetchAllNews = async () => {
-  const center = await fetchNews(centerCategoryId.value)
+  const center = await fetchNews(centerCategoryId.value);
 
-  centerNews.value = center
+  centerNews.value = center;
 
-  console.log('【首页】中心动态获取完成:', {
+  console.log("【首页】中心动态获取完成:", {
     center: center.length,
-  })
-}
+  });
+};
 
-const formatDay = (date: string): string => date.split('-')[2] || ''
+const formatDay = (date: string): string => date.split("-")[2] || "";
 const formatMonthYear = (date: string): string => {
-  const parts = date.split('-')
-  return parts.length >= 2 ? `${parts[1]}/${parts[0].slice(2)}` : ''
-}
+  const parts = date.split("-");
+  return parts.length >= 2 ? `${parts[1]}/${parts[0].slice(2)}` : "";
+};
 
 onMounted(async () => {
-  await fetchCategoryIds()
-  await fetchAllNews()
-})
+  await fetchCategoryIds();
+  await fetchAllNews();
+});
 </script>
 
 <style scoped>
@@ -185,7 +185,8 @@ onMounted(async () => {
 
 .center-news h3 {
   font-family:
-    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+    "STZhongsong", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Heiti SC", sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: #fff;

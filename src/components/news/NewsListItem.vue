@@ -1,34 +1,48 @@
 <template>
   <div class="news-item">
-    <div class="news-content">
-      <h3 class="news-title">
-        <router-link :to="`/news/detail/${news._id || news.id}`">{{ news.title }}</router-link>
-      </h3>
-      <p class="news-summary">
-        {{ displaySummary }}
-      </p>
-      <div class="news-meta">
-        <span class="news-date">{{ formatDate(news.publishDate || news.createdAt) }}</span>
-        <span class="news-author" v-if="news.author">作者：{{ displayAuthor }}</span>
-        <span class="news-views" v-if="news.viewCount">阅读：{{ news.viewCount }}</span>
+    <router-link :to="`/news/detail/${news._id || news.id}`" class="news-link">
+      <div class="news-wrapper">
+        <div class="date-block">
+          <div class="day">
+            {{ formatDateDay(news.publishDate || news.createdAt) }}
+          </div>
+          <div class="month-year">
+            {{ formatDateMonthYear(news.publishDate || news.createdAt) }}
+          </div>
+        </div>
+        <div class="news-content-inner">
+          <h3 class="news-title">{{ news.title }}</h3>
+          <div class="news-meta">
+            <span
+              class="category-tag"
+              :class="`category-${news.categoryKey || 'center'}`"
+            >
+              {{ news.categoryName || "中心动态" }}
+            </span>
+            <span class="news-author" v-if="displayAuthor"
+              >作者：{{ displayAuthor }}</span
+            >
+            <span class="news-views" v-if="news.viewCount"
+              >阅读：{{ news.viewCount }}</span
+            >
+          </div>
+          <p class="news-summary">{{ displaySummary }}</p>
+        </div>
       </div>
-    </div>
-    <div class="news-cover" v-if="news.cover">
-      <img :src="news.cover" :alt="news.title" />
-    </div>
+    </router-link>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
-import type { News } from '@/types/news'
+import { defineComponent, computed } from "vue";
+import type { News } from "@/types/news";
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, '')
+  return html.replace(/<[^>]+>/g, "");
 }
 
 export default defineComponent({
-  name: 'NewsListItem',
+  name: "NewsListItem",
   props: {
     news: {
       type: Object as () => any,
@@ -38,30 +52,40 @@ export default defineComponent({
   setup(props) {
     // 优先显示摘要，无则取正文前100字
     const displaySummary = computed(() => {
-      if (props.news.summary) return props.news.summary
-      if (props.news.content) return stripHtml(props.news.content).slice(0, 100) + '...'
-      return ''
-    })
+      if (props.news.summary) return props.news.summary;
+      if (props.news.content)
+        return stripHtml(props.news.content).slice(0, 100) + "...";
+      return "";
+    });
     // 显示作者名
     const displayAuthor = computed(() => {
-      const author = props.news.author as any
-      if (typeof author === 'string') return author
+      const author = props.news.author as any;
+      if (typeof author === "string") return author;
       if (author && (author.username || author.name)) {
-        return author.username || author.name
+        return author.username || author.name;
       }
-      return ''
-    })
-    // 日期格式化
-    const formatDate = (date: string) => {
-      return new Date(date).toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })
-    }
-    return { displaySummary, displayAuthor, formatDate }
+      return "";
+    });
+
+    // 日期格式化 - 日
+    const formatDateDay = (date: string) => {
+      return new Date(date).getDate().toString().padStart(2, "0");
+    };
+
+    // 日期格式化 - 月年
+    const formatDateMonthYear = (date: string) => {
+      const d = new Date(date);
+      return `${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+    };
+
+    return {
+      displaySummary,
+      displayAuthor,
+      formatDateDay,
+      formatDateMonthYear,
+    };
   },
-})
+});
 </script>
 
 <style scoped>
@@ -95,7 +119,11 @@ export default defineComponent({
   min-width: 80px;
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-color-light) 100%
+  );
   color: white;
   display: flex;
   flex-direction: column;
@@ -141,8 +169,28 @@ export default defineComponent({
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
-  background: var(--primary-color-light);
-  color: var(--primary-color);
+  color: white;
+  background-color: #1890ff;
+}
+
+.category-center {
+  background-color: #2196f3;
+}
+
+.category-notice {
+  background-color: #4caf50;
+}
+
+.category-policy {
+  background-color: #ff9800;
+}
+
+.category-theory {
+  background-color: #fa8c16;
+}
+
+.category-teaching {
+  background-color: #eb2f96;
 }
 
 .news-author,
@@ -157,7 +205,30 @@ export default defineComponent({
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .news-wrapper {
+    flex-direction: column;
+  }
+
+  .date-block {
+    margin-bottom: 15px;
+    margin-right: 0;
+    width: 60px;
+    height: 60px;
+  }
+
+  .news-title {
+    font-size: 16px;
+  }
+
+  .news-summary {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
 }
 </style>

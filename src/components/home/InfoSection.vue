@@ -5,7 +5,7 @@
         <h3>
           <i class="fas fa-bullhorn header-icon"></i>
           <span class="title-text">通知公告</span>
-          <router-link to="/news/notice" class="more-link">
+          <router-link to="/news?category=notice" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
@@ -33,7 +33,7 @@
         <h3>
           <i class="fas fa-file-alt header-icon"></i>
           <span class="title-text">政策文件</span>
-          <router-link to="/news/policy" class="more-link">
+          <router-link to="/news?category=policy" class="more-link">
             更多<i class="fas fa-angle-right"></i>
           </router-link>
         </h3>
