@@ -1,6 +1,9 @@
 <template>
   <div class="resource-detail">
-    <a-page-header :title="resource?.title || '资源详情'" @back="() => router.push('/resources')">
+    <a-page-header
+      :title="resource?.title || '资源详情'"
+      @back="() => router.push('/resources')"
+    >
       <template #extra>
         <a-space>
           <!-- 暂时禁用下载和分享功能，专注于基本显示 -->
@@ -28,27 +31,41 @@
               <span
                 ><UserOutlined />
                 {{
-                  typeof resource?.author === 'string'
+                  typeof resource?.author === "string"
                     ? resource.author
-                    : resource?.author?.name || resource?.createdBy?.name || '未知作者'
+                    : resource?.author?.name ||
+                      resource?.createdBy?.name ||
+                      "未知作者"
                 }}</span
               >
               <span
                 ><CalendarOutlined />
-                {{ formatDate(resource?.publishDate || resource?.createdAt) }}</span
+                {{
+                  formatDate(resource?.publishDate || resource?.createdAt)
+                }}</span
               >
               <span><EyeOutlined /> {{ resource?.viewCount || 0 }} 查看</span>
-              <span><DownloadOutlined /> {{ resource?.downloadCount || 0 }} 下载</span>
+              <span
+                ><DownloadOutlined />
+                {{ resource?.downloadCount || 0 }} 下载</span
+              >
             </div>
-            <div class="content" v-if="resource?.content" v-html="resource.content"></div>
-            <div v-else-if="resource?.description" class="content">{{ resource.description }}</div>
+            <div
+              class="content"
+              v-if="resource?.description"
+              v-html="resource.description"
+            ></div>
             <div class="tags" v-if="resource?.tags?.length">
               <a-tag v-for="tag in resource.tags" :key="tag">{{ tag }}</a-tag>
             </div>
           </div>
         </a-card>
         <a-card v-else>
-          <a-result status="404" title="资源不存在" sub-title="请检查资源ID是否正确">
+          <a-result
+            status="404"
+            title="资源不存在"
+            sub-title="请检查资源ID是否正确"
+          >
             <template #extra>
               <a-button type="primary" @click="() => router.push('/resources')"
                 >返回资源中心</a-button
@@ -88,63 +105,86 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { resourceApi } from '@/api'
-import type { Resource } from '@/api/modules/resources/index'
-import { message } from 'ant-design-vue'
-import * as dayjs from 'dayjs'
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { resourceApi } from "@/api";
+import type { Resource } from "@/api/modules/resources/index";
+import { message } from "ant-design-vue";
+import * as dayjs from "dayjs";
 import {
   DownloadOutlined,
   ShareAltOutlined,
   UserOutlined,
   CalendarOutlined,
   EyeOutlined,
-} from '@ant-design/icons-vue'
+} from "@ant-design/icons-vue";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // 资源相关状态
-const resource = ref<Resource | null>(null)
-const relatedResources = ref<Resource[]>([])
-const loading = ref(false)
+const resource = ref<Resource | null>(null);
+const relatedResources = ref<Resource[]>([]);
+const loading = ref(false);
 
 // 格式化日期
 const formatDate = (date?: string) => {
-  if (!date) return ''
-  return dayjs.default(date).format('YYYY-MM-DD HH:mm')
-}
+  if (!date) return "";
+  return dayjs.default(date).format("YYYY-MM-DD HH:mm");
+};
 
 // 初始化资源详情
 const fetchResource = async () => {
-  const resourceId = route.params.id as string
+  const resourceId = route.params.id as string;
   if (!resourceId) {
-    message.error('资源ID不能为空')
-    return
+    message.error("资源ID不能为空");
+    return;
   }
 
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await resourceApi.getDetail(resourceId)
+    const response = await resourceApi.getDetail(resourceId);
     if (response.success && response.data) {
-      resource.value = response.data
-      console.log('资源详情获取成功:', response.data)
+      resource.value = response.data;
+      console.log("资源详情获取成功:", response.data);
+
+      // 获取相关资源（同分类的其他资源）
+      await fetchRelatedResources();
     } else {
-      message.error('获取资源详情失败')
-      console.error('API响应失败:', response)
+      message.error("获取资源详情失败");
+      console.error("API响应失败:", response);
     }
   } catch (error) {
-    console.error('获取资源详情失败:', error)
-    message.error('获取资源详情失败，请稍后重试')
+    console.error("获取资源详情失败:", error);
+    message.error("获取资源详情失败，请稍后重试");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
+
+// 获取相关资源
+const fetchRelatedResources = async () => {
+  if (!resource.value) return;
+
+  try {
+    const response = await resourceApi.getList({
+      category: resource.value.categoryId,
+      limit: 5,
+    });
+    if (response.success && response.data) {
+      // 过滤掉当前资源，只显示其他资源
+      relatedResources.value = response.data
+        .filter((r) => r.id !== resource.value?.id)
+        .slice(0, 4);
+    }
+  } catch (error) {
+    console.error("获取相关资源失败:", error);
+  }
+};
 
 onMounted(() => {
-  fetchResource()
-})
+  fetchResource();
+});
 </script>
 
 <style lang="scss" scoped>

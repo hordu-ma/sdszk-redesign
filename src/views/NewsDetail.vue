@@ -13,7 +13,9 @@
             :date="newsData.publishDate || newsData.createdAt"
             :author="
               typeof newsData.author === 'object'
-                ? (newsData.author as any).username || (newsData.author as any).name || ''
+                ? (newsData.author as any).username ||
+                  (newsData.author as any).name ||
+                  ''
                 : newsData.author
             "
             :source="newsData.source?.name"
@@ -41,7 +43,7 @@
           link-prefix="/news/detail"
         />
       </div>
-      
+
       <!-- 文章不存在的提示 -->
       <div v-else-if="!loading" class="not-found">
         <a-result
@@ -61,90 +63,88 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { newsApi } from '@/api'
-import BreadcrumbNav from '../components/common/BreadcrumbNav.vue'
-import ArticleMeta from '../components/common/ArticleMeta.vue'
-import RelatedList from '../components/common/RelatedList.vue'
-import type { News, NewsResponse, NewsListResponse } from '@/types/news'
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import { message } from "ant-design-vue";
+import { newsApi } from "@/api";
+import BreadcrumbNav from "../components/common/BreadcrumbNav.vue";
+import ArticleMeta from "../components/common/ArticleMeta.vue";
+import RelatedList from "../components/common/RelatedList.vue";
+import type { News, NewsResponse, NewsListResponse } from "@/types/news";
 
-const route = useRoute()
-const newsId = computed(() => route.params.id as string)
-const loading = ref(false)
+const route = useRoute();
+const newsId = computed(() => route.params.id as string);
+const loading = ref(false);
 
 // 面包屑导航项
 const breadcrumbItems = computed(() => [
-  { title: '首页', link: '/' },
-  { title: '资讯中心', link: '/news' },
-  { title: newsData.value.title || '文章详情' },
-])
+  { title: "首页", link: "/" },
+  { title: "资讯中心", link: "/news" },
+  { title: newsData.value.title || "文章详情" },
+]);
 
 // 文章数据
 const newsData = ref<News>({
-  id: '',
-  title: '',
-  content: '',
-  status: 'draft',
+  id: "",
+  title: "",
+  content: "",
+  status: "draft",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-})
+});
 
 // 相关文章
-const relatedNews = ref<Array<{ id: string; title: string; date: string }>>([])
+const relatedNews = ref<Array<{ id: string; title: string; date: string }>>([]);
 
 // 获取新闻数据
 const fetchNewsData = async (id: string) => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await newsApi.getDetail(id)
-    console.log('新闻详情响应', response)
-    
+    const response = await newsApi.getDetail(id);
+    console.log("新闻详情响应", response);
+
     // 检查API响应是否成功
-    if (response.success || response.status === 'success') {
-      const rawData = response.data
+    if (response.success || response.status === "success") {
+      const rawData = response.data;
       // 转换后端数据格式以匹配前端类型定义
       newsData.value = {
         ...rawData,
         id: rawData._id || rawData.id, // 兼容_id和id字段
-        author: typeof rawData.author === 'object' 
-          ? rawData.author.username || rawData.author.name 
-          : rawData.author
-      }
-      
-      console.log('处理后的新闻数据', newsData.value)
-      
+        author:
+          typeof rawData.author === "object"
+            ? rawData.author.username || rawData.author.name
+            : rawData.author,
+      };
+
+      console.log("处理后的新闻数据", newsData.value);
+
       // 获取相关文章
       if (rawData.category) {
-        await fetchRelatedNews(
-          rawData.category,
-          rawData._id || rawData.id
-        )
+        await fetchRelatedNews(rawData.category, rawData._id || rawData.id);
       }
     } else {
-      console.error('API响应失败:', response)
-      message.error('找不到对应的文章')
+      console.error("API响应失败:", response);
+      message.error("找不到对应的文章");
     }
   } catch (error) {
-    console.error('获取文章详情失败', error)
-    message.error('获取文章详情失败')
+    console.error("获取文章详情失败", error);
+    message.error("获取文章详情失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 获取相关文章
 const fetchRelatedNews = async (_category: any, currentId: string) => {
   try {
     const response = await newsApi.getList({
       limit: 5,
-    })
-    
-    console.log('相关文章响应', response)
-    
-    if (response.success || response.status === 'success') {
-      const articles = response.data || []
+    });
+
+    console.log("相关文章响应", response);
+
+    if (response.success || response.status === "success") {
+      const articles = response.data || [];
       relatedNews.value = articles
         .filter((item: any) => (item._id || item.id) !== currentId)
         .slice(0, 4) // 只显示4篇相关文章
@@ -152,18 +152,18 @@ const fetchRelatedNews = async (_category: any, currentId: string) => {
           id: item._id || item.id,
           title: item.title,
           date: item.publishDate || item.createdAt,
-        }))
+        }));
     }
   } catch (error) {
-    console.error('获取相关文章失败', error)
+    console.error("获取相关文章失败", error);
   }
-}
+};
 
 onMounted(() => {
   if (newsId.value) {
-    fetchNewsData(newsId.value)
+    fetchNewsData(newsId.value);
   }
-})
+});
 </script>
 
 <style scoped>
