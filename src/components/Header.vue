@@ -1,5 +1,9 @@
 <template>
-  <header class="header" :class="{ 'header-scrolled': isScrolled }" :data-visible="isHeaderVisible">
+  <header
+    class="header"
+    :class="{ 'header-scrolled': isScrolled }"
+    :data-visible="isHeaderVisible"
+  >
     <div class="header-content">
       <button class="mobile-menu-trigger" @click="toggleMenu">
         <span class="sr-only">打开菜单</span>
@@ -23,30 +27,50 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
-                <router-link to="/news/center" class="dropdown-link">中心动态</router-link>
+                <router-link to="/news?category=center" class="dropdown-link"
+                  >中心动态</router-link
+                >
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/news/notice" class="dropdown-link">通知公告</router-link>
+                <router-link to="/news?category=notice" class="dropdown-link"
+                  >通知公告</router-link
+                >
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/news/policy" class="dropdown-link">政策文件</router-link>
+                <router-link to="/news?category=policy" class="dropdown-link"
+                  >政策文件</router-link
+                >
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">活动中心</a>
+        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item"
+          >活动中心</a
+        >
         <el-dropdown trigger="hover" class="nav-dropdown">
           <router-link to="/resources" class="nav-item">资源中心</router-link>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
-                <router-link to="/resources/theory" class="dropdown-link">文献资料</router-link>
+                <router-link
+                  to="/resources?category=theory"
+                  class="dropdown-link"
+                  >理论前沿</router-link
+                >
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/resources/teaching" class="dropdown-link">教学研究</router-link>
+                <router-link
+                  to="/resources?category=teaching"
+                  class="dropdown-link"
+                  >教学研究</router-link
+                >
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/resources/video" class="dropdown-link">影像思政</router-link>
+                <router-link
+                  to="/resources?category=video"
+                  class="dropdown-link"
+                  >影像思政</router-link
+                >
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -71,7 +95,9 @@
 
         <div class="auth-buttons" v-if="!isAuthenticated">
           <router-link to="/auth" class="auth-button">
-            <el-button class="custom-auth-button login-button" plain>登录/注册</el-button>
+            <el-button class="custom-auth-button login-button" plain
+              >登录/注册</el-button
+            >
           </router-link>
         </div>
         <div class="user-menu" v-else>
@@ -102,7 +128,11 @@
         </button>
         <!-- 移动端导航菜单 -->
         <nav class="mobile-nav">
-          <div v-for="item in menuItems" :key="item.path" class="mobile-nav-item">
+          <div
+            v-for="item in menuItems"
+            :key="item.path"
+            class="mobile-nav-item"
+          >
             <component
               :is="item.external ? 'a' : 'router-link'"
               :to="!item.external ? item.path : undefined"
@@ -139,137 +169,137 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { Search, ArrowDown } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/user'
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { Search, ArrowDown } from "@element-plus/icons-vue";
+import { useUserStore } from "@/stores/user";
 
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
 // 状态管理
-const isMenuOpen = ref(false)
-const isScrolled = ref(false)
-const isHeaderVisible = ref(true)
-const lastScrollY = ref(0)
-const searchKeyword = ref('')
-let scrollTimer: ReturnType<typeof setTimeout> | null = null
+const isMenuOpen = ref(false);
+const isScrolled = ref(false);
+const isHeaderVisible = ref(true);
+const lastScrollY = ref(0);
+const searchKeyword = ref("");
+let scrollTimer: ReturnType<typeof setTimeout> | null = null;
 
 // 用户状态
-const isAuthenticated = computed(() => userStore.isAuthenticated)
-const userInfo = computed(() => userStore.userInfo)
+const isAuthenticated = computed(() => userStore.isAuthenticated);
+const userInfo = computed(() => userStore.userInfo);
 
 // 菜单项配置
 interface MenuItem {
-  path: string
-  name: string
-  children?: MenuItem[]
-  external?: boolean
+  path: string;
+  name: string;
+  children?: MenuItem[];
+  external?: boolean;
 }
 
 const menuItems: MenuItem[] = [
-  { path: '/', name: '首页' },
-  { path: '/about', name: '平台简介' },
+  { path: "/", name: "首页" },
+  { path: "/about", name: "平台简介" },
   {
-    path: '/news',
-    name: '资讯中心',
+    path: "/news",
+    name: "资讯中心",
     children: [
-      { path: '/news/center', name: '中心动态' },
-      { path: '/news/notice', name: '通知公告' },
-      { path: '/news/policy', name: '政策文件' },
+      { path: "/news?category=center", name: "中心动态" },
+      { path: "/news?category=notice", name: "通知公告" },
+      { path: "/news?category=policy", name: "政策文件" },
     ],
   },
-  { path: 'http://show.sdszk.cn/#/', name: '活动中心', external: true },
+  { path: "http://show.sdszk.cn/#/", name: "活动中心", external: true },
   {
-    path: '/resources',
-    name: '资源中心',
+    path: "/resources",
+    name: "资源中心",
     children: [
-      { path: '/resources/theory', name: '文献资料' },
-      { path: '/resources/teaching', name: '教学研究' },
-      { path: '/resources/video', name: '影像思政' },
+      { path: "/resources?category=theory", name: "理论前沿" },
+      { path: "/resources?category=teaching", name: "教学研究" },
+      { path: "/resources?category=video", name: "影像思政" },
     ],
   },
-  { path: '/ai', name: 'AI思政' },
-]
+  { path: "/ai", name: "AI思政" },
+];
 
 // 处理登录相关
 const handleCommand = (command: string) => {
   switch (command) {
-    case 'profile':
-      router.push('/user/profile')
-      break
-    case 'logout':
-      userStore.logout()
-      router.push('/')
-      break
+    case "profile":
+      router.push("/user/profile");
+      break;
+    case "logout":
+      userStore.logout();
+      router.push("/");
+      break;
   }
-}
+};
 
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
     router.push({
-      path: '/search',
+      path: "/search",
       query: { q: searchKeyword.value.trim() },
-    })
+    });
   }
-}
+};
 
 const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
-  document.body.style.overflow = isMenuOpen.value ? 'hidden' : ''
-}
+  isMenuOpen.value = !isMenuOpen.value;
+  document.body.style.overflow = isMenuOpen.value ? "hidden" : "";
+};
 
 const closeMenu = () => {
-  isMenuOpen.value = false
-  document.body.style.overflow = ''
-}
+  isMenuOpen.value = false;
+  document.body.style.overflow = "";
+};
 
 // 处理滚动效果
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50
+  isScrolled.value = window.scrollY > 50;
 
   if (window.scrollY < 50) {
-    isHeaderVisible.value = true
+    isHeaderVisible.value = true;
   } else {
-    const currentScrollY = window.scrollY
+    const currentScrollY = window.scrollY;
     if (currentScrollY < lastScrollY.value) {
-      isHeaderVisible.value = true
+      isHeaderVisible.value = true;
     } else if (currentScrollY > lastScrollY.value + 10) {
-      isHeaderVisible.value = false
+      isHeaderVisible.value = false;
     }
-    lastScrollY.value = currentScrollY
+    lastScrollY.value = currentScrollY;
   }
 
   if (scrollTimer !== null) {
-    clearTimeout(scrollTimer)
+    clearTimeout(scrollTimer);
   }
   scrollTimer = setTimeout(() => {
-    isHeaderVisible.value = true
-  }, 2000)
-}
+    isHeaderVisible.value = true;
+  }, 2000);
+};
 
 // 监听路由变化
 watch(
   () => route.path,
   () => {
-    isHeaderVisible.value = true
-    isMenuOpen.value = false
-    document.body.style.overflow = ''
+    isHeaderVisible.value = true;
+    isMenuOpen.value = false;
+    document.body.style.overflow = "";
   }
-)
+);
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  handleScroll()
-})
+  window.addEventListener("scroll", handleScroll);
+  handleScroll();
+});
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener("scroll", handleScroll);
   if (scrollTimer !== null) {
-    clearTimeout(scrollTimer)
+    clearTimeout(scrollTimer);
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
@@ -296,11 +326,11 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
 }
 
-.header[data-visible='true'] {
+.header[data-visible="true"] {
   transform: translateY(0);
 }
 
-.header[data-visible='false'] {
+.header[data-visible="false"] {
   transform: translateY(-100%);
 }
 

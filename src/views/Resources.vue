@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { message } from "ant-design-vue";
 import {
   FileOutlined,
@@ -117,6 +117,7 @@ import { resourceApi } from "@/api";
 import type { Resource } from "@/api";
 
 const router = useRouter();
+const route = useRoute();
 const loading = ref(false);
 const activeCategory = ref("all");
 const currentPage = ref(1);
@@ -124,6 +125,24 @@ const pageSize = ref(12);
 const total = ref(0);
 const resources = ref<Resource[]>([]);
 const categories = ref(RESOURCE_CATEGORIES);
+
+// 初始化时从路由参数获取分类
+onMounted(() => {
+  if (route.query.category) {
+    activeCategory.value = route.query.category as string;
+  }
+  fetchResources();
+});
+
+// 监听分类变化，更新路由参数
+watch(activeCategory, (newCategory) => {
+  router.push({
+    path: "/resources",
+    query: { ...(newCategory !== "all" ? { category: newCategory } : {}) },
+  });
+  currentPage.value = 1;
+  fetchResources();
+});
 
 // 获取资源列表
 const fetchResources = async () => {
@@ -159,8 +178,6 @@ const fetchResources = async () => {
 // 处理分类变化
 const handleCategoryChange = (key: string) => {
   activeCategory.value = key;
-  currentPage.value = 1;
-  fetchResources();
 };
 
 // 处理分页变化
@@ -185,9 +202,9 @@ const formatDate = (date?: string) => {
 };
 
 // 初始化
-onMounted(() => {
-  fetchResources();
-});
+// onMounted(() => {
+//   fetchResources();
+// });
 </script>
 
 <style scoped>

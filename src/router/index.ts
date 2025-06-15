@@ -1,15 +1,19 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { useUserStore } from '../stores/user'
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
+import { message } from "ant-design-vue";
+import { useUserStore } from "../stores/user";
 
 // 扩展路由元数据类型
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
-    requiresAuth?: boolean
-    adminOnly?: boolean
-    permissions?: string[]
-    keepAlive?: boolean
-    title?: string
+    requiresAuth?: boolean;
+    adminOnly?: boolean;
+    permissions?: string[];
+    keepAlive?: boolean;
+    title?: string;
   }
 }
 
@@ -17,336 +21,300 @@ declare module 'vue-router' {
 const getBase = (): string => {
   // 检查是否有环境变量
   if (import.meta.env.VITE_BASE_URL) {
-    return import.meta.env.VITE_BASE_URL
+    return import.meta.env.VITE_BASE_URL;
   }
   // 否则使用默认的BASE_URL
-  return import.meta.env.BASE_URL || '/'
-}
+  return import.meta.env.BASE_URL || "/";
+};
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
-    name: 'home',
-    component: () => import('../views/Home.vue'),
+    path: "/",
+    name: "home",
+    component: () => import("../views/Home.vue"),
   },
   {
-    path: '/auth',
-    name: 'auth',
-    component: () => import('../views/auth/AuthPage.vue'),
+    path: "/auth",
+    name: "auth",
+    component: () => import("../views/auth/AuthPage.vue"),
     meta: {
       requiresAuth: false,
     },
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/About.vue'),
+    path: "/about",
+    name: "about",
+    component: () => import("../views/About.vue"),
   },
   {
-    path: '/news',
-    name: 'news',
-    component: () => import('../views/News.vue'),
+    path: "/news",
+    name: "news",
+    component: () => import("../views/News.vue"),
   },
   {
-    path: '/news/center',
-    name: 'newsCenter',
-    component: () => import('../views/news/NewsList.vue'),
-  },
-  {
-    path: '/news/notice',
-    name: 'newsNotice',
-    component: () => import('../views/news/NewsList.vue'),
-  },
-  {
-    path: '/news/policy',
-    name: 'newsPolicy',
-    component: () => import('../views/news/NewsList.vue'),
-  },
-  {
-    path: '/news/detail/:id',
-    name: 'newsDetail',
-    component: () => import('../views/NewsDetail.vue'),
+    path: "/news/detail/:id",
+    name: "newsDetail",
+    component: () => import("../views/NewsDetail.vue"),
     props: true,
   },
   {
-    path: '/activities',
-    name: 'activities',
-    component: () => import('../views/Activities.vue'),
+    path: "/activities",
+    name: "activities",
+    component: () => import("../views/Activities.vue"),
   },
   {
-    path: '/resources',
-    name: 'resources',
-    component: () => import('../views/Resources.vue'),
-  },
-  // 添加缺失的资源子路由
-  {
-    path: '/resources/theory',
-    name: 'resourcesTheory',
-    component: () => import('../views/resources/ResourcesByCategory.vue'),
-    props: { category: 'theory' },
+    path: "/resources",
+    name: "resources",
+    component: () => import("../views/Resources.vue"),
   },
   {
-    path: '/resources/teaching',
-    name: 'resourcesTeaching',
-    component: () => import('../views/resources/ResourcesByCategory.vue'),
-    props: { category: 'teaching' },
-  },
-  {
-    path: '/resources/video',
-    name: 'resourcesVideo',
-    component: () => import('../views/resources/ResourcesByCategory.vue'),
-    props: { category: 'video' },
-  },
-  {
-    path: '/resources/category/:category',
-    name: 'resourcesByCategory',
-    component: () => import('../views/resources/ResourcesByCategory.vue'),
+    path: "/resources/detail/:id",
+    name: "resourceDetail",
+    component: () => import("../views/resources/ResourceDetail.vue"),
     props: true,
   },
   {
-    path: '/resources/detail/:id',
-    name: 'resourceDetail',
-    component: () => import('../views/resources/ResourceDetail.vue'),
-    props: true,
-  },
-  {
-    path: '/ai',
-    name: 'ai',
-    component: () => import('../views/AI.vue'),
+    path: "/ai",
+    name: "ai",
+    component: () => import("../views/AI.vue"),
   },
   // 个人中心路由
   {
-    path: '/user',
-    component: () => import('../views/user/UserLayout.vue'),
+    path: "/user",
+    component: () => import("../views/user/UserLayout.vue"),
     meta: {
       requiresAuth: true,
     },
     children: [
       {
-        path: '',
-        redirect: '/user/profile',
+        path: "",
+        redirect: "/user/profile",
       },
       {
-        path: 'profile',
-        name: 'userProfile',
-        component: () => import('../views/user/UserProfile.vue'),
+        path: "profile",
+        name: "userProfile",
+        component: () => import("../views/user/UserProfile.vue"),
       },
       {
-        path: 'favorites',
-        name: 'userFavorites',
-        component: () => import('../views/user/UserFavorites.vue'),
+        path: "favorites",
+        name: "userFavorites",
+        component: () => import("../views/user/UserFavorites.vue"),
       },
       {
-        path: 'history',
-        name: 'userHistory',
-        component: () => import('../views/user/UserHistory.vue'),
+        path: "history",
+        name: "userHistory",
+        component: () => import("../views/user/UserHistory.vue"),
       },
       {
-        path: 'settings',
-        name: 'userSettings',
-        component: () => import('../views/user/UserSettings.vue'),
+        path: "settings",
+        name: "userSettings",
+        component: () => import("../views/user/UserSettings.vue"),
       },
     ],
   },
   // 管理后台路由
   {
-    path: '/admin/login',
-    name: 'adminLogin',
-    component: () => import('../views/admin/auth/AdminLogin.vue'),
+    path: "/admin/login",
+    name: "adminLogin",
+    component: () => import("../views/admin/auth/AdminLogin.vue"),
     meta: {
       requiresAuth: false,
     },
   },
   {
-    path: '/admin',
-    component: () => import('../components/admin/AdminLayout.vue'),
+    path: "/admin",
+    component: () => import("../components/admin/AdminLayout.vue"),
     meta: {
       requiresAuth: true,
       adminOnly: true,
     },
     children: [
       {
-        path: '',
-        redirect: '/admin/dashboard',
+        path: "",
+        redirect: "/admin/dashboard",
       },
       {
-        path: 'dashboard',
-        name: 'adminDashboard',
-        component: () => import('../views/admin/dashboard/AdminDashboard.vue'),
+        path: "dashboard",
+        name: "adminDashboard",
+        component: () => import("../views/admin/dashboard/AdminDashboard.vue"),
         meta: {
           keepAlive: true,
-          title: '仪表板',
+          title: "仪表板",
         },
       },
       // 新闻管理路由
       {
-        path: 'news',
+        path: "news",
         children: [
           {
-            path: 'list',
-            name: 'adminNewsList',
-            component: () => import('../views/admin/news/NewsList.vue'),
+            path: "list",
+            name: "adminNewsList",
+            component: () => import("../views/admin/news/NewsList.vue"),
             meta: {
               keepAlive: true,
-              permissions: ['news:read'],
-              title: '新闻列表',
+              permissions: ["news:read"],
+              title: "新闻列表",
             },
           },
           {
-            path: 'create',
-            name: 'adminNewsCreate',
-            component: () => import('../views/admin/news/NewsCreate.vue'),
+            path: "create",
+            name: "adminNewsCreate",
+            component: () => import("../views/admin/news/NewsCreate.vue"),
             meta: {
               keepAlive: false,
-              permissions: ['news:create'],
-              title: '发布新闻',
+              permissions: ["news:create"],
+              title: "发布新闻",
             },
           },
           {
-            path: 'edit/:id',
-            name: 'adminNewsEdit',
-            component: () => import('../views/admin/news/NewsEdit.vue'),
+            path: "edit/:id",
+            name: "adminNewsEdit",
+            component: () => import("../views/admin/news/NewsEdit.vue"),
             props: true,
             meta: {
               keepAlive: false,
-              permissions: ['news:update'],
-              title: '编辑新闻',
+              permissions: ["news:update"],
+              title: "编辑新闻",
             },
           },
           {
-            path: 'categories',
-            name: 'adminNewsCategories',
-            component: () => import('../views/admin/news/NewsCategories.vue'),
+            path: "categories",
+            name: "adminNewsCategories",
+            component: () => import("../views/admin/news/NewsCategories.vue"),
             meta: {
               keepAlive: true,
-              permissions: ['news:category'],
-              title: '分类管理',
+              permissions: ["news:category"],
+              title: "分类管理",
             },
           },
         ],
       },
       // 资源管理路由
       {
-        path: 'resources',
+        path: "resources",
         children: [
           {
-            path: 'list',
-            name: 'adminResourcesList',
-            component: () => import('../views/admin/resources/ResourcesList.vue'),
+            path: "list",
+            name: "adminResourcesList",
+            component: () =>
+              import("../views/admin/resources/ResourcesList.vue"),
             meta: {
-              permissions: ['resource:read'],
+              permissions: ["resource:read"],
             },
           },
           {
-            path: 'create',
-            name: 'adminResourcesCreate',
-            component: () => import('../views/admin/resources/ResourcesCreate.vue'),
+            path: "create",
+            name: "adminResourcesCreate",
+            component: () =>
+              import("../views/admin/resources/ResourcesCreate.vue"),
             meta: {
-              permissions: ['resource:create'],
+              permissions: ["resource:create"],
             },
           },
           {
-            path: 'edit/:id',
-            name: 'adminResourcesEdit',
-            component: () => import('../views/admin/resources/ResourcesEdit.vue'),
+            path: "edit/:id",
+            name: "adminResourcesEdit",
+            component: () =>
+              import("../views/admin/resources/ResourcesEdit.vue"),
             props: true,
             meta: {
-              permissions: ['resource:update'],
+              permissions: ["resource:update"],
             },
           },
           {
-            path: 'categories',
-            name: 'adminResourcesCategories',
-            component: () => import('../views/admin/resources/ResourcesCategories.vue'),
+            path: "categories",
+            name: "adminResourcesCategories",
+            component: () =>
+              import("../views/admin/resources/ResourcesCategories.vue"),
             meta: {
-              permissions: ['resource:category'],
+              permissions: ["resource:category"],
             },
           },
         ],
       },
       // 用户管理路由
       {
-        path: 'users',
+        path: "users",
         children: [
           {
-            path: 'list',
-            name: 'adminUsersList',
-            component: () => import('../views/admin/users/UsersList.vue'),
+            path: "list",
+            name: "adminUsersList",
+            component: () => import("../views/admin/users/UsersList.vue"),
             meta: {
-              permissions: ['user:read'],
+              permissions: ["user:read"],
             },
           },
           {
-            path: 'roles',
-            name: 'adminUserRoles',
-            component: () => import('../views/admin/users/UserRoles.vue'),
+            path: "roles",
+            name: "adminUserRoles",
+            component: () => import("../views/admin/users/UserRoles.vue"),
             meta: {
-              permissions: ['user:role'],
+              permissions: ["user:role"],
             },
           },
           {
-            path: 'permissions',
-            name: 'adminUserPermissions',
-            component: () => import('../views/admin/users/UserPermissions.vue'),
+            path: "permissions",
+            name: "adminUserPermissions",
+            component: () => import("../views/admin/users/UserPermissions.vue"),
             meta: {
-              permissions: ['user:permission'],
+              permissions: ["user:permission"],
             },
           },
         ],
       },
       // 系统设置路由
       {
-        path: 'settings',
-        name: 'adminSettings',
-        component: () => import('../views/admin/settings/SystemSettings.vue'),
+        path: "settings",
+        name: "adminSettings",
+        component: () => import("../views/admin/settings/SystemSettings.vue"),
         meta: {
-          permissions: ['settings:update'],
+          permissions: ["settings:update"],
         },
       },
     ],
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(getBase()),
   routes,
-})
+});
 
 // 导航守卫
 router.beforeEach(async (to, _from, next) => {
-  const userStore = useUserStore()
+  const userStore = useUserStore();
 
   // 如果需要验证
-  if (to.matched.some(record => record.meta.requiresAuth)) {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!userStore.isAuthenticated) {
       // 未登录，重定向到登录页
       return next({
-        path: '/admin/login',
+        path: "/admin/login",
         query: { redirect: to.fullPath },
-      })
+      });
     }
 
     // 检查路由是否需要管理员权限
     if (to.meta.adminOnly && !userStore.isAdmin) {
-      message.error('您没有访问该页面的权限')
-      return next({ path: '/admin/dashboard' })
+      message.error("您没有访问该页面的权限");
+      return next({ path: "/admin/dashboard" });
     }
 
     // 检查路由是否需要特定权限
     if (to.meta.permissions) {
-      const requiredPermissions = to.meta.permissions as string[]
-      const hasPermission = requiredPermissions.some(permission =>
+      const requiredPermissions = to.meta.permissions as string[];
+      const hasPermission = requiredPermissions.some((permission) =>
         userStore.hasPermission(permission)
-      )
+      );
 
       if (!hasPermission) {
-        message.error('您没有访问该页面的权限')
-        return next({ path: '/admin/dashboard' })
+        message.error("您没有访问该页面的权限");
+        return next({ path: "/admin/dashboard" });
       }
     }
   }
 
-  next()
-})
+  next();
+});
 
-export default router
+export default router;
