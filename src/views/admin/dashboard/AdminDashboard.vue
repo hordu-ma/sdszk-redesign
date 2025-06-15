@@ -235,29 +235,7 @@ const quickActions = ref([
 ]);
 
 // 最新动态
-const recentActivities = ref([
-  {
-    id: 1,
-    user: { username: "张三", avatar: "" },
-    action: "发布了新闻",
-    target: "《关于加强思政课建设的通知》",
-    createdAt: new Date(Date.now() - 1000 * 60 * 10), // 10分钟前
-  },
-  {
-    id: 2,
-    user: { username: "李四", avatar: "" },
-    action: "上传了资源",
-    target: "思政课教学课件.pptx",
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30分钟前
-  },
-  {
-    id: 3,
-    user: { username: "王五", avatar: "" },
-    action: "修改了用户",
-    target: "赵六的权限设置",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60), // 1小时前
-  },
-]);
+const recentActivities = ref([]);
 
 // 加载统计数据
 const loadStats = async () => {
