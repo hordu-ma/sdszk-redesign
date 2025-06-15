@@ -264,7 +264,7 @@ const saveProfile = async () => {
 
     const response = await api.put("/api/auth/profile", updateData);
 
-    if (response.status === 'success') {
+    if (response.status === "success") {
       message.success("个人资料更新成功");
       // 更新用户信息
       await userStore.initUserInfo();
@@ -289,7 +289,7 @@ const changePassword = async () => {
       newPassword: passwordForm.newPassword,
     });
 
-    if (response.status === 'success') {
+    if (response.status === "success") {
       message.success("密码修改成功");
       showPasswordModal.value = false;
       resetPasswordForm();
