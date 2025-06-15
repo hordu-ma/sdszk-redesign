@@ -135,16 +135,20 @@ onMounted(() => {
 });
 
 // 监听路由查询参数变化
-watch(() => route.query.category, (newCategory) => {
-  const targetCategory = (newCategory as string) || 'all';
-  if (activeCategory.value !== targetCategory) {
-    activeCategory.value = targetCategory;
-  }
-}, { immediate: false });
+watch(
+  () => route.query.category,
+  (newCategory) => {
+    const targetCategory = (newCategory as string) || "all";
+    if (activeCategory.value !== targetCategory) {
+      activeCategory.value = targetCategory;
+    }
+  },
+  { immediate: false }
+);
 
 // 监听分类变化，更新路由参数
 watch(activeCategory, (newCategory) => {
-  const currentQueryCategory = route.query.category || 'all';
+  const currentQueryCategory = route.query.category || "all";
   // 只有当分类真正变化时才更新路由
   if (newCategory !== currentQueryCategory) {
     router.push({
