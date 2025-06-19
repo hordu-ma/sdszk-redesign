@@ -75,6 +75,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { resourceApi } from "@/api";
+import { debouncedGetResources } from "@/utils/homeApiHandler";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import NewsSection from "../components/home/NewsSection.vue";
 import InfoSection from "../components/home/InfoSection.vue";
@@ -95,20 +96,21 @@ const researches = ref([]);
 const videos = ref([]);
 
 const fetchResourceBlock = async () => {
-  // 理论前沿
-  const theoryRes = await resourceApi.getList({ category: "theory", limit: 5 });
-  if (theoryRes.success) theories.value = theoryRes.data;
+  try {
+    // 理论前沿 - 使用防抖和缓存
+    const theoryRes = await debouncedGetResources("theory", 5);
+    if (theoryRes.success) theories.value = theoryRes.data;
 
-  // 教学研究
-  const researchRes = await resourceApi.getList({
-    category: "teaching",
-    limit: 5,
-  });
-  if (researchRes.success) researches.value = researchRes.data;
+    // 教学研究 - 使用防抖和缓存
+    const researchRes = await debouncedGetResources("teaching", 5);
+    if (researchRes.success) researches.value = researchRes.data;
 
-  // 影像思政
-  const videoRes = await resourceApi.getList({ category: "video", limit: 6 });
-  if (videoRes.success) videos.value = videoRes.data;
+    // 影像思政 - 使用防抖和缓存
+    const videoRes = await debouncedGetResources("video", 6);
+    if (videoRes.success) videos.value = videoRes.data;
+  } catch (error) {
+    console.error("加载资源数据失败:", error);
+  }
 };
 
 onMounted(() => {

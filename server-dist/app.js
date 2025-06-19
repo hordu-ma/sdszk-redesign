@@ -7,7 +7,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import rateLimit from "express-rate-limit";
+// 使用自定义的频率限制中间件
+import "./middleware/rateLimit.js";
 // 路由导入
 import newsRoutes from "./routes/news.js";
 import newsCategoryRoutes from "./routes/newsCategories.js";
@@ -39,15 +40,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 配置速率限制
-const limiter = rateLimit({
-  max: 100, // 每IP每小时最多100个请求
-  windowMs: 60 * 60 * 1000, // 1小时
-  message: "从此IP发送了太多请求，请一小时后再试",
-});
+// 引入自定义频率限制中间件
+import { applyRateLimits } from "./middleware/rateLimit.js";
 
 // 中间件配置
-app.use("/api", limiter); // 应用速率限制到所有API路由
+applyRateLimits(app); // 应用自定义频率限制
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());

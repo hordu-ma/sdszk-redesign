@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "../utils/api";
+import { debounce } from "../utils/debounce";
 
 export interface UserInfo {
   id: string;
@@ -38,6 +39,7 @@ export const useUserStore = defineStore(
     const token = ref<string | null>(null);
     const userInfo = ref<UserInfo | null>(null);
     const loading = ref(false);
+    const initInProgress = ref(false); // 添加标记，避免重复初始化
 
     // 计算属性
     const isAuthenticated = computed(() => !!token.value);
@@ -105,7 +107,7 @@ export const useUserStore = defineStore(
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/api/auth/login", payload);
+        const response = await api.post("/auth/login", payload);
 
         // 确保检查response.data是对象且有status属性
         if (
@@ -164,7 +166,7 @@ export const useUserStore = defineStore(
     async function logout(): Promise<void> {
       try {
         // 调用后端登出接口
-        await api.post("/api/auth/logout");
+        await api.post("/auth/logout");
       } catch (error) {
         // 即使后端登出失败，也要清除前端状态
         console.error("后端登出错误:", error);
@@ -183,7 +185,7 @@ export const useUserStore = defineStore(
     async function register(payload: RegisterPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/api/auth/register", payload);
+        const response = await api.post("/auth/register", payload);
 
         if (response.data?.status === "success") {
           return true;
@@ -200,7 +202,7 @@ export const useUserStore = defineStore(
     // 发送验证码
     async function sendVerificationCode(phone: string): Promise<boolean> {
       try {
-        const response = await api.post("/api/auth/send-code", { phone });
+        const response = await api.post("/auth/send-code", { phone });
         return response.data?.status === "success";
       } catch (error) {
         console.error("发送验证码失败:", error);
@@ -218,35 +220,46 @@ export const useUserStore = defineStore(
     }
 
     // 初始化用户信息
-    async function initUserInfo(): Promise<void> {
+    // 防抖版本的用户信息初始化
+    const debouncedUserInfoInit = debounce(async () => {
+      if (initInProgress.value) return; // 避免并发调用
+
       const savedToken = localStorage.getItem("token");
-      if (savedToken) {
+      if (!savedToken) return;
+
+      try {
+        initInProgress.value = true;
         token.value = savedToken;
         // 设置全局请求头
         api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
-        try {
-          const { data } = await api.get("/api/auth/me");
-          if (data.status === "success") {
-            const userData = data.data.user;
 
-            // 转换权限格式
-            const transformedPermissions = transformPermissions(
-              userData.permissions
-            );
-            const userWithTransformedPermissions = {
-              ...userData,
-              permissions: transformedPermissions,
-            };
+        const { data } = await api.get("/auth/me");
+        if (data.status === "success") {
+          const userData = data.data.user;
 
-            userInfo.value = userWithTransformedPermissions;
-          } else {
-            throw new Error("获取用户信息失败");
-          }
-        } catch (error) {
-          console.error("获取用户信息失败:", error);
-          await logout();
+          // 转换权限格式
+          const transformedPermissions = transformPermissions(
+            userData.permissions
+          );
+          const userWithTransformedPermissions = {
+            ...userData,
+            permissions: transformedPermissions,
+          };
+
+          userInfo.value = userWithTransformedPermissions;
+        } else {
+          throw new Error("获取用户信息失败");
         }
+      } catch (error) {
+        console.error("获取用户信息失败:", error);
+        await logout();
+      } finally {
+        initInProgress.value = false;
       }
+    }, 500); // 500ms的防抖延迟
+
+    async function initUserInfo(): Promise<void> {
+      await debouncedUserInfoInit();
     }
 
     return {

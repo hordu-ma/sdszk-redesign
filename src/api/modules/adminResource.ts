@@ -161,7 +161,7 @@ export class AdminResourceApi extends BaseApi {
   ): Promise<
     ApiResponse<{ fileUrl: string; fileName: string; fileSize: number }>
   > {
-    const uploadUrl = "/api/uploads/resource";
+    const uploadUrl = "/uploads/resource";
     console.log("🔄 Upload request:", uploadUrl);
 
     return this.request<{

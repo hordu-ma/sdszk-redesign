@@ -29,9 +29,11 @@ export abstract class BaseApi {
     config: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
-      const fullUrl = config.url?.startsWith("/api")
-        ? config.url
-        : this.getUrl(config.url || "");
+      // 避免URL出现/api/api的重复前缀
+      const url = config.url || "";
+      const isApiPath = url.startsWith("/api/");
+      const cleanUrl = isApiPath ? url.substring(4) : url;
+      const fullUrl = this.getUrl(cleanUrl);
 
       console.log("🌐 API 请求:", {
         method: config.method,

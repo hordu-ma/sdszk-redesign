@@ -38,6 +38,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { newsApi, newsCategoryApi } from "@/api";
+import {
+  debouncedGetCoreCategories,
+  debouncedGetNews,
+} from "@/utils/homeApiHandler";
 import carousel1 from "../../assets/images/carousel1.jpg";
 import carousel2 from "../../assets/images/carousel2.jpg";
 import carousel3 from "../../assets/images/carousel3.jpg";
@@ -66,15 +70,16 @@ const centerCategoryId = ref<string>("");
 
 const fetchCategoryIds = async () => {
   try {
-    const res = await newsCategoryApi.getCoreCategories();
+    // 使用防抖和缓存的API调用
+    const res = await debouncedGetCoreCategories();
     console.log("【首页】获取核心分类响应:", res);
 
     // 处理API响应格式
     let categories = [];
     if ((res as any).data && (res as any).data.status === "success") {
       categories = (res as any).data.data;
-    } else if (res.success || (res as any).success) {
-      categories = res.data || (res as any).data;
+    } else if ((res as any).success) {
+      categories = (res as any).data || [];
     }
 
     if (Array.isArray(categories)) {
@@ -97,7 +102,8 @@ const fetchNews = async (categoryId: string, limit = 3) => {
   if (!categoryId) return [];
 
   try {
-    const res = await newsApi.getList({ category: categoryId, limit });
+    // 使用防抖和缓存的API调用
+    const res = await debouncedGetNews(categoryId, limit);
 
     // 处理API响应格式
     let newsList = [];

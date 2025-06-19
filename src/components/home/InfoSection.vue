@@ -126,6 +126,10 @@
 import { ref, onMounted } from "vue";
 import { newsApi, newsCategoryApi } from "@/api";
 import { computed } from "vue";
+import {
+  debouncedGetCoreCategories,
+  debouncedGetNews,
+} from "@/utils/homeApiHandler";
 
 const props = defineProps({
   theories: {
@@ -145,15 +149,20 @@ const policyCategoryId = ref<string>("");
 
 const fetchCoreCategoryIds = async () => {
   try {
-    const res = await newsCategoryApi.getCoreCategories();
+    // 使用防抖和缓存的API调用
+    const res = await debouncedGetCoreCategories();
     console.log("【InfoSection】获取核心分类响应:", res);
 
     // 处理API响应格式
     let categories = [];
-    if ((res as any).data && (res as any).data.status === "success") {
-      categories = (res as any).data.data;
-    } else if (res.success || (res as any).success) {
-      categories = res.data || (res as any).data;
+    if (res && typeof res === "object") {
+      if (res.data && res.data.status === "success") {
+        categories = res.data.data;
+      } else if (res.success) {
+        categories = res.data;
+      } else if (res.data) {
+        categories = res.data;
+      }
     }
 
     if (Array.isArray(categories)) {
@@ -173,7 +182,6 @@ const fetchCoreCategoryIds = async () => {
     console.error("【InfoSection】获取分类失败:", error);
   }
 };
-
 const fetchNotices = async () => {
   if (!noticeCategoryId.value) {
     console.log("【InfoSection】通知公告分类ID为空");
@@ -185,10 +193,8 @@ const fetchNotices = async () => {
       "【InfoSection】开始获取通知公告，分类ID:",
       noticeCategoryId.value
     );
-    const res = await newsApi.getList({
-      category: noticeCategoryId.value,
-      limit: 5,
-    });
+    // 使用防抖和缓存的API调用
+    const res = await debouncedGetNews(noticeCategoryId.value, 5);
     console.log("【InfoSection】通知公告API响应:", res);
 
     // 处理API响应格式
@@ -220,7 +226,6 @@ const fetchNotices = async () => {
     console.error("【InfoSection】获取通知公告失败:", error);
   }
 };
-
 const fetchPolicies = async () => {
   if (!policyCategoryId.value) {
     console.log("【InfoSection】政策文件分类ID为空");
@@ -232,10 +237,8 @@ const fetchPolicies = async () => {
       "【InfoSection】开始获取政策文件，分类ID:",
       policyCategoryId.value
     );
-    const res = await newsApi.getList({
-      category: policyCategoryId.value,
-      limit: 5,
-    });
+    // 使用防抖和缓存的API调用
+    const res = await debouncedGetNews(policyCategoryId.value, 5);
     console.log("【InfoSection】政策文件API响应:", res);
 
     // 处理API响应格式
