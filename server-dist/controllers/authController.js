@@ -50,19 +50,68 @@ const createSendToken = (user, statusCode, res) => {
 // 登录
 export const login = async (req, res, next) => {
   try {
+    console.log('=== 登录调试开始 ===');
+    console.log('请求体:', req.body);
+    console.log('环境变量检查:', {
+      NODE_ENV: process.env.NODE_ENV,
+      MONGODB_URI: process.env.MONGODB_URI ? '已设置' : '未设置',
+      JWT_SECRET: process.env.JWT_SECRET ? '已设置' : '未设置'
+    });
+    
     const { username, password } = req.body;
 
     // 1) 检查用户名和密码是否存在
+    console.log('步骤1: 检查用户名和密码');
+    console.log('username:', username);
+    console.log('password length:', password ? password.length : 0);
+    
     if (!username || !password) {
+      console.log('❌ 用户名或密码为空');
       return res.status(400).json({
         status: "error",
         message: "请提供用户名和密码",
       });
     }
+    console.log('✅ 用户名和密码都存在');
 
     // 2) 检查用户是否存在及密码是否正确
+    console.log('步骤2: 查找用户');
     const user = await User.findOne({ username }).select("+password");
-    if (!user || !(await user.correctPassword(password, user.password))) {
+    
+    if (!user) {
+      console.log('❌ 用户不存在');
+      return res.status(401).json({
+        status: "error",
+        message: "用户名或密码错误",
+      });
+    }
+    
+    console.log('✅ 用户存在');
+    console.log('用户信息:', {
+      id: user._id,
+      username: user.username,
+      role: user.role,
+      active: user.active,
+      hasPassword: !!user.password,
+      passwordLength: user.password ? user.password.length : 0,
+      passwordPrefix: user.password ? user.password.substring(0, 10) : ''
+    });
+
+    console.log('步骤3: 验证密码');
+    try {
+      const passwordMatch = await user.correctPassword(password, user.password);
+      console.log('密码匹配结果:', passwordMatch);
+      
+      if (!passwordMatch) {
+        console.log('❌ 密码不匹配');
+        return res.status(401).json({
+          status: "error",
+          message: "用户名或密码错误",
+        });
+      }
+      console.log('✅ 密码匹配');
+    } catch (pwdError) {
+      console.error('密码验证过程出错:', pwdError);
       return res.status(401).json({
         status: "error",
         message: "用户名或密码错误",
@@ -70,16 +119,26 @@ export const login = async (req, res, next) => {
     }
 
     // 3) 检查用户是否激活
+    console.log('步骤4: 检查用户激活状态');
+    console.log('用户激活状态:', user.active);
+    
     if (!user.active) {
+      console.log('❌ 用户未激活');
       return res.status(401).json({
         status: "error",
         message: "该账户已被禁用",
       });
     }
+    console.log('✅ 用户已激活');
 
     // 4) 如果一切正常，发送令牌给客户端
+    console.log('步骤5: 生成token并发送响应');
+    console.log('✅ 登录成功，准备发送token');
     createSendToken(user, 200, res);
+    
+    console.log('=== 登录调试结束 ===');
   } catch (error) {
+    console.error('❌ 登录过程中发生错误:', error);
     next(error);
   }
 };
