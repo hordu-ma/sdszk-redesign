@@ -298,9 +298,18 @@ const fetchCategories = async () => {
     console.log("📊 资源分类响应类型:", typeof response);
     console.log("📋 资源分类响应键:", Object.keys(response || {}));
 
-    // 修复数据响应处理逻辑 - 直接使用 response.data
+    // 处理不同的响应格式
     let data: ResourceCategory[] = [];
-    if (response?.data && Array.isArray(response.data)) {
+    if ((response as any).status === "success") {
+      // 处理 { status: 'success', data: [...] } 格式
+      data = (response as any).data || [];
+      console.log("✅ 资源分类使用 { status: 'success', data: [...] } 格式");
+    } else if ((response as any).data?.status === "success") {
+      // 处理嵌套格式 { data: { status: 'success', data: [...] } }
+      data = (response as any).data.data || [];
+      console.log("✅ 资源分类使用嵌套格式");
+    } else if (response?.data && Array.isArray(response.data)) {
+      // 处理标准 ApiResponse 格式 { success: true, data: [...] }
       data = response.data;
       console.log("✅ 资源分类使用 response.data 路径");
     } else if (Array.isArray(response)) {

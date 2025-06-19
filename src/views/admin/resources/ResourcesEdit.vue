@@ -426,8 +426,23 @@ const fetchResourceDetail = async () => {
 const fetchCategories = async () => {
   try {
     const response = await resourceCategoryApi.getList();
-    categories.value = response.data;
+    console.log("编辑页面资源分类响应数据:", response);
+
+    // 处理不同的响应格式
+    if ((response as any).status === "success") {
+      // 处理 { status: 'success', data: [...] } 格式
+      categories.value = (response as any).data || [];
+    } else if ((response as any).data?.status === "success") {
+      // 处理嵌套格式 { data: { status: 'success', data: [...] } }
+      categories.value = (response as any).data.data || [];
+    } else {
+      // 处理标准 ApiResponse 格式 { success: true, data: [...] }
+      categories.value = response.data || [];
+    }
+
+    console.log("编辑页面解析后的资源分类数据:", categories.value);
   } catch (error: any) {
+    console.error("获取资源分类列表失败:", error);
     message.error(error.message || "获取分类列表失败");
   }
 };
