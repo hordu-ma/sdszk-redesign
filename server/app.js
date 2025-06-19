@@ -27,6 +27,7 @@ import adminNewsRoutes from "./routes/adminNews.js";
 import rolesRoutes from "./routes/roles.js";
 import permissionsRoutes from "./routes/permissions.js";
 import adminResourceRoutes from "./routes/adminResources.js";
+import healthRoutes from "./routes/health.js";
 
 // 错误处理中间件
 import errorMiddleware from "./middleware/errorMiddleware.js";
@@ -128,6 +129,9 @@ connectDB();
 app.get("/", (req, res) => {
   res.json({ message: "山东省大中小学思政课一体化指导中心API服务" });
 });
+
+// 健康检查路由（应该在频率限制之前）
+app.use("/api", healthRoutes);
 
 // API 路由
 app.use("/api/news", newsRoutes);

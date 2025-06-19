@@ -1,23 +1,24 @@
 #!/bin/bash
 
-# 设置颜色输出
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# 前端构建和部署脚本 - 使用正确的生产环境配置
 
-echo -e "${YELLOW}=========================================${NC}"
-echo -e "${YELLOW}       前端部署到阿里云ECS服务器        ${NC}"
-echo -e "${YELLOW}=========================================${NC}"
+ALIYUN_HOST="60.205.124.67"
+ALIYUN_USER="root"
 
-# 本地构建
-echo -e "${YELLOW}1. 开始构建前端应用...${NC}"
-npm run build -- --mode aliyun
+echo "=== 前端构建和部署脚本 ==="
+
+echo "1. 清理旧的构建文件..."
+rm -rf dist
+
+echo "2. 使用生产环境配置构建前端..."
+npm run build
 
 if [ $? -ne 0 ]; then
-  echo -e "${RED}构建失败，请检查错误信息${NC}"
-  exit 1
+    echo "❌ 前端构建失败！"
+    exit 1
 fi
+
+echo "✅ 前端构建成功！"
 
 echo -e "${GREEN}构建成功!${NC}"
 
