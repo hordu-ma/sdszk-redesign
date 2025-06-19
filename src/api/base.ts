@@ -21,7 +21,8 @@ export abstract class BaseApi {
   }
 
   protected getUrl(path: string): string {
-    return `/api${this.prefix}${path}`;
+    // 不再自动添加/api前缀，因为Nginx已配置将/api转发到后端，且后端路由已包含/api
+    return `${this.prefix}${path}`;
   }
 
   protected async request<T>(

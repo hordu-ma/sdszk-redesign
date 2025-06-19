@@ -1,3 +1,6 @@
+# 安装Nginx sudo apt install -y nginx # 启动Nginx并设置开机自启 sudo systemctl
+start nginx sudo systemctl enable nginx # 验证Nginx是否正常运行 sudo systemctl
+status nginx
 <template>
   <div class="app-container">
     <!-- 根据路由判断是否显示前台布局 -->
@@ -21,34 +24,27 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from './stores/user'
-import Header from './components/Header.vue'
-import FooterLinks from './components/FooterLinks.vue'
-import BackToTop from './components/BackToTop.vue'
+import { computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useUserStore } from "./stores/user";
+import Header from "./components/Header.vue";
+import FooterLinks from "./components/FooterLinks.vue";
+import BackToTop from "./components/BackToTop.vue";
 
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
-const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const route = useRoute();
+const router = useRouter();
+const userStore = useUserStore();
+const isAdminRoute = computed(() => route.path.startsWith("/admin"));
 
 // 应用初始化
 onMounted(async () => {
   // 初始化用户信息
-  await userStore.initUserInfo()
-
-  // 处理GitHub Pages的路由重定向
-  const redirect = sessionStorage.getItem('redirect')
-  if (redirect) {
-    sessionStorage.removeItem('redirect')
-    router.push(redirect)
-  }
-})
+  await userStore.initUserInfo();
+});
 </script>
 
 <style>
-@import './styles/components.css';
+@import "./styles/components.css";
 
 /* 全局样式 */
 * {
@@ -85,7 +81,8 @@ html {
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #333;
