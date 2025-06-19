@@ -62,6 +62,7 @@ app.use(
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
+        "https://hordu-ma.github.io", // GitHub Pages域名
         process.env.FRONTEND_URL,
         undefined, // 允许无origin的请求（如curl、本地测试）
       ].filter(Boolean);

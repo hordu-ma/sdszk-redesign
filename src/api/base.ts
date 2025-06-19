@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
 import type { ApiModuleConfig, ApiResponse, QueryParams } from "./types";
-import api from "@/utils/api";
+import api from "@/utils/conditionalApi"; // 使用条件API，自动适应GitHub Pages环境
 import type { ApiErrorResponse } from "@/types/error.types";
 import { handleApiError } from "@/utils/apiErrorHandler";
 

@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "build:gh-pages": "vite build --config vite.config.gh-pages.ts",
+    "build:gh-pages": "vue-tsc && vite build --config vite.config.gh-pages.ts --mode github-pages",
+    "build:gh-pages:aliyun": "vue-tsc && vite build --config vite.config.gh-pages.ts --mode aliyun-api",
+    "deploy:gh-pages": "bash scripts/deploy-gh-pages.sh",
+    "deploy:gh-pages:aliyun": "bash scripts/deploy-gh-pages-aliyun.sh",
+    "deploy:backend": "bash scripts/deploy-backend.sh",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -16,10 +20,11 @@
     "test:e2e:report": "playwright show-report test-results/playwright-report",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "server": "node server/index.js",
-    "server:dev": "nodemon server/index.js",
+    "server": "node server/app.js",
+    "server:dev": "nodemon server/app.js",
     "prepare": "husky install",
-    "deploy": "npm run build:gh-pages && gh-pages -d dist"
+    "deploy": "npm run build:gh-pages && gh-pages -d dist",
+    "test:api": "node scripts/test-api-connectivity.mjs"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
