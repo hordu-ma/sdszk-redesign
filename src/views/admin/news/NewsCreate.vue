@@ -15,8 +15,12 @@
         </div>
       </div>
       <div class="header-right">
-        <a-button @click="handleSaveDraft" :loading="saving"> 保存草稿 </a-button>
-        <a-button type="primary" @click="handlePublish" :loading="publishing"> 发布新闻 </a-button>
+        <a-button @click="handleSaveDraft" :loading="saving">
+          保存草稿
+        </a-button>
+        <a-button type="primary" @click="handlePublish" :loading="publishing">
+          发布新闻
+        </a-button>
       </div>
     </div>
 
@@ -67,7 +71,11 @@
               <!-- 发布设置 -->
               <a-card title="发布设置" size="small" class="setting-card">
                 <a-form-item label="新闻分类" name="category">
-                  <a-select v-model:value="formData.category" placeholder="请选择分类" allow-clear>
+                  <a-select
+                    v-model:value="formData.category"
+                    placeholder="请选择分类"
+                    allow-clear
+                  >
                     <a-select-option
                       v-for="category in categories"
                       :key="category._id"
@@ -112,7 +120,11 @@
                     <div v-if="formData.featuredImage" class="image-preview">
                       <img :src="formData.featuredImage" alt="特色图片" />
                       <div class="image-actions">
-                        <a-button type="text" size="small" @click.stop="handleRemoveImage">
+                        <a-button
+                          type="text"
+                          size="small"
+                          @click.stop="handleRemoveImage"
+                        >
                           <template #icon>
                             <DeleteOutlined />
                           </template>
@@ -131,10 +143,14 @@
               <!-- 高级设置 -->
               <a-card title="高级设置" size="small" class="setting-card">
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isTop"> 置顶新闻 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isTop">
+                    置顶新闻
+                  </a-checkbox>
                 </a-form-item>
                 <a-form-item>
-                  <a-checkbox v-model:checked="formData.isFeatured"> 精选新闻 </a-checkbox>
+                  <a-checkbox v-model:checked="formData.isFeatured">
+                    精选新闻
+                  </a-checkbox>
                 </a-form-item>
               </a-card>
             </div>
@@ -146,87 +162,108 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
-import { adminNewsApi, type NewsFormData } from '@/api/modules/adminNews'
-import { NewsCategoryApi, type NewsCategory } from '@/api/modules/newsCategory'
-import QuillEditor from '@/components/common/QuillEditor.vue'
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import {
+  ArrowLeftOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons-vue";
+import { adminNewsApi, type NewsFormData } from "@/api/modules/adminNews";
+import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
+import QuillEditor from "@/components/common/QuillEditor.vue";
 
 // 创建分类API实例
-const newsCategoryApi = new NewsCategoryApi()
-import type { Rule } from 'ant-design-vue/es/form'
-import type { UploadProps } from 'ant-design-vue'
+const newsCategoryApi = new NewsCategoryApi();
+import type { Rule } from "ant-design-vue/es/form";
+import type { UploadProps } from "ant-design-vue";
 
-const router = useRouter()
-const formRef = ref()
-const quillEditorRef = ref()
+const router = useRouter();
+const formRef = ref();
+const quillEditorRef = ref();
 
 // 状态管理
-const saving = ref(false)
-const publishing = ref(false)
-const categories = ref<NewsCategory[]>([])
-const imageFileList = ref([])
+const saving = ref(false);
+const publishing = ref(false);
+const categories = ref<NewsCategory[]>([]);
+const imageFileList = ref([]);
 
 // 表单数据
 const formData = reactive<NewsFormData>({
-  title: '',
-  content: '',
-  summary: '',
-  category: '', // ✅ 修复：改为空字符串，匹配string类型
-  featuredImage: '',
+  title: "",
+  content: "",
+  summary: "",
+  category: "", // ✅ 修复：改为空字符串，匹配string类型
+  featuredImage: "",
   tags: [],
-  status: 'draft',
+  status: "draft",
   isTop: false,
   isFeatured: false,
   publishTime: undefined,
-})
+});
 
 // 表单验证规则
 const rules: Record<string, Rule[]> = {
   title: [
-    { required: true, message: '请输入新闻标题', trigger: 'blur' },
-    { min: 5, max: 100, message: '标题长度应在5-100个字符之间', trigger: 'blur' },
+    { required: true, message: "请输入新闻标题", trigger: "blur" },
+    {
+      min: 5,
+      max: 100,
+      message: "标题长度应在5-100个字符之间",
+      trigger: "blur",
+    },
   ],
-  category: [{ required: true, message: '请选择新闻分类', trigger: 'change' }],
+  category: [{ required: true, message: "请选择新闻分类", trigger: "change" }],
   content: [
-    { required: true, message: '请输入新闻内容', trigger: 'blur' },
-    { min: 50, message: '内容长度不能少于50个字符', trigger: 'blur' },
+    { required: true, message: "请输入新闻内容", trigger: "blur" },
+    { min: 50, message: "内容长度不能少于50个字符", trigger: "blur" },
   ],
-}
+};
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const response = await newsCategoryApi.getList()
-    const data = (response as any)?.data?.data || []
-    categories.value = data
+    const response = await newsCategoryApi.getList();
+    console.log("分类响应数据:", response);
+    // 处理不同的响应格式
+    if ((response as any).status === "success") {
+      // 处理 { status: 'success', data: [...] } 格式
+      categories.value = (response as any).data || [];
+    } else if ((response as any).data?.status === "success") {
+      // 处理嵌套格式 { data: { status: 'success', data: [...] } }
+      categories.value = (response as any).data.data || [];
+    } else {
+      // 处理标准 ApiResponse 格式 { success: true, data: [...] }
+      categories.value = response.data || [];
+    }
+    console.log("解析后的分类数据:", categories.value);
   } catch (error: any) {
-    message.error(error.message || '获取分类列表失败')
+    console.error("获取分类列表失败:", error);
+    message.error(error.message || "获取分类列表失败");
   }
-}
+};
 
 // 图片上传前验证
-const beforeUpload: UploadProps['beforeUpload'] = file => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+const beforeUpload: UploadProps["beforeUpload"] = (file) => {
+  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
   if (!isJpgOrPng) {
-    message.error('只能上传 JPG/PNG 格式的图片!')
-    return false
+    message.error("只能上传 JPG/PNG 格式的图片!");
+    return false;
   }
-  const isLt2M = file.size! / 1024 / 1024 < 2
+  const isLt2M = file.size! / 1024 / 1024 < 2;
   if (!isLt2M) {
-    message.error('图片大小不能超过 2MB!')
-    return false
+    message.error("图片大小不能超过 2MB!");
+    return false;
   }
-  return false // 阻止自动上传
-}
+  return false; // 阻止自动上传
+};
 
 // 处理图片上传
 const handleImageUpload = async ({ file }: any) => {
   try {
-    const uploadFormData = new FormData()
-    uploadFormData.append('file', file)
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file);
 
     // 调用上传API
     // 注意：这里需要替换为实际的上传API
@@ -234,92 +271,92 @@ const handleImageUpload = async ({ file }: any) => {
     // formData.featuredImage = data.url
 
     // 临时使用本地预览（在API实现前使用）
-    const reader = new FileReader()
-    reader.onload = e => {
-      formData.featuredImage = e.target?.result as string
-    }
-    reader.readAsDataURL(file)
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      formData.featuredImage = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
 
-    message.success('图片上传成功')
+    message.success("图片上传成功");
   } catch (error: any) {
-    message.error(error.message || '图片上传失败')
+    message.error(error.message || "图片上传失败");
   }
-}
+};
 
 // 移除图片
 const handleRemoveImage = () => {
-  formData.featuredImage = ''
-}
+  formData.featuredImage = "";
+};
 
 // 保存草稿
 const handleSaveDraft = async () => {
   try {
     // 检查认证状态
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (!token) {
-      message.error('请先登录')
-      router.push('/admin/login')
-      return
+      message.error("请先登录");
+      router.push("/admin/login");
+      return;
     }
 
-    saving.value = true
-    formData.status = 'draft'
+    saving.value = true;
+    formData.status = "draft";
 
-    await formRef.value.validate()
-    await adminNewsApi.create(formData)
+    await formRef.value.validate();
+    await adminNewsApi.create(formData);
 
-    message.success('草稿保存成功')
-    router.push('/admin/news/list')
+    message.success("草稿保存成功");
+    router.push("/admin/news/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else if (error.response?.status === 401) {
-      message.error('登录已过期，请重新登录')
-      router.push('/admin/login')
+      message.error("登录已过期，请重新登录");
+      router.push("/admin/login");
     } else {
-      message.error(error.message || '保存草稿失败')
+      message.error(error.message || "保存草稿失败");
     }
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // 发布新闻
 const handlePublish = async () => {
   try {
     // 检查认证状态
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (!token) {
-      message.error('请先登录')
-      router.push('/admin/login')
-      return
+      message.error("请先登录");
+      router.push("/admin/login");
+      return;
     }
 
-    publishing.value = true
-    formData.status = 'published'
+    publishing.value = true;
+    formData.status = "published";
 
-    await formRef.value.validate()
-    await adminNewsApi.create(formData)
+    await formRef.value.validate();
+    await adminNewsApi.create(formData);
 
-    message.success('新闻发布成功')
-    router.push('/admin/news/list')
+    message.success("新闻发布成功");
+    router.push("/admin/news/list");
   } catch (error: any) {
     if (error.errorFields) {
-      message.error('请检查表单填写是否正确')
+      message.error("请检查表单填写是否正确");
     } else if (error.response?.status === 401) {
-      message.error('登录已过期，请重新登录')
-      router.push('/admin/login')
+      message.error("登录已过期，请重新登录");
+      router.push("/admin/login");
     } else {
-      message.error(error.message || '发布失败')
+      message.error(error.message || "发布失败");
     }
   } finally {
-    publishing.value = false
+    publishing.value = false;
   }
-}
+};
 
 onMounted(() => {
-  fetchCategories()
-})
+  fetchCategories();
+});
 </script>
 
 <style scoped lang="scss">

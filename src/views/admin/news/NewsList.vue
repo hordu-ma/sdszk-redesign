@@ -391,8 +391,21 @@ const fetchCategories = async () => {
     console.log("获取分类列表...");
     const newsCategoryApi = new NewsCategoryApi();
     const response = await newsCategoryApi.getList();
-    categories.value = response.data;
-    console.log("成功获取分类:", response.data.length, "个");
+    console.log("分类响应:", response);
+
+    // 处理不同的响应格式
+    if ((response as any).status === "success") {
+      // 处理 { status: 'success', data: [...] } 格式
+      categories.value = (response as any).data || [];
+    } else if ((response as any).data?.status === "success") {
+      // 处理嵌套格式 { data: { status: 'success', data: [...] } }
+      categories.value = (response as any).data.data || [];
+    } else {
+      // 处理标准 ApiResponse 格式 { success: true, data: [...] }
+      categories.value = response.data || [];
+    }
+
+    console.log("成功获取分类:", categories.value.length, "个");
   } catch (error: any) {
     console.error("获取分类列表失败:", error);
     message.error(error.message || "获取分类列表失败");
