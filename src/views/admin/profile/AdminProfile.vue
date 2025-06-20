@@ -270,7 +270,7 @@ const saveProfile = async () => {
       avatar: formData.avatar,
     };
 
-    const response = await api.put("/auth/profile", updateData);
+    const response = await api.put("/api/auth/profile", updateData);
 
     if (response.data && response.status === 200) {
       message.success("个人资料更新成功");
