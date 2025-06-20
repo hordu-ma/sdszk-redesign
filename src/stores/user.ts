@@ -107,7 +107,7 @@ export const useUserStore = defineStore(
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/auth/login", payload);
+        const response = await api.post("/api/auth/login", payload);
 
         // 确保检查response.data是对象且有status属性
         if (
@@ -166,7 +166,7 @@ export const useUserStore = defineStore(
     async function logout(): Promise<void> {
       try {
         // 调用后端登出接口
-        await api.post("/auth/logout");
+        await api.post("/api/auth/logout");
       } catch (error) {
         // 即使后端登出失败，也要清除前端状态
         console.error("后端登出错误:", error);
@@ -185,7 +185,7 @@ export const useUserStore = defineStore(
     async function register(payload: RegisterPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/auth/register", payload);
+        const response = await api.post("/api/auth/register", payload);
 
         if (response.data?.status === "success") {
           return true;
@@ -202,7 +202,7 @@ export const useUserStore = defineStore(
     // 发送验证码
     async function sendVerificationCode(phone: string): Promise<boolean> {
       try {
-        const response = await api.post("/auth/send-code", { phone });
+        const response = await api.post("/api/auth/send-code", { phone });
         return response.data?.status === "success";
       } catch (error) {
         console.error("发送验证码失败:", error);
@@ -233,7 +233,7 @@ export const useUserStore = defineStore(
         // 设置全局请求头
         api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
 
-        const { data } = await api.get("/auth/me");
+        const { data } = await api.get("/api/auth/me");
         if (data.status === "success") {
           const userData = data.data.user;
 
