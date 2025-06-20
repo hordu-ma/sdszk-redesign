@@ -28,8 +28,7 @@
                 <span class="month-year">{{ formatMonthYear(news.date) }}</span>
               </div>
               <div class="news-content">
-                <h3 class="news-title">{{ news.title }}</h3>
-                <p class="news-summary">{{ news.summary }}</p>
+                {{ news.title }}
               </div>
             </div>
           </router-link>
@@ -59,7 +58,6 @@ interface NewsItem {
   id: string;
   title: string;
   date: string;
-  summary: string;
 }
 
 const carouselItems = ref<CarouselItem[]>([
@@ -78,7 +76,9 @@ const fetchCenterNews = async () => {
     if (!categoryRes.success) return;
 
     // 查找中心动态分类
-    const centerCategory = categoryRes.data.find((cat: any) => cat.key === "center");
+    const centerCategory = categoryRes.data.find(
+      (cat: any) => cat.key === "center"
+    );
     if (!centerCategory) return;
 
     // 获取中心动态新闻
@@ -88,6 +88,7 @@ const fetchCenterNews = async () => {
     });
 
     if (newsRes.success && Array.isArray(newsRes.data)) {
+      console.log("获取到的新闻数据:", newsRes.data);
       centerNews.value = newsRes.data.map((item: any) => ({
         id: item._id || item.id,
         title: item.title,
@@ -96,8 +97,8 @@ const fetchCenterNews = async () => {
           : item.createdAt
             ? item.createdAt.slice(0, 10)
             : "",
-        summary: item.summary || "",
       }));
+      console.log("处理后的新闻数据:", centerNews.value);
     }
   } catch (error) {
     console.error("获取中心动态失败:", error);
@@ -156,10 +157,10 @@ onMounted(() => {
   font-family:
     "STZhongsong", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
     "Heiti SC", sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   color: #fff;
-  padding: 12px 20px;
+  padding: 10px 20px;
   background: linear-gradient(to right, #9a2314, #c44836);
   margin: 0;
   border-radius: 0;
@@ -167,6 +168,7 @@ onMounted(() => {
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  line-height: 1.3;
 }
 
 .center-news .header-icon {
@@ -200,10 +202,10 @@ onMounted(() => {
 .news-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px;
+  padding: 12px 20px 20px 20px;
 }
 
 .news-container::-webkit-scrollbar {
@@ -240,10 +242,12 @@ onMounted(() => {
 
 .news-wrapper {
   display: flex;
-  gap: 25px;
-  padding: 15px 15px 15px 5px;
+  gap: 0;
+  padding: 15px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  height: 96px;
+  align-items: flex-start;
 }
 
 .news-wrapper:hover {
@@ -257,13 +261,18 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   min-width: 70px;
-  height: 70px;
+  width: 70px;
+  height: 66px;
   padding: var(--spacing-sm);
   background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
   border-radius: var(--border-radius-base);
   box-shadow: 0 2px 8px rgba(229, 57, 53, 0.2);
   color: #ffffff;
   transition: var(--transition-base);
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin: 0;
+  margin-right: 15px;
 }
 
 .news-wrapper:hover .date-block {
@@ -289,36 +298,28 @@ onMounted(() => {
 
 .news-content {
   flex: 1;
-}
-
-.news-title {
-  margin: 0 0 var(--spacing-sm);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  color: var(--text-color);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: flex-start;
+  padding: 10px 15px;
+  margin: 0;
+  background: linear-gradient(135deg, #9a2314 0%, #c44836 100%);
+  border-radius: var(--border-radius-base);
+  color: #ffffff;
   overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: normal;
+  word-wrap: break-word;
+  text-align: left;
   transition: var(--transition-base);
 }
 
-.news-wrapper:hover .news-title {
-  color: var(--primary-color);
-}
-
-.news-summary {
-  margin: 0;
-  font-size: var(--font-size-base);
-  color: var(--text-color-light);
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
+.news-wrapper:hover .news-content {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .no-data {
