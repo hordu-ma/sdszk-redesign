@@ -64,7 +64,12 @@ app.use(
         "http://localhost:5174",
         "http://localhost:5175",
         "https://hordu-ma.github.io", // GitHub Pages域名
-        process.env.FRONTEND_URL,
+        "https://horsduroot.com", // 主域名
+        "https://www.horsduroot.com", // 带www的域名
+        // 处理环境变量中的多个域名（逗号分隔）
+        ...(process.env.FRONTEND_URL
+          ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+          : []),
         undefined, // 允许无origin的请求（如curl、本地测试）
       ].filter(Boolean);
       if (!origin || allowedOrigins.includes(origin)) {
