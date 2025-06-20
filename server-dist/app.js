@@ -27,6 +27,7 @@ import adminNewsRoutes from "./routes/adminNews.js";
 import rolesRoutes from "./routes/roles.js";
 import permissionsRoutes from "./routes/permissions.js";
 import adminResourceRoutes from "./routes/adminResources.js";
+import healthRoutes from "./routes/health.js";
 
 // 错误处理中间件
 import errorMiddleware from "./middleware/errorMiddleware.js";
@@ -39,6 +40,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// 配置 trust proxy，用于正确处理代理请求
+app.set("trust proxy", true);
 
 // 引入自定义频率限制中间件
 import { applyRateLimits } from "./middleware/rateLimit.js";
@@ -128,6 +132,9 @@ connectDB();
 app.get("/", (req, res) => {
   res.json({ message: "山东省大中小学思政课一体化指导中心API服务" });
 });
+
+// 健康检查路由（应该在频率限制之前）
+app.use("/api", healthRoutes);
 
 // API 路由
 app.use("/api/news", newsRoutes);

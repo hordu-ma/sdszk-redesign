@@ -4,10 +4,10 @@
 
 import rateLimit from "express-rate-limit";
 
-// 默认限制：100次请求/分钟
+// 默认限制：更宽松的限制，适合生产环境
 const defaultRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1分钟
-  max: 100, // 每个IP最多100个请求/分钟
+  max: 200, // 每个IP最多200个请求/分钟
   standardHeaders: true, // 返回标准的RateLimit头部信息
   legacyHeaders: false, // 禁用X-RateLimit-*头部
   message: {
@@ -15,12 +15,16 @@ const defaultRateLimit = rateLimit({
     message: "请求过于频繁，请稍后再试",
     code: "TOO_MANY_REQUESTS",
   },
+  skip: (req) => {
+    // 跳过健康检查和静态资源
+    return req.path === "/api/health" || req.path.startsWith("/uploads/");
+  },
 });
 
-// 核心接口频率限制：15次请求/分钟
+// 核心接口频率限制：更宽松的限制
 const coreApiRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1分钟
-  max: 15, // 每个IP最多15个请求/分钟
+  max: 50, // 每个IP最多50个请求/分钟
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -29,15 +33,15 @@ const coreApiRateLimit = rateLimit({
     code: "CORE_API_TOO_MANY_REQUESTS",
   },
   keyGenerator: (req) => {
-    // 基于IP和路径组合生成限制键
-    return `${req.ip}-${req.path}`;
+    // 基于IP生成限制键，移除路径以避免过度限制
+    return req.ip;
   },
 });
 
 // 适用于需要更严格限制的接口（例如用户注册、登录等）
 const strictRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5分钟
-  max: 10, // 每个IP最多10个请求/5分钟
+  max: 20, // 每个IP最多20个请求/5分钟
   standardHeaders: true,
   legacyHeaders: false,
   message: {

@@ -41,6 +41,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// 配置 trust proxy，用于正确处理代理请求
+app.set("trust proxy", true);
+
 // 引入自定义频率限制中间件
 import { applyRateLimits } from "./middleware/rateLimit.js";
 

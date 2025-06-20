@@ -57,13 +57,56 @@ zip -r ../server-deploy.zip ./*
 cd ..
 
 echo_success "后端打包完成: server-deploy.zip"
-echo_warning "接下来请按照以下步骤操作:"
-echo "1. 上传 server-deploy.zip 到阿里云服务器"
-echo "2. 在阿里云服务器上解压: unzip server-deploy.zip -d /var/www/sdszk-backend"
-echo "3. 安装Node.js环境(如未安装): apt-get install nodejs npm"
-echo "4. 启动服务: cd /var/www/sdszk-backend && npm start"
-echo ""
-echo_warning "重要: 确保在阿里云上设置了以下环境变量:"
-echo "- MONGODB_URI: MongoDB数据库连接字符串"
-echo "- JWT_SECRET: JWT密钥"
-echo "- FRONTEND_URL: 前端URL(GitHub Pages地址)"
+
+# 服务器配置
+SERVER_USER="root"
+SERVER_IP="60.205.124.67"
+DEPLOY_PATH="/var/www/sdszk-backend"
+
+echo_warning "开始自动部署到服务器..."
+
+# 上传文件到服务器
+echo_warning "正在上传文件到服务器..."
+scp server-deploy.zip $SERVER_USER@$SERVER_IP:/tmp/
+
+# 在服务器上执行部署
+echo_warning "正在服务器上部署..."
+ssh $SERVER_USER@$SERVER_IP << 'EOF'
+    # 停止现有服务
+    pm2 stop sdszk-backend || true
+    
+    # 备份现有代码
+    if [ -d "/var/www/sdszk-backend" ]; then
+        mv /var/www/sdszk-backend /var/www/sdszk-backend-backup-$(date +%Y%m%d_%H%M%S)
+    fi
+    
+    # 创建部署目录
+    mkdir -p /var/www/sdszk-backend
+    
+    # 解压新代码
+    cd /var/www/sdszk-backend
+    unzip -o /tmp/server-deploy.zip
+    
+    # 安装依赖
+    npm install --production
+    
+    # 创建必要目录
+    mkdir -p uploads/documents uploads/images uploads/videos logs
+    
+    # 设置权限
+    chmod -R 755 uploads logs
+    
+    # 重启服务
+    pm2 restart sdszk-backend || pm2 start app.js --name sdszk-backend
+    
+    # 清理临时文件
+    rm /tmp/server-deploy.zip
+EOF
+
+echo_success "后端部署完成!"
+echo_warning "正在检查服务状态..."
+
+# 检查服务状态
+ssh $SERVER_USER@$SERVER_IP "pm2 status"
+
+echo_success "部署成功! 服务已重启"
