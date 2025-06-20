@@ -51,7 +51,7 @@ mkdir -p uploads/documents uploads/images uploads/videos logs
 
 # 打包项目
 echo_warning "正在打包项目..."
-zip -r ../server-deploy.zip ./*
+zip -r ../server-deploy.zip . -x "node_modules/.cache/*"
 
 # 返回项目根目录
 cd ..
