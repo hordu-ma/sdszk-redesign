@@ -26,7 +26,9 @@
             </div>
           </router-link>
         </li>
-        <li v-if="noticeNews.length === 0" class="no-data">暂无通知公告</li>
+        <li v-if="!noticeLoading && noticeNews.length === 0" class="no-data">
+          暂无通知公告
+        </li>
       </ul>
     </div>
     <div class="info-block policy">
@@ -55,7 +57,9 @@
             </div>
           </router-link>
         </li>
-        <li v-if="policyNews.length === 0" class="no-data">暂无政策文件</li>
+        <li v-if="!policyLoading && policyNews.length === 0" class="no-data">
+          暂无政策文件
+        </li>
       </ul>
     </div>
     <div class="info-block theory">
@@ -146,6 +150,11 @@ const props = defineProps({
 
 const noticeNews = ref<any[]>([]);
 const policyNews = ref<any[]>([]);
+
+// 加载状态
+const noticeLoading = ref(true);
+const policyLoading = ref(true);
+
 const noticeCategoryId = ref<string>("");
 const policyCategoryId = ref<string>("");
 
@@ -228,6 +237,7 @@ const fetchCoreCategoryIds = async () => {
 const fetchNotices = async () => {
   if (!noticeCategoryId.value) {
     console.log("【InfoSection】通知公告分类ID为空");
+    noticeLoading.value = false;
     return;
   }
 
@@ -359,11 +369,15 @@ const fetchNotices = async () => {
     }
   } catch (error) {
     console.error("【InfoSection】获取通知公告失败:", error);
+  } finally {
+    // 无论成功还是失败，都设置加载完成
+    noticeLoading.value = false;
   }
 };
 const fetchPolicies = async () => {
   if (!policyCategoryId.value) {
     console.log("【InfoSection】政策文件分类ID为空");
+    policyLoading.value = false;
     return;
   }
 
@@ -506,6 +520,9 @@ const fetchPolicies = async () => {
     }
   } catch (error) {
     console.error("【InfoSection】获取政策文件失败:", error);
+  } finally {
+    // 无论成功还是失败，都设置加载完成
+    policyLoading.value = false;
   }
 };
 
