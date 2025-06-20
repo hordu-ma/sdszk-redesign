@@ -13,16 +13,16 @@ export abstract class BaseApi {
   constructor(config: ApiModuleConfig | string = {}) {
     this.api = api;
     if (typeof config === "string") {
-      this.baseURL = API_CONFIG.baseURL || "";
+      this.baseURL = ""; // axios实例已经设置了baseURL，这里不再重复设置
       this.prefix = config;
     } else {
-      this.baseURL = config.baseURL || API_CONFIG.baseURL || "";
+      this.baseURL = ""; // axios实例已经设置了baseURL，这里不再重复设置
       this.prefix = config.prefix || "";
     }
   }
 
   protected getUrl(path: string): string {
-    return `${this.baseURL}${this.prefix}${path}`;
+    return `${this.prefix}${path}`;
   }
 
   protected async request<T>(
