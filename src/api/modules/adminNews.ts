@@ -66,7 +66,7 @@ export const adminNewsApi = {
     // 确保参数始终是有效的对象
     const validParams = params || {};
     // 确保分页参数正确传递
-    return api.get("/admin/news", {
+    return api.get("/api/admin/news", {
       params: {
         page: validParams.page || 1,
         limit: validParams.limit || 20,
@@ -83,12 +83,12 @@ export const adminNewsApi = {
 
   // 获取新闻详情
   getDetail(id: string): Promise<ApiResponse<NewsItem>> {
-    return api.get(`/admin/news/${id}`);
+    return api.get(`/api/admin/news/${id}`);
   },
 
   // 创建新闻
   create(data: NewsFormData): Promise<ApiResponse<NewsItem>> {
-    return api.post("/admin/news", data);
+    return api.post("/api/admin/news", data);
   },
 
   // 更新新闻
@@ -96,22 +96,22 @@ export const adminNewsApi = {
     id: string,
     data: Partial<NewsFormData>
   ): Promise<ApiResponse<NewsItem>> {
-    return api.put(`/admin/news/${id}`, data);
+    return api.put(`/api/admin/news/${id}`, data);
   },
 
   // 删除新闻
   delete(id: string): Promise<ApiResponse<void>> {
-    return api.delete(`/admin/news/${id}`);
+    return api.delete(`/api/admin/news/${id}`);
   },
 
   // 批量删除新闻
   batchDelete(ids: string[]): Promise<ApiResponse<void>> {
-    return api.post("/admin/news/batch-delete", { ids });
+    return api.post("/api/admin/news/batch-delete", { ids });
   },
 
   // 发布/取消发布新闻
   togglePublish(id: string): Promise<ApiResponse<NewsItem>> {
-    return api.patch(`/admin/news/${id}/toggle-publish`);
+    return api.patch(`/api/admin/news/${id}/toggle-publish`);
   },
 
   // 置顶/取消置顶新闻
