@@ -636,54 +636,6 @@ onUnmounted(() => {
   .user-menu {
     display: none; /* 移动端隐藏用户菜单，在mobile-nav中显示 */
   }
-
-  /* 移动端菜单优化 */
-  .mobile-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 80%;
-    max-width: 300px;
-    height: 100%;
-    background: #fff;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-  }
-
-  .mobile-menu.active {
-    transform: translateX(0);
-  }
-
-  .mobile-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-  }
-
-  .mobile-nav {
-    padding: 80px 30px 30px;
-  }
-
-  .mobile-nav-link {
-    font-size: 16px;
-    padding: 12px 0;
-  }
-
-  .mobile-submenu {
-    padding-left: 16px;
-  }
-
-  .mobile-submenu-link {
-    font-size: 14px;
-    padding: 10px 0;
-  }
 }
 
 @include xs {
