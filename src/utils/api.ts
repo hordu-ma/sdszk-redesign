@@ -37,8 +37,7 @@ const shouldRetry = (error: AxiosError): boolean => {
 
 // 创建axios实例
 const api = axios.create({
-  baseURL:
-    API_CONFIG.baseURL || (import.meta.env.DEV ? "" : "http://localhost:3000"),
+  baseURL: import.meta.env.DEV ? "" : "http://localhost:3000",
   timeout: API_CONFIG.timeout,
   headers: {
     "Content-Type": "application/json",

@@ -3,6 +3,7 @@ import type { ApiModuleConfig, ApiResponse, QueryParams } from "./types";
 import api from "@/utils/conditionalApi"; // 使用条件API，自动适应GitHub Pages环境
 import type { ApiErrorResponse } from "@/types/error.types";
 import { handleApiError } from "@/utils/apiErrorHandler";
+import { API_CONFIG } from "@/config";
 
 export abstract class BaseApi {
   protected api: AxiosInstance;
@@ -12,18 +13,16 @@ export abstract class BaseApi {
   constructor(config: ApiModuleConfig | string = {}) {
     this.api = api;
     if (typeof config === "string") {
-      this.baseURL = "";
+      this.baseURL = API_CONFIG.baseURL || "";
       this.prefix = config;
     } else {
-      this.baseURL = config.baseURL || "";
+      this.baseURL = config.baseURL || API_CONFIG.baseURL || "";
       this.prefix = config.prefix || "";
     }
   }
 
   protected getUrl(path: string): string {
-    // 开发环境需要/api前缀来触发Vite代理
-    const apiPrefix = import.meta.env.DEV ? "/api" : "";
-    return `${apiPrefix}${this.prefix}${path}`;
+    return `${this.baseURL}${this.prefix}${path}`;
   }
 
   protected async request<T>(

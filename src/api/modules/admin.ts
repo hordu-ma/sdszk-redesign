@@ -57,9 +57,6 @@ class DashboardApi extends BaseApi {
 
   // 获取仪表板统计数据
   public getStats(): Promise<ApiResponse<DashboardStats>> {
-    console.log("调用getStats API...");
-    const url = `/api/admin/dashboard/stats`; // 直接构建URL用于调试
-    console.log("请求URL:", url);
     return this.get("/admin/dashboard/stats");
   }
 
