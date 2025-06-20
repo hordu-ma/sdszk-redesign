@@ -21,8 +21,9 @@ export abstract class BaseApi {
   }
 
   protected getUrl(path: string): string {
-    // 不再自动添加/api前缀，因为Nginx已配置将/api转发到后端，且后端路由已包含/api
-    return `${this.prefix}${path}`;
+    // 开发环境需要/api前缀来触发Vite代理
+    const apiPrefix = import.meta.env.DEV ? "/api" : "";
+    return `${apiPrefix}${this.prefix}${path}`;
   }
 
   protected async request<T>(
