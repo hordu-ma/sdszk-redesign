@@ -270,7 +270,7 @@ const saveProfile = async () => {
       avatar: formData.avatar,
     };
 
-    const response = await api.put("/api/auth/profile", updateData);
+    const response = await api.put("/auth/profile", updateData);
 
     if (response.data && response.status === 200) {
       message.success("个人资料更新成功");
@@ -292,7 +292,7 @@ const changePassword = async () => {
     await passwordFormRef.value.validate();
     changingPassword.value = true;
 
-    const response = await api.put("/api/auth/change-password", {
+    const response = await api.put("/auth/change-password", {
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword,
     });

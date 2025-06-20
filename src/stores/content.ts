@@ -179,7 +179,7 @@ export const useContentStore = defineStore("content", {
 
     async createNews(newsData: Record<string, any>): Promise<any> {
       try {
-        const response = await api.post("/api/news", newsData);
+        const response = await api.post("/news", newsData);
         return response.data;
       } catch (error) {
         console.error("创建新闻失败:", error);
@@ -228,7 +228,7 @@ export const useContentStore = defineStore("content", {
 
     async createResource(resourceData: Record<string, any>): Promise<any> {
       try {
-        const response = await api.post("/api/resources", resourceData);
+        const response = await api.post("/resources", resourceData);
         return response.data;
       } catch (error) {
         console.error("创建资源失败:", error);

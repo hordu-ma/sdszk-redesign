@@ -30,11 +30,7 @@ export abstract class BaseApi {
     config: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
-      // 避免URL出现/api/api的重复前缀
-      const url = config.url || "";
-      const isApiPath = url.startsWith("/api/");
-      const cleanUrl = isApiPath ? url.substring(4) : url;
-      const fullUrl = this.getUrl(cleanUrl);
+      const fullUrl = this.getUrl(config.url || "");
 
       console.log("🌐 API 请求:", {
         method: config.method,

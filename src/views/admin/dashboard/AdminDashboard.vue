@@ -437,7 +437,7 @@ const testApiDirectly = async () => {
 
   try {
     console.log("开始直接测试API...");
-    const response = await fetch("/api/admin/dashboard/stats", {
+    const response = await fetch("/admin/dashboard/stats", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
