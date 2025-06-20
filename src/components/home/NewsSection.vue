@@ -16,7 +16,11 @@
         </router-link>
       </h3>
       <div class="news-container">
-        <div v-for="news in centerNews" :key="news.id" class="news-item">
+        <div
+          v-for="news in centerNews as any[]"
+          :key="news.id"
+          class="news-item"
+        >
           <router-link :to="`/news/detail/${news.id}`" class="news-link">
             <div class="news-wrapper">
               <div class="date-block">
@@ -30,6 +34,9 @@
             </div>
           </router-link>
         </div>
+        <div v-if="!centerLoading && centerNews.length === 0" class="no-data">
+          暂无中心动态
+        </div>
       </div>
     </div>
   </div>
@@ -38,10 +45,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { newsApi, newsCategoryApi } from "@/api";
-import {
-  debouncedGetCoreCategories,
-  debouncedGetNews,
-} from "@/utils/homeApiHandler";
 import carousel1 from "../../assets/images/carousel1.jpg";
 import carousel2 from "../../assets/images/carousel2.jpg";
 import carousel3 from "../../assets/images/carousel3.jpg";
@@ -66,55 +69,26 @@ const carouselItems = ref<CarouselItem[]>([
 ]);
 
 const centerNews = ref<NewsItem[]>([]);
-const centerCategoryId = ref<string>("");
+const centerLoading = ref(true);
 
-const fetchCategoryIds = async () => {
+const fetchCenterNews = async () => {
   try {
-    // 使用防抖和缓存的API调用
-    const res = await debouncedGetCoreCategories();
-    console.log("【首页】获取核心分类响应:", res);
+    // 获取分类列表
+    const categoryRes = await newsCategoryApi.getList();
+    if (!categoryRes.success) return;
 
-    // 处理API响应格式
-    let categories = [];
-    if ((res as any).data && (res as any).data.status === "success") {
-      categories = (res as any).data.data;
-    } else if ((res as any).success) {
-      categories = (res as any).data || [];
-    }
+    // 查找中心动态分类
+    const centerCategory = categoryRes.data.find((cat: any) => cat.key === "center");
+    if (!centerCategory) return;
 
-    if (Array.isArray(categories)) {
-      const center = categories.find((cat: any) => cat.key === "center");
+    // 获取中心动态新闻
+    const newsRes = await newsApi.getList({
+      category: centerCategory._id,
+      limit: 3,
+    });
 
-      if (center) centerCategoryId.value = center._id;
-
-      console.log("【首页】分类ID获取结果:", {
-        center: centerCategoryId.value,
-      });
-    } else {
-      console.error("【首页】分类数据格式不正确:", categories);
-    }
-  } catch (error) {
-    console.error("【首页】获取分类失败:", error);
-  }
-};
-
-const fetchNews = async (categoryId: string, limit = 3) => {
-  if (!categoryId) return [];
-
-  try {
-    // 使用防抖和缓存的API调用
-    const res = await debouncedGetNews(categoryId, limit);
-
-    // 处理API响应格式
-    let newsList = [];
-    if ((res as any).success && Array.isArray((res as any).data)) {
-      newsList = (res as any).data;
-    } else if ((res as any).data && (res as any).data.success) {
-      newsList = (res as any).data.data || [];
-    }
-
-    if (Array.isArray(newsList)) {
-      return newsList.map((item: any) => ({
+    if (newsRes.success && Array.isArray(newsRes.data)) {
+      centerNews.value = newsRes.data.map((item: any) => ({
         id: item._id || item.id,
         title: item.title,
         date: item.publishDate
@@ -126,20 +100,10 @@ const fetchNews = async (categoryId: string, limit = 3) => {
       }));
     }
   } catch (error) {
-    console.error("【首页】获取新闻失败:", error);
+    console.error("获取中心动态失败:", error);
+  } finally {
+    centerLoading.value = false;
   }
-
-  return [];
-};
-
-const fetchAllNews = async () => {
-  const center = await fetchNews(centerCategoryId.value);
-
-  centerNews.value = center;
-
-  console.log("【首页】中心动态获取完成:", {
-    center: center.length,
-  });
 };
 
 const formatDay = (date: string): string => date.split("-")[2] || "";
@@ -148,9 +112,8 @@ const formatMonthYear = (date: string): string => {
   return parts.length >= 2 ? `${parts[1]}/${parts[0].slice(2)}` : "";
 };
 
-onMounted(async () => {
-  await fetchCategoryIds();
-  await fetchAllNews();
+onMounted(() => {
+  fetchCenterNews();
 });
 </script>
 
@@ -356,5 +319,12 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+}
+
+.no-data {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  padding: 40px 20px;
 }
 </style>
