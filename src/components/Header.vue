@@ -136,18 +136,45 @@
             :key="item.path"
             class="mobile-nav-item"
           >
-            <component
-              :is="item.external ? 'a' : 'router-link'"
-              :to="!item.external ? item.path : undefined"
-              :href="item.external ? item.path : undefined"
-              :target="item.external ? '_blank' : undefined"
-              @click="item.children ? null : closeMenu"
+            <a
+              v-if="item.external"
+              :href="item.path"
+              target="_blank"
               class="mobile-nav-link"
+              @click="closeMenu"
             >
               {{ item.name }}
-              <i v-if="item.children" class="fas fa-chevron-down"></i>
-            </component>
-            <div v-if="item.children" class="mobile-submenu">
+            </a>
+            <div
+              v-else-if="item.children"
+              class="mobile-nav-link"
+              @click="toggleSubMenu(item.name)"
+            >
+              {{ item.name }}
+              <i
+                class="fas fa-chevron-down"
+                :class="{ 'is-open': openSubMenuName === item.name }"
+              ></i>
+            </div>
+            <router-link
+              v-else
+              :to="item.path"
+              class="mobile-nav-link"
+              @click="closeMenu"
+            >
+              {{ item.name }}
+            </router-link>
+
+            <div
+              v-if="item.children"
+              class="mobile-submenu"
+              :style="{
+                maxHeight:
+                  openSubMenuName === item.name
+                    ? `${item.children.length * 45}px`
+                    : '0',
+              }"
+            >
               <router-link
                 v-for="child in item.children"
                 :key="child.path"
@@ -183,6 +210,7 @@ const userStore = useUserStore();
 
 // 状态管理
 const isMenuOpen = ref(false);
+const openSubMenuName = ref<string | null>(null);
 const isScrolled = ref(false);
 const isHeaderVisible = ref(true);
 const lastScrollY = ref(0);
@@ -248,14 +276,26 @@ const handleSearch = () => {
   }
 };
 
+const toggleSubMenu = (itemName: string) => {
+  if (openSubMenuName.value === itemName) {
+    openSubMenuName.value = null;
+  } else {
+    openSubMenuName.value = itemName;
+  }
+};
+
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
   document.body.style.overflow = isMenuOpen.value ? "hidden" : "";
+  if (!isMenuOpen.value) {
+    openSubMenuName.value = null; // 关闭主菜单时重置子菜单
+  }
 };
 
 const closeMenu = () => {
   isMenuOpen.value = false;
   document.body.style.overflow = "";
+  openSubMenuName.value = null; // 关闭主菜单时重置子菜单
 };
 
 // 处理滚动效果
@@ -725,6 +765,57 @@ onUnmounted(() => {
   display: block;
   font-size: 16px;
   transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  color: #e0e0e0;
+  text-decoration: none;
+  border-radius: 8px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  .fa-chevron-down {
+    margin-left: auto;
+    font-size: 14px;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .fa-chevron-down.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+.mobile-submenu {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease-in-out;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  margin: 4px 0 8px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.mobile-submenu-link {
+  display: block;
+  padding: 10px 0;
+  color: #e0e0e0;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #fff;
+  }
 }
 
 .mobile-auth {
