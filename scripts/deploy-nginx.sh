@@ -19,9 +19,9 @@ SERVER_IP="60.205.124.67"
 # 本地配置文件路径
 LOCAL_CONFIG_PATH="./nginx-ssl.conf"
 
-# 服务器端配置文件路径 (重要: 请根据服务器实际情况确认此路径)
-# 常见的线上路径为 /etc/nginx/sites-available/your-domain.conf 或 /etc/nginx/conf.d/your-domain.conf
-REMOTE_CONFIG_PATH="/etc/nginx/sites-available/horsduroot.com.conf"
+# 服务器端配置文件路径 (根据服务器实际情况确认)
+# 经过 `ssh` 验证，正确的路径是 /etc/nginx/sites-available/sdszk
+REMOTE_CONFIG_PATH="/etc/nginx/sites-available/sdszk"
 
 # --- 脚本开始 ---
 set -e # 任何命令失败则立即退出
