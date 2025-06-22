@@ -117,10 +117,13 @@
         </div>
       </div>
 
+      <!-- 移动端遮罩层 -->
+      <transition name="fade">
+        <div v-if="isMenuOpen" class="mobile-overlay" @click="closeMenu"></div>
+      </transition>
+
       <!-- 移动端菜单容器 -->
       <div class="mobile-menu" :class="{ 'menu-open': isMenuOpen }">
-        <!-- 移动端遮罩层 -->
-        <div class="mobile-overlay" @click="closeMenu"></div>
         <!-- 移动端关闭按钮 -->
         <button class="mobile-menu-close" @click="closeMenu">
           <span class="sr-only">关闭菜单</span>
@@ -687,6 +690,17 @@ onUnmounted(() => {
   right: 0;
 }
 
+/* 遮罩层淡入淡出效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 .mobile-overlay {
   position: fixed;
   top: 0;
@@ -696,15 +710,7 @@ onUnmounted(() => {
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);
   z-index: 1500;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
   cursor: pointer;
-}
-
-.menu-open .mobile-overlay {
-  opacity: 1;
-  visibility: visible;
 }
 
 .mobile-nav {
