@@ -16,81 +16,273 @@
       </div>
     </div>
 
-    <!-- 搜索和筛选 -->
+    <!-- 高级搜索和筛选 -->
     <div class="search-section">
-      <a-form layout="inline" :model="searchForm" @finish="handleSearch">
-        <a-form-item label="关键词">
-          <a-input
-            v-model:value="searchForm.keyword"
-            placeholder="请输入标题或内容关键词"
-            style="width: 200px"
-            allow-clear
-          />
-        </a-form-item>
-        <a-form-item label="分类">
-          <a-select
-            v-model:value="searchForm.category"
-            placeholder="请选择分类"
-            style="width: 150px"
-            allow-clear
-          >
-            <a-select-option
-              v-for="category in categories"
-              :key="category._id"
-              :value="category._id"
+      <a-card size="small" :bordered="false">
+        <template #title>
+          <div class="search-header">
+            <span>高级搜索</span>
+            <a-space>
+              <a-button type="text" size="small" @click="toggleAdvancedSearch">
+                {{ showAdvancedSearch ? "收起" : "展开" }}
+                <template #icon>
+                  <DownOutlined v-if="!showAdvancedSearch" />
+                  <UpOutlined v-else />
+                </template>
+              </a-button>
+              <a-button type="text" size="small" @click="clearSearchHistory">
+                清空历史
+              </a-button>
+            </a-space>
+          </div>
+        </template>
+
+        <!-- 基础搜索 -->
+        <a-form layout="inline" :model="searchForm" @finish="handleSearch">
+          <a-form-item label="关键词">
+            <a-input
+              v-model:value="searchForm.keyword"
+              placeholder="请输入标题或内容关键词"
+              style="width: 250px"
+              allow-clear
+              @press-enter="handleSearch"
             >
-              {{ category.name }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select
-            v-model:value="searchForm.status"
-            placeholder="请选择状态"
-            style="width: 120px"
-            allow-clear
-          >
-            <a-select-option value="draft">草稿</a-select-option>
-            <a-select-option value="published">已发布</a-select-option>
-            <a-select-option value="archived">已归档</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="日期范围">
-          <a-range-picker
-            v-model:value="searchForm.dateRange"
-            format="YYYY-MM-DD"
-            style="width: 240px"
-          />
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" html-type="submit">
-            <template #icon>
-              <SearchOutlined />
-            </template>
-            搜索
-          </a-button>
-          <a-button @click="handleReset" style="margin-left: 8px">
-            重置
-          </a-button>
-        </a-form-item>
-      </a-form>
+              <template #suffix>
+                <SearchOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item label="分类">
+            <a-select
+              v-model:value="searchForm.category"
+              placeholder="请选择分类"
+              style="width: 150px"
+              allow-clear
+            >
+              <a-select-option
+                v-for="category in categories"
+                :key="category._id"
+                :value="category._id"
+              >
+                {{ category.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="状态">
+            <a-select
+              v-model:value="searchForm.status"
+              placeholder="请选择状态"
+              style="width: 120px"
+              allow-clear
+            >
+              <a-select-option value="draft">草稿</a-select-option>
+              <a-select-option value="published">已发布</a-select-option>
+              <a-select-option value="archived">已归档</a-select-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" html-type="submit">
+              <template #icon>
+                <SearchOutlined />
+              </template>
+              搜索
+            </a-button>
+            <a-button @click="handleReset" style="margin-left: 8px">
+              重置
+            </a-button>
+          </a-form-item>
+        </a-form>
+
+        <!-- 高级搜索选项 -->
+        <div v-show="showAdvancedSearch" class="advanced-search">
+          <a-divider />
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-form-item label="作者">
+                <a-input
+                  v-model:value="searchForm.author"
+                  placeholder="请输入作者姓名"
+                  allow-clear
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="标签">
+                <a-select
+                  v-model:value="searchForm.tags"
+                  mode="multiple"
+                  placeholder="请选择标签"
+                  style="width: 100%"
+                  allow-clear
+                  :max-tag-count="3"
+                >
+                  <a-select-option
+                    v-for="tag in availableTags"
+                    :key="tag"
+                    :value="tag"
+                  >
+                    {{ tag }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="阅读量">
+                <a-select
+                  v-model:value="searchForm.viewRange"
+                  placeholder="阅读量范围"
+                  style="width: 100%"
+                  allow-clear
+                >
+                  <a-select-option value="0-100">0-100</a-select-option>
+                  <a-select-option value="100-1000">100-1000</a-select-option>
+                  <a-select-option value="1000-10000"
+                    >1000-10000</a-select-option
+                  >
+                  <a-select-option value="10000+">10000+</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-form-item label="创建时间">
+                <a-range-picker
+                  v-model:value="searchForm.createDateRange"
+                  format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="发布时间">
+                <a-range-picker
+                  v-model:value="searchForm.publishDateRange"
+                  format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="排序方式">
+                <a-select
+                  v-model:value="searchForm.sortBy"
+                  placeholder="请选择排序方式"
+                  style="width: 100%"
+                >
+                  <a-select-option value="createdAt">创建时间</a-select-option>
+                  <a-select-option value="publishDate"
+                    >发布时间</a-select-option
+                  >
+                  <a-select-option value="viewCount">阅读量</a-select-option>
+                  <a-select-option value="title">标题</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-form-item label="特色设置">
+                <a-checkbox-group v-model:value="searchForm.features">
+                  <a-checkbox value="isTop">置顶</a-checkbox>
+                  <a-checkbox value="isFeatured">精选</a-checkbox>
+                </a-checkbox-group>
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="内容类型">
+                <a-checkbox-group v-model:value="searchForm.contentTypes">
+                  <a-checkbox value="hasImage">包含图片</a-checkbox>
+                  <a-checkbox value="hasVideo">包含视频</a-checkbox>
+                </a-checkbox-group>
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item>
+                <a-space>
+                  <a-button type="primary" @click="handleAdvancedSearch">
+                    高级搜索
+                  </a-button>
+                  <a-button @click="handleSaveSearch"> 保存搜索 </a-button>
+                </a-space>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </div>
+
+        <!-- 搜索历史 -->
+        <div v-if="searchHistory.length > 0" class="search-history">
+          <a-divider />
+          <div class="history-header">
+            <span>搜索历史</span>
+            <a-button type="text" size="small" @click="clearSearchHistory">
+              清空
+            </a-button>
+          </div>
+          <div class="history-tags">
+            <a-tag
+              v-for="(history, index) in searchHistory"
+              :key="index"
+              closable
+              @close="removeSearchHistory(index)"
+              @click="loadSearchHistory(history)"
+              style="cursor: pointer; margin-bottom: 8px"
+            >
+              {{ history.name }}
+            </a-tag>
+          </div>
+        </div>
+      </a-card>
     </div>
 
     <!-- 批量操作 -->
     <div class="batch-actions" v-if="selectedRowKeys.length > 0">
-      <span class="selected-info">已选择 {{ selectedRowKeys.length }} 项</span>
-      <a-button-group>
-        <a-button @click="handleBatchPublish">批量发布</a-button>
-        <a-button @click="handleBatchArchive">批量归档</a-button>
-        <a-popconfirm
-          title="确定要删除选中的新闻吗？"
-          ok-text="确定"
-          cancel-text="取消"
-          @confirm="handleBatchDelete"
-        >
-          <a-button danger>批量删除</a-button>
-        </a-popconfirm>
-      </a-button-group>
+      <a-card size="small" :bordered="false">
+        <div class="batch-header">
+          <span class="selected-info"
+            >已选择 {{ selectedRowKeys.length }} 项</span
+          >
+          <a-space>
+            <a-button @click="handleBatchPublish" :loading="batchLoading">
+              <template #icon>
+                <CheckOutlined />
+              </template>
+              批量发布
+            </a-button>
+            <a-button @click="handleBatchArchive" :loading="batchLoading">
+              <template #icon>
+                <InboxOutlined />
+              </template>
+              批量归档
+            </a-button>
+            <a-button @click="handleBatchMoveCategory" :loading="batchLoading">
+              <template #icon>
+                <FolderOutlined />
+              </template>
+              批量移动分类
+            </a-button>
+            <a-button @click="handleBatchAddTags" :loading="batchLoading">
+              <template #icon>
+                <TagOutlined />
+              </template>
+              批量添加标签
+            </a-button>
+            <a-popconfirm
+              title="确定要删除选中的新闻吗？"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="handleBatchDelete"
+            >
+              <a-button danger :loading="batchLoading">
+                <template #icon>
+                  <DeleteOutlined />
+                </template>
+                批量删除
+              </a-button>
+            </a-popconfirm>
+          </a-space>
+        </div>
+      </a-card>
     </div>
 
     <!-- 新闻列表表格 -->
@@ -169,6 +361,44 @@
         </template>
       </a-table>
     </div>
+
+    <!-- 批量操作模态框 -->
+    <a-modal
+      v-model:open="batchModalVisible"
+      :title="batchModalTitle"
+      @ok="handleBatchModalOk"
+      @cancel="batchModalVisible = false"
+    >
+      <div v-if="batchModalType === 'category'">
+        <p>请选择要移动到的分类：</p>
+        <a-select
+          v-model:value="batchModalData.category"
+          placeholder="请选择分类"
+          style="width: 100%"
+        >
+          <a-select-option
+            v-for="category in categories"
+            :key="category._id"
+            :value="category._id"
+          >
+            {{ category.name }}
+          </a-select-option>
+        </a-select>
+      </div>
+      <div v-else-if="batchModalType === 'tags'">
+        <p>请选择要添加的标签：</p>
+        <a-select
+          v-model:value="batchModalData.tags"
+          mode="multiple"
+          placeholder="请选择标签"
+          style="width: 100%"
+        >
+          <a-select-option v-for="tag in availableTags" :key="tag" :value="tag">
+            {{ tag }}
+          </a-select-option>
+        </a-select>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -176,7 +406,17 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons-vue";
+import {
+  PlusOutlined,
+  SearchOutlined,
+  DownOutlined,
+  UpOutlined,
+  CheckOutlined,
+  InboxOutlined,
+  FolderOutlined,
+  TagOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons-vue";
 import {
   adminNewsApi,
   type NewsItem,
@@ -192,6 +432,21 @@ const loading = ref(false);
 const tableData = ref<NewsItem[]>([]);
 const categories = ref<NewsCategory[]>([]);
 const selectedRowKeys = ref<(string | number)[]>([]);
+
+// 高级搜索相关
+const showAdvancedSearch = ref(false);
+const availableTags = ref<string[]>([]);
+const searchHistory = ref<{ name: string; query: NewsQueryParams }[]>([]);
+
+// 批量操作相关
+const batchLoading = ref(false);
+const batchModalVisible = ref(false);
+const batchModalType = ref<"category" | "tags">("category");
+const batchModalTitle = ref("");
+const batchModalData = reactive({
+  category: "",
+  tags: [] as string[],
+});
 
 // 防抖相关
 let fetchTimer: any = null;
@@ -211,6 +466,14 @@ const searchForm = reactive({
   category: undefined as string | undefined, // ✅ 修复：改为string类型
   status: undefined as string | undefined,
   dateRange: undefined as [string, string] | undefined,
+  author: "",
+  tags: [] as string[],
+  viewRange: "",
+  createDateRange: undefined as [string, string] | undefined,
+  publishDateRange: undefined as [string, string] | undefined,
+  sortBy: "",
+  features: [] as string[],
+  contentTypes: [] as string[],
 });
 
 // 分页配置
@@ -428,6 +691,14 @@ const handleReset = () => {
     category: undefined,
     status: undefined,
     dateRange: undefined,
+    author: "",
+    tags: [],
+    viewRange: "",
+    createDateRange: undefined,
+    publishDateRange: undefined,
+    sortBy: "",
+    features: [],
+    contentTypes: [],
   });
   pagination.current = 1;
   debouncedFetchNewsList();
@@ -514,6 +785,100 @@ const handleBatchArchive = async () => {
   message.info("功能开发中...");
 };
 
+// 处理批量移动分类
+const handleBatchMoveCategory = () => {
+  batchModalType.value = "category";
+  batchModalTitle.value = "批量移动分类";
+  batchModalData.category = "";
+  batchModalVisible.value = true;
+};
+
+// 处理批量添加标签
+const handleBatchAddTags = () => {
+  batchModalType.value = "tags";
+  batchModalTitle.value = "批量添加标签";
+  batchModalData.tags = [];
+  batchModalVisible.value = true;
+};
+
+// 处理高级搜索
+const handleAdvancedSearch = () => {
+  // 实现高级搜索逻辑
+  message.info("功能开发中...");
+};
+
+// 处理保存搜索
+const handleSaveSearch = () => {
+  // 实现保存搜索逻辑
+  message.info("功能开发中...");
+};
+
+// 高级搜索相关函数
+const toggleAdvancedSearch = () => {
+  showAdvancedSearch.value = !showAdvancedSearch.value;
+};
+
+const clearSearchHistory = () => {
+  searchHistory.value = [];
+  localStorage.removeItem("newsSearchHistory");
+  message.success("搜索历史已清空");
+};
+
+const handleSearchHistory = (query: NewsQueryParams) => {
+  // 实现保存搜索历史逻辑
+  message.info("功能开发中...");
+};
+
+const removeSearchHistory = (index: number) => {
+  searchHistory.value.splice(index, 1);
+  localStorage.setItem(
+    "newsSearchHistory",
+    JSON.stringify(searchHistory.value)
+  );
+  message.success("搜索历史已删除");
+};
+
+const loadSearchHistory = (history: {
+  name: string;
+  query: NewsQueryParams;
+}) => {
+  // 加载搜索历史到表单
+  Object.assign(searchForm, history.query);
+  handleSearch();
+  message.success(`已加载搜索条件：${history.name}`);
+};
+
+// 批量操作模态框相关函数
+const handleBatchModalOk = async () => {
+  try {
+    batchLoading.value = true;
+
+    if (batchModalType.value === "category") {
+      // 使用现有的更新方法进行批量操作
+      for (const id of selectedRowKeys.value) {
+        await adminNewsApi.update(id as string, {
+          category: batchModalData.category,
+        });
+      }
+      message.success("批量移动分类成功");
+    } else if (batchModalType.value === "tags") {
+      // 使用现有的更新方法进行批量操作
+      for (const id of selectedRowKeys.value) {
+        await adminNewsApi.update(id as string, { tags: batchModalData.tags });
+      }
+      message.success("批量添加标签成功");
+    }
+
+    batchModalVisible.value = false;
+    selectedRowKeys.value = [];
+    debouncedFetchNewsList();
+  } catch (error: any) {
+    message.error(error.message || "批量操作失败");
+  } finally {
+    batchLoading.value = false;
+  }
+};
+
 onMounted(() => {
   console.log("NewsList组件已挂载");
 
@@ -577,17 +942,47 @@ onMounted(() => {
     border-radius: 8px;
     margin-bottom: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .search-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .advanced-search {
+      margin-top: 16px;
+    }
+
+    .search-history {
+      margin-top: 16px;
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .history-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
   }
 
   .batch-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 0;
+    margin-bottom: 16px;
 
-    .selected-info {
-      color: #1890ff;
-      font-weight: 500;
+    .batch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .selected-info {
+        color: #1890ff;
+        font-weight: 500;
+      }
     }
   }
 

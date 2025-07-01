@@ -60,6 +60,10 @@
                   v-model="formData.content"
                   placeholder="请输入新闻内容..."
                   height="400px"
+                  :show-toolbar="true"
+                  :show-word-count="true"
+                  :max-length="10000"
+                  @word-count="handleWordCount"
                 />
               </a-form-item>
             </div>
@@ -352,6 +356,11 @@ const handlePublish = async () => {
   } finally {
     publishing.value = false;
   }
+};
+
+// 处理字数统计
+const handleWordCount = (count: number) => {
+  console.log("当前字数：", count);
 };
 
 onMounted(() => {
