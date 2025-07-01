@@ -1,24 +1,27 @@
 <template>
   <div class="admin-dashboard">
-    <!-- 调试区域 -->
-    <div
-      style="
-        margin-bottom: 20px;
-        padding: 10px;
-        background: #f5f5f5;
-        border-radius: 4px;
-      "
-    >
-      <a-button type="primary" @click="loadStats" style="margin-right: 10px">
-        重新加载统计数据
-      </a-button>
-      <a-button @click="debugData" style="margin-right: 10px">
-        调试数据
-      </a-button>
-      <a-button @click="forceSetToken" style="margin-right: 10px">
-        设置Token
-      </a-button>
-      <a-button @click="testApiDirectly"> 直接测试API </a-button>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2>仪表盘</h2>
+        <p>系统概览和关键指标监控</p>
+      </div>
+      <div class="header-right">
+        <a-space>
+          <a-button @click="refreshData" :loading="refreshing">
+            <template #icon>
+              <ReloadOutlined />
+            </template>
+            刷新数据
+          </a-button>
+          <a-button @click="exportData">
+            <template #icon>
+              <DownloadOutlined />
+            </template>
+            导出报告
+          </a-button>
+        </a-space>
+      </div>
     </div>
 
     <!-- 统计卡片区域 -->
@@ -38,11 +41,14 @@
             :class="{
               'trend-up': stat.trend > 0,
               'trend-down': stat.trend < 0,
+              'trend-neutral': stat.trend === 0,
             }"
           >
             <ArrowUpOutlined v-if="stat.trend > 0" />
             <ArrowDownOutlined v-if="stat.trend < 0" />
+            <MinusOutlined v-if="stat.trend === 0" />
             <span>{{ Math.abs(stat.trend) }}%</span>
+            <span class="trend-period">较上期</span>
           </div>
         </div>
       </div>
@@ -55,13 +61,41 @@
         <div class="chart-card">
           <div class="card-header">
             <h3>访问量趋势</h3>
-            <a-select v-model:value="chartPeriod" style="width: 120px">
-              <a-select-option value="7">近7天</a-select-option>
-              <a-select-option value="30">近30天</a-select-option>
-              <a-select-option value="90">近90天</a-select-option>
-            </a-select>
+            <div class="chart-controls">
+              <a-select
+                v-model:value="chartPeriod"
+                style="width: 120px"
+                @change="loadVisitTrends"
+              >
+                <a-select-option value="7">近7天</a-select-option>
+                <a-select-option value="30">近30天</a-select-option>
+                <a-select-option value="90">近90天</a-select-option>
+              </a-select>
+              <a-button type="text" @click="toggleChartType">
+                <template #icon>
+                  <BarChartOutlined v-if="chartType === 'line'" />
+                  <LineChartOutlined v-else />
+                </template>
+              </a-button>
+            </div>
           </div>
           <div class="chart-container" ref="chartRef"></div>
+        </div>
+
+        <!-- 内容分布图表 -->
+        <div class="chart-card">
+          <div class="card-header">
+            <h3>内容分布</h3>
+            <a-select
+              v-model:value="contentChartType"
+              style="width: 120px"
+              @change="loadContentDistribution"
+            >
+              <a-select-option value="category">按分类</a-select-option>
+              <a-select-option value="status">按状态</a-select-option>
+            </a-select>
+          </div>
+          <div class="chart-container" ref="contentChartRef"></div>
         </div>
 
         <!-- 最新动态 -->
@@ -92,6 +126,9 @@
                 </div>
               </div>
             </div>
+            <div v-if="recentActivities.length === 0" class="empty-state">
+              <a-empty description="暂无动态" />
+            </div>
           </div>
         </div>
       </div>
@@ -116,38 +153,112 @@
           </div>
         </div>
 
-        <!-- 系统信息 -->
-        <div class="system-info-card">
+        <!-- 系统状态监控 -->
+        <div class="system-status-card">
           <div class="card-header">
-            <h3>系统信息</h3>
+            <h3>系统状态</h3>
+            <a-tag
+              :color="systemStatus.overall === 'healthy' ? 'green' : 'red'"
+            >
+              {{ systemStatus.overall === "healthy" ? "正常" : "异常" }}
+            </a-tag>
           </div>
-          <div class="system-info">
-            <div class="info-item">
-              <span class="info-label">系统版本：</span>
-              <span class="info-value">v1.0.0</span>
+          <div class="system-status">
+            <div
+              class="status-item"
+              v-for="item in systemStatus.items"
+              :key="item.key"
+            >
+              <div class="status-info">
+                <span class="status-label">{{ item.label }}</span>
+                <span class="status-value">{{ item.value }}</span>
+              </div>
+              <a-tag
+                :color="
+                  item.status === 'healthy'
+                    ? 'green'
+                    : item.status === 'warning'
+                      ? 'orange'
+                      : 'red'
+                "
+              >
+                {{
+                  item.status === "healthy"
+                    ? "正常"
+                    : item.status === "warning"
+                      ? "警告"
+                      : "异常"
+                }}
+              </a-tag>
             </div>
-            <div class="info-item">
-              <span class="info-label">服务器状态：</span>
-              <a-tag color="green">运行正常</a-tag>
-            </div>
-            <div class="info-item">
-              <span class="info-label">数据库状态：</span>
-              <a-tag color="green">连接正常</a-tag>
-            </div>
-            <div class="info-item">
-              <span class="info-label">存储空间：</span>
-              <span class="info-value">65% (6.5GB/10GB)</span>
+          </div>
+        </div>
+
+        <!-- 性能指标 -->
+        <div class="performance-card">
+          <div class="card-header">
+            <h3>性能指标</h3>
+          </div>
+          <div class="performance-metrics">
+            <div
+              class="metric-item"
+              v-for="metric in performanceMetrics"
+              :key="metric.key"
+            >
+              <div class="metric-header">
+                <span class="metric-label">{{ metric.label }}</span>
+                <span class="metric-value">{{ metric.value }}</span>
+              </div>
+              <a-progress
+                :percent="metric.percent"
+                :status="metric.status"
+                :stroke-color="metric.color"
+                size="small"
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 数据导出模态框 -->
+    <a-modal
+      v-model:open="exportModalVisible"
+      title="导出数据报告"
+      @ok="handleExport"
+      @cancel="exportModalVisible = false"
+      :confirm-loading="exporting"
+    >
+      <a-form :model="exportForm" layout="vertical">
+        <a-form-item label="报告类型">
+          <a-radio-group v-model:value="exportForm.type">
+            <a-radio value="daily">日报</a-radio>
+            <a-radio value="weekly">周报</a-radio>
+            <a-radio value="monthly">月报</a-radio>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item label="包含内容">
+          <a-checkbox-group v-model:value="exportForm.content">
+            <a-checkbox value="stats">统计数据</a-checkbox>
+            <a-checkbox value="trends">趋势图表</a-checkbox>
+            <a-checkbox value="activities">活动记录</a-checkbox>
+            <a-checkbox value="performance">性能指标</a-checkbox>
+          </a-checkbox-group>
+        </a-form-item>
+        <a-form-item label="导出格式">
+          <a-radio-group v-model:value="exportForm.format">
+            <a-radio value="pdf">PDF</a-radio>
+            <a-radio value="excel">Excel</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, h, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, onMounted, onBeforeUnmount, h, watch, computed } from "vue";
+import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 import * as echarts from "echarts";
 import { dashboardApi } from "@/api/modules/admin";
@@ -161,14 +272,32 @@ import {
   SettingOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  MinusOutlined,
+  ReloadOutlined,
+  DownloadOutlined,
+  BarChartOutlined,
+  LineChartOutlined,
+  ClockCircleOutlined,
+  DatabaseOutlined,
+  CloudServerOutlined,
+  HddOutlined,
 } from "@ant-design/icons-vue";
 
 const router = useRouter();
-const route = useRoute();
 const chartRef = ref<HTMLElement>();
+const contentChartRef = ref<HTMLElement>();
 const chartPeriod = ref("7");
+const chartType = ref<"line" | "bar">("line");
+const contentChartType = ref<"category" | "status">("category");
 let chart: echarts.ECharts | null = null;
-let isUnmounted = false; // 标志位，防止卸载后 setState
+let contentChart: echarts.ECharts | null = null;
+let isUnmounted = false;
+let refreshTimer: NodeJS.Timeout | null = null;
+
+// 状态管理
+const refreshing = ref(false);
+const exportModalVisible = ref(false);
+const exporting = ref(false);
 
 // 统计数据
 const statsData = ref([
@@ -236,7 +365,7 @@ const quickActions = ref([
 
 // 最新动态类型定义
 interface ActivityItem {
-  id: number;
+  id: number | string;
   user: {
     username: string;
     avatar: string;
@@ -249,32 +378,97 @@ interface ActivityItem {
 // 最新动态
 const recentActivities = ref<ActivityItem[]>([]);
 
+// 系统状态
+const systemStatus = ref({
+  overall: "healthy" as "healthy" | "warning" | "error",
+  items: [
+    {
+      key: "server",
+      label: "服务器状态",
+      value: "运行正常",
+      status: "healthy" as "healthy" | "warning" | "error",
+    },
+    {
+      key: "database",
+      label: "数据库连接",
+      value: "连接正常",
+      status: "healthy" as "healthy" | "warning" | "error",
+    },
+    {
+      key: "storage",
+      label: "存储空间",
+      value: "65% (6.5GB/10GB)",
+      status: "warning" as "healthy" | "warning" | "error",
+    },
+    {
+      key: "memory",
+      label: "内存使用",
+      value: "45% (2.3GB/5GB)",
+      status: "healthy" as "healthy" | "warning" | "error",
+    },
+  ],
+});
+
+// 性能指标
+const performanceMetrics = ref([
+  {
+    key: "cpu",
+    label: "CPU使用率",
+    value: "45%",
+    percent: 45,
+    status: "normal" as "normal" | "exception" | "success",
+    color: "#1890ff",
+  },
+  {
+    key: "memory",
+    label: "内存使用率",
+    value: "60%",
+    percent: 60,
+    status: "normal",
+    color: "#52c41a",
+  },
+  {
+    key: "disk",
+    label: "磁盘使用率",
+    value: "75%",
+    percent: 75,
+    status: "exception",
+    color: "#fa541c",
+  },
+  {
+    key: "network",
+    label: "网络延迟",
+    value: "12ms",
+    percent: 20,
+    status: "success",
+    color: "#722ed1",
+  },
+]);
+
+// 导出表单
+const exportForm = ref<{
+  type: "daily" | "weekly" | "monthly";
+  content: string[];
+  format: "pdf" | "excel";
+}>({
+  type: "daily",
+  content: ["stats", "trends"],
+  format: "pdf",
+});
+
 // 加载统计数据
 const loadStats = async () => {
   try {
-    console.log("开始加载统计数据...");
     const response = await dashboardApi.getStats();
-    console.log("API响应:", response);
-    console.log("API响应类型:", typeof response);
-    console.log("API响应keys:", Object.keys(response));
-    console.log("response.success:", response.success);
-    console.log("response.data:", response.data);
-
     if (isUnmounted) return;
 
     if (response.success && response.data) {
       const data = response.data;
-      console.log("收到的数据:", data);
-      console.log("数据类型:", typeof data);
-      console.log("数据keys:", Object.keys(data));
-      console.log("newsCount:", data.newsCount);
-      console.log("resourceCount:", data.resourceCount);
-
-      const newStatsData = [
+      statsData.value = [
         {
           key: "news",
           label: "新闻数量",
-          value: data.newsCount.toString(),
+          value: data.newsCount?.toString() || "0",
           trend: data.newsGrowth || 0,
           color: "#1890ff",
           icon: FileTextOutlined,
@@ -282,7 +476,7 @@ const loadStats = async () => {
         {
           key: "resources",
           label: "资源数量",
-          value: data.resourceCount.toString(),
+          value: data.resourceCount?.toString() || "0",
           trend: data.resourceGrowth || 0,
           color: "#52c41a",
           icon: FolderOutlined,
@@ -290,7 +484,7 @@ const loadStats = async () => {
         {
           key: "users",
           label: "用户数量",
-          value: data.userCount.toString(),
+          value: data.userCount?.toString() || "0",
           trend: data.userGrowth || 0,
           color: "#722ed1",
           icon: UserOutlined,
@@ -298,24 +492,12 @@ const loadStats = async () => {
         {
           key: "views",
           label: "总访问量",
-          value: data.totalViews.toString(),
+          value: data.totalViews?.toString() || "0",
           trend: data.viewsGrowth || 0,
           color: "#fa541c",
           icon: EyeOutlined,
         },
       ];
-
-      console.log("更新前的statsData:", statsData.value);
-      console.log("准备设置的newStatsData:", newStatsData);
-      statsData.value = newStatsData;
-      console.log("更新后的statsData:", statsData.value);
-
-      // 强制触发响应式更新
-      console.log("强制触发Vue响应式更新...");
-    } else {
-      console.error("API响应格式错误:", response);
-      console.error("response.success:", response.success);
-      console.error("response.data:", response.data);
     }
   } catch (error) {
     if (!isUnmounted) {
@@ -332,18 +514,56 @@ const loadVisitTrends = async () => {
       Number(chartPeriod.value)
     );
     if (isUnmounted) return;
+
     if (response.success && response.data && chart) {
       const data = response.data;
-      chart.setOption({
+      const option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+          },
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true,
+        },
         xAxis: {
-          data: data.map((item) => item.date),
+          type: "category",
+          boundaryGap: chartType.value === "bar",
+          data: data.map((item: any) => item.date),
+        },
+        yAxis: {
+          type: "value",
         },
         series: [
           {
-            data: data.map((item) => item.visits),
+            name: "访问量",
+            type: chartType.value,
+            stack: chartType.value === "bar" ? "Total" : undefined,
+            smooth: chartType.value === "line",
+            areaStyle:
+              chartType.value === "line"
+                ? {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                      { offset: 0, color: "rgba(24, 144, 255, 0.3)" },
+                      { offset: 1, color: "rgba(24, 144, 255, 0.05)" },
+                    ]),
+                  }
+                : undefined,
+            lineStyle:
+              chartType.value === "line"
+                ? {
+                    color: "#1890ff",
+                  }
+                : undefined,
+            data: data.map((item: any) => item.visits),
           },
         ],
-      });
+      };
+      chart.setOption(option);
     }
   } catch (error) {
     if (!isUnmounted) {
@@ -353,30 +573,251 @@ const loadVisitTrends = async () => {
   }
 };
 
+// 加载内容分布
+const loadContentDistribution = async () => {
+  try {
+    const response = await dashboardApi.getContentDistribution(
+      contentChartType.value
+    );
+    if (isUnmounted) return;
+
+    if (response.success && response.data && contentChart) {
+      const data = response.data;
+      const option = {
+        tooltip: {
+          trigger: "item",
+          formatter: "{a} <br/>{b}: {c} ({d}%)",
+        },
+        legend: {
+          orient: "vertical",
+          left: "left",
+        },
+        series: [
+          {
+            name:
+              contentChartType.value === "category" ? "分类分布" : "状态分布",
+            type: "pie",
+            radius: ["40%", "70%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: "center",
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: "18",
+                fontWeight: "bold",
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            data: data.map((item: any) => ({
+              name: item.name,
+              value: item.value,
+            })),
+          },
+        ],
+      };
+      contentChart.setOption(option);
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error("加载内容分布失败:", error);
+      message.error("加载内容分布失败");
+    }
+  }
+};
+
 // 加载最新动态
 const loadRecentActivities = async () => {
   try {
     const response = await dashboardApi.getRecentActivities();
     if (isUnmounted) return;
+
     if (response.success && response.data) {
-      // 转换API数据格式以匹配本地定义的类型
-      recentActivities.value = response.data.items.map((item) => ({
-        id: item.id,
+      const items = response.data.items || [];
+      recentActivities.value = items.map((item: any) => ({
+        id: typeof item.id === "number" ? item.id : Date.now(),
         user: {
-          username: item.user.username,
-          avatar: item.user.avatar || "",
+          username: item.user?.username || "未知用户",
+          avatar: item.user?.avatar || "",
         },
-        action: item.action,
-        target: item.target,
-        createdAt: new Date(item.createdAt),
+        action: item.action || "未知操作",
+        target: item.target || "未知对象",
+        createdAt: new Date(item.createdAt || Date.now()),
       }));
+    } else {
+      console.warn("最新动态API返回异常:", response);
+      recentActivities.value = [];
     }
   } catch (error) {
     if (!isUnmounted) {
       console.error("加载最新动态失败:", error);
-      message.error("加载最新动态失败");
+      // 设置默认动态而不是显示错误消息
+      recentActivities.value = [
+        {
+          id: "default-1",
+          user: {
+            username: "系统",
+            avatar: "",
+          },
+          action: "系统启动",
+          target: "CMS系统",
+          createdAt: new Date(),
+        },
+      ];
     }
   }
+};
+
+// 加载系统状态
+const loadSystemStatus = async () => {
+  try {
+    const response = await dashboardApi.getSystemStatus();
+    if (isUnmounted) return;
+
+    if (response.success && response.data) {
+      systemStatus.value = response.data;
+    } else {
+      console.warn("系统状态API返回异常:", response);
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error("加载系统状态失败:", error);
+      // 设置默认状态而不是显示错误消息
+      systemStatus.value = {
+        overall: "warning",
+        items: [
+          {
+            key: "server",
+            label: "服务器状态",
+            value: "检查中...",
+            status: "warning",
+          },
+          {
+            key: "database",
+            label: "数据库连接",
+            value: "检查中...",
+            status: "warning",
+          },
+          {
+            key: "storage",
+            label: "存储空间",
+            value: "检查中...",
+            status: "warning",
+          },
+          {
+            key: "memory",
+            label: "内存使用",
+            value: "检查中...",
+            status: "warning",
+          },
+        ],
+      };
+    }
+  }
+};
+
+// 加载性能指标
+const loadPerformanceMetrics = async () => {
+  try {
+    const response = await dashboardApi.getPerformanceMetrics();
+    if (isUnmounted) return;
+
+    if (response.success && response.data) {
+      performanceMetrics.value = response.data;
+    } else {
+      console.warn("性能指标API返回异常:", response);
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error("加载性能指标失败:", error);
+      // 设置默认指标而不是显示错误消息
+      performanceMetrics.value = [
+        {
+          key: "cpu",
+          label: "CPU使用率",
+          value: "检查中...",
+          percent: 0,
+          status: "normal",
+          color: "#1890ff",
+        },
+        {
+          key: "memory",
+          label: "内存使用率",
+          value: "检查中...",
+          percent: 0,
+          status: "normal",
+          color: "#52c41a",
+        },
+        {
+          key: "disk",
+          label: "磁盘使用率",
+          value: "检查中...",
+          percent: 0,
+          status: "normal",
+          color: "#fa541c",
+        },
+        {
+          key: "network",
+          label: "网络延迟",
+          value: "检查中...",
+          percent: 0,
+          status: "normal",
+          color: "#722ed1",
+        },
+      ];
+    }
+  }
+};
+
+// 刷新数据
+const refreshData = async () => {
+  refreshing.value = true;
+  try {
+    await Promise.all([
+      loadStats(),
+      loadVisitTrends(),
+      loadContentDistribution(),
+      loadRecentActivities(),
+      loadSystemStatus(),
+      loadPerformanceMetrics(),
+    ]);
+    message.success("数据刷新成功");
+  } catch (error) {
+    message.error("数据刷新失败");
+  } finally {
+    refreshing.value = false;
+  }
+};
+
+// 导出数据
+const exportData = () => {
+  exportModalVisible.value = true;
+};
+
+// 处理导出
+const handleExport = async () => {
+  exporting.value = true;
+  try {
+    const response = await dashboardApi.exportReport(exportForm.value);
+    if (response.success) {
+      message.success("报告导出成功");
+      exportModalVisible.value = false;
+    }
+  } catch (error) {
+    message.error("报告导出失败");
+  } finally {
+    exporting.value = false;
+  }
+};
+
+// 切换图表类型
+const toggleChartType = () => {
+  chartType.value = chartType.value === "line" ? "bar" : "line";
+  loadVisitTrends();
 };
 
 // 处理快捷操作
@@ -399,66 +840,7 @@ const handleQuickAction = (key: string) => {
 
 // 查看全部动态
 const viewAllActivities = () => {
-  // 实现查看全部动态的逻辑
-  message.info("功能开发中...");
-};
-
-// 调试数据
-const debugData = () => {
-  console.log("=== 调试信息 ===");
-  console.log("当前statsData:", statsData.value);
-  console.log("chartPeriod:", chartPeriod.value);
-  console.log("recentActivities:", recentActivities.value);
-  console.log("isUnmounted:", isUnmounted);
-
-  // 检查用户认证状态
-  const token = localStorage.getItem("token"); // 修正token键名
-  console.log("localStorage token:", token);
-
-  message.info("调试信息已输出到控制台");
-};
-
-// 强制设置token
-const forceSetToken = () => {
-  const newToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGJkYWE5MjM2ZDY3YzA3MjFmYzUzNCIsImlhdCI6MTc0OTk3MDEzOCwiZXhwIjoxNzUwNTc0OTM4fQ.NtlvQ8WcIr5x9eAhoOrPAsLaZn4kwnYGYr0MLzIsXlA";
-  localStorage.setItem("token", newToken);
-  console.log("已设置token:", newToken);
-  message.success("Token已设置");
-};
-
-// 直接测试API
-const testApiDirectly = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    message.error("没有token，请先设置");
-    return;
-  }
-
-  try {
-    console.log("开始直接测试API...");
-    const response = await fetch("/api/admin/dashboard/stats", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("API响应状态:", response.status);
-    const data = await response.json();
-    console.log("API响应数据:", data);
-
-    if (data.success) {
-      message.success("API测试成功");
-      console.log("统计数据:", data.data);
-    } else {
-      message.error(`API测试失败: ${data.message}`);
-    }
-  } catch (error) {
-    console.error("API测试错误:", error);
-    message.error("API测试错误");
-  }
+  router.push("/admin/activities");
 };
 
 // 格式化时间
@@ -507,7 +889,6 @@ const initChart = () => {
       {
         name: "访问量",
         type: "line",
-        stack: "Total",
         smooth: true,
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -525,16 +906,83 @@ const initChart = () => {
   chart.setOption(option);
 };
 
+// 初始化内容分布图表
+const initContentChart = () => {
+  if (!contentChartRef.value) return;
+  contentChart = echarts.init(contentChartRef.value);
+  const option = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b}: {c} ({d}%)",
+    },
+    legend: {
+      orient: "vertical",
+      left: "left",
+    },
+    series: [
+      {
+        name: "内容分布",
+        type: "pie",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        label: {
+          show: false,
+          position: "center",
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: "18",
+            fontWeight: "bold",
+          },
+        },
+        labelLine: {
+          show: false,
+        },
+        data: [],
+      },
+    ],
+  };
+  contentChart.setOption(option);
+};
+
 // 监听图表周期变化
 watch(chartPeriod, () => {
   loadVisitTrends();
+});
+
+// 监听内容图表类型变化
+watch(contentChartType, () => {
+  loadContentDistribution();
 });
 
 // 组件挂载时初始化
 onMounted(async () => {
   isUnmounted = false;
   initChart();
-  await Promise.all([loadStats(), loadVisitTrends(), loadRecentActivities()]);
+  initContentChart();
+
+  await Promise.all([
+    loadStats(),
+    loadVisitTrends(),
+    loadContentDistribution(),
+    loadRecentActivities(),
+    loadSystemStatus(),
+    loadPerformanceMetrics(),
+  ]);
+
+  // 设置自动刷新（每5分钟）
+  refreshTimer = setInterval(
+    () => {
+      if (!isUnmounted) {
+        loadStats();
+        loadSystemStatus();
+        loadPerformanceMetrics();
+      }
+    },
+    5 * 60 * 1000
+  );
+
   window.addEventListener("resize", handleResize);
 });
 
@@ -545,6 +993,14 @@ onBeforeUnmount(() => {
     chart.dispose();
     chart = null;
   }
+  if (contentChart) {
+    contentChart.dispose();
+    contentChart = null;
+  }
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
   window.removeEventListener("resize", handleResize);
 });
 
@@ -552,12 +1008,39 @@ const handleResize = () => {
   if (chart) {
     chart.resize();
   }
+  if (contentChart) {
+    contentChart.resize();
+  }
 };
 </script>
 
 <style scoped lang="scss">
 .admin-dashboard {
   padding: 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  .header-left {
+    h2 {
+      margin: 0 0 4px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #262626;
+    }
+
+    p {
+      margin: 0;
+      color: #8c8c8c;
+      font-size: 14px;
+    }
+  }
 }
 
 .stats-grid {
@@ -569,12 +1052,18 @@ const handleResize = () => {
 
 .stat-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   gap: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
 }
 
 .stat-icon {
@@ -585,6 +1074,7 @@ const handleResize = () => {
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  transition: all 0.3s ease;
 }
 
 .stat-content {
@@ -594,13 +1084,13 @@ const handleResize = () => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: #262626;
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  color: #666;
+  color: #8c8c8c;
   font-size: 14px;
   margin-bottom: 8px;
 }
@@ -618,6 +1108,15 @@ const handleResize = () => {
 
   &.trend-down {
     color: #ff4d4f;
+  }
+
+  &.trend-neutral {
+    color: #8c8c8c;
+  }
+
+  .trend-period {
+    color: #bfbfbf;
+    font-weight: normal;
   }
 }
 
@@ -637,11 +1136,17 @@ const handleResize = () => {
 .chart-card,
 .activity-card,
 .quick-actions-card,
-.system-info-card {
+.system-status-card,
+.performance-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .card-header {
@@ -654,7 +1159,13 @@ const handleResize = () => {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: #262626;
+  }
+
+  .chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 
@@ -666,11 +1177,23 @@ const handleResize = () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  .empty-state {
+    padding: 40px 0;
+    text-align: center;
+  }
 }
 
 .activity-item {
   display: flex;
   gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #fafafa;
+  }
 }
 
 .activity-content {
@@ -678,14 +1201,14 @@ const handleResize = () => {
 }
 
 .activity-text {
-  color: #333;
+  color: #262626;
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 4px;
 }
 
 .activity-time {
-  color: #999;
+  color: #8c8c8c;
   font-size: 12px;
 }
 
@@ -695,27 +1218,50 @@ const handleResize = () => {
   gap: 12px;
 }
 
-.system-info {
+.system-status,
+.performance-metrics {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.info-item {
+.status-item,
+.metric-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
-.info-label {
-  color: #666;
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-label,
+.metric-label {
+  color: #8c8c8c;
   font-size: 14px;
 }
 
-.info-value {
-  color: #333;
+.status-value,
+.metric-value {
+  color: #262626;
   font-size: 14px;
   font-weight: 500;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 @media (max-width: 1200px) {
@@ -727,6 +1273,12 @@ const handleResize = () => {
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 }
 </style>

@@ -25,6 +25,13 @@ export interface VisitTrend {
   visits: number;
 }
 
+// 内容分布数据接口
+export interface ContentDistribution {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
 // 最新动态接口
 export interface RecentActivity {
   id: number;
@@ -39,6 +46,27 @@ export interface RecentActivity {
   createdAt: string;
 }
 
+// 系统状态接口
+export interface SystemStatus {
+  overall: "healthy" | "warning" | "error";
+  items: Array<{
+    key: string;
+    label: string;
+    value: string;
+    status: "healthy" | "warning" | "error";
+  }>;
+}
+
+// 性能指标接口
+export interface PerformanceMetric {
+  key: string;
+  label: string;
+  value: string;
+  percent: number;
+  status: "normal" | "exception" | "success";
+  color: string;
+}
+
 // 系统信息接口
 export interface SystemInfo {
   version: string;
@@ -47,6 +75,13 @@ export interface SystemInfo {
   storageUsed: number;
   storageTotal: number;
   storagePercent: number;
+}
+
+// 导出报告参数接口
+export interface ExportReportParams {
+  type: "daily" | "weekly" | "monthly";
+  content: string[];
+  format: "pdf" | "excel";
 }
 
 // Create a concrete subclass of BaseApi for instantiation and expose public API methods
@@ -69,6 +104,15 @@ class DashboardApi extends BaseApi {
     });
   }
 
+  // 获取内容分布
+  public getContentDistribution(
+    type: "category" | "status"
+  ): Promise<ApiResponse<ContentDistribution[]>> {
+    return this.get("/admin/dashboard/content-distribution", {
+      params: { type },
+    });
+  }
+
   // 获取最新动态
   public getRecentActivities(
     params?: PaginationParams
@@ -76,9 +120,26 @@ class DashboardApi extends BaseApi {
     return this.get("/admin/dashboard/activities", { params });
   }
 
+  // 获取系统状态
+  public getSystemStatus(): Promise<ApiResponse<SystemStatus>> {
+    return this.get("/admin/dashboard/system-status");
+  }
+
+  // 获取性能指标
+  public getPerformanceMetrics(): Promise<ApiResponse<PerformanceMetric[]>> {
+    return this.get("/admin/dashboard/performance-metrics");
+  }
+
   // 获取系统信息
   public getSystemInfo(): Promise<ApiResponse<SystemInfo>> {
     return this.get("/admin/dashboard/system-info");
+  }
+
+  // 导出报告
+  public exportReport(
+    params: ExportReportParams
+  ): Promise<ApiResponse<{ downloadUrl: string }>> {
+    return this.post("/admin/dashboard/export-report", params);
   }
 }
 
