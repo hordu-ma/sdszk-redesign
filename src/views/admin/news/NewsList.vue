@@ -591,11 +591,19 @@ const fetchNewsList = async () => {
     const response = await adminNewsApi.getList(params);
     console.log("新闻列表响应:", response);
 
-    // 简化数据处理，与资源管理保持一致
-    tableData.value = response.data.data || response.data || [];
+    // 处理数据，确保ID字段正确映射
+    const rawData = response.data.data || response.data || [];
+    tableData.value = rawData.map((item: any) => ({
+      ...item,
+      _id: item._id || item.id, // 确保_id字段存在
+      id: item._id || item.id, // 保持兼容性
+    }));
     pagination.total = response.pagination?.total || 0;
 
     console.log("✅ 成功加载新闻数据:", tableData.value.length, "条记录");
+    if (tableData.value.length > 0) {
+      console.log("📋 数据示例:", tableData.value[0]);
+    }
   } catch (error: any) {
     console.error("获取新闻列表失败:", error);
     message.error(error.message || "获取新闻列表失败");
@@ -679,16 +687,29 @@ const onSelectChange = (newSelectedRowKeys: (string | number)[]) => {
 
 // 处理编辑
 const handleEdit = (record: NewsItem) => {
-  router.push(`/admin/news/edit/${record._id}`);
+  const id = record._id || record.id;
+  if (!id) {
+    message.error("获取新闻ID失败");
+    console.error("新闻记录缺少ID字段:", record);
+    return;
+  }
+  console.log("跳转到编辑页面，ID:", id);
+  router.push(`/admin/news/edit/${id}`);
 };
 
 // 处理删除
 const handleDelete = async (record: NewsItem) => {
   try {
-    await adminNewsApi.deleteNews(record._id as any);
+    const id = record._id || record.id;
+    if (!id) {
+      message.error("获取新闻ID失败");
+      return;
+    }
+    await adminNewsApi.deleteNews(id);
     message.success("删除成功");
     fetchNewsList();
   } catch (error: any) {
+    console.error("删除失败:", error);
     message.error(error.message || "删除失败");
   }
 };
@@ -708,10 +729,16 @@ const handleBatchDelete = async () => {
 // 处理置顶切换
 const handleToggleTop = async (record: NewsItem) => {
   try {
-    await adminNewsApi.toggleTop(record._id);
+    const id = record._id || record.id;
+    if (!id) {
+      message.error("获取新闻ID失败");
+      return;
+    }
+    await adminNewsApi.toggleTop(id);
     message.success(record.isTop ? "取消置顶成功" : "置顶成功");
     fetchNewsList();
   } catch (error: any) {
+    console.error("置顶操作失败:", error);
     message.error(error.message || "操作失败");
   }
 };
@@ -719,10 +746,16 @@ const handleToggleTop = async (record: NewsItem) => {
 // 处理发布状态切换
 const handleTogglePublish = async (record: NewsItem) => {
   try {
-    await adminNewsApi.togglePublish(record._id);
+    const id = record._id || record.id;
+    if (!id) {
+      message.error("获取新闻ID失败");
+      return;
+    }
+    await adminNewsApi.togglePublish(id);
     message.success(record.status === "published" ? "下线成功" : "发布成功");
     fetchNewsList();
   } catch (error: any) {
+    console.error("发布状态切换失败:", error);
     message.error(error.message || "操作失败");
   }
 };
