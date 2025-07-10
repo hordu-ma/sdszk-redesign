@@ -418,7 +418,7 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons-vue";
 import {
-  adminNewsApi,
+  AdminNewsApi,
   type NewsItem,
   type NewsQueryParams,
 } from "@/api/modules/adminNews";
@@ -426,6 +426,9 @@ import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
 import type { TableColumnsType, TableProps } from "ant-design-vue";
 
 const router = useRouter();
+
+// 创建API实例
+const adminNewsApi = new AdminNewsApi();
 
 // 数据状态
 const loading = ref(false);
@@ -447,18 +450,6 @@ const batchModalData = reactive({
   category: "",
   tags: [] as string[],
 });
-
-// 防抖相关
-let fetchTimer: any = null;
-const isFetching = ref(false);
-
-// 防抖函数
-const debounce = (fn: Function, delay: number) => {
-  return (...args: any[]) => {
-    if (fetchTimer) clearTimeout(fetchTimer);
-    fetchTimer = setTimeout(() => fn(...args), delay);
-  };
-};
 
 // 搜索表单
 const searchForm = reactive({
@@ -577,22 +568,18 @@ const formatDate = (dateString: string) => {
 
 // 获取新闻列表
 const fetchNewsList = async () => {
-  // 防止重复请求
-  if (isFetching.value) {
-    console.log("请求进行中，跳过重复请求");
-    return;
-  }
-
+  loading.value = true;
   try {
-    loading.value = true;
-    isFetching.value = true;
-
     const params: NewsQueryParams = {
       page: pagination.current,
       limit: pagination.pageSize,
       keyword: searchForm.keyword || undefined,
       category: searchForm.category,
-      status: searchForm.status as any,
+      status: searchForm.status as
+        | "draft"
+        | "published"
+        | "archived"
+        | undefined,
     };
 
     if (searchForm.dateRange) {
@@ -604,43 +591,20 @@ const fetchNewsList = async () => {
     const response = await adminNewsApi.getList(params);
     console.log("新闻列表响应:", response);
 
-    // 兼容后端响应结构 { status: 'success', data: { data: [...], pagination: {...} } }
-    const resData = response.data as any;
-    if (
-      resData &&
-      resData.status === "success" &&
-      resData.data &&
-      Array.isArray(resData.data.data)
-    ) {
-      tableData.value = resData.data.data.map((item: any) => ({
-        ...item,
-        _id: item._id || item.id, // 确保_id字段存在
-        id: item._id || item.id, // 保持兼容性
-        categoryName:
-          item.category &&
-          typeof item.category === "object" &&
-          item.category.name
-            ? item.category.name
-            : "未知分类",
-      }));
-      pagination.total = resData.data.pagination?.total || 0;
-      console.log("✅ 成功加载新闻数据:", tableData.value.length, "条记录");
-    } else {
-      console.warn("❌ 服务器响应格式异常或数据为空:", response);
-      tableData.value = [];
-      pagination.total = 0;
-    }
+    // 简化数据处理，与资源管理保持一致
+    tableData.value = response.data.data || response.data || [];
+    pagination.total = response.pagination?.total || 0;
+
+    console.log("✅ 成功加载新闻数据:", tableData.value.length, "条记录");
   } catch (error: any) {
     console.error("获取新闻列表失败:", error);
     message.error(error.message || "获取新闻列表失败");
+    tableData.value = [];
+    pagination.total = 0;
   } finally {
     loading.value = false;
-    isFetching.value = false;
   }
 };
-
-// 防抖版本的获取新闻列表
-const debouncedFetchNewsList = debounce(fetchNewsList, 300);
 
 // 获取分类列表
 const fetchCategories = async () => {
@@ -675,13 +639,10 @@ const fetchCategories = async () => {
   }
 };
 
-// 防抖版本的获取分类列表
-const debouncedFetchCategories = debounce(fetchCategories, 300);
-
 // 处理搜索
 const handleSearch = () => {
   pagination.current = 1;
-  debouncedFetchNewsList();
+  fetchNewsList();
 };
 
 // 处理重置
@@ -701,21 +662,14 @@ const handleReset = () => {
     contentTypes: [],
   });
   pagination.current = 1;
-  debouncedFetchNewsList();
+  fetchNewsList();
 };
 
 // 处理表格变化
 const handleTableChange: TableProps["onChange"] = (pag, filters, sorter) => {
   pagination.current = pag.current || 1;
   pagination.pageSize = pag.pageSize || 20;
-
-  // 注释掉URL更新，避免可能的无限循环
-  // const newUrl = new URL(window.location.href)
-  // newUrl.searchParams.set('page', pagination.current.toString())
-  // newUrl.searchParams.set('limit', pagination.pageSize.toString())
-  // window.history.pushState({}, '', newUrl.toString())
-
-  debouncedFetchNewsList();
+  fetchNewsList();
 };
 
 // 处理选择变化
@@ -731,9 +685,9 @@ const handleEdit = (record: NewsItem) => {
 // 处理删除
 const handleDelete = async (record: NewsItem) => {
   try {
-    await adminNewsApi.delete(record._id as any);
+    await adminNewsApi.deleteNews(record._id as any);
     message.success("删除成功");
-    debouncedFetchNewsList();
+    fetchNewsList();
   } catch (error: any) {
     message.error(error.message || "删除失败");
   }
@@ -745,7 +699,7 @@ const handleBatchDelete = async () => {
     await adminNewsApi.batchDelete(selectedRowKeys.value.map(String));
     message.success("批量删除成功");
     selectedRowKeys.value = [];
-    debouncedFetchNewsList();
+    fetchNewsList();
   } catch (error: any) {
     message.error(error.message || "批量删除失败");
   }
@@ -756,7 +710,7 @@ const handleToggleTop = async (record: NewsItem) => {
   try {
     await adminNewsApi.toggleTop(record._id);
     message.success(record.isTop ? "取消置顶成功" : "置顶成功");
-    debouncedFetchNewsList();
+    fetchNewsList();
   } catch (error: any) {
     message.error(error.message || "操作失败");
   }
@@ -767,7 +721,7 @@ const handleTogglePublish = async (record: NewsItem) => {
   try {
     await adminNewsApi.togglePublish(record._id);
     message.success(record.status === "published" ? "下线成功" : "发布成功");
-    debouncedFetchNewsList();
+    fetchNewsList();
   } catch (error: any) {
     message.error(error.message || "操作失败");
   }
@@ -871,7 +825,7 @@ const handleBatchModalOk = async () => {
 
     batchModalVisible.value = false;
     selectedRowKeys.value = [];
-    debouncedFetchNewsList();
+    fetchNewsList();
   } catch (error: any) {
     message.error(error.message || "批量操作失败");
   } finally {
@@ -903,11 +857,11 @@ onMounted(() => {
   }
 
   // 使用防抖版本获取数据，避免重复请求
-  debouncedFetchCategories();
+  fetchCategories();
 
   // 延迟获取新闻列表，确保分类数据先加载
   setTimeout(() => {
-    debouncedFetchNewsList();
+    fetchNewsList();
   }, 100);
 });
 </script>
