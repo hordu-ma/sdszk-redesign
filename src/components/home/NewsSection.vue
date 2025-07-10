@@ -3,7 +3,12 @@
     <div class="carousel-container">
       <el-carousel height="400px">
         <el-carousel-item v-for="item in carouselItems" :key="item.id">
-          <img :src="item.image" :alt="item.title" class="carousel-img" />
+          <div class="carousel-item-wrapper" @click="handleCarouselClick(item)">
+            <img :src="item.image" :alt="item.title" class="carousel-img" />
+            <div class="carousel-overlay">
+              <div class="carousel-title">{{ item.title }}</div>
+            </div>
+          </div>
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -43,6 +48,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { newsApi, newsCategoryApi } from "@/api";
 import carousel1 from "../../assets/images/carousel1.jpg";
 import carousel2 from "../../assets/images/carousel2.jpg";
@@ -52,6 +58,7 @@ interface CarouselItem {
   id: number;
   image: string;
   title: string;
+  newsId?: string; // 添加新闻ID用于跳转
 }
 
 interface NewsItem {
@@ -60,14 +67,25 @@ interface NewsItem {
   date: string;
 }
 
-const carouselItems = ref<CarouselItem[]>([
+const router = useRouter();
+
+// 默认轮播图数据（作为后备）
+const defaultCarouselItems: CarouselItem[] = [
   { id: 1, image: carousel1, title: "新闻1" },
   { id: 2, image: carousel2, title: "新闻2" },
   { id: 3, image: carousel3, title: "新闻3" },
-]);
+];
 
+const carouselItems = ref<CarouselItem[]>(defaultCarouselItems);
 const centerNews = ref<NewsItem[]>([]);
 const centerLoading = ref(true);
+
+// 轮播图点击处理函数
+const handleCarouselClick = (item: CarouselItem) => {
+  if (item.newsId) {
+    router.push(`/news/detail/${item.newsId}`);
+  }
+};
 
 const fetchCenterNews = async () => {
   try {
@@ -81,7 +99,7 @@ const fetchCenterNews = async () => {
     );
     if (!centerCategory) return;
 
-    // 获取中心动态新闻
+    // 获取中心动态新闻（获取前3条用于轮播图）
     const newsRes = await newsApi.getList({
       category: centerCategory._id,
       limit: 3,
@@ -89,6 +107,8 @@ const fetchCenterNews = async () => {
 
     if (newsRes.success && Array.isArray(newsRes.data)) {
       console.log("获取到的新闻数据:", newsRes.data);
+
+      // 更新中心动态新闻列表
       centerNews.value = newsRes.data.map((item: any) => ({
         id: item._id || item.id,
         title: item.title,
@@ -98,10 +118,23 @@ const fetchCenterNews = async () => {
             ? item.createdAt.slice(0, 10)
             : "",
       }));
+
+      // 更新轮播图数据 - 使用获取到的新闻数据
+      carouselItems.value = newsRes.data.map((item: any, index: number) => ({
+        id: index + 1,
+        image:
+          item.thumbnail || defaultCarouselItems[index]?.image || carousel1,
+        title: item.title,
+        newsId: item._id || item.id, // 添加新闻ID用于跳转
+      }));
+
+      console.log("更新后的轮播图数据:", carouselItems.value);
       console.log("处理后的新闻数据:", centerNews.value);
     }
   } catch (error) {
     console.error("获取中心动态失败:", error);
+    // 如果获取失败，使用默认轮播图数据
+    carouselItems.value = defaultCarouselItems;
   } finally {
     centerLoading.value = false;
   }
@@ -137,6 +170,41 @@ onMounted(() => {
   width: 100%;
   height: 400px;
   object-fit: cover;
+}
+
+.carousel-item-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.carousel-item-wrapper:hover {
+  transform: scale(1.02);
+}
+
+.carousel-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.carousel-item-wrapper:hover .carousel-overlay {
+  transform: translateY(0);
+}
+
+.carousel-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.4;
 }
 
 .center-news {
