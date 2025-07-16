@@ -6,12 +6,20 @@
     >
       <template #extra>
         <a-space>
-          <!-- 暂时禁用下载和分享功能，专注于基本显示 -->
-          <a-button type="primary" disabled>
+          <a-button
+            type="primary"
+            @click="downloadResource"
+            :loading="downloading"
+            :disabled="!resource"
+          >
             <template #icon><DownloadOutlined /></template>
             下载
           </a-button>
-          <a-button disabled>
+          <a-button
+            @click="shareResource"
+            :loading="sharing"
+            :disabled="!resource"
+          >
             <template #icon><ShareAltOutlined /></template>
             分享
           </a-button>
@@ -109,8 +117,7 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { resourceApi } from "@/api";
 import type { Resource } from "@/api/modules/resources/index";
-import { message } from "ant-design-vue";
-import * as dayjs from "dayjs";
+import { message, Modal } from "ant-design-vue";
 import {
   DownloadOutlined,
   ShareAltOutlined,
@@ -126,11 +133,28 @@ const route = useRoute();
 const resource = ref<Resource | null>(null);
 const relatedResources = ref<Resource[]>([]);
 const loading = ref(false);
+const downloading = ref(false);
+const sharing = ref(false);
 
 // 格式化日期
-const formatDate = (date?: string) => {
-  if (!date) return "";
-  return dayjs.default(date).format("YYYY-MM-DD HH:mm");
+const formatDate = (date?: string): string => {
+  if (!date) return "未知日期";
+  try {
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return "无效日期";
+    }
+    return dateObj.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.error("日期格式化失败:", error);
+    return "日期错误";
+  }
 };
 
 // 初始化资源详情
@@ -179,6 +203,147 @@ const fetchRelatedResources = async () => {
     }
   } catch (error) {
     console.error("获取相关资源失败:", error);
+  }
+};
+
+// 工具函数：复制到剪贴板
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } else {
+      // 降级方案
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      return true;
+    }
+  } catch (error) {
+    console.error("复制失败:", error);
+    return false;
+  }
+};
+
+// 获取文件扩展名
+const getFileExtension = (filename: string, mimeType?: string): string => {
+  const nameExt = filename.split(".").pop()?.toLowerCase();
+  if (nameExt && nameExt !== filename) {
+    return `.${nameExt}`;
+  }
+
+  if (mimeType) {
+    const mimeMap: Record<string, string> = {
+      "application/pdf": ".pdf",
+      "application/msword": ".doc",
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "video/mp4": ".mp4",
+      "audio/mp3": ".mp3",
+      "text/plain": ".txt",
+    };
+    return mimeMap[mimeType] || "";
+  }
+  return "";
+};
+
+// 下载资源
+const downloadResource = async () => {
+  if (!resource.value) {
+    message.warning("资源不可用");
+    return;
+  }
+
+  downloading.value = true;
+  try {
+    // 尝试多种可能的URL字段
+    const resourceData = resource.value as any;
+    const downloadUrl =
+      resourceData.url || resourceData.fileUrl || resourceData.downloadUrl;
+
+    if (!downloadUrl) {
+      message.warning("该资源暂无下载链接");
+      return;
+    }
+
+    const filename =
+      resource.value.title +
+      getFileExtension(resource.value.title, resource.value.mimeType);
+
+    // 创建下载链接
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    message.success("下载已开始");
+
+    // 更新下载次数
+    if (resource.value.downloadCount !== undefined) {
+      resource.value.downloadCount += 1;
+    }
+  } catch (error) {
+    console.error("下载失败:", error);
+    message.error("下载失败，请稍后重试");
+  } finally {
+    downloading.value = false;
+  }
+};
+
+// 分享资源
+const shareResource = async () => {
+  if (!resource.value) {
+    message.warning("资源不可用");
+    return;
+  }
+
+  sharing.value = true;
+  const shareUrl = window.location.href;
+  const shareTitle = resource.value.title;
+  const shareText = `${shareTitle} - 山东省大中小学思政课一体化指导中心`;
+
+  try {
+    // 检查是否支持 Web Share API
+    if (
+      navigator.share &&
+      /mobile|android|iphone|ipad/i.test(navigator.userAgent)
+    ) {
+      await navigator.share({
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+      });
+      message.success("分享成功");
+    } else {
+      // 直接复制链接，更简单可靠
+      const success = await copyToClipboard(shareUrl);
+      if (success) {
+        message.success("链接已复制到剪贴板，可以分享给他人了");
+      } else {
+        // 降级方案：显示链接让用户手动复制
+        Modal.info({
+          title: "分享资源",
+          content: `请复制以下链接分享给他人：\n\n${shareUrl}`,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("分享失败:", error);
+    // 降级到复制链接
+    const success = await copyToClipboard(shareUrl);
+    if (success) {
+      message.success("链接已复制到剪贴板");
+    } else {
+      message.error("分享失败，请手动复制链接：" + shareUrl);
+    }
+  } finally {
+    sharing.value = false;
   }
 };
 
