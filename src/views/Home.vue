@@ -80,15 +80,6 @@ import VideoPlayer from "../components/VideoPlayer.vue";
 import NewsSection from "../components/home/NewsSection.vue";
 import InfoSection from "../components/home/InfoSection.vue";
 import BannerSection from "../components/home/BannerSection.vue";
-import video1 from "../assets/videos/video1.mp4";
-import video2 from "../assets/videos/video2.mp4";
-import video3 from "../assets/videos/video3.mp4";
-import video4 from "../assets/videos/video4.mp4";
-import video5 from "../assets/videos/video5.mp4";
-import video6 from "../assets/videos/video6.mp4";
-import poster1 from "../assets/images/posters/poster1.jpg";
-import poster2 from "../assets/images/posters/poster2.jpg";
-import poster3 from "../assets/images/posters/poster3.jpg";
 import SectionHeader from "../components/common/SectionHeader.vue";
 
 const theories = ref([]);
@@ -117,9 +108,6 @@ onMounted(() => {
   fetchResourceBlock();
 });
 
-import poster4 from "../assets/images/posters/poster4.jpg";
-import poster5 from "../assets/images/posters/poster5.jpg";
-import poster6 from "../assets/images/posters/poster6.jpg";
 import teacher1 from "../assets/images/teachers/teacher1.jpg";
 import teacher2 from "../assets/images/teachers/teacher2.jpg";
 import teacher3 from "../assets/images/teachers/teacher3.jpg";
