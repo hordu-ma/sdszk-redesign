@@ -1,6 +1,3 @@
-# 安装Nginx sudo apt install -y nginx # 启动Nginx并设置开机自启 sudo systemctl
-start nginx sudo systemctl enable nginx # 验证Nginx是否正常运行 sudo systemctl
-status nginx
 <template>
   <div class="app-container">
     <!-- 根据路由判断是否显示前台布局 -->
