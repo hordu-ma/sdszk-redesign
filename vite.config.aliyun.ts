@@ -29,12 +29,23 @@ export default defineConfig(({ mode }) => {
           },
         },
       }),
+      // Gzip 压缩
       viteCompression({
         verbose: true,
         disable: false,
-        threshold: 1024,
+        threshold: 10240, // 10KB 以上的文件才压缩
         algorithm: "gzip",
         ext: ".gz",
+        deleteOriginFile: false, // 保留原文件
+      }),
+      // Brotli 压缩（更高效）
+      viteCompression({
+        verbose: true,
+        disable: false,
+        threshold: 10240, // 10KB 以上的文件才压缩
+        algorithm: "brotliCompress",
+        ext: ".br",
+        deleteOriginFile: false,
       }),
     ],
     resolve: {
