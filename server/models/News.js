@@ -116,6 +116,11 @@ const newsSchema = new mongoose.Schema(
   }
 )
 
+// 复合索引，优化后台查询和排序
+newsSchema.index({ status: 1, category: 1, publishDate: -1 });
+newsSchema.index({ isTop: 1, status: 1, publishDate: -1 });
+newsSchema.index({ isFeatured: 1, status: 1, publishDate: -1 });
+
 // 创建全文搜索索引
 newsSchema.index(
   {

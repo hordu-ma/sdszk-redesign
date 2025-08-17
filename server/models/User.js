@@ -102,6 +102,10 @@ const userSchema = new mongoose.Schema(
   }
 )
 
+// 添加索引，优化查询
+userSchema.index({ email: 1 }, { unique: true, sparse: true }); // 稀疏索引，忽略null值
+userSchema.index({ role: 1, active: 1 }); // 优化用户管理查询
+
 // 在保存之前对密码进行加密
 userSchema.pre('save', async function (next) {
   // 如果密码没有被修改，则不需要重新加密
