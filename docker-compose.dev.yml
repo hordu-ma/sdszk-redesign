@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  # MongoDB 数据库 - 开发环境
+  mongodb:
+    image: mongo:6.0
+    container_name: sdszk-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=sdszk
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - sdszk-dev-network
+
+volumes:
+  mongodb_dev_data:
+
+networks:
+  sdszk-dev-network:
+    driver: bridge
