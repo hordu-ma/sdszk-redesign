@@ -94,9 +94,22 @@ app.use(
 );
 // 处理所有OPTIONS预检请求，确保返回CORS头
 app.options("*", cors());
+// 配置Helmet安全头，启用CSP
 app.use(
   helmet({
-    contentSecurityPolicy: false, // 在开发中禁用CSP，生产环境应启用
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com"],
+        imgSrc: ["'self'", "data:", "https:", "http:"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        connectSrc: ["'self'", "https://*.google-analytics.com"],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
   })
 );
 app.use(morgan("dev"));

@@ -210,11 +210,13 @@ export const getNewsList = async (req, res) => {
     console.log("排序条件:", sortOptions);
 
     const news = await News.find(query)
+      .select("title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount") // 限制返回字段
       .populate("category", "name key")
       .populate("createdBy", "username name")
       .sort(sortOptions)
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // 使用 lean() 提高性能
 
     const total = await News.countDocuments(query);
 
@@ -241,8 +243,10 @@ export const getNewsList = async (req, res) => {
 export const getNewsById = async (req, res) => {
   try {
     const news = await News.findById(req.params.id)
+      .select("title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount") // 限制返回字段
       .populate("category", "name key")
-      .populate("createdBy", "username name");
+      .populate("createdBy", "username name")
+      .lean(); // 使用 lean() 提高性能
 
     if (!news) {
       return response.notFound(res, "新闻不存在");

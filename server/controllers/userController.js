@@ -4,7 +4,7 @@ import User from '../models/User.js'
 // 获取所有用户
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-__v')
+    const users = await User.find().select('-__v -loginHistory').lean() // 使用 lean() 提高性能
     res.status(200).json({
       data: users,
       pagination: {
@@ -22,7 +22,7 @@ export const getAllUsers = async (req, res) => {
 // 获取单个用户
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-__v')
+    const user = await User.findById(req.params.id).select('-__v -loginHistory').lean() // 使用 lean() 提高性能
 
     if (!user) {
       return res.status(404).json({

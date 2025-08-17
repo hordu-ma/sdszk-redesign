@@ -161,9 +161,11 @@ export const getResourceList = async (req, res) => {
     }
 
     const resources = await Resource.find(query)
+      .select("title description thumbnail category isPublished featured isTop viewCount createdAt") // 限制返回字段
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // 使用 lean() 提高性能
 
     const total = await Resource.countDocuments(query);
 
