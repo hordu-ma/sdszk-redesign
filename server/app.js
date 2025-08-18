@@ -7,6 +7,11 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
+// 引入Redis客户端
+import { initRedis, closeRedis } from "./config/redis.js";
+// 引入Swagger
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 // 使用自定义的频率限制中间件
 import "./middleware/rateLimit.js";
 // 路由导入
@@ -118,6 +123,29 @@ app.use(morgan("dev"));
 const uploadDir = process.env.UPLOAD_DIR || "uploads";
 app.use(`/${uploadDir}`, express.static(path.join(__dirname, uploadDir)));
 
+// Swagger配置
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "山东省大中小学思政课一体化指导中心API",
+      version: "1.0.0",
+      description: "山东省大中小学思政课一体化指导中心后端API文档",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000/api",
+        description: "开发服务器",
+      },
+    ],
+  },
+  // 指定包含JSDoc注释的文件路径
+  apis: ["./routes/*.js", "./controllers/*.js"], 
+};
+
+const specs = swaggerJsdoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 // MongoDB连接配置
 const connectDB = async () => {
   try {
@@ -143,8 +171,15 @@ mongoose.connection.on("disconnected", () => {
   connectDB();
 });
 
-// 初始化数据库连接
-connectDB();
+// 初始化数据库和Redis连接
+Promise.all([connectDB(), initRedis()])
+  .then(() => {
+    console.log('✅ 数据库和Redis已成功初始化');
+  })
+  .catch((err) => {
+    console.error('❌ 初始化过程中发生错误:', err);
+    process.exit(1);
+  });
 
 // API 路由
 app.get("/", (req, res) => {
@@ -204,6 +239,37 @@ app.use(errorMiddleware);
 
 // 启动服务器
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`服务器运行在端口 ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 服务运行在 http://localhost:${PORT}`);
+  console.log(`📚 API文档: http://localhost:${PORT}/api-docs`);
 });
+
+// 优雅地关闭应用程序
+const gracefulShutdown = async (signal) => {
+  console.log(`接收到 ${signal} 信号，开始优雅关闭...`);
+  
+  // 停止接受新请求
+  server.close(async () => {
+    console.log('HTTP服务器已关闭');
+    
+    try {
+      // 关闭数据库连接
+      await mongoose.connection.close();
+      console.log('MongoDB连接已关闭');
+      
+      // 关闭Redis连接
+      await closeRedis();
+      console.log('Redis连接已关闭');
+      
+      console.log('优雅关闭完成');
+      process.exit(0);
+    } catch (err) {
+      console.error('关闭过程中发生错误:', err);
+      process.exit(1);
+    }
+  });
+};
+
+// 监听关闭信号
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

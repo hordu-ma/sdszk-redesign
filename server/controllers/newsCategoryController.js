@@ -2,47 +2,129 @@ import NewsCategory from '../models/NewsCategory.js'
 import ActivityLog from '../models/ActivityLog.js'
 import { NotFoundError, ForbiddenError } from '../utils/appError.js'
 import mongoose from 'mongoose'
+import cacheService from '../services/cacheService.js'
 
-// 获取所有新闻分类
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     NewsCategory:
+ *       type: object
+ *       required:
+ *         - name
+ *         - key
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: 分类ID
+ *         name:
+ *           type: string
+ *           description: 分类名称
+ *         key:
+ *           type: string
+ *           description: 分类标识符
+ *         description:
+ *           type: string
+ *           description: 分类描述
+ *         order:
+ *           type: number
+ *           description: 排序
+ *         color:
+ *           type: string
+ *           description: 分类颜色
+ *         icon:
+ *           type: string
+ *           description: 分类图标
+ *         isActive:
+ *           type: boolean
+ *           description: 是否激活
+ *         isCore:
+ *           type: boolean
+ *           description: 是否为核心分类
+ *         createdBy:
+ *           type: string
+ *           description: 创建者ID
+ *         updatedBy:
+ *           type: string
+ *           description: 更新者ID
+ *       example:
+ *         id: "605c69e2f2d8c90015eaf123"
+ *         name: "中心动态"
+ *         key: "center"
+ *         description: "中心最新动态"
+ *         order: 1
+ *         color: "#1890ff"
+ *         icon: "notification"
+ *         isActive: true
+ *         isCore: true
+ *         createdBy: "605c69e2f2d8c90015eaf456"
+ *         updatedBy: "605c69e2f2d8c90015eaf456"
+ */
+
+/**
+ * @openapi
+ * /news-categories:
+ *   get:
+ *     summary: 获取所有新闻分类
+ *     description: 获取所有新闻分类列表
+ *     tags: [NewsCategories]
+ *     parameters:
+ *       - in: query
+ *         name: includeInactive
+ *         schema:
+ *           type: boolean
+ *         description: 是否包含非激活分类
+ *     responses:
+ *       200:
+ *         description: 成功获取分类列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/NewsCategory'
+ *       500:
+ *         description: 服务器内部错误
+ */
 export const getCategories = async (req, res) => {
   try {
-    console.log('getCategories 被调用')
-    console.log('MongoDB连接状态:', mongoose.connection.readyState)
-    console.log('数据库名称:', mongoose.connection.db.databaseName)
-
-    // 直接用原生查询
-    const rawData = await mongoose.connection.db.collection('newscategories').find({}).toArray()
-    console.log(
-      '原生查询结果:',
-      rawData.length,
-      rawData.map(d => ({ name: d.name, key: d.key }))
-    )
-
-    // 直接计数看是否能连接到集合
-    const count = await NewsCategory.countDocuments()
-    console.log('Mongoose文档数量:', count)
-
     const { includeInactive = false } = req.query
-    const query = {}
-    console.log('查询条件:', query)
+    const cacheKey = includeInactive ? 'news_categories:all' : 'news_categories:active'
+    
+    // 使用缓存包装
+    const categories = await cacheService.wrap(
+      cacheKey,
+      async () => {
+        console.log('从数据库获取新闻分类')
+        const query = includeInactive ? {} : { isActive: true }
+        console.log('查询条件:', query)
 
-    const categories = await NewsCategory.find(query).sort({ order: 1, name: 1 })
+        const dbCategories = await NewsCategory.find(query).sort({ order: 1, name: 1 })
 
-    console.log('找到分类数量:', categories.length)
-    console.log(
-      '分类数据:',
-      categories.map(c => ({ name: c.name, isActive: c.isActive }))
+        console.log('找到分类数量:', dbCategories.length)
+        console.log(
+          '分类数据:',
+          dbCategories.map(c => ({ name: c.name, isActive: c.isActive }))
+        )
+
+        // 标记核心分类
+        return dbCategories.map(cat => ({
+          ...cat.toObject(),
+          isEditable: !cat.isCore,
+        }))
+      },
+      3600 // 1小时缓存
     )
-
-    // 标记核心分类
-    const formattedCategories = categories.map(cat => ({
-      ...cat.toObject(),
-      isEditable: !cat.isCore,
-    }))
 
     res.json({
       status: 'success',
-      data: formattedCategories,
+      data: categories,
     })
   } catch (err) {
     res.status(500).json({
@@ -75,7 +157,16 @@ export const getCategory = async (req, res) => {
 // 获取核心分类
 export const getCoreCategories = async (req, res) => {
   try {
-    const coreCategories = await NewsCategory.getCoreCategories()
+    const cacheKey = 'news_categories:core'
+    
+    // 使用缓存包装
+    const coreCategories = await cacheService.wrap(
+      cacheKey,
+      async () => {
+        return await NewsCategory.getCoreCategories()
+      },
+      3600 // 1小时缓存
+    )
 
     res.json({
       status: 'success',
@@ -117,6 +208,10 @@ export const createCategory = async (req, res) => {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     })
+
+    // 清除相关缓存
+    await cacheService.delByPattern('news_categories:*')
+    console.log('已清除新闻分类相关缓存')
 
     res.status(201).json({
       status: 'success',
@@ -197,6 +292,10 @@ export const updateCategory = async (req, res) => {
       userAgent: req.headers['user-agent'],
     })
 
+    // 清除相关缓存
+    await cacheService.delByPattern('news_categories:*')
+    console.log('已清除新闻分类相关缓存')
+
     res.json({
       status: 'success',
       data: updatedCategory,
@@ -238,6 +337,10 @@ export const deleteCategory = async (req, res) => {
       userAgent: req.headers['user-agent'],
     })
 
+    // 清除相关缓存
+    await cacheService.delByPattern('news_categories:*')
+    console.log('已清除新闻分类相关缓存')
+
     res.json({
       status: 'success',
       message: '分类已删除',
@@ -278,6 +381,10 @@ export const updateCategoryOrder = async (req, res) => {
       ip: req.ip,
       userAgent: req.headers['user-agent'],
     })
+
+    // 清除相关缓存
+    await cacheService.delByPattern('news_categories:*')
+    console.log('已清除新闻分类相关缓存')
 
     res.json({
       status: 'success',
