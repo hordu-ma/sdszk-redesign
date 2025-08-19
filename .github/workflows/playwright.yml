@@ -1,27 +1,89 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+# 环境变量
+env:
+  NODE_VERSION: "18"
+  CACHE_VERSION: v1
+
 jobs:
   test:
+    name: E2E Tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Checkout代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Gemini建议3.3: 添加npm依赖缓存
+      - name: 缓存依赖项
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-node-
+
+      # 缓存Playwright浏览器
+      - name: 缓存Playwright浏览器
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.CACHE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-playwright-
+
+      - name: 安装依赖项
+        run: npm ci
+
+      - name: 安装Playwright浏览器
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # 仅在缓存命中时安装系统依赖
+      - name: 安装系统依赖
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # 检查应用是否能正常构建
+      - name: 构建应用
+        run: npm run build
+
+      - name: 运行Playwright测试
+        run: npx playwright test
+        env:
+          CI: true
+
+      # 上传测试报告
+      - name: 上传Playwright报告
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      # 上传测试结果摘要
+      - name: 发布测试结果
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Playwright测试结果
+          path: test-results/results.xml
+          reporter: java-junit
+          fail-on-error: false

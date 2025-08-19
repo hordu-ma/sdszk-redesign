@@ -17,7 +17,7 @@
       </h3>
       <div class="video-grid">
         <div v-for="video in videos" :key="video.id" class="video-card">
-          <video-player :src="video.url" :poster="video.poster || ''" />
+          <video-player :src="video.fileUrl" :poster="video.poster || ''" />
           <p class="video-title">{{ video.title }}</p>
         </div>
       </div>

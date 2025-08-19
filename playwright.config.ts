@@ -12,7 +12,8 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./tests",
+  testDir: "./tests/e2e",
+  globalSetup: "./tests/global-setup.ts",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -21,15 +22,27 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
+  /* Timeout for each test */
+  timeout: 30 * 1000,
+  /* Timeout for expect() assertions */
+  expect: {
+    timeout: 5000,
+  },
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: process.env.CI ? [['github'], ['html']] : 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* 基础URL配置，用于page.goto()和测试请求 */
     baseURL: "http://localhost:5173",
 
+    /* 等待策略 */
+    actionTimeout: 10 * 1000,
+    navigationTimeout: 30 * 1000,
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
 
   /* Configure projects for major browsers */
@@ -76,5 +89,7 @@ export default defineConfig({
     url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // 增加超时时间以等待服务器启动
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

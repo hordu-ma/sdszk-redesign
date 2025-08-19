@@ -31,6 +31,8 @@ const mapFrontendToBackend = (data) => {
     delete mapped.fileType;
   }
 
+
+
   // status 到 isPublished 的转换
   if (mapped.status !== undefined) {
     mapped.isPublished = mapped.status === "published";
@@ -121,6 +123,8 @@ const mapBackendToFrontend = (data) => {
     delete mapped.mimeType;
   }
 
+
+
   // isPublished 到 status 的转换
   if (mapped.isPublished !== undefined) {
     mapped.status = mapped.isPublished ? "published" : "draft";
@@ -162,7 +166,7 @@ export const getResourceList = async (req, res) => {
     }
 
     const resources = await Resource.find(query)
-      .select("title description thumbnail category isPublished featured isTop viewCount createdAt") // 限制返回字段
+      .select("title description thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType") // 限制返回字段
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
@@ -225,11 +229,11 @@ export const createResource = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
+      user: req.user._id,
       action: "create",
       entityType: "resource",
       entityId: savedResource._id,
+      entityName: savedResource.title,
       details: {
         title: savedResource.title,
         category: savedResource.category,
@@ -274,11 +278,11 @@ export const updateResource = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
+      user: req.user._id,
       action: "update",
       entityType: "resource",
       entityId: resource._id,
+      entityName: resource.title,
       details: {
         title: resource.title,
         category: resource.category,
@@ -311,11 +315,11 @@ export const deleteResource = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
+      user: req.user._id,
       action: "delete",
       entityType: "resource",
       entityId: resource._id,
+      entityName: resource.title,
       details: {
         title: resource.title,
         category: resource.category,
@@ -350,14 +354,14 @@ export const togglePublishStatus = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
-      action: resource.isPublished ? "publish" : "unpublish",
+      user: req.user._id,
+      action: resource.isPublished ? "unpublish" : "publish",
       entityType: "resource",
       entityId: resource._id,
+      entityName: resource.title,
       details: {
         title: resource.title,
-        category: resource.category,
+        isPublished: !resource.isPublished,
       },
       ip: req.ip,
       userAgent: req.headers["user-agent"],
@@ -553,10 +557,10 @@ export const batchDeleteResources = async (req, res, next) => {
 
     // 记录批量删除活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
-      action: "batch_delete",
+      user: req.user._id,
+      action: "delete",
       entityType: "resource",
+      entityName: `批量删除${resources.length}个资源`,
       details: {
         count: resources.length,
         resourceTitles: resources.map((r) => r.title),
@@ -610,10 +614,10 @@ export const batchUpdateResources = async (req, res, next) => {
 
     // 记录批量更新活动
     await ActivityLog.create({
+      user: req.user._id,
       action: "update",
       entityType: "resource",
-      userId: req.user.id,
-      username: req.user.username,
+      entityName: `批量更新${resources.length}个资源`,
       details: {
         count: resources.length,
         resourceTitles: resources.map((r) => r.title),
@@ -663,11 +667,11 @@ export const updateResourceStatus = async (req, res, next) => {
 
     // 记录活动日志
     await ActivityLog.create({
+      user: req.user._id,
       action: "update",
       entityType: "resource",
       entityId: id,
-      userId: req.user.id,
-      username: req.user.username,
+      entityName: resource.title,
       details: {
         title: resource.title,
         oldStatus: resource.isPublished ? "published" : "draft",

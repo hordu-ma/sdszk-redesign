@@ -85,7 +85,7 @@ export const PAGINATION_CONFIG = {
 
 // 上传配置
 export const UPLOAD_CONFIG = {
-  maxSize: (Number(import.meta.env.VITE_UPLOAD_MAX_SIZE) || 10) * 1024 * 1024, // 转换为字节
+  maxSize: (Number(import.meta.env.VITE_UPLOAD_MAX_SIZE) || 100) * 1024 * 1024, // 转换为字节
   acceptTypes: (
     import.meta.env.VITE_UPLOAD_ACCEPT_TYPES ||
     ".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"

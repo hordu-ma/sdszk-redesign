@@ -2,8 +2,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import { useUserStore } from '@/stores/user'
-import { useContentStore } from '@/stores/content'
+import { useUserStore } from '../../stores/user'
+import { useContentStore } from '../../stores/content'
 
 // Mock localStorage with better implementation
 const createLocalStorageMock = () => {
@@ -31,7 +31,7 @@ const createLocalStorageMock = () => {
 }
 
 // Mock API
-vi.mock('@/utils/api', () => ({
+vi.mock('../../utils/api', () => ({
   default: {
     defaults: { headers: { common: {} } },
     get: vi.fn().mockResolvedValue({ data: { status: 'success', data: { user: {} } } }),
@@ -42,7 +42,7 @@ vi.mock('@/utils/api', () => ({
 }))
 
 // Mock debounce utility
-vi.mock('@/utils/debounce', () => ({
+vi.mock('../../utils/debounce', () => ({
   debounce: (fn: Function) => fn
 }))
 

@@ -78,7 +78,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 默认10MB
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 100 * 1024 * 1024, // 默认100MB
   },
   fileFilter: fileFilter,
 })
@@ -91,7 +91,7 @@ export const uploadSingle = fieldName => {
     uploadMiddleware(req, res, err => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return next(new BadRequestError('文件过大，请上传小于10MB的文件'))
+          return next(new BadRequestError('文件过大，请上传小于100MB的文件'))
         }
         return next(new BadRequestError(err.message))
       } else if (err) {
@@ -110,7 +110,7 @@ export const uploadMultiple = (fieldName, maxCount = 5) => {
     uploadMiddleware(req, res, err => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return next(new BadRequestError('文件过大，请上传小于10MB的文件'))
+          return next(new BadRequestError('文件过大，请上传小于100MB的文件'))
         } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
           return next(new BadRequestError(`最多只能上传${maxCount}个文件`))
         }
