@@ -1,5 +1,8 @@
 <template>
-  <div class="video-player-container" :class="{ 'is-fullscreen': isFullscreen }">
+  <div
+    class="video-player-container"
+    :class="{ 'is-fullscreen': isFullscreen }"
+  >
     <video
       ref="videoRef"
       class="video-element"
@@ -55,7 +58,9 @@
         </div>
 
         <!-- 时间显示 -->
-        <div class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</div>
+        <div class="time-display">
+          {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+        </div>
 
         <!-- 全屏按钮 -->
         <button class="control-button" @click="toggleFullscreen">
@@ -69,144 +74,151 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { VideoPlay, VideoPause, Mute, Microphone, FullScreen, Close } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import {
+  VideoPlay,
+  VideoPause,
+  Mute,
+  Microphone,
+  FullScreen,
+  Close,
+} from "@element-plus/icons-vue";
 
 defineOptions({
-  name: 'VideoPlayer',
-})
+  name: "VideoPlayer",
+});
 
 const props = defineProps<{
-  src: string
-  poster?: string
-}>()
+  src: string;
+  poster?: string;
+}>();
 
-const videoRef = ref<HTMLVideoElement | null>(null)
-const isPlaying = ref(false)
-const currentTime = ref(0)
-const duration = ref(0)
-const progress = ref(0)
-const volume = ref(1)
-const isMuted = ref(false)
-const isFullscreen = ref(false)
-const showControls = ref(true)
-let controlsTimeout: number
+const videoRef = ref<HTMLVideoElement | null>(null);
+const isPlaying = ref(false);
+const currentTime = ref(0);
+const duration = ref(0);
+const progress = ref(0);
+const volume = ref(1);
+const isMuted = ref(false);
+const isFullscreen = ref(false);
+const showControls = ref(true);
+let controlsTimeout: number;
 
 // 计算音量图标
 const volumeIcon = computed(() => {
-  if (isMuted.value || volume.value === 0) return Mute
-  return Microphone
-})
+  if (isMuted.value || volume.value === 0) return Mute;
+  return Microphone;
+});
 
 // 格式化时间
 const formatTime = (time: number): string => {
-  const minutes = Math.floor(time / 60)
-  const seconds = Math.floor(time % 60)
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
 // 播放/暂停切换
 const togglePlay = () => {
-  if (!videoRef.value) return
+  if (!videoRef.value) return;
   if (isPlaying.value) {
-    videoRef.value.pause()
+    videoRef.value.pause();
   } else {
-    videoRef.value.play()
+    videoRef.value.play();
   }
-}
+};
 
 // 音量控制
 const toggleMute = () => {
-  if (!videoRef.value) return
-  isMuted.value = !isMuted.value
-  videoRef.value.muted = isMuted.value
-}
+  if (!videoRef.value) return;
+  isMuted.value = !isMuted.value;
+  videoRef.value.muted = isMuted.value;
+};
 
 const onVolumeChange = (event: Event) => {
-  if (!videoRef.value) return
-  const target = event.target as HTMLInputElement
-  const newVolume = parseFloat(target.value)
-  volume.value = newVolume
-  videoRef.value.volume = newVolume
-  isMuted.value = newVolume === 0
-}
+  if (!videoRef.value) return;
+  const target = event.target as HTMLInputElement;
+  const newVolume = parseFloat(target.value);
+  volume.value = newVolume;
+  videoRef.value.volume = newVolume;
+  isMuted.value = newVolume === 0;
+};
 
 // 进度条控制
 const onProgressChange = (event: Event) => {
-  if (!videoRef.value) return
-  const target = event.target as HTMLInputElement
-  const newTime = (parseFloat(target.value) / 100) * duration.value
-  videoRef.value.currentTime = newTime
-}
+  if (!videoRef.value) return;
+  const target = event.target as HTMLInputElement;
+  const newTime = (parseFloat(target.value) / 100) * duration.value;
+  videoRef.value.currentTime = newTime;
+};
 
 // 全屏控制
 const toggleFullscreen = () => {
-  if (!videoRef.value) return
+  if (!videoRef.value) return;
   if (!isFullscreen.value) {
     if (videoRef.value.requestFullscreen) {
-      videoRef.value.requestFullscreen()
+      videoRef.value.requestFullscreen();
     }
   } else {
     if (document.exitFullscreen) {
-      document.exitFullscreen()
+      document.exitFullscreen();
     }
   }
-}
+};
 
 // 事件处理
 const onTimeUpdate = () => {
-  if (!videoRef.value) return
-  currentTime.value = videoRef.value.currentTime
-  progress.value = (currentTime.value / duration.value) * 100
-}
+  if (!videoRef.value) return;
+  currentTime.value = videoRef.value.currentTime;
+  progress.value = (currentTime.value / duration.value) * 100;
+};
 
 const onLoadedMetadata = () => {
-  if (!videoRef.value) return
-  duration.value = videoRef.value.duration
-}
+  if (!videoRef.value) return;
+  duration.value = videoRef.value.duration;
+};
 
 const onPlay = () => {
-  isPlaying.value = true
-}
+  isPlaying.value = true;
+};
 
 const onPause = () => {
-  isPlaying.value = false
-}
+  isPlaying.value = false;
+};
 
 const onEnded = () => {
-  isPlaying.value = false
-  currentTime.value = 0
-  progress.value = 0
-}
+  isPlaying.value = false;
+  currentTime.value = 0;
+  progress.value = 0;
+};
 
 // 自动隐藏控制栏
 const resetControlsTimeout = () => {
-  showControls.value = true
-  clearTimeout(controlsTimeout)
+  showControls.value = true;
+  clearTimeout(controlsTimeout);
   controlsTimeout = window.setTimeout(() => {
     if (isPlaying.value) {
-      showControls.value = false
+      showControls.value = false;
     }
-  }, 3000)
-}
+  }, 3000);
+};
 
 // 监听鼠标移动
 const handleMouseMove = () => {
-  resetControlsTimeout()
-}
+  resetControlsTimeout();
+};
 
 // 生命周期钩子
 onMounted(() => {
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('fullscreenchange', () => {
-    isFullscreen.value = !!document.fullscreenElement
-  })
-})
+  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("fullscreenchange", () => {
+    isFullscreen.value = !!document.fullscreenElement;
+  });
+});
 
 onUnmounted(() => {
-  document.removeEventListener('mousemove', handleMouseMove)
-  clearTimeout(controlsTimeout)
-})
+  document.removeEventListener("mousemove", handleMouseMove);
+  clearTimeout(controlsTimeout);
+});
 </script>
 
 <style scoped>
@@ -291,6 +303,7 @@ onUnmounted(() => {
   width: 60px;
   height: 4px;
   -webkit-appearance: none;
+  appearance: none;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   outline: none;

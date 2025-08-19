@@ -34,6 +34,56 @@
           <a-skeleton active />
         </a-card>
         <a-card v-else-if="resource">
+          <!-- 媒体预览区域 -->
+          <div class="media-preview" v-if="getMediaUrl(resource)">
+            <!-- 视频播放器 -->
+            <div v-if="isVideoFile(resource)" class="video-container">
+              <video
+                :src="getMediaUrl(resource)"
+                controls
+                preload="metadata"
+                class="media-player"
+                @error="handleMediaError"
+              >
+                您的浏览器不支持视频播放
+              </video>
+            </div>
+
+            <!-- 音频播放器 -->
+            <div v-else-if="isAudioFile(resource)" class="audio-container">
+              <audio
+                :src="getMediaUrl(resource)"
+                controls
+                preload="metadata"
+                class="media-player"
+                @error="handleMediaError"
+              >
+                您的浏览器不支持音频播放
+              </audio>
+            </div>
+
+            <!-- 图片预览 -->
+            <div v-else-if="isImageFile(resource)" class="image-container">
+              <img
+                :src="getMediaUrl(resource)"
+                :alt="resource.title"
+                class="media-player"
+                @error="handleMediaError"
+              />
+            </div>
+
+            <!-- PDF预览 -->
+            <div v-else-if="isPdfFile(resource)" class="pdf-container">
+              <iframe
+                :src="getMediaUrl(resource)"
+                class="media-player pdf-viewer"
+                @error="handleMediaError"
+              >
+                您的浏览器不支持PDF预览，请点击下载按钮下载文件
+              </iframe>
+            </div>
+          </div>
+
           <div class="resource-info">
             <div class="resource-meta">
               <span
@@ -347,6 +397,58 @@ const shareResource = async () => {
   }
 };
 
+// 媒体相关工具函数
+const getMediaUrl = (resource: Resource): string => {
+  const resourceData = resource as any;
+  return (
+    resourceData.url || resourceData.fileUrl || resourceData.downloadUrl || ""
+  );
+};
+
+const isVideoFile = (resource: Resource): boolean => {
+  const url = getMediaUrl(resource);
+  const videoExtensions = [".mp4", ".webm", ".ogg", ".avi", ".mov", ".wmv"];
+  return (
+    videoExtensions.some((ext) => url.toLowerCase().includes(ext)) ||
+    (resource.mimeType?.startsWith("video/") ?? false) ||
+    (resource.fileType?.includes("video") ?? false)
+  );
+};
+
+const isAudioFile = (resource: Resource): boolean => {
+  const url = getMediaUrl(resource);
+  const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"];
+  return (
+    audioExtensions.some((ext) => url.toLowerCase().includes(ext)) ||
+    (resource.mimeType?.startsWith("audio/") ?? false) ||
+    (resource.fileType?.includes("audio") ?? false)
+  );
+};
+
+const isImageFile = (resource: Resource): boolean => {
+  const url = getMediaUrl(resource);
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+  return (
+    imageExtensions.some((ext) => url.toLowerCase().includes(ext)) ||
+    (resource.mimeType?.startsWith("image/") ?? false) ||
+    (resource.fileType?.includes("image") ?? false)
+  );
+};
+
+const isPdfFile = (resource: Resource): boolean => {
+  const url = getMediaUrl(resource);
+  return (
+    url.toLowerCase().includes(".pdf") ||
+    resource.mimeType === "application/pdf" ||
+    (resource.fileType?.includes("pdf") ?? false)
+  );
+};
+
+const handleMediaError = (event: Event) => {
+  console.error("媒体加载失败:", event);
+  message.warning("媒体文件加载失败，请尝试下载查看");
+};
+
 onMounted(() => {
   fetchResource();
 });
@@ -358,6 +460,48 @@ onMounted(() => {
 
   .resource-content {
     margin-top: 24px;
+  }
+
+  .media-preview {
+    margin-bottom: 24px;
+
+    .video-container,
+    .audio-container,
+    .image-container,
+    .pdf-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .media-player {
+      max-width: 100%;
+      max-height: 500px;
+      border-radius: 4px;
+    }
+
+    .video-container .media-player {
+      width: 100%;
+      height: auto;
+    }
+
+    .audio-container .media-player {
+      width: 100%;
+    }
+
+    .image-container .media-player {
+      max-height: 400px;
+      object-fit: contain;
+    }
+
+    .pdf-viewer {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
   }
 
   .resource-info {

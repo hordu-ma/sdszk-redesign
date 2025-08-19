@@ -46,17 +46,18 @@ export interface Resource {
   content?: string
   type?: 'document' | 'video' | 'image' | 'audio' | 'other'
   category?:
-    | string
-    | {
-        id: string
-        key: string
-        name: string
-      }
+  | string
+  | {
+    id: string
+    key: string
+    name: string
+  }
   categoryId?: string
   url?: string
   fileSize?: number
   fileType?: string
   mimeType?: string
+  thumbnail?: string
   downloadCount?: number
   viewCount?: number
   author?: ResourceAuthor | string
@@ -94,7 +95,7 @@ export interface CreateResourceDTO extends Partial<Resource> {
   url: string
 }
 
-export interface UpdateResourceDTO extends Partial<Resource> {}
+export interface UpdateResourceDTO extends Partial<Resource> { }
 
 export interface ResourceQueryParams extends QueryParams {
   type?: string
@@ -110,7 +111,7 @@ export class ResourceApi extends BaseApi {
 
   // 获取资源列表
   async getList(params?: ResourceQueryParams): Promise<ApiResponse<Resource[]>> {
-    return await this.get<Resource[]>('', params)
+    return await this.get<Resource[]>('', { params })
   }
 
   // 获取资源详情
@@ -193,7 +194,7 @@ export class ResourceApi extends BaseApi {
   ): Promise<
     ApiResponse<Comment[]> & { pagination?: { total: number; page: number; limit: number } }
   > {
-    return await this.get(`/${id}/comments`, params)
+    return await this.get(`/${id}/comments`, { params })
   }
 
   // 添加评论

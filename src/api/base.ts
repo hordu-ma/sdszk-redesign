@@ -68,12 +68,12 @@ export abstract class BaseApi {
 
   protected async get<T>(
     path: string,
-    params?: QueryParams
+    config?: { params?: any }
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "GET",
       url: path,
-      params,
+      params: config?.params,
     });
   }
 

@@ -291,6 +291,18 @@ const pagination = reactive({
   showQuickJumper: true,
   showTotal: (total: number, range: [number, number]) =>
     `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+  onChange: (page: number, pageSize: number) => {
+    console.log("📄 分页组件onChange:", { page, pageSize });
+    pagination.current = page;
+    pagination.pageSize = pageSize;
+    fetchResources();
+  },
+  onShowSizeChange: (current: number, size: number) => {
+    console.log("📄 分页组件onShowSizeChange:", { current, size });
+    pagination.current = 1; // 改变页面大小时回到第一页
+    pagination.pageSize = size;
+    fetchResources();
+  },
 });
 
 // 表格列配置
@@ -345,17 +357,72 @@ const rowSelection = computed(() => ({
 const fetchResources = async () => {
   loading.value = true;
   try {
-    const params = {
+    const params: any = {
       page: pagination.current,
-      pageSize: pagination.pageSize,
-      ...filters,
+      limit: pagination.pageSize,
     };
 
+    // 添加筛选条件（只添加有值的参数）
+    if (filters.keyword) {
+      params.keyword = filters.keyword;
+    }
+    if (filters.categoryId) {
+      params.category = filters.categoryId;
+    }
+    if (filters.status) {
+      params.status = filters.status;
+    }
+    if (filters.type) {
+      params.type = filters.type;
+    }
+    if (filters.dateRange && filters.dateRange.length === 2) {
+      params.dateRange = filters.dateRange;
+    }
+
+    console.log("📋 获取资源列表 - 请求参数:", params);
+
     const response = await adminResourceApi.getList(params);
-    resources.value = response.data.data || response.data;
-    pagination.total = response.pagination?.total || 0;
+
+    console.log("📋 获取资源列表 - 响应数据:", response);
+
+    // 处理API响应数据
+    if (response && response.success) {
+      // 直接使用response.data作为资源列表
+      resources.value = Array.isArray(response.data) ? response.data : [];
+
+      // 处理分页信息
+      if (response.pagination) {
+        pagination.total = response.pagination.total || 0;
+      } else {
+        // 如果没有分页信息，保持当前total不变
+        console.warn("⚠️ 响应中缺少分页信息");
+      }
+
+      console.log("📋 成功处理响应数据:", {
+        resourcesCount: resources.value.length,
+        paginationTotal: pagination.total,
+        currentPage: pagination.current,
+      });
+    } else {
+      // 处理失败响应
+      resources.value = [];
+      pagination.total = 0;
+      const errorMsg = response?.message || "获取资源列表失败";
+      console.error("❌ API响应失败:", errorMsg);
+      message.error(errorMsg);
+    }
+
+    console.log("📋 处理后的数据:", {
+      resourcesCount: resources.value.length,
+      total: pagination.total,
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    });
   } catch (error: any) {
+    console.error("❌ 获取资源列表失败:", error);
     message.error(error.message || "获取资源列表失败");
+    resources.value = [];
+    pagination.total = 0;
   } finally {
     loading.value = false;
   }
@@ -394,6 +461,14 @@ const handleSearch = () => {
 
 // 表格变化处理
 const handleTableChange = (pag: any, filters: any, sorter: any) => {
+  console.log("🔄 分页变化:", {
+    current: pag.current,
+    pageSize: pag.pageSize,
+    total: pag.total,
+    oldCurrent: pagination.current,
+    oldPageSize: pagination.pageSize,
+  });
+
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   fetchResources();
@@ -469,7 +544,7 @@ const handleAction = async (action: string, record: ResourceItem) => {
 // 状态变更
 const handleStatusChange = async (
   id: string,
-  status: "draft" | "published" | "archived"
+  status: "draft" | "published" | "archived",
 ) => {
   try {
     await adminResourceApi.updateStatus(id, status);
@@ -496,7 +571,7 @@ const handleBatchPublish = async () => {
   try {
     await adminResourceApi.batchUpdateStatus(
       selectedRowKeys.value,
-      "published"
+      "published",
     );
     message.success("批量发布成功");
     selectedRowKeys.value = [];

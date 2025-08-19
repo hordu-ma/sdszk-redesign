@@ -241,3 +241,190 @@ export const batchDeleteAdminResources = async (req, res) => {
     return response.serverError(res, "批量删除失败", err);
   }
 };
+
+// 创建新资源
+export const createAdminResource = async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      summary,
+      categoryId,
+      fileUrl,
+      fileName,
+      fileSize,
+      fileType,
+      thumbnail,
+      type,
+      publishDate,
+      accessLevel,
+      allowDownload,
+      allowComment,
+      sortOrder,
+      tags,
+      status,
+      isTop,
+      isFeatured,
+      downloadPermission,
+    } = req.body;
+
+    // 验证必需字段
+    if (!title || !description || !categoryId || !fileUrl) {
+      return response.badRequest(res, "标题、描述、分类和文件URL为必填项");
+    }
+
+    // 验证分类是否存在
+    const category = await ResourceCategory.findById(categoryId);
+    if (!category) {
+      return response.badRequest(res, "指定的分类不存在");
+    }
+
+    // 创建资源数据
+    const resourceData = {
+      title,
+      content: description, // 映射到content字段
+      summary,
+      category: categoryId,
+      fileUrl,
+      fileName,
+      fileSize: parseInt(fileSize) || 0,
+      mimeType: fileType,
+      thumbnail,
+      type,
+      publishDate: publishDate ? new Date(publishDate) : new Date(),
+      accessLevel: accessLevel || "public",
+      allowDownload: allowDownload !== false,
+      allowComment: allowComment !== false,
+      sortOrder: parseInt(sortOrder) || 0,
+      tags: Array.isArray(tags) ? tags : [],
+      isPublished: status === "published",
+      isTop: isTop === true,
+      featured: isFeatured === true,
+      downloadPermission: downloadPermission || "public",
+      author: req.user?.name || "Unknown",
+      createdBy: req.user?.id,
+      viewCount: 0,
+      downloadCount: 0,
+    };
+
+    // 创建并保存资源
+    const resource = new Resource(resourceData);
+    await resource.save();
+
+    // 填充分类信息后返回
+    await resource.populate("category", "name key color description");
+
+    const resourceObj = resource.toObject();
+    const transformedResource = {
+      ...resourceObj,
+      id: resourceObj._id.toString(),
+      status: resourceObj.isPublished ? "published" : "draft",
+      description: resourceObj.content,
+      categoryId: resourceObj.category?._id?.toString(),
+      categoryName: resourceObj.category?.name,
+      isFeatured: resourceObj.featured,
+      fileType: resourceObj.mimeType,
+    };
+
+    return response.success(res, transformedResource, "资源创建成功", 201);
+  } catch (err) {
+    console.error("创建资源失败: ", err);
+    return response.serverError(res, "创建资源失败", err);
+  }
+};
+
+// 更新资源
+export const updateAdminResource = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      summary,
+      categoryId,
+      fileUrl,
+      fileName,
+      fileSize,
+      fileType,
+      thumbnail,
+      type,
+      publishDate,
+      accessLevel,
+      allowDownload,
+      allowComment,
+      sortOrder,
+      tags,
+      status,
+      isTop,
+      isFeatured,
+      downloadPermission,
+    } = req.body;
+
+    // 查找资源
+    const resource = await Resource.findById(id);
+    if (!resource) {
+      return response.notFound(res, "资源不存在");
+    }
+
+    // 如果更改了分类，验证新分类是否存在
+    if (categoryId && categoryId !== resource.category?.toString()) {
+      const category = await ResourceCategory.findById(categoryId);
+      if (!category) {
+        return response.badRequest(res, "指定的分类不存在");
+      }
+    }
+
+    // 更新资源数据
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.content = description;
+    if (summary !== undefined) updateData.summary = summary;
+    if (categoryId !== undefined) updateData.category = categoryId;
+    if (fileUrl !== undefined) updateData.fileUrl = fileUrl;
+    if (fileName !== undefined) updateData.fileName = fileName;
+    if (fileSize !== undefined) updateData.fileSize = parseInt(fileSize) || 0;
+    if (fileType !== undefined) updateData.mimeType = fileType;
+    if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
+    if (type !== undefined) updateData.type = type;
+    if (publishDate !== undefined) updateData.publishDate = new Date(publishDate);
+    if (accessLevel !== undefined) updateData.accessLevel = accessLevel;
+    if (allowDownload !== undefined) updateData.allowDownload = allowDownload;
+    if (allowComment !== undefined) updateData.allowComment = allowComment;
+    if (sortOrder !== undefined) updateData.sortOrder = parseInt(sortOrder) || 0;
+    if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
+    if (status !== undefined) updateData.isPublished = status === "published";
+    if (isTop !== undefined) updateData.isTop = isTop;
+    if (isFeatured !== undefined) updateData.featured = isFeatured;
+    if (downloadPermission !== undefined) updateData.downloadPermission = downloadPermission;
+
+    // 更新修改时间和修改者
+    updateData.updatedAt = new Date();
+    if (req.user?.id) {
+      updateData.updatedBy = req.user.id;
+    }
+
+    // 执行更新
+    const updatedResource = await Resource.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    ).populate("category", "name key color description");
+
+    const resourceObj = updatedResource.toObject();
+    const transformedResource = {
+      ...resourceObj,
+      id: resourceObj._id.toString(),
+      status: resourceObj.isPublished ? "published" : "draft",
+      description: resourceObj.content,
+      categoryId: resourceObj.category?._id?.toString(),
+      categoryName: resourceObj.category?.name,
+      isFeatured: resourceObj.featured,
+      fileType: resourceObj.mimeType,
+    };
+
+    return response.success(res, transformedResource, "资源更新成功");
+  } catch (err) {
+    console.error("更新资源失败:", err);
+    return response.serverError(res, "更新资源失败", err);
+  }
+};

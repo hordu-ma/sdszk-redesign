@@ -215,6 +215,44 @@
                 </a-form-item>
               </a-card>
 
+              <!-- 首页展示图 -->
+              <a-card title="首页展示图" size="small" class="setting-card">
+                <a-form-item name="thumbnail">
+                  <div class="thumbnail-upload">
+                    <a-upload
+                      v-model:file-list="thumbnailFileList"
+                      name="file"
+                      list-type="picture-card"
+                      :show-upload-list="false"
+                      :before-upload="beforeThumbnailUpload"
+                      @change="handleThumbnailChange"
+                      accept="image/*"
+                    >
+                      <div v-if="formData.thumbnail" class="thumbnail-preview">
+                        <img :src="formData.thumbnail" alt="缩略图" />
+                        <div class="thumbnail-actions">
+                          <a-button
+                            type="text"
+                            size="small"
+                            @click.stop="removeThumbnail"
+                            danger
+                          >
+                            删除
+                          </a-button>
+                        </div>
+                      </div>
+                      <div v-else class="thumbnail-upload-placeholder">
+                        <plus-outlined />
+                        <div class="upload-text">上传图片</div>
+                      </div>
+                    </a-upload>
+                    <div class="thumbnail-tip">
+                      建议尺寸：300x200px，支持JPG、PNG格式
+                    </div>
+                  </div>
+                </a-form-item>
+              </a-card>
+
               <!-- 高级设置 -->
               <a-card title="高级设置" size="small" class="setting-card">
                 <a-form-item>
@@ -255,6 +293,7 @@ import {
   ArrowLeftOutlined,
   InboxOutlined,
   FileOutlined,
+  PlusOutlined,
 } from "@ant-design/icons-vue";
 import {
   adminResourceApi,
@@ -283,6 +322,8 @@ const publishing = ref(false);
 const uploadProgress = ref(0);
 const categories = ref<ResourceCategory[]>([]);
 const fileList = ref([]);
+const thumbnailFileList = ref([]);
+const thumbnailUploading = ref(false);
 
 // 表单数据
 const formData = reactive<ResourceFormData>({
@@ -293,6 +334,7 @@ const formData = reactive<ResourceFormData>({
   fileName: "",
   fileSize: 0,
   fileType: "",
+  thumbnail: "",
   tags: [],
   status: "draft",
   isTop: false,
@@ -419,11 +461,11 @@ const handleFileChange = async (info: any) => {
         (progressEvent: any) => {
           if (progressEvent.total) {
             const percent = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
+              (progressEvent.loaded * 100) / progressEvent.total,
             );
             uploadProgress.value = Math.min(30 + percent * 0.7, 100); // 30% + 70% for actual upload
           }
-        }
+        },
       );
 
       console.log("✅ Upload response:", response);
@@ -437,7 +479,7 @@ const handleFileChange = async (info: any) => {
         console.log("📎 File URL set:", formData.fileUrl);
       } else {
         throw new Error(
-          "上传响应格式错误: " + JSON.stringify((response as any).data)
+          "上传响应格式错误: " + JSON.stringify((response as any).data),
         );
       }
     } catch (error: any) {
@@ -447,7 +489,7 @@ const handleFileChange = async (info: any) => {
 
       uploadProgress.value = 0;
       message.error(
-        error.message || error.response?.data?.message || "文件上传失败"
+        error.message || error.response?.data?.message || "文件上传失败",
       );
 
       // 清除文件信息
@@ -466,6 +508,54 @@ const formatFileSize = (bytes: number) => {
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
+
+// 缩略图上传处理
+const beforeThumbnailUpload = (file: any) => {
+  const isImage = file.type.startsWith("image/");
+  if (!isImage) {
+    message.error("只能上传图片文件！");
+    return false;
+  }
+
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error("图片大小不能超过2MB！");
+    return false;
+  }
+
+  return false; // 阻止自动上传，手动处理
+};
+
+const handleThumbnailChange = async (info: any) => {
+  if (info.file && !thumbnailUploading.value) {
+    thumbnailUploading.value = true;
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", info.file);
+
+      const response = await adminResourceApi.upload(formDataUpload);
+
+      if (response.data?.fileUrl) {
+        formData.thumbnail = response.data.fileUrl;
+        message.success("缩略图上传成功");
+      } else {
+        throw new Error("上传响应格式错误");
+      }
+    } catch (error: any) {
+      console.error("缩略图上传失败:", error);
+      message.error(error.message || "缩略图上传失败");
+    } finally {
+      thumbnailUploading.value = false;
+    }
+  }
+};
+
+const removeThumbnail = () => {
+  formData.thumbnail = "";
+  thumbnailFileList.value = [];
+  message.success("已删除缩略图");
 };
 
 // 保存草稿
@@ -488,7 +578,7 @@ const handleSaveDraft = async () => {
       message.error("请检查表单填写是否正确");
     } else {
       message.error(
-        error.message || error.response?.data?.message || "保存草稿失败"
+        error.message || error.response?.data?.message || "保存草稿失败",
       );
     }
   } finally {
@@ -516,7 +606,7 @@ const handlePublish = async () => {
       message.error("请检查表单填写是否正确");
     } else {
       message.error(
-        error.message || error.response?.data?.message || "发布失败"
+        error.message || error.response?.data?.message || "发布失败",
       );
     }
   } finally {
@@ -619,6 +709,83 @@ onMounted(() => {
 
     .upload-progress {
       margin-top: 16px;
+    }
+
+    /* 缩略图上传样式 */
+    .thumbnail-upload {
+      text-align: center;
+    }
+
+    .thumbnail-upload :deep(.ant-upload) {
+      width: 100%;
+      height: 120px;
+    }
+
+    .thumbnail-preview {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .thumbnail-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .thumbnail-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .thumbnail-preview:hover .thumbnail-actions {
+      opacity: 1;
+    }
+
+    .thumbnail-upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .thumbnail-upload-placeholder:hover {
+      border-color: #1890ff;
+      background: #f0f8ff;
+    }
+
+    .thumbnail-upload-placeholder .anticon {
+      font-size: 28px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .upload-text {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .thumbnail-tip {
+      margin-top: 8px;
+      color: #999;
+      font-size: 12px;
     }
   }
 

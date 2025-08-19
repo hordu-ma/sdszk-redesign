@@ -3,6 +3,8 @@ import express from "express";
 import {
   getAdminResourceList,
   getAdminResourceDetail,
+  createAdminResource,
+  updateAdminResource,
   updateAdminResourceStatus,
   batchUpdateAdminResourceStatus,
   batchDeleteAdminResources,
@@ -19,6 +21,12 @@ router.get("/", getAdminResourceList);
 
 // 获取管理员资源详情
 router.get("/:id", getAdminResourceDetail);
+
+// 创建新资源
+router.post("/", createAdminResource);
+
+// 更新资源
+router.put("/:id", updateAdminResource);
 
 // 更新资源状态
 router.patch("/:id/status", updateAdminResourceStatus);

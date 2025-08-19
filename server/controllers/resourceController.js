@@ -166,7 +166,7 @@ export const getResourceList = async (req, res) => {
     }
 
     const resources = await Resource.find(query)
-      .select("title description thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType") // 限制返回字段
+      .select("title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType") // 限制返回字段
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))

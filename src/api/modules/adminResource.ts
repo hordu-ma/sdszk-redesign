@@ -11,6 +11,7 @@ export interface ResourceFormData {
   fileName: string;
   fileSize: number;
   fileType: string;
+  thumbnail?: string;
   type?: "document" | "video" | "image" | "audio" | "other";
   publishDate?: string;
   accessLevel?: "public" | "login" | "vip";
@@ -78,7 +79,7 @@ export interface ResourceQueryParams extends QueryParams {
 // 资源 API 类
 export class AdminResourceApi extends BaseApi {
   constructor() {
-    super("/resources"); // 修改为匹配后端实际路由路径
+    super("/admin/resources"); // 使用相对路径，/api前缀由Vite代理处理
   }
 
   // 获取资源列表
@@ -161,10 +162,10 @@ export class AdminResourceApi extends BaseApi {
   ): Promise<
     ApiResponse<{ fileUrl: string; fileName: string; fileSize: number }>
   > {
-    console.log("🔄 Upload request: /uploads/resource");
+    console.log("🔄 Upload request: /api/uploads/resource");
 
     // 直接使用axios实例，绕过BaseApi的路径处理机制
-    const response = await this.api.post("/uploads/resource", formData, {
+    const response = await this.api.post("/api/uploads/resource", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

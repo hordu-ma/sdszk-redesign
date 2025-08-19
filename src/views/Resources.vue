@@ -29,17 +29,27 @@
                 <template #cover>
                   <div class="resource-cover">
                     <img
-                      v-if="resource.url"
-                      :src="resource.url"
+                      v-if="resource.thumbnail"
+                      :src="resource.thumbnail"
                       :alt="resource.title"
                     />
                     <div v-else class="resource-icon">
-                      <FileOutlined v-if="resource.type === 'document'" />
-                      <VideoCameraOutlined
-                        v-else-if="resource.type === 'video'"
+                      <FileOutlined
+                        v-if="
+                          resource.fileType?.includes('document') ||
+                          resource.fileType?.includes('pdf') ||
+                          resource.fileType?.includes('word')
+                        "
                       />
-                      <PictureOutlined v-else-if="resource.type === 'image'" />
-                      <SoundOutlined v-else-if="resource.type === 'audio'" />
+                      <VideoCameraOutlined
+                        v-else-if="resource.fileType?.includes('video')"
+                      />
+                      <PictureOutlined
+                        v-else-if="resource.fileType?.includes('image')"
+                      />
+                      <SoundOutlined
+                        v-else-if="resource.fileType?.includes('audio')"
+                      />
                       <FileOutlined v-else />
                     </div>
                   </div>
@@ -47,7 +57,10 @@
                 <a-card-meta :title="resource.title">
                   <template #description>
                     <div class="resource-meta">
-                      <p class="resource-summary">{{ resource.description }}</p>
+                      <div
+                        class="resource-summary"
+                        v-html="truncateHtml(resource.description || '')"
+                      ></div>
                       <div class="resource-info">
                         <span
                           ><UserOutlined />
@@ -217,6 +230,22 @@ const formatDate = (date?: string) => {
   });
 };
 
+// 截取HTML内容，避免显示过长
+const truncateHtml = (html: string, maxLength: number = 100): string => {
+  if (!html) return "";
+
+  // 移除HTML标签，只保留文本内容进行长度判断
+  const textContent = html.replace(/<[^>]*>/g, "");
+
+  if (textContent.length <= maxLength) {
+    return html;
+  }
+
+  // 如果文本过长，截取HTML并添加省略号
+  const truncated = textContent.substring(0, maxLength);
+  return truncated + "...";
+};
+
 // 初始化
 // onMounted(() => {
 //   fetchResources();
@@ -287,6 +316,15 @@ const formatDate = (date?: string) => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.resource-summary :deep(p) {
+  margin: 0;
+}
+
+.resource-summary :deep(strong) {
+  font-weight: 600;
 }
 
 .resource-info {
