@@ -55,10 +55,8 @@ export default defineConfig(({ mode }) => {
           optimizationLevel: 3, // 降低优化级别以加快构建
           interlaced: false,
         },
-        // PNG 优化 - 使用 pngquant 而不是 optipng
-        optipng: {
-          enabled: false,
-        },
+        // PNG 优化 - 禁用 optipng，使用 pngquant 代替
+        optipng: false,
         // JPEG 优化
         mozjpeg: {
           quality: 85, // 提高质量以保持视觉效果
