@@ -26,6 +26,8 @@ import {
   slowRequestLogger,
   securityLogger
 } from "./middleware/loggerMiddleware.js";
+// 引入 CORS 配置
+import { getCorsConfig, validateCorsConfig } from "./config/cors.js";
 // 使用自定义的频率限制中间件
 import "./middleware/rateLimit.js";
 // 路由导入
@@ -74,46 +76,13 @@ applyRateLimits(app); // 应用自定义频率限制
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:5180",
-        "http://localhost:5182",
-        "http://localhost:5179",
-        "http://localhost:5178",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "https://hordu-ma.github.io", // GitHub Pages域名
-        "https://horsduroot.com", // 主域名
-        "https://www.horsduroot.com", // 带www的域名
-        // 处理环境变量中的多个域名（逗号分隔）
-        ...(process.env.FRONTEND_URL
-          ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
-          : []),
-        undefined, // 允许无origin的请求（如curl、本地测试）
-      ].filter(Boolean);
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Cookie",
-      "X-Requested-With",
-    ],
-    exposedHeaders: ["set-cookie", "Set-Cookie"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    maxAge: 3600,
-  })
-);
+// 验证并应用 CORS 配置
+if (validateCorsConfig()) {
+  app.use(cors(getCorsConfig()));
+} else {
+  sysLogger.error('CORS 配置验证失败，应用无法启动');
+  process.exit(1);
+}
 // 处理所有OPTIONS预检请求，确保返回CORS头
 app.options("*", cors());
 // 配置Helmet安全头，启用CSP
