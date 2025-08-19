@@ -48,48 +48,33 @@ export default defineConfig(({ mode }) => {
         ext: ".br",
         deleteOriginFile: false,
       }),
-      // 图片压缩 - 优化配置以平衡质量和大小
+      // 图片压缩
       viteImagemin({
-        // GIF 优化
         gifsicle: {
-          optimizationLevel: 3, // 降低优化级别以加快构建
+          optimizationLevel: 7,
           interlaced: false,
         },
-        // PNG 优化 - 使用 pngquant 而不是 optipng
         optipng: {
           enabled: false,
         },
-        // JPEG 优化
         mozjpeg: {
-          quality: 85, // 提高质量以保持视觉效果
-          progressive: true, // 启用渐进式加载
+          quality: 80,
         },
-        // PNG 量化压缩
         pngquant: {
-          quality: [0.7, 0.85], // 提高质量范围
+          quality: [0.65, 0.8],
           speed: 4,
         },
-        // SVG 优化
         svgo: {
           plugins: [
             {
               name: 'removeViewBox',
-              active: false, // 保留 viewBox 以确保 SVG 正确缩放
             },
             {
               name: 'removeEmptyAttrs',
-              active: false, // 保留可能需要的空属性
-            },
-            {
-              name: 'removeDoctype',
-            },
-            {
-              name: 'removeComments',
+              active: false,
             },
           ],
         },
-        // 输出详细信息
-        verbose: true,
       }),
     ],
     resolve: {

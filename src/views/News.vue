@@ -112,7 +112,7 @@ watch(
       fetchNews();
     }
   },
-  { immediate: false }
+  { immediate: false },
 );
 
 // 监听分类变化，更新路由参数
@@ -127,13 +127,13 @@ watch(
     currentPage.value = 1;
     fetchNews();
   },
-  { immediate: false }
+  { immediate: false },
 );
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
-    const response = await newsCategoryApi.getList();
+    const response = await newsCategoryApi.instance.getList();
     if (response.success) {
       categories.value = response.data;
     }
@@ -156,7 +156,7 @@ const fetchNews = async () => {
     if (activeCategory.value !== "all") {
       // 根据分类key查找分类ID
       const selectedCategory = categories.value.find(
-        (cat) => cat.key === activeCategory.value
+        (cat) => cat.key === activeCategory.value,
       );
       if (selectedCategory) {
         params.category = selectedCategory._id;
@@ -165,12 +165,12 @@ const fetchNews = async () => {
           "未找到分类:",
           activeCategory.value,
           "可用分类:",
-          categories.value
+          categories.value,
         );
       }
     }
 
-    const response = await newsApi.getList(params);
+    const response = await newsApi.instance.getList(params);
     console.log("新闻接口响应", response);
 
     if (response.success) {
@@ -197,7 +197,7 @@ const filteredNews = computed(() => {
     ...news,
     // 格式化显示数据
     date: new Date(news.publishDate || news.createdAt).toLocaleDateString(
-      "zh-CN"
+      "zh-CN",
     ),
     categoryKey: news.category?.key || "center",
     categoryName: news.category?.name || "中心动态",

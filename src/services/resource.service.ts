@@ -17,7 +17,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 获取资源列表
   async getList(params?: ResourceQueryParams) {
-    const response = await resourceApi.getList(params)
+    const response = await resourceApi.instance.getList(params)
     if (this.useCache) {
       this.cacheResponse('list', response, params)
     }
@@ -32,7 +32,7 @@ export class ResourceService extends BaseService<Resource> {
       if (cached) return cached
     }
 
-    const response = await resourceApi.getDetail(id)
+    const response = await resourceApi.instance.getDetail(id)
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
@@ -41,7 +41,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 创建资源
   async create(data: CreateResourceDTO) {
-    const response = await resourceApi.create(data)
+    const response = await resourceApi.instance.create(data)
     if (this.useCache) {
       this.clearCache()
     }
@@ -50,7 +50,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 更新资源
   async update(id: string, data: UpdateResourceDTO) {
-    const response = await resourceApi.update(id, data)
+    const response = await resourceApi.instance.update(id, data)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -60,7 +60,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 删除资源
   async delete(id: string) {
-    const response = await resourceApi.delete(id)
+    const response = await resourceApi.instance.delete(id)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -70,7 +70,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 更新资源状态
   async updateStatus(id: string, status: Resource['status']) {
-    const response = await resourceApi.updateStatus(id, status)
+    const response = await resourceApi.instance.updateStatus(id, status)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -80,7 +80,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 批量删除资源
   async batchDelete(ids: string[]) {
-    const response = await resourceApi.batchDelete(ids)
+    const response = await resourceApi.instance.batchDelete(ids)
     if (this.useCache) {
       this.clearCache()
     }
@@ -89,7 +89,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 批量更新资源状态
   async batchUpdateStatus(ids: string[], status: Resource['status']) {
-    const response = await resourceApi.batchUpdateStatus(ids, status)
+    const response = await resourceApi.instance.batchUpdateStatus(ids, status)
     if (this.useCache) {
       this.clearCache()
     }
@@ -98,7 +98,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 更新资源标签
   async updateTags(id: string, tags: string[]) {
-    const response = await resourceApi.updateTags(id, tags)
+    const response = await resourceApi.instance.updateTags(id, tags)
     if (this.useCache) {
       this.clearCache()
     }
@@ -115,7 +115,7 @@ export class ResourceService extends BaseService<Resource> {
       }
     })
 
-    const response = await resourceApi.create(formData)
+    const response = await resourceApi.instance.create(formData)
     if (this.useCache) {
       this.clearCache()
     }
@@ -124,7 +124,7 @@ export class ResourceService extends BaseService<Resource> {
 
   // 下载资源
   async download(id: string) {
-    return await resourceApi.download(id)
+    return await resourceApi.instance.download(id)
   }
 
   // 获取分类列表
@@ -135,7 +135,7 @@ export class ResourceService extends BaseService<Resource> {
       if (cached) return cached
     }
 
-    const response = await resourceApi.getCategories()
+    const response = await resourceApi.instance.getCategories()
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
@@ -150,7 +150,7 @@ export class ResourceService extends BaseService<Resource> {
       if (cached) return cached
     }
 
-    const response = await resourceApi.getTags()
+    const response = await resourceApi.instance.getTags()
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
@@ -169,15 +169,15 @@ export class ResourceService extends BaseService<Resource> {
 
   // 评论相关方法
   async getComments(id: string, params?: { page?: number; limit?: number }) {
-    return await resourceApi.getComments(id, params)
+    return await resourceApi.instance.getComments(id, params)
   }
 
   async addComment(id: string, data: { content: string; parentId?: string }) {
-    return await resourceApi.addComment(id, data)
+    return await resourceApi.instance.addComment(id, data)
   }
 
   async deleteComment(resourceId: string, commentId: string) {
-    return await resourceApi.deleteComment(resourceId, commentId)
+    return await resourceApi.instance.deleteComment(resourceId, commentId)
   }
 
   // 分享相关方法
@@ -189,6 +189,6 @@ export class ResourceService extends BaseService<Resource> {
       message?: string
     }
   ) {
-    return await resourceApi.share(id, data)
+    return await resourceApi.instance.share(id, data)
   }
 }

@@ -252,9 +252,8 @@ export const getNewsById = async (req, res) => {
       return response.notFound(res, "新闻不存在");
     }
 
-    // 更新浏览量
-    news.viewCount += 1;
-    await news.save();
+    // 更新浏览量 - 使用 findByIdAndUpdate 而不是在 lean 对象上调用 save
+    await News.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } });
 
     // 应用字段映射：后端 -> 前端
     const responseData = mapBackendToFrontend(news);

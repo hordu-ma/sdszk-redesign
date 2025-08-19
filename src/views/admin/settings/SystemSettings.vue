@@ -812,7 +812,8 @@ const saveAllSettings = async () => {
     });
 
     // 调用API批量更新设置
-    const response = await settingsApi.bulkUpdateSettings(settingsToUpdate);
+    const response =
+      await settingsApi.instance.bulkUpdateSettings(settingsToUpdate);
 
     if (response.success) {
       message.success("设置保存成功");
@@ -905,14 +906,14 @@ const restoreData = () => {
 // 数据加载
 const loadSettings = async () => {
   try {
-    const response = await settingsApi.getAllSettings();
+    const response = await settingsApi.instance.getAllSettings();
 
     if (response.success && response.data) {
       const settings = response.data;
 
       // 更新网站设置
       if (settings.site) {
-        settings.site.forEach((setting) => {
+        settings.site.forEach((setting: any) => {
           const key = setting.key.replace("site.", "");
           if (key in siteSettings) {
             siteSettings[key] = setting.value;
@@ -922,7 +923,7 @@ const loadSettings = async () => {
 
       // 更新系统设置
       if (settings.system) {
-        settings.system.forEach((setting) => {
+        settings.system.forEach((setting: any) => {
           const key = setting.key.replace("system.", "");
           if (key in systemSettings) {
             systemSettings[key] = setting.value;
@@ -932,7 +933,7 @@ const loadSettings = async () => {
 
       // 更新邮件设置
       if (settings.email) {
-        settings.email.forEach((setting) => {
+        settings.email.forEach((setting: any) => {
           const key = setting.key.replace("email.", "");
           if (key in emailSettings) {
             emailSettings[key] = setting.value;
@@ -942,7 +943,7 @@ const loadSettings = async () => {
 
       // 更新安全设置
       if (settings.security) {
-        settings.security.forEach((setting) => {
+        settings.security.forEach((setting: any) => {
           const key = setting.key.replace("security.", "");
           if (key in securitySettings) {
             securitySettings[key] = setting.value;
@@ -952,7 +953,7 @@ const loadSettings = async () => {
 
       // 更新备份设置
       if (settings.backup) {
-        settings.backup.forEach((setting) => {
+        settings.backup.forEach((setting: any) => {
           const key = setting.key.replace("backup.", "");
           if (key in backupSettings) {
             if (key === "backupTime") {

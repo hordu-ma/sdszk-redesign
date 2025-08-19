@@ -1,4 +1,4 @@
-# Gemini 开发建议
+Gemini 开发建议
 
 本文档由 Gemini 根据对项目代码的分析生成，旨在提供额外的开发建议，以补充现有的 `开发建议.md` 文件。
 
@@ -19,7 +19,9 @@
   }
 
   // 在 src/stores/user.ts 中使用
-  function transformPermissions(backendPermissions: BackendPermissions): string[] {
+  function transformPermissions(
+    backendPermissions: BackendPermissions,
+  ): string[] {
     // ...
   }
   ```
@@ -29,6 +31,7 @@
 ### 1.2. 统一 UI 组件库
 
 项目中同时使用了 `Element Plus` 和 `Ant Design Vue` 两个 UI 组件库。这可能会导致：
+
 - **不一致的 UI/UX**：两个库的设计语言和组件行为不同。
 - **增加包体积**：需要同时加载两个库的资源。
 - **增加心智负担**：开发者需要熟悉两个库的用法。

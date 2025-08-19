@@ -85,23 +85,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    loginHistory: {
-      type: [
-        {
-          loginTime: { type: Date, default: Date.now },
-          ip: String,
-          userAgent: String,
-          success: { type: Boolean, default: true },
-        },
-      ],
-      default: [],
-      validate: {
-        validator: function (arr) {
-          return arr.length <= 10;
-        },
-        message: '登录历史记录不能超过10条'
-      }
-    },
+    loginHistory: [
+      {
+        loginTime: Date,
+        ip: String,
+        userAgent: String,
+        success: Boolean,
+      },
+    ],
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
@@ -114,7 +105,6 @@ const userSchema = new mongoose.Schema(
 // 添加索引，优化查询
 userSchema.index({ email: 1 }, { unique: true, sparse: true }); // 稀疏索引，忽略null值
 userSchema.index({ role: 1, active: 1 }); // 优化用户管理查询
-userSchema.index({ "loginHistory.loginTime": -1 }); // 优化登录历史查询性能
 
 // 在保存之前对密码进行加密
 userSchema.pre('save', async function (next) {
@@ -172,43 +162,19 @@ userSchema.methods.recordLogin = async function (success, ip, userAgent) {
     success,
   }
 
-  // 使用 MongoDB 的 $push 和 $slice 操作符确保数组长度不超过10
-  try {
-    await this.constructor.updateOne(
-      { _id: this._id },
-      {
-        $push: {
-          loginHistory: {
-            $each: [loginRecord],
-            $slice: -10 // 保持最新的10条记录
-          }
-        },
-        ...(success && { lastLogin: new Date() })
-      }
-    );
-
-    // 更新当前实例的数据
-    if (!this.loginHistory) this.loginHistory = [];
-    this.loginHistory.push(loginRecord);
-    if (this.loginHistory.length > 10) {
-      this.loginHistory = this.loginHistory.slice(-10);
-    }
-    if (success) {
-      this.lastLogin = new Date();
-    }
-  } catch (error) {
-    console.error('记录登录历史失败:', error);
-    // 如果数据库操作失败，回退到原有逻辑
-    if (this.loginHistory && this.loginHistory.length >= 10) {
-      this.loginHistory.shift();
-    }
-    if (!this.loginHistory) this.loginHistory = [];
-    this.loginHistory.push(loginRecord);
-    if (success) {
-      this.lastLogin = new Date();
-    }
-    await this.save({ validateBeforeSave: false });
+  // 保持登录历史记录不超过10条
+  if (this.loginHistory && this.loginHistory.length >= 10) {
+    this.loginHistory.shift()
   }
+
+  if (!this.loginHistory) this.loginHistory = []
+  this.loginHistory.push(loginRecord)
+
+  if (success) {
+    this.lastLogin = new Date()
+  }
+
+  await this.save({ validateBeforeSave: false })
 }
 
 // 在角色修改时自动设置权限

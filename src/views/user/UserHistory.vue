@@ -66,7 +66,9 @@
           </template>
         </el-dropdown>
 
-        <el-button type="danger" plain @click="clearAllHistory"> 清空历史 </el-button>
+        <el-button type="danger" plain @click="clearAllHistory">
+          清空历史
+        </el-button>
       </div>
     </div>
 
@@ -99,7 +101,9 @@
         </el-col>
         <el-col :span="4">
           <div class="stat-card">
-            <div class="stat-number">{{ formatDuration(stats.avgDuration) }}</div>
+            <div class="stat-number">
+              {{ formatDuration(stats.avgDuration) }}
+            </div>
             <div class="stat-label">平均时长</div>
           </div>
         </el-col>
@@ -135,7 +139,9 @@
                 {{ getTypeText(item.type) }}
               </el-tag>
               <span class="rec-reason">{{ item.reason }}</span>
-              <span class="rec-score">推荐度: {{ Math.round(item.score * 100) }}%</span>
+              <span class="rec-score"
+                >推荐度: {{ Math.round(item.score * 100) }}%</span
+              >
             </div>
           </div>
         </div>
@@ -145,7 +151,11 @@
     <!-- 历史记录列表 -->
     <div class="history-list">
       <div class="list-header">
-        <el-checkbox v-model="selectAll" @change="handleSelectAll" class="select-all-checkbox">
+        <el-checkbox
+          v-model="selectAll"
+          @change="handleSelectAll"
+          class="select-all-checkbox"
+        >
           全选
         </el-checkbox>
 
@@ -164,7 +174,9 @@
 
       <div v-else-if="!history.length" class="empty-state">
         <el-empty description="暂无浏览记录">
-          <el-button type="primary" @click="$router.push('/')"> 去首页逛逛 </el-button>
+          <el-button type="primary" @click="$router.push('/')">
+            去首页逛逛
+          </el-button>
         </el-empty>
       </div>
 
@@ -180,8 +192,15 @@
         <el-table-column label="内容标题" min-width="200">
           <template #default="scope">
             <div class="title-cell">
-              <i :class="getTypeIcon(scope.row.resourceType)" class="type-icon"></i>
-              <a :href="scope.row.resourceUrl" target="_blank" class="title-link">
+              <i
+                :class="getTypeIcon(scope.row.resourceType)"
+                class="type-icon"
+              ></i>
+              <a
+                :href="scope.row.resourceUrl"
+                target="_blank"
+                class="title-link"
+              >
                 {{ scope.row.resourceTitle }}
               </a>
             </div>
@@ -205,8 +224,8 @@
         <el-table-column label="设备信息" width="150">
           <template #default="scope">
             <div class="device-info">
-              <div>{{ scope.row.device?.type || '-' }}</div>
-              <small>{{ scope.row.device?.browser || '-' }}</small>
+              <div>{{ scope.row.device?.type || "-" }}</div>
+              <small>{{ scope.row.device?.browser || "-" }}</small>
             </div>
           </template>
         </el-table-column>
@@ -219,7 +238,11 @@
 
         <el-table-column label="操作" width="120">
           <template #default="scope">
-            <el-button type="text" size="small" @click="addToFavorites(scope.row)">
+            <el-button
+              type="text"
+              size="small"
+              @click="addToFavorites(scope.row)"
+            >
               收藏
             </el-button>
             <el-button
@@ -244,7 +267,7 @@
         >
           <el-checkbox
             :model-value="selectedItems.includes(item._id)"
-            @change="checked => handleItemSelect(item._id, checked)"
+            @change="(checked) => handleItemSelect(item._id, checked)"
             class="card-checkbox"
           />
 
@@ -258,7 +281,9 @@
               <el-tag :type="getTypeColor(item.resourceType)" size="small">
                 {{ getTypeText(item.resourceType) }}
               </el-tag>
-              <span class="view-time">{{ formatDateTime(item.createdAt) }}</span>
+              <span class="view-time">{{
+                formatDateTime(item.createdAt)
+              }}</span>
             </div>
 
             <div class="card-stats">
@@ -268,7 +293,7 @@
               </span>
               <span class="device">
                 <i class="fas fa-desktop"></i>
-                {{ item.device?.type || 'Unknown' }}
+                {{ item.device?.type || "Unknown" }}
               </span>
             </div>
           </div>
@@ -277,7 +302,12 @@
             <el-button type="text" size="small" @click="addToFavorites(item)">
               <i class="fas fa-heart"></i>
             </el-button>
-            <el-button type="text" size="small" @click="deleteHistory(item._id)" class="delete-btn">
+            <el-button
+              type="text"
+              size="small"
+              @click="deleteHistory(item._id)"
+              class="delete-btn"
+            >
               <i class="fas fa-trash"></i>
             </el-button>
           </div>
@@ -295,7 +325,11 @@
           <div class="timeline-content">
             <div class="timeline-header">
               <i :class="getTypeIcon(item.resourceType)" class="type-icon"></i>
-              <a :href="item.resourceUrl" target="_blank" class="timeline-title">
+              <a
+                :href="item.resourceUrl"
+                target="_blank"
+                class="timeline-title"
+              >
                 {{ item.resourceTitle }}
               </a>
               <el-tag :type="getTypeColor(item.resourceType)" size="small">
@@ -304,12 +338,18 @@
             </div>
 
             <div class="timeline-meta">
-              <span class="duration"> 浏览时长: {{ formatDuration(item.viewDuration) }} </span>
-              <span class="device"> 设备: {{ item.device?.type || 'Unknown' }} </span>
+              <span class="duration">
+                浏览时长: {{ formatDuration(item.viewDuration) }}
+              </span>
+              <span class="device">
+                设备: {{ item.device?.type || "Unknown" }}
+              </span>
             </div>
 
             <div class="timeline-actions">
-              <el-button type="text" size="small" @click="addToFavorites(item)"> 收藏 </el-button>
+              <el-button type="text" size="small" @click="addToFavorites(item)">
+                收藏
+              </el-button>
               <el-button
                 type="text"
                 size="small"
@@ -340,226 +380,233 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, ArrowDown } from '@element-plus/icons-vue'
-import { viewHistoryApi } from '@/api/modules/viewHistory'
-import { favoriteApi } from '@/api/modules/favorite'
+import { ref, reactive, onMounted, computed, watch } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Search, ArrowDown } from "@element-plus/icons-vue";
+import { viewHistoryApi } from "@/api/modules/viewHistory";
+import { favoriteApi } from "@/api/modules/favorite";
 
 // 响应式数据
-const loading = ref(false)
+const loading = ref(false);
 // 定义历史记录接口
 interface ViewHistory {
-  _id: string
-  resourceId: string
-  resourceTitle: string
-  resourceType: string
-  resourceUrl?: string
-  viewDuration: number
-  createdAt: string
+  _id: string;
+  resourceId: string;
+  resourceTitle: string;
+  resourceType: string;
+  resourceUrl?: string;
+  viewDuration: number;
+  createdAt: string;
   device?: {
-    type?: string
-    browser?: string
-  }
+    type?: string;
+    browser?: string;
+  };
 }
 
 // 定义统计数据接口
 interface HistoryStats {
-  totalViews: number
-  todayViews: number
-  weekViews: number
-  monthViews: number
-  avgDuration: number
-  mostViewedType: string
-  mostActiveHour: number
+  totalViews: number;
+  todayViews: number;
+  weekViews: number;
+  monthViews: number;
+  avgDuration: number;
+  mostViewedType: string;
+  mostActiveHour: number;
 }
 
 // 定义推荐内容接口
 interface Recommendation {
-  _id: string
-  title: string
-  type: 'news' | 'resource' | 'activity'
-  url: string
-  score: number
-  reason: string
-  thumbnail?: string
+  _id: string;
+  title: string;
+  type: "news" | "resource" | "activity";
+  url: string;
+  score: number;
+  reason: string;
+  thumbnail?: string;
 }
 
-const history = ref<ViewHistory[]>([])
+const history = ref<ViewHistory[]>([]);
 const stats = ref<HistoryStats>({
   totalViews: 0,
   todayViews: 0,
   weekViews: 0,
   monthViews: 0,
   avgDuration: 0,
-  mostViewedType: '',
+  mostViewedType: "",
   mostActiveHour: 0,
-})
-const recommendations = ref<Recommendation[]>([])
-const selectedItems = ref<string[]>([])
-const selectAll = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
-const viewMode = ref('list')
+});
+const recommendations = ref<Recommendation[]>([]);
+const selectedItems = ref<string[]>([]);
+const selectAll = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
+const viewMode = ref("list");
 
 // 筛选条件
-const selectedType = ref('')
-const dateRange = ref<string[]>([])
-const searchKeyword = ref('')
+const selectedType = ref("");
+const dateRange = ref<string[]>([]);
+const searchKeyword = ref("");
 
 // 加载浏览历史
 const loadHistory = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const params: any = {
       page: currentPage.value,
       limit: pageSize.value,
       resourceType: selectedType.value,
       keyword: searchKeyword.value,
-    }
+    };
 
     if (dateRange.value && dateRange.value.length === 2) {
-      params.startDate = dateRange.value[0]
-      params.endDate = dateRange.value[1]
+      params.startDate = dateRange.value[0];
+      params.endDate = dateRange.value[1];
     }
 
-    const response = await viewHistoryApi.getViewHistory(params)
-    history.value = response.data.histories || []
-    total.value = response.data.total || 0
+    const response = await viewHistoryApi.instance.getViewHistory(params);
+    history.value = response.data.histories || [];
+    total.value = response.data.total || 0;
 
     // 清空选择
-    selectedItems.value = []
-    selectAll.value = false
+    selectedItems.value = [];
+    selectAll.value = false;
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : '加载浏览历史失败'
-    ElMessage.error(errorMessage)
+    const errorMessage =
+      error instanceof Error ? error.message : "加载浏览历史失败";
+    ElMessage.error(errorMessage);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 加载统计数据
 const loadStats = async () => {
   try {
-    const response = await viewHistoryApi.getHistoryStats()
-    stats.value = response.data || {}
+    const response = await viewHistoryApi.instance.getHistoryStats();
+    stats.value = response.data || {};
   } catch (error) {
-    console.error('加载统计失败:', error)
+    console.error("加载统计失败:", error);
   }
-}
+};
 
 // 加载推荐内容
 const loadRecommendations = async () => {
   try {
-    const response = await viewHistoryApi.getRecommendedContent({ limit: 5 })
-    recommendations.value = response.data || []
+    const response = await viewHistoryApi.instance.getRecommendedContent({
+      limit: 5,
+    });
+    recommendations.value = response.data || [];
   } catch (error) {
-    console.error('加载推荐失败:', error)
+    console.error("加载推荐失败:", error);
   }
-}
+};
 
 // 全选处理
 const handleSelectAll = (checked: boolean | string | number) => {
-  const isChecked = Boolean(checked)
+  const isChecked = Boolean(checked);
   if (isChecked) {
-    selectedItems.value = history.value.map(item => item._id)
+    selectedItems.value = history.value.map((item) => item._id);
   } else {
-    selectedItems.value = []
+    selectedItems.value = [];
   }
-}
+};
 
 // 表格选择变化
 const handleSelectionChange = (selection: any[]) => {
-  selectedItems.value = selection.map(item => item._id)
-}
+  selectedItems.value = selection.map((item) => item._id);
+};
 
 // 单项选择处理
 const handleItemSelect = (id: string, checked: boolean | string | number) => {
-  const isChecked = Boolean(checked)
+  const isChecked = Boolean(checked);
   if (isChecked) {
-    selectedItems.value.push(id)
+    selectedItems.value.push(id);
   } else {
-    const index = selectedItems.value.indexOf(id)
+    const index = selectedItems.value.indexOf(id);
     if (index > -1) {
-      selectedItems.value.splice(index, 1)
+      selectedItems.value.splice(index, 1);
     }
   }
-}
+};
 
 // 打开资源
 const openResource = (item: any) => {
   if (item.resourceUrl) {
-    window.open(item.resourceUrl, '_blank')
+    window.open(item.resourceUrl, "_blank");
   }
-}
+};
 
 // 删除单条历史
 const deleteHistory = async (id: string) => {
   try {
-    await ElMessageBox.confirm('确定要删除这条浏览记录吗？', '确认删除', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm("确定要删除这条浏览记录吗？", "确认删除", {
+      type: "warning",
+    });
 
-    await viewHistoryApi.deleteViewHistory(id)
-    ElMessage.success('删除成功')
-    loadHistory()
-    loadStats()
+    await viewHistoryApi.instance.deleteViewHistory(id);
+    ElMessage.success("删除成功");
+    loadHistory();
+    loadStats();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '删除失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "删除失败");
     }
   }
-}
+};
 
 // 批量删除
 const batchDelete = async () => {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${selectedItems.value.length} 条记录吗？`,
-      '批量删除',
-      { type: 'warning' }
-    )
+      "批量删除",
+      { type: "warning" },
+    );
 
-    loading.value = true
-    await viewHistoryApi.batchDeleteHistory(selectedItems.value)
-    ElMessage.success('批量删除成功')
-    selectedItems.value = []
-    selectAll.value = false
-    loadHistory()
-    loadStats()
+    loading.value = true;
+    await viewHistoryApi.instance.batchDeleteHistory(selectedItems.value);
+    ElMessage.success("批量删除成功");
+    selectedItems.value = [];
+    selectAll.value = false;
+    loadHistory();
+    loadStats();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '批量删除失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "批量删除失败");
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 清空所有历史
 const clearAllHistory = async () => {
   try {
-    await ElMessageBox.confirm('确定要清空所有浏览历史吗？此操作不可恢复！', '清空历史', {
-      type: 'warning',
-      confirmButtonText: '确定清空',
-      cancelButtonText: '取消',
-    })
+    await ElMessageBox.confirm(
+      "确定要清空所有浏览历史吗？此操作不可恢复！",
+      "清空历史",
+      {
+        type: "warning",
+        confirmButtonText: "确定清空",
+        cancelButtonText: "取消",
+      },
+    );
 
-    loading.value = true
-    await viewHistoryApi.clearAllHistory()
-    ElMessage.success('历史记录已清空')
-    history.value = []
-    total.value = 0
-    loadStats()
+    loading.value = true;
+    await viewHistoryApi.instance.clearAllHistory();
+    ElMessage.success("历史记录已清空");
+    history.value = [];
+    total.value = 0;
+    loadStats();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '清空失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "清空失败");
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 导出历史
 const handleExport = async (format: string) => {
@@ -567,111 +614,116 @@ const handleExport = async (format: string) => {
     const params: any = {
       format,
       resourceType: selectedType.value,
-    }
+    };
 
     if (dateRange.value && dateRange.value.length === 2) {
-      params.startDate = dateRange.value[0]
-      params.endDate = dateRange.value[1]
+      params.startDate = dateRange.value[0];
+      params.endDate = dateRange.value[1];
     }
 
-    const blob = await viewHistoryApi.exportHistory(params)
+    const blob = await viewHistoryApi.instance.exportHistory(params);
 
     // 创建下载链接
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `浏览历史_${new Date().toLocaleDateString()}.${format === 'excel' ? 'xlsx' : format}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `浏览历史_${new Date().toLocaleDateString()}.${format === "excel" ? "xlsx" : format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 
-    ElMessage.success('导出成功')
+    ElMessage.success("导出成功");
   } catch (error: any) {
-    ElMessage.error(error.message || '导出失败')
+    ElMessage.error(error.message || "导出失败");
   }
-}
+};
 
 // 添加到收藏
 const addToFavorites = async (item: any) => {
   try {
-    await favoriteApi.addFavorite({
+    await favoriteApi.instance.addFavorite({
       itemType: item.resourceType,
       itemId: item.resourceId,
       notes: `从浏览历史添加于 ${formatDateTime(new Date().toISOString())}`,
-    })
-    ElMessage.success('已添加到收藏')
+    });
+    ElMessage.success("已添加到收藏");
   } catch (error: any) {
-    ElMessage.error(error.message || '添加收藏失败')
+    ElMessage.error(error.message || "添加收藏失败");
   }
-}
+};
 
 // 获取类型图标
 const getTypeIcon = (type: string) => {
   const iconMap: Record<string, string> = {
-    news: 'fas fa-newspaper',
-    resource: 'fas fa-file-alt',
-    activity: 'fas fa-calendar-alt',
-  }
-  return iconMap[type] || 'fas fa-file'
-}
+    news: "fas fa-newspaper",
+    resource: "fas fa-file-alt",
+    activity: "fas fa-calendar-alt",
+  };
+  return iconMap[type] || "fas fa-file";
+};
 
 // 获取类型颜色
-const getTypeColor = (type: string): 'success' | 'warning' | 'danger' | 'info' | 'primary' => {
-  const colorMap: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
-    news: 'primary',
-    resource: 'success',
-    activity: 'warning',
-  }
-  return colorMap[type] || 'info'
-}
+const getTypeColor = (
+  type: string,
+): "success" | "warning" | "danger" | "info" | "primary" => {
+  const colorMap: Record<
+    string,
+    "success" | "warning" | "danger" | "info" | "primary"
+  > = {
+    news: "primary",
+    resource: "success",
+    activity: "warning",
+  };
+  return colorMap[type] || "info";
+};
 
 // 获取类型文本
 const getTypeText = (type: string) => {
   const textMap: Record<string, string> = {
-    news: '新闻',
-    resource: '资源',
-    activity: '活动',
-  }
-  return textMap[type] || '未知'
-}
+    news: "新闻",
+    resource: "资源",
+    activity: "活动",
+  };
+  return textMap[type] || "未知";
+};
 
 // 格式化时长
 const formatDuration = (seconds: number) => {
-  if (!seconds || seconds < 0) return '0秒'
+  if (!seconds || seconds < 0) return "0秒";
 
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
 
   if (hours > 0) {
-    return `${hours}小时${minutes}分钟`
+    return `${hours}小时${minutes}分钟`;
   } else if (minutes > 0) {
-    return `${minutes}分钟${secs}秒`
+    return `${minutes}分钟${secs}秒`;
   } else {
-    return `${secs}秒`
+    return `${secs}秒`;
   }
-}
+};
 
 // 格式化日期时间
 const formatDateTime = (date: string) => {
-  return new Date(date).toLocaleString('zh-CN')
-}
+  return new Date(date).toLocaleString("zh-CN");
+};
 
 // 监听选择状态
 watch(
   () => selectedItems.value.length,
-  newLength => {
-    selectAll.value = newLength > 0 && newLength === history.value.length
-  }
-)
+  (newLength) => {
+    selectAll.value = newLength > 0 && newLength === history.value.length;
+  },
+);
 
 // 组件挂载
 onMounted(() => {
-  loadHistory()
-  loadStats()
-  loadRecommendations()
-})
+  loadHistory();
+  loadStats();
+  loadRecommendations();
+});
 </script>
 
 <style scoped>

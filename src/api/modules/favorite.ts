@@ -131,5 +131,12 @@ export class FavoriteApi extends BaseApi {
   }
 }
 
-// 导出收藏API实例
-export const favoriteApi = new FavoriteApi()
+// 懒加载收藏API实例，避免循环依赖
+let _favoriteApi: FavoriteApi | null = null;
+
+export const favoriteApi = {
+  get instance() {
+    if (!_favoriteApi) _favoriteApi = new FavoriteApi();
+    return _favoriteApi;
+  }
+};

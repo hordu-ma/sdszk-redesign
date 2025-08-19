@@ -100,7 +100,7 @@ const relatedNews = ref<Array<{ id: string; title: string; date: string }>>([]);
 const fetchNewsData = async (id: string) => {
   loading.value = true;
   try {
-    const response = await newsApi.getDetail(id);
+    const response = await newsApi.instance.getDetail(id);
     console.log("新闻详情响应", response);
 
     // 检查API响应是否成功
@@ -137,7 +137,7 @@ const fetchNewsData = async (id: string) => {
 // 获取相关文章
 const fetchRelatedNews = async (_category: any, currentId: string) => {
   try {
-    const response = await newsApi.getList({
+    const response = await newsApi.instance.getList({
       limit: 5,
     });
 

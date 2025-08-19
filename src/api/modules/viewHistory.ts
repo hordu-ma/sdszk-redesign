@@ -160,5 +160,12 @@ export class ViewHistoryApi extends BaseApi {
   }
 }
 
-// 导出浏览历史API实例
-export const viewHistoryApi = new ViewHistoryApi()
+// 懒加载浏览历史API实例，避免循环依赖
+let _viewHistoryApi: ViewHistoryApi | null = null;
+
+export const viewHistoryApi = {
+  get instance() {
+    if (!_viewHistoryApi) _viewHistoryApi = new ViewHistoryApi();
+    return _viewHistoryApi;
+  }
+};

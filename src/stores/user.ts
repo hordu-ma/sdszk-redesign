@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "../utils/api";
 import { debounce } from "../utils/debounce";
+import type { BackendPermissions, PermissionList } from "../types/permissions";
 
 export interface UserInfo {
   id: string;
@@ -11,7 +12,7 @@ export interface UserInfo {
   email?: string;
   phone?: string;
   role: "admin" | "editor" | "user";
-  permissions: string[];
+  permissions: PermissionList;
   status?: "active" | "inactive" | "banned";
   createdAt?: string;
   lastLoginAt?: string;
@@ -33,6 +34,17 @@ interface RegisterPayload {
   verificationCode: string;
 }
 
+interface LoginResponse {
+  status: string;
+  token: string;
+  data?: {
+    user: Omit<UserInfo, 'permissions'> & {
+      permissions: BackendPermissions | PermissionList;
+    };
+  };
+  message?: string;
+}
+
 export const useUserStore = defineStore(
   "user",
   () => {
@@ -49,19 +61,59 @@ export const useUserStore = defineStore(
     );
     const userPermissions = computed(() => userInfo.value?.permissions || []);
 
-    // 设置token
-    function setToken(newToken: string) {
+    // ========== 私有辅助方法 ==========
+
+    /**
+     * 设置认证令牌
+     * @private
+     */
+    function _setAuthToken(newToken: string | null, persist: boolean = false) {
       token.value = newToken;
+
+      if (newToken) {
+        api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+        if (persist) {
+          localStorage.setItem("token", newToken);
+        }
+      } else {
+        delete api.defaults.headers.common["Authorization"];
+        localStorage.removeItem("token");
+      }
     }
 
-    // 设置用户信息
-    function setUserInfo(user: UserInfo) {
-      userInfo.value = user;
+    /**
+     * 清除认证状态
+     * @private
+     */
+    function _clearAuthState() {
+      token.value = null;
+      userInfo.value = null;
+      localStorage.removeItem("token");
+      delete api.defaults.headers.common["Authorization"];
     }
 
-    // 权限转换函数：将后端嵌套对象格式转换为前端字符串数组格式
-    function transformPermissions(backendPermissions: any): string[] {
-      const permissions: string[] = [];
+    /**
+     * 设置用户信息（内部使用）
+     * @private
+     */
+    function _setUserData(userData: Omit<UserInfo, 'permissions'> & { permissions: BackendPermissions | PermissionList }) {
+      const transformedPermissions = Array.isArray(userData.permissions)
+        ? userData.permissions
+        : transformPermissions(userData.permissions);
+
+      userInfo.value = {
+        ...userData,
+        permissions: transformedPermissions,
+      };
+    }
+
+    // ========== 权限转换 ==========
+
+    /**
+     * 权限转换函数：将后端嵌套对象格式转换为前端字符串数组格式
+     */
+    function transformPermissions(backendPermissions: BackendPermissions | any): PermissionList {
+      const permissions: PermissionList = [];
 
       if (!backendPermissions || typeof backendPermissions !== "object") {
         return permissions;
@@ -103,66 +155,79 @@ export const useUserStore = defineStore(
       return Array.from(new Set(permissions));
     }
 
-    // 登录方法
+    // ========== 登录相关方法 ==========
+
+    /**
+     * 处理登录响应
+     * @private
+     */
+    function _processLoginResponse(response: LoginResponse, remember: boolean = false) {
+      if (response.status !== "success") {
+        throw new Error(response.message || "登录失败");
+      }
+
+      const authToken = response.token;
+      const userData = response.data?.user;
+
+      if (!authToken || !userData) {
+        throw new Error("登录响应数据不完整");
+      }
+
+      // 设置token
+      _setAuthToken(authToken, remember);
+
+      // 设置用户信息
+      _setUserData(userData);
+    }
+
+    /**
+     * 执行登录请求
+     * @private
+     */
+    async function _performLogin(payload: LoginPayload): Promise<LoginResponse> {
+      const response = await api.post("/auth/login", payload);
+
+      if (typeof response.data !== "object" || response.data === null) {
+        throw new Error("登录响应格式错误");
+      }
+
+      return response.data;
+    }
+
+    /**
+     * 用户登录
+     */
     async function login(payload: LoginPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/auth/login", payload);
 
-        // 确保检查response.data是对象且有status属性
-        if (
-          typeof response.data === "object" &&
-          response.data !== null &&
-          response.data.status === "success"
-        ) {
-          const authToken = response.data.token;
-          const userData = response.data.data?.user; // 获取用户数据
+        // 执行登录请求
+        const response = await _performLogin(payload);
 
-          if (authToken && userData) {
-            token.value = authToken;
+        // 处理登录响应
+        _processLoginResponse(response, payload.remember);
 
-            // 转换权限格式
-            const transformedPermissions = transformPermissions(
-              userData.permissions
-            );
-            const userWithTransformedPermissions = {
-              ...userData,
-              permissions: transformedPermissions,
-            };
-
-            userInfo.value = userWithTransformedPermissions;
-
-            // 如果选择记住登录状态，保存token
-            if (payload.remember) {
-              localStorage.setItem("token", authToken);
-            }
-
-            // 设置全局请求头
-            api.defaults.headers.common["Authorization"] =
-              `Bearer ${authToken}`;
-
-            return true;
-          }
-        }
-
-        // 登录失败时抛出错误
-        throw new Error(
-          response.data.message || "登录失败，请检查用户名和密码"
-        );
+        return true;
       } catch (error: any) {
         console.error("登录错误:", error);
+
+        // 登录失败时清理状态
+        _clearAuthState();
+
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message ||
-            error.message ||
-            "登录失败，请检查网络连接"
+          error.message ||
+          "登录失败，请检查网络连接"
         );
       } finally {
         loading.value = false;
       }
     }
 
-    // 登出方法
+    /**
+     * 用户登出
+     */
     async function logout(): Promise<void> {
       try {
         // 调用后端登出接口
@@ -171,56 +236,30 @@ export const useUserStore = defineStore(
         // 即使后端登出失败，也要清除前端状态
         console.error("后端登出错误:", error);
       } finally {
-        // 清除所有认证相关状态
-        token.value = null;
-        userInfo.value = null;
-        localStorage.removeItem("token");
-
-        // 清除全局请求头中的Authorization
-        delete api.defaults.headers.common["Authorization"];
+        _clearAuthState();
       }
     }
 
-    // 注册方法
-    async function register(payload: RegisterPayload): Promise<boolean> {
-      try {
-        loading.value = true;
-        const response = await api.post("/auth/register", payload);
+    // ========== 用户信息管理 ==========
 
-        if (response.data?.status === "success") {
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error("注册失败:", error);
-        throw error;
-      } finally {
-        loading.value = false;
+    /**
+     * 获取当前用户信息
+     * @private
+     */
+    async function _fetchCurrentUser(): Promise<void> {
+      const { data } = await api.get("/auth/me");
+
+      if (data.status !== "success") {
+        throw new Error("获取用户信息失败");
       }
+
+      const userData = data.data.user;
+      _setUserData(userData);
     }
 
-    // 发送验证码
-    async function sendVerificationCode(phone: string): Promise<boolean> {
-      try {
-        const response = await api.post("/auth/send-code", { phone });
-        return response.data?.status === "success";
-      } catch (error) {
-        console.error("发送验证码失败:", error);
-        throw error;
-      }
-    }
-
-    // 检查权限
-    function hasPermission(permission: string): boolean {
-      // 如果是管理员，始终有权限
-      if (userInfo.value?.role === "admin") {
-        return true;
-      }
-      return userPermissions.value.includes(permission);
-    }
-
-    // 初始化用户信息
-    // 防抖版本的用户信息初始化
+    /**
+     * 初始化用户信息（防抖版本）
+     */
     const debouncedUserInfoInit = debounce(async () => {
       if (initInProgress.value) return; // 避免并发调用
 
@@ -229,27 +268,12 @@ export const useUserStore = defineStore(
 
       try {
         initInProgress.value = true;
-        token.value = savedToken;
-        // 设置全局请求头
-        api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
 
-        const { data } = await api.get("/auth/me");
-        if (data.status === "success") {
-          const userData = data.data.user;
+        // 恢复token
+        _setAuthToken(savedToken, false);
 
-          // 转换权限格式
-          const transformedPermissions = transformPermissions(
-            userData.permissions
-          );
-          const userWithTransformedPermissions = {
-            ...userData,
-            permissions: transformedPermissions,
-          };
-
-          userInfo.value = userWithTransformedPermissions;
-        } else {
-          throw new Error("获取用户信息失败");
-        }
+        // 获取用户信息
+        await _fetchCurrentUser();
       } catch (error) {
         console.error("获取用户信息失败:", error);
         await logout();
@@ -262,14 +286,65 @@ export const useUserStore = defineStore(
       await debouncedUserInfoInit();
     }
 
+    // ========== 注册相关方法 ==========
+
+    async function register(payload: RegisterPayload): Promise<boolean> {
+      try {
+        loading.value = true;
+        const response = await api.post("/auth/register", payload);
+        return response.data?.status === "success";
+      } catch (error) {
+        console.error("注册失败:", error);
+        throw error;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function sendVerificationCode(phone: string): Promise<boolean> {
+      try {
+        const response = await api.post("/auth/send-code", { phone });
+        return response.data?.status === "success";
+      } catch (error) {
+        console.error("发送验证码失败:", error);
+        throw error;
+      }
+    }
+
+    // ========== 权限检查 ==========
+
+    function hasPermission(permission: string): boolean {
+      // 如果是管理员，始终有权限
+      if (userInfo.value?.role === "admin") {
+        return true;
+      }
+      return userPermissions.value.includes(permission);
+    }
+
+    // ========== 公开方法（保持向后兼容） ==========
+
+    // 保留原有的公开方法以确保兼容性
+    function setToken(newToken: string) {
+      _setAuthToken(newToken, true);
+    }
+
+    function setUserInfo(user: UserInfo) {
+      userInfo.value = user;
+    }
+
     return {
+      // 状态
       token,
       userInfo,
       loading,
+
+      // 计算属性
       isAuthenticated,
       isAdmin,
       isEditor,
       userPermissions,
+
+      // 方法
       login,
       logout,
       register,

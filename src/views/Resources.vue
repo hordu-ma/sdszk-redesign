@@ -143,7 +143,7 @@ watch(
       activeCategory.value = targetCategory;
     }
   },
-  { immediate: false }
+  { immediate: false },
 );
 
 // 监听分类变化，更新路由参数
@@ -175,7 +175,7 @@ const fetchResources = async () => {
       params.category = activeCategory.value;
     }
 
-    const response: any = await resourceApi.getList(params);
+    const response: any = await resourceApi.instance.getList(params);
 
     if (response.success) {
       resources.value = response.data;

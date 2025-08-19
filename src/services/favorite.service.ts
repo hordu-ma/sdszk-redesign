@@ -5,7 +5,7 @@ import type { FavoriteItem, FavoriteQueryParams, FavoriteStats } from '@/api/mod
 // 获取收藏列表
 export const getFavorites = async (params: FavoriteQueryParams & { keyword?: string }) => {
   const { keyword, ...apiParams } = params
-  const response = await favoriteApi.getFavorites(apiParams)
+  const response = await favoriteApi.instance.getFavorites(apiParams)
 
   if (response.success && response.data.favorites && keyword) {
     // 客户端实现关键词过滤，因为服务端API没有提供关键字搜索功能
@@ -32,13 +32,13 @@ export const getFavorites = async (params: FavoriteQueryParams & { keyword?: str
 // 删除收藏
 export const deleteFavorite = async (itemId: string) => {
   // 此处简化处理，实际可能需要先获取itemType
-  const response = await favoriteApi.removeFavorite('news', itemId)
+  const response = await favoriteApi.instance.removeFavorite('news', itemId)
   return response
 }
 
 // 批量删除收藏
 export const batchDeleteFavorites = async (favoriteIds: string[]) => {
-  const response = await favoriteApi.batchDeleteFavorites(favoriteIds)
+  const response = await favoriteApi.instance.batchDeleteFavorites(favoriteIds)
   return response
 }
 
@@ -51,7 +51,7 @@ export const updateFavorite = async (
 
   // 更新分类
   if (data.category !== undefined) {
-    response = await favoriteApi.updateFavoriteCategory(id, data.category)
+    response = await favoriteApi.instance.updateFavoriteCategory(id, data.category)
   }
 
   // 标签和备注更新需要额外实现，这里简化处理
@@ -60,7 +60,7 @@ export const updateFavorite = async (
 
 // 获取收藏统计
 export const getFavoriteStats = async () => {
-  const response = await favoriteApi.getFavoriteStats()
+  const response = await favoriteApi.instance.getFavoriteStats()
   return {
     success: response.success,
     data: {
@@ -74,7 +74,7 @@ export const getFavoriteStats = async () => {
 
 // 获取用户收藏分类
 export const getCategories = async () => {
-  const response = await favoriteApi.getFavoriteStats()
+  const response = await favoriteApi.instance.getFavoriteStats()
   const categories = response.data.byCategory.map((c: any) => c._id)
   return {
     success: true,

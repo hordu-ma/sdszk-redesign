@@ -16,20 +16,20 @@ export const recordView = async (data: {
   resourceUrl: string
   viewDuration?: number
 }) => {
-  const response = await viewHistoryApi.recordView(data)
+  const response = await viewHistoryApi.instance.recordView(data)
   return response
 }
 
 // 更新浏览时长
 export const updateViewDuration = async (historyId: string, duration: number) => {
-  const response = await viewHistoryApi.updateViewDuration(historyId, duration)
+  const response = await viewHistoryApi.instance.updateViewDuration(historyId, duration)
   return response
 }
 
 // 获取浏览历史列表
 export const getViewHistory = async (params?: ViewHistoryParams & { keyword?: string }) => {
   const { keyword, ...apiParams } = params || {}
-  const response = await viewHistoryApi.getViewHistory(apiParams)
+  const response = await viewHistoryApi.instance.getViewHistory(apiParams)
 
   // 如果有关键词，在客户端进行筛选
   if (response.success && response.data.histories && keyword) {
@@ -50,7 +50,7 @@ export const getViewHistory = async (params?: ViewHistoryParams & { keyword?: st
 
 // 获取浏览历史统计
 export const getHistoryStats = async (days?: number) => {
-  const response = await viewHistoryApi.getHistoryStats({ days })
+  const response = await viewHistoryApi.instance.getHistoryStats({ days })
   return {
     success: response.success,
     data: response.data,
@@ -63,7 +63,7 @@ export const getPopularContent = async (params?: {
   days?: number
   resourceType?: 'news' | 'resource' | 'activity'
 }) => {
-  const response = await viewHistoryApi.getPopularContent(params)
+  const response = await viewHistoryApi.instance.getPopularContent(params)
   return {
     success: response.success,
     data: response.data,
@@ -72,7 +72,7 @@ export const getPopularContent = async (params?: {
 
 // 获取推荐内容
 export const getRecommendedContent = async (limit?: number) => {
-  const response = await viewHistoryApi.getRecommendedContent({ limit })
+  const response = await viewHistoryApi.instance.getRecommendedContent({ limit })
   return {
     success: response.success,
     data: response.data,
@@ -81,19 +81,19 @@ export const getRecommendedContent = async (limit?: number) => {
 
 // 删除浏览历史
 export const deleteHistory = async (historyId: string) => {
-  const response = await viewHistoryApi.deleteViewHistory(historyId)
+  const response = await viewHistoryApi.instance.deleteViewHistory(historyId)
   return response
 }
 
 // 批量删除浏览历史
 export const batchDeleteHistory = async (historyIds: string[]) => {
-  const response = await viewHistoryApi.batchDeleteHistory(historyIds)
+  const response = await viewHistoryApi.instance.batchDeleteHistory(historyIds)
   return response
 }
 
 // 清空浏览历史
 export const clearAllHistory = async () => {
-  const response = await viewHistoryApi.clearAllHistory()
+  const response = await viewHistoryApi.instance.clearAllHistory()
   return response
 }
 
@@ -104,5 +104,5 @@ export const exportHistory = async (params?: {
   endDate?: string
   resourceType?: 'news' | 'resource' | 'activity'
 }) => {
-  return await viewHistoryApi.exportHistory(params)
+  return await viewHistoryApi.instance.exportHistory(params)
 }

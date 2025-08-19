@@ -41,7 +41,7 @@ const loading = ref(false);
 
 // 支持两种方式：props传递 或 路由参数传递
 const category = computed(
-  () => props.category || (route.params.category as string)
+  () => props.category || (route.params.category as string),
 );
 const categoryTitle = computed(() => {
   if (category.value === "theory") return "理论前沿";
@@ -53,7 +53,9 @@ const categoryTitle = computed(() => {
 const fetchResources = async () => {
   loading.value = true;
   try {
-    const res: any = await resourceApi.getList({ category: category.value });
+    const res: any = await resourceApi.instance.getList({
+      category: category.value,
+    });
     if (res.success) resources.value = res.data;
   } finally {
     loading.value = false;

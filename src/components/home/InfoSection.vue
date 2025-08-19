@@ -156,7 +156,7 @@ const policyCategoryId = ref<string>("");
 const fetchCoreCategoryIds = async () => {
   try {
     // 直接调用分类API，更高效
-    const res = await newsCategoryApi.getList();
+    const res = await newsCategoryApi.instance.getList();
 
     if (res.success && Array.isArray(res.data)) {
       const notice = res.data.find((cat: any) => cat.key === "notice");
@@ -177,7 +177,7 @@ const fetchNotices = async () => {
 
   try {
     // 直接调用新闻API
-    const res = await newsApi.getList({
+    const res = await newsApi.instance.getList({
       category: noticeCategoryId.value,
       limit: 5,
     });
@@ -212,7 +212,7 @@ const fetchPolicies = async () => {
 
   try {
     // 直接调用新闻API
-    const res = await newsApi.getList({
+    const res = await newsApi.instance.getList({
       category: policyCategoryId.value,
       limit: 5,
     });

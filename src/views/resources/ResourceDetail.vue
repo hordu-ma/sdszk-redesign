@@ -167,7 +167,7 @@ const fetchResource = async () => {
 
   loading.value = true;
   try {
-    const response = await resourceApi.getDetail(resourceId);
+    const response = await resourceApi.instance.getDetail(resourceId);
     if (response.success && response.data) {
       resource.value = response.data;
       console.log("资源详情获取成功:", response.data);
@@ -191,14 +191,14 @@ const fetchRelatedResources = async () => {
   if (!resource.value) return;
 
   try {
-    const response = await resourceApi.getList({
+    const response = await resourceApi.instance.getList({
       category: resource.value.categoryId,
       limit: 5,
     });
     if (response.success && response.data) {
       // 过滤掉当前资源，只显示其他资源
       relatedResources.value = response.data
-        .filter((r) => r.id !== resource.value?.id)
+        .filter((r: any) => r.id !== resource.value?.id)
         .slice(0, 4);
     }
   } catch (error) {

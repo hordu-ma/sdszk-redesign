@@ -26,7 +26,7 @@ export async function getCoreCategoriesWithCache() {
 
   // 缓存不存在或已过期，重新获取
   console.log("【首页API】获取新的分类数据");
-  const res = await newsCategoryApi.getCoreCategories();
+  const res = await newsCategoryApi.instance.getCoreCategories();
 
   // 缓存结果
   coreCategoriesCache = res;
@@ -64,7 +64,7 @@ export async function getResourcesByCategoryWithCache(
   // 缓存不存在或已过期，重新获取
   console.log(`【首页API】获取新的资源数据: ${category}`);
   try {
-    const res = await resourceApi.getList({
+    const res = await resourceApi.instance.getList({
       category,
       limit,
     });
@@ -116,7 +116,7 @@ export async function getNewsByCategoryWithCache(
   // 缓存不存在或已过期，重新获取
   console.log(`【首页API】获取新的新闻数据: ${categoryId}`);
   try {
-    const res = await newsApi.getList({
+    const res = await newsApi.instance.getList({
       category: categoryId,
       limit,
     });

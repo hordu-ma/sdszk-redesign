@@ -90,17 +90,17 @@ const handleCarouselClick = (item: CarouselItem) => {
 const fetchCenterNews = async () => {
   try {
     // 获取分类列表
-    const categoryRes = await newsCategoryApi.getList();
+    const categoryRes = await newsCategoryApi.instance.getList();
     if (!categoryRes.success) return;
 
     // 查找中心动态分类
     const centerCategory = categoryRes.data.find(
-      (cat: any) => cat.key === "center"
+      (cat: any) => cat.key === "center",
     );
     if (!centerCategory) return;
 
     // 获取中心动态新闻（获取前3条用于轮播图）
-    const newsRes = await newsApi.getList({
+    const newsRes = await newsApi.instance.getList({
       category: centerCategory._id,
       limit: 3,
     });

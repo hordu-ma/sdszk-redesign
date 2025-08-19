@@ -12,7 +12,7 @@ export class NewsService extends BaseService<News> {
 
   // 获取新闻列表
   async getList(params?: NewsQueryParams): Promise<ApiResponse<News[]>> {
-    const response = await newsApi.getList(params)
+    const response = await newsApi.instance.getList(params)
     if (this.useCache) {
       this.cacheResponse('list', response, params)
     }
@@ -27,7 +27,7 @@ export class NewsService extends BaseService<News> {
       if (cached) return cached
     }
 
-    const response = await newsApi.getDetail(id)
+    const response = await newsApi.instance.getDetail(id)
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
@@ -37,7 +37,7 @@ export class NewsService extends BaseService<News> {
   // 创建新闻
   async create(data: FormData | Partial<News>, options = {}): Promise<ApiResponse<News>> {
     const newsData = data as Partial<News>
-    const response = await newsApi.create(newsData as CreateNewsDTO)
+    const response = await newsApi.instance.create(newsData as CreateNewsDTO)
     if (this.useCache) {
       this.clearCache()
     }
@@ -46,7 +46,7 @@ export class NewsService extends BaseService<News> {
 
   // 更新新闻
   async update(id: string | number, data: Partial<News>): Promise<ApiResponse<News>> {
-    const response = await newsApi.update(id.toString(), data as UpdateNewsDTO)
+    const response = await newsApi.instance.update(id.toString(), data as UpdateNewsDTO)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -56,7 +56,7 @@ export class NewsService extends BaseService<News> {
 
   // 删除新闻
   async delete(id: string): Promise<ApiResponse<void>> {
-    const response = await newsApi.delete(id)
+    const response = await newsApi.instance.delete(id)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -66,7 +66,7 @@ export class NewsService extends BaseService<News> {
 
   // 更新新闻状态
   async updateStatus(id: string, status: News['status']): Promise<ApiResponse<News>> {
-    const response = await newsApi.updateStatus(id, status)
+    const response = await newsApi.instance.updateStatus(id, status)
     if (this.useCache) {
       this.clearCache()
       this.deleteCached(`detail:${id}`)
@@ -82,7 +82,7 @@ export class NewsService extends BaseService<News> {
       if (cached) return cached
     }
 
-    const response = await newsApi.getCategories()
+    const response = await newsApi.instance.getCategories()
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
@@ -97,7 +97,7 @@ export class NewsService extends BaseService<News> {
       if (cached) return cached
     }
 
-    const response = await newsApi.getTags()
+    const response = await newsApi.instance.getTags()
     if (this.useCache) {
       this.cacheResponse(cacheKey, response)
     }
