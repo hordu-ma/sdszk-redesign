@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-08-19T07:42:06.266Z",
+  "summary": {
+    "total": 4,
+    "optimized": 4,
+    "needsOptimization": 0,
+    "errors": []
+  },
+  "stores": [
+    {
+      "file": "content",
+      "path": "/Users/liguoma/my-devs/javascript/sdszk-redesign/src/stores/content.ts",
+      "hasPersistConfig": true,
+      "persistType": "selective",
+      "persistedPaths": [
+        "news.filters",
+        "news.limit",
+        "resources.filters",
+        "resources.limit",
+        "activities.filters",
+        "activities.limit"
+      ],
+      "allStatePersisted": false,
+      "temporaryStates": [
+        "loading"
+      ],
+      "recommendations": []
+    },
+    {
+      "file": "news",
+      "path": "/Users/liguoma/my-devs/javascript/sdszk-redesign/src/stores/news.ts",
+      "hasPersistConfig": false,
+      "persistType": "none",
+      "persistedPaths": [],
+      "allStatePersisted": false,
+      "temporaryStates": [],
+      "recommendations": []
+    },
+    {
+      "file": "resource",
+      "path": "/Users/liguoma/my-devs/javascript/sdszk-redesign/src/stores/resource.ts",
+      "hasPersistConfig": false,
+      "persistType": "none",
+      "persistedPaths": [],
+      "allStatePersisted": false,
+      "temporaryStates": [],
+      "recommendations": []
+    },
+    {
+      "file": "user",
+      "path": "/Users/liguoma/my-devs/javascript/sdszk-redesign/src/stores/user.ts",
+      "hasPersistConfig": true,
+      "persistType": "selective",
+      "persistedPaths": [
+        "token",
+        "userInfo"
+      ],
+      "allStatePersisted": false,
+      "temporaryStates": [
+        "error"
+      ],
+      "recommendations": []
+    }
+  ],
+  "recommendations": []
+}

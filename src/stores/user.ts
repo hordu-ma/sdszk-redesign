@@ -357,6 +357,9 @@ export const useUserStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: {
+      // 只持久化核心认证数据，避免持久化临时状态
+      paths: ['token', 'userInfo'],
+    } as any,
   }
 );
