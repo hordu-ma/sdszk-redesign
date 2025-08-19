@@ -1,10 +1,10 @@
 // resourceCategoryController.js - 资源分类控制器
 import ResourceCategory from '../models/ResourceCategory.js'
 import ActivityLog from '../models/ActivityLog.js'
-import { NotFoundError } from '../utils/appError.js'
+import { AppError, BadRequestError, NotFoundError } from '../utils/appError.js'
 
 // 获取所有资源分类
-export const getCategories = async (req, res) => {
+export const getCategories = async (req, res, next) => {
   try {
     const { includeInactive = false } = req.query
     const query = includeInactive ? {} : { isActive: true }
@@ -19,15 +19,12 @@ export const getCategories = async (req, res) => {
       data: categories,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取单个分类
-export const getCategory = async (req, res) => {
+export const getCategory = async (req, res, next) => {
   try {
     const category = await ResourceCategory.findById(req.params.id).populate('resourceCount')
 
@@ -40,15 +37,12 @@ export const getCategory = async (req, res) => {
       data: category,
     })
   } catch (err) {
-    res.status(err.statusCode || 500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 创建资源分类
-export const createCategory = async (req, res) => {
+export const createCategory = async (req, res, next) => {
   try {
     // 设置创建者
     req.body.createdBy = req.user._id
@@ -75,15 +69,12 @@ export const createCategory = async (req, res) => {
       data: savedCategory,
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新资源分类
-export const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res, next) => {
   try {
     const category = await ResourceCategory.findById(req.params.id)
 
@@ -119,20 +110,17 @@ export const updateCategory = async (req, res) => {
       data: updatedCategory,
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除资源分类
-export const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res, next) => {
   try {
     const category = await ResourceCategory.findById(req.params.id)
 
     if (!category) {
-      throw new NotFoundError('分类不存在')
+      return next(new NotFoundError('分类不存在'))
     }
 
     // 软删除：将isActive设为false
@@ -159,15 +147,12 @@ export const deleteCategory = async (req, res) => {
       message: '分类已删除',
     })
   } catch (err) {
-    res.status(err.statusCode || 500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新分类排序
-export const updateCategoryOrder = async (req, res) => {
+export const updateCategoryOrder = async (req, res, next) => {
   try {
     const { categories } = req.body
 
@@ -200,9 +185,6 @@ export const updateCategoryOrder = async (req, res) => {
       message: '分类排序已更新',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }

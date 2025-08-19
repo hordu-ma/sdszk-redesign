@@ -2,7 +2,7 @@
 import express from "express";
 import {
   getOverviewStats,
-  getRecentActivities,
+  getRecentActivity,
   getVisitTrends,
   getContentDistribution,
   getSystemStatus,
@@ -23,7 +23,7 @@ router.get("/visit-trends", authenticateToken, getVisitTrends);
 router.get("/content-distribution", authenticateToken, getContentDistribution);
 
 // 获取最新动态
-router.get("/activities", authenticateToken, getRecentActivities);
+router.get("/activities", authenticateToken, getRecentActivity);
 
 // 获取系统状态
 router.get("/system-status", authenticateToken, getSystemStatus);

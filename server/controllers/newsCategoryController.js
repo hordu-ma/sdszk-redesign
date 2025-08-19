@@ -1,6 +1,6 @@
 import NewsCategory from '../models/NewsCategory.js'
 import ActivityLog from '../models/ActivityLog.js'
-import { NotFoundError, ForbiddenError } from '../utils/appError.js'
+import { AppError, BadRequestError, NotFoundError, ForbiddenError } from '../utils/appError.js'
 import mongoose from 'mongoose'
 import cacheService from '../services/cacheService.js'
 
@@ -92,11 +92,11 @@ import cacheService from '../services/cacheService.js'
  *       500:
  *         description: 服务器内部错误
  */
-export const getCategories = async (req, res) => {
+export const getCategories = async (req, res, next) => {
   try {
     const { includeInactive = false } = req.query
     const cacheKey = includeInactive ? 'news_categories:all' : 'news_categories:active'
-    
+
     // 使用缓存包装
     const categories = await cacheService.wrap(
       cacheKey,
@@ -127,15 +127,12 @@ export const getCategories = async (req, res) => {
       data: categories,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取单个分类
-export const getCategory = async (req, res) => {
+export const getCategoryById = async (req, res, next) => {
   try {
     const category = await NewsCategory.findById(req.params.id)
     if (!category) {
@@ -147,18 +144,15 @@ export const getCategory = async (req, res) => {
       data: category,
     })
   } catch (err) {
-    res.status(err.statusCode || 500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取核心分类
-export const getCoreCategories = async (req, res) => {
+export const getCoreCategories = async (req, res, next) => {
   try {
     const cacheKey = 'news_categories:core'
-    
+
     // 使用缓存包装
     const coreCategories = await cacheService.wrap(
       cacheKey,
@@ -173,15 +167,12 @@ export const getCoreCategories = async (req, res) => {
       data: coreCategories,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 创建新闻分类
-export const createCategory = async (req, res) => {
+export const createCategory = async (req, res, next) => {
   try {
     // 设置创建者
     req.body.createdBy = req.user._id
@@ -240,15 +231,12 @@ export const createCategory = async (req, res) => {
       errorMessage = errors.join(', ')
     }
 
-    res.status(statusCode).json({
-      status: 'error',
-      message: errorMessage,
-    })
+    next(new AppError(errorMessage, statusCode))
   }
 }
 
 // 更新新闻分类
-export const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res, next) => {
   try {
     const category = await NewsCategory.findById(req.params.id)
 
@@ -301,15 +289,12 @@ export const updateCategory = async (req, res) => {
       data: updatedCategory,
     })
   } catch (err) {
-    res.status(err.statusCode || 400).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除新闻分类
-export const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res, next) => {
   try {
     const category = await NewsCategory.findById(req.params.id)
 
@@ -346,15 +331,12 @@ export const deleteCategory = async (req, res) => {
       message: '分类已删除',
     })
   } catch (err) {
-    res.status(err.statusCode || 500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新分类排序
-export const updateCategoryOrder = async (req, res) => {
+export const updateCategoryOrder = async (req, res, next) => {
   try {
     const { categories } = req.body
 
@@ -391,9 +373,6 @@ export const updateCategoryOrder = async (req, res) => {
       message: '分类排序已更新',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }

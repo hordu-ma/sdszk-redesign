@@ -4,6 +4,7 @@ import ActivityLog from "../models/ActivityLog.js";
 import ResourceCategory from "../models/ResourceCategory.js";
 import response from "../utils/responseHelper.js";
 import mongoose from "mongoose";
+import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from "../utils/appError.js";
 
 // 字段映射函数：前端字段名 -> 后端字段名
 const mapFrontendToBackend = (data) => {
@@ -210,7 +211,7 @@ export const getResourceById = async (req, res) => {
 };
 
 // 创建资源
-export const createResource = async (req, res) => {
+export const createResource = async (req, res, next) => {
   try {
     // 字段映射：前端 -> 后端
     const mappedData = mapFrontendToBackend(req.body);
@@ -245,15 +246,12 @@ export const createResource = async (req, res) => {
       data: responseData,
     });
   } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 更新资源
-export const updateResource = async (req, res) => {
+export const updateResource = async (req, res, next) => {
   try {
     // 字段映射：前端 -> 后端
     const mappedData = mapFrontendToBackend(req.body);
@@ -271,10 +269,7 @@ export const updateResource = async (req, res) => {
     );
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     // 记录活动
@@ -301,23 +296,17 @@ export const updateResource = async (req, res) => {
       data: responseData,
     });
   } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 删除资源
-export const deleteResource = async (req, res) => {
+export const deleteResource = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     // 记录活动
@@ -342,23 +331,17 @@ export const deleteResource = async (req, res) => {
       message: "资源已删除",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 发布/取消发布资源
-export const togglePublishStatus = async (req, res) => {
+export const togglePublishStatus = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     resource.isPublished = !resource.isPublished;
@@ -386,23 +369,18 @@ export const togglePublishStatus = async (req, res) => {
       message: resource.isPublished ? "资源已发布" : "资源已取消发布",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 设置/取消设置为精选资源
-export const toggleFeaturedStatus = async (req, res) => {
+// 置顶/取消置顶资源
+export const toggleFeaturedStatus = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     resource.featured = !resource.featured;
@@ -415,23 +393,17 @@ export const toggleFeaturedStatus = async (req, res) => {
       message: resource.featured ? "已设为精选资源" : "已取消精选资源",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
-// 设置/取消置顶资源
-export const toggleTopStatus = async (req, res) => {
+// 置顶/取消置顶资源
+export const toggleTopStatus = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     resource.isTop = !resource.isTop;
@@ -444,23 +416,17 @@ export const toggleTopStatus = async (req, res) => {
       message: resource.isTop ? "已设为置顶资源" : "已取消置顶资源",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 获取相关资源
-export const getRelatedResources = async (req, res) => {
+export const getRelatedResources = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     // 基于类别和标签查找相关资源
@@ -478,15 +444,12 @@ export const getRelatedResources = async (req, res) => {
       data: relatedResources,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 获取每个类别的最新资源
-export const getLatestByCategory = async (req, res) => {
+export const getLatestByCategory = async (req, res, next) => {
   try {
     const categories = ["theory", "teaching", "video"];
     const limit = parseInt(req.query.limit) || 3;
@@ -510,23 +473,17 @@ export const getLatestByCategory = async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 增加资源下载次数
-export const incrementDownloadCount = async (req, res) => {
+export const incrementDownloadCount = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);
 
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     resource.downloadCount += 1;
@@ -539,15 +496,12 @@ export const incrementDownloadCount = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 获取资源统计信息
-export const getResourceStats = async (req, res) => {
+export const getResourceStats = async (req, res, next) => {
   try {
     const stats = {
       totalCount: await Resource.countDocuments(),
@@ -574,33 +528,24 @@ export const getResourceStats = async (req, res) => {
       data: stats,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 批量删除资源
-export const batchDeleteResources = async (req, res) => {
+export const batchDeleteResources = async (req, res, next) => {
   try {
     const { ids } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        status: "fail",
-        message: "请提供要删除的资源ID列表",
-      });
+      return next(new BadRequestError("请提供要删除的资源ID列表"));
     }
 
     // 查找要删除的资源
     const resources = await Resource.find({ _id: { $in: ids } });
 
     if (resources.length === 0) {
-      return res.status(404).json({
-        status: "fail",
-        message: "未找到指定的资源",
-      });
+      return next(new NotFoundError("未找到指定的资源"));
     }
 
     // 执行删除操作
@@ -625,33 +570,24 @@ export const batchDeleteResources = async (req, res) => {
       message: `成功删除 ${resources.length} 个资源`,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 批量更新资源
-export const batchUpdateResources = async (req, res) => {
+export const batchUpdateResources = async (req, res, next) => {
   try {
     const { ids, status, ...otherData } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        status: "fail",
-        message: "请提供要更新的资源ID列表",
-      });
+      return next(new BadRequestError("请提供要更新的资源ID列表"));
     }
 
     // 更新前查找资源
     const resources = await Resource.find({ _id: { $in: ids } });
 
     if (resources.length === 0) {
-      return res.status(404).json({
-        status: "fail",
-        message: "未找到指定的资源",
-      });
+      return next(new NotFoundError("未找到指定的资源"));
     }
 
     // 准备更新数据
@@ -660,10 +596,7 @@ export const batchUpdateResources = async (req, res) => {
     // 如果有status字段，转换为isPublished
     if (status !== undefined) {
       if (!["draft", "published", "archived"].includes(status)) {
-        return res.status(400).json({
-          status: "fail",
-          message: "无效的状态值",
-        });
+        return next(new BadRequestError("无效的状态值"));
       }
       updateData.isPublished = status === "published";
     }
@@ -696,34 +629,25 @@ export const batchUpdateResources = async (req, res) => {
       message: `成功更新 ${resources.length} 个资源`,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };
 
 // 更新资源状态
-export const updateStatus = async (req, res) => {
+export const updateResourceStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
     // 验证状态值
     if (!["draft", "published", "archived"].includes(status)) {
-      return res.status(400).json({
-        status: "fail",
-        message: "无效的状态值",
-      });
+      return next(new BadRequestError("无效的状态值"));
     }
 
     // 查找资源
     const resource = await Resource.findById(id);
     if (!resource) {
-      return res.status(404).json({
-        status: "fail",
-        message: "资源不存在",
-      });
+      return next(new NotFoundError("资源不存在"));
     }
 
     // 更新状态 - 将status转换为isPublished
@@ -765,9 +689,6 @@ export const updateStatus = async (req, res) => {
       message: "状态更新成功",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    next(err);
   }
 };

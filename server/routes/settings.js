@@ -9,7 +9,7 @@ import express from "express";
 import {
   getAllSettings,
   getSettingsByGroup,
-  getSettingByKey,
+  getSetting,
   updateSetting,
   bulkUpdateSettings,
   deleteSetting,
@@ -42,7 +42,7 @@ router.get("/", getAllSettings);
 router.get("/group/:group", getSettingsByGroup);
 
 // 获取单个设置
-router.get("/:key", getSettingByKey);
+router.get("/:key", getSetting);
 
 // 更新单个设置
 router.put(

@@ -12,6 +12,20 @@ import { initRedis, closeRedis } from "./config/redis.js";
 // 引入Swagger
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+// 引入结构化日志
+import {
+  dbLogger,
+  sysLogger,
+  logSystemStart,
+  logSystemShutdown,
+  logError
+} from "./utils/logger.js";
+import {
+  requestLogger,
+  errorRequestLogger,
+  slowRequestLogger,
+  securityLogger
+} from "./middleware/loggerMiddleware.js";
 // 使用自定义的频率限制中间件
 import "./middleware/rateLimit.js";
 // 路由导入
@@ -51,6 +65,9 @@ app.set("trust proxy", true);
 
 // 引入自定义频率限制中间件
 import { applyRateLimits } from "./middleware/rateLimit.js";
+
+// 记录应用启动日志
+sysLogger.info("Application starting up...");
 
 // 中间件配置
 applyRateLimits(app); // 应用自定义频率限制
@@ -119,6 +136,11 @@ app.use(
 );
 app.use(morgan("dev"));
 
+// 日志中间件配置
+app.use(requestLogger);      // 记录所有HTTP请求
+app.use(slowRequestLogger(1000));  // 记录超过1秒的慢请求
+app.use(securityLogger);     // 记录安全敏感操作
+
 // 静态文件服务
 const uploadDir = process.env.UPLOAD_DIR || "uploads";
 app.use(`/${uploadDir}`, express.static(path.join(__dirname, uploadDir)));
@@ -162,30 +184,42 @@ const connectDB = async (isReconnect = false) => {
     );
 
     if (isReconnect) {
-      console.log(`✅ MongoDB重连成功 (第${reconnectAttempts}次尝试)`);
+      dbLogger.info({
+        reconnectAttempt: reconnectAttempts,
+        type: 'reconnect'
+      }, `MongoDB重连成功 (第${reconnectAttempts}次尝试)`);
       reconnectAttempts = 0; // 重置重连计数器
     } else {
-      console.log("✅ MongoDB初始连接成功");
+      dbLogger.info({ type: 'initial' }, "MongoDB初始连接成功");
     }
 
     return conn;
   } catch (err) {
     if (isReconnect) {
       reconnectAttempts++;
-      console.error(`❌ MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次):`, err.message);
+      dbLogger.error({
+        reconnectAttempt: reconnectAttempts,
+        maxAttempts: MAX_RECONNECT_ATTEMPTS,
+        error: err.message
+      }, `MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次)`);
 
       if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.error(`💀 已达到最大重连次数(${MAX_RECONNECT_ATTEMPTS})，停止重连`);
+        dbLogger.fatal({
+          maxAttempts: MAX_RECONNECT_ATTEMPTS
+        }, `已达到最大重连次数，停止重连`);
         return;
       }
 
       // 指数退避策略：1s, 2s, 4s, 8s, 16s, 32s, 最大60s
       const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1), 60000);
-      console.log(`⏰ ${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试...`);
+      dbLogger.info({
+        delay: delay,
+        nextAttempt: reconnectAttempts + 1
+      }, `${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试`);
 
       setTimeout(() => connectDB(true), delay);
     } else {
-      console.error("❌ MongoDB初始连接失败:", err.message);
+      logError(err, { context: 'mongodb-initial-connection' });
       throw err; // 初始连接失败时抛出错误
     }
   }
@@ -194,23 +228,23 @@ const connectDB = async (isReconnect = false) => {
 // 监听MongoDB连接事件
 mongoose.connection.on("disconnected", () => {
   if (reconnectAttempts === 0) {
-    console.log("⚠️ MongoDB连接断开，开始重连...");
+    dbLogger.warn("MongoDB连接断开，开始重连...");
     connectDB(true);
   }
 });
 
 // 监听连接错误事件
 mongoose.connection.on("error", (err) => {
-  console.error("❌ MongoDB连接错误:", err.message);
+  logError(err, { context: 'mongodb-connection' });
 });
 
 // 初始化数据库和Redis连接
 Promise.all([connectDB(), initRedis()])
   .then(() => {
-    console.log('✅ 数据库和Redis已成功初始化');
+    sysLogger.info('数据库和Redis已成功初始化');
   })
   .catch((err) => {
-    console.error('❌ 初始化过程中发生错误:', err);
+    logError(err, { context: 'application-initialization' });
     process.exit(1);
   });
 
@@ -267,37 +301,44 @@ app.all("*", (req, res) => {
   });
 });
 
-// 错误处理中间件
+// 应用错误处理中间件
+app.use(errorRequestLogger);
 app.use(errorMiddleware);
 
 // 启动服务器
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
-  console.log(`🚀 服务运行在 http://localhost:${PORT}`);
-  console.log(`📚 API文档: http://localhost:${PORT}/api-docs`);
+  logSystemStart({
+    port: PORT,
+    apiDocs: `http://localhost:${PORT}/api-docs`,
+    environment: process.env.NODE_ENV,
+    nodeVersion: process.version
+  });
+  sysLogger.info({ port: PORT }, `服务运行在 http://localhost:${PORT}`);
+  sysLogger.info({ url: `http://localhost:${PORT}/api-docs` }, 'API文档已启用');
 });
 
 // 优雅地关闭应用程序
 const gracefulShutdown = async (signal) => {
-  console.log(`接收到 ${signal} 信号，开始优雅关闭...`);
+  sysLogger.info({ signal }, `接收到 ${signal} 信号，开始优雅关闭...`);
 
   // 停止接受新请求
   server.close(async () => {
-    console.log('HTTP服务器已关闭');
+    sysLogger.info('HTTP服务器已关闭');
 
     try {
       // 关闭数据库连接
       await mongoose.connection.close();
-      console.log('MongoDB连接已关闭');
+      dbLogger.info('MongoDB连接已关闭');
 
       // 关闭Redis连接
       await closeRedis();
-      console.log('Redis连接已关闭');
+      sysLogger.info('Redis连接已关闭');
 
-      console.log('优雅关闭完成');
+      logSystemShutdown(signal);
       process.exit(0);
     } catch (err) {
-      console.error('关闭过程中发生错误:', err);
+      logError(err, { context: 'graceful-shutdown' });
       process.exit(1);
     }
   });

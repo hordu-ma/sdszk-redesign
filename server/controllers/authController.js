@@ -1,6 +1,8 @@
 // authController.js - 认证控制器
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from "../utils/appError.js";
+import { authLogger, logAuthEvent, logError } from "../utils/logger.js";
 
 // 生成JWT令牌
 const signToken = (id) => {
@@ -50,95 +52,110 @@ const createSendToken = (user, statusCode, res) => {
 // 登录
 export const login = async (req, res, next) => {
   try {
-    console.log("=== 登录调试开始 ===");
-    console.log("请求体:", req.body);
-    console.log("环境变量检查:", {
-      NODE_ENV: process.env.NODE_ENV,
-      MONGODB_URI: process.env.MONGODB_URI ? "已设置" : "未设置",
-      JWT_SECRET: process.env.JWT_SECRET ? "已设置" : "未设置",
-    });
+    authLogger.debug({
+      requestBody: { username: req.body.username, hasPassword: !!req.body.password },
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        MONGODB_URI: process.env.MONGODB_URI ? "已设置" : "未设置",
+        JWT_SECRET: process.env.JWT_SECRET ? "已设置" : "未设置",
+      }
+    }, "登录流程开始");
 
     const { username, password } = req.body;
 
     // 1) 检查用户名和密码是否存在
-    console.log("步骤1: 检查用户名和密码");
-    console.log("username:", username);
-    console.log("password length:", password ? password.length : 0);
+    authLogger.debug({
+      username,
+      passwordLength: password ? password.length : 0
+    }, "步骤1: 检查用户名和密码");
 
     if (!username || !password) {
-      console.log("❌ 用户名或密码为空");
-      return res.status(400).json({
-        status: "error",
-        message: "请提供用户名和密码",
+      logAuthEvent('login_failed', {
+        reason: 'missing_credentials',
+        username: username || 'undefined',
+        ip: req.ip
       });
+      return next(new BadRequestError("请提供用户名和密码"));
     }
-    console.log("✅ 用户名和密码都存在");
+    authLogger.debug("用户名和密码验证通过");
 
     // 2) 检查用户是否存在及密码是否正确
-    console.log("步骤2: 查找用户");
+    authLogger.debug({ username }, "步骤2: 查找用户");
     const user = await User.findOne({ username }).select("+password");
 
     if (!user) {
-      console.log("❌ 用户不存在");
-      return res.status(401).json({
-        status: "error",
-        message: "用户名或密码错误",
+      logAuthEvent('login_failed', {
+        reason: 'user_not_found',
+        username,
+        ip: req.ip
       });
+      return next(new UnauthorizedError("用户名或密码错误"));
     }
 
-    console.log("✅ 用户存在");
-    console.log("用户信息:", {
-      id: user._id,
+    authLogger.debug({
+      userId: user._id,
       username: user.username,
       role: user.role,
       active: user.active,
-      hasPassword: !!user.password,
-      passwordLength: user.password ? user.password.length : 0,
-      passwordPrefix: user.password ? user.password.substring(0, 10) : "",
-    });
+      hasPassword: !!user.password
+    }, "用户存在，验证用户信息");
 
-    console.log("步骤3: 验证密码");
+    authLogger.debug("步骤3: 验证密码");
     try {
       const passwordMatch = await user.correctPassword(password, user.password);
-      console.log("密码匹配结果:", passwordMatch);
+      authLogger.debug({ passwordMatch }, "密码匹配结果");
 
       if (!passwordMatch) {
-        console.log("❌ 密码不匹配");
-        return res.status(401).json({
-          status: "error",
-          message: "用户名或密码错误",
+        logAuthEvent('login_failed', {
+          reason: 'invalid_password',
+          username,
+          userId: user._id,
+          ip: req.ip
         });
+        return next(new UnauthorizedError("用户名或密码错误"));
       }
-      console.log("✅ 密码匹配");
+      authLogger.debug("密码验证通过");
     } catch (pwdError) {
-      console.error("密码验证过程出错:", pwdError);
-      return res.status(401).json({
-        status: "error",
-        message: "用户名或密码错误",
+      logError(pwdError, {
+        context: 'password_verification',
+        username,
+        userId: user._id
       });
+      return next(new UnauthorizedError("用户名或密码错误"));
     }
 
     // 3) 检查用户是否激活
-    console.log("步骤4: 检查用户激活状态");
-    console.log("用户激活状态:", user.active);
+    authLogger.debug({ active: user.active }, "步骤4: 检查用户激活状态");
 
     if (!user.active) {
-      console.log("❌ 用户未激活");
-      return res.status(401).json({
-        status: "error",
-        message: "该账户已被禁用",
+      logAuthEvent('login_failed', {
+        reason: 'account_disabled',
+        username,
+        userId: user._id,
+        ip: req.ip
       });
+      return next(new UnauthorizedError("该账户已被禁用"));
     }
-    console.log("✅ 用户已激活");
+    authLogger.debug("用户激活状态验证通过");
 
     // 4) 如果一切正常，发送令牌给客户端
-    console.log("步骤5: 生成token并发送响应");
-    console.log("✅ 登录成功，准备发送token");
-    createSendToken(user, 200, res);
+    authLogger.debug("步骤5: 生成token并发送响应");
 
-    console.log("=== 登录调试结束 ===");
+    logAuthEvent('login_success', {
+      username,
+      userId: user._id,
+      role: user.role,
+      ip: req.ip
+    });
+
+    createSendToken(user, 200, res);
+    authLogger.info({ username, userId: user._id }, "登录成功");
   } catch (error) {
-    console.error("❌ 登录过程中发生错误:", error);
+    logError(error, {
+      context: 'login_process',
+      username: req.body.username,
+      ip: req.ip
+    });
     next(error);
   }
 };
@@ -180,10 +197,7 @@ export const updateProfile = async (req, res, next) => {
         _id: { $ne: userId },
       });
       if (existingUser) {
-        return res.status(400).json({
-          status: "error",
-          message: "用户名已被使用",
-        });
+        return next(new BadRequestError("用户名已被使用"));
       }
     }
 
@@ -191,10 +205,7 @@ export const updateProfile = async (req, res, next) => {
     if (email && email !== req.user.email) {
       const existingUser = await User.findOne({ email, _id: { $ne: userId } });
       if (existingUser) {
-        return res.status(400).json({
-          status: "error",
-          message: "邮箱已被使用",
-        });
+        return next(new BadRequestError("邮箱已被使用"));
       }
     }
 
@@ -240,26 +251,17 @@ export const changePassword = async (req, res, next) => {
 
     // 验证输入
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({
-        status: "error",
-        message: "请提供当前密码和新密码",
-      });
+      return next(new BadRequestError("请提供当前密码和新密码"));
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({
-        status: "error",
-        message: "新密码长度不能少于6位",
-      });
+      return next(new BadRequestError("新密码长度不能少于6位"));
     }
 
     // 获取用户信息（包含密码）
     const user = await User.findById(userId).select("+password");
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "用户不存在",
-      });
+      return next(new NotFoundError("用户不存在"));
     }
 
     // 验证当前密码
@@ -268,10 +270,7 @@ export const changePassword = async (req, res, next) => {
       user.password
     );
     if (!isCurrentPasswordCorrect) {
-      return res.status(400).json({
-        status: "error",
-        message: "当前密码错误",
-      });
+      return next(new BadRequestError("当前密码错误"));
     }
 
     // 更新密码
@@ -303,10 +302,7 @@ export const protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        status: "error",
-        message: "您未登录，请先登录",
-      });
+      return next(new UnauthorizedError("您未登录，请先登录"));
     }
 
     // 2) 验证token
@@ -318,28 +314,19 @@ export const protect = async (req, res, next) => {
     // 3) 检查用户是否仍然存在
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
-      return res.status(401).json({
-        status: "error",
-        message: "此token的用户已不存在",
-      });
+      return next(new UnauthorizedError("此token的用户已不存在"));
     }
 
     // 4) 检查用户是否已经激活
     if (!currentUser.active) {
-      return res.status(401).json({
-        status: "error",
-        message: "该账户已被禁用",
-      });
+      return next(new UnauthorizedError("该账户已被禁用"));
     }
 
     // 5) 将用户信息添加到请求对象中
     req.user = currentUser;
     next();
   } catch (error) {
-    return res.status(401).json({
-      status: "error",
-      message: "Token无效或已过期",
-    });
+    return next(new UnauthorizedError("Token无效或已过期"));
   }
 };
 
@@ -347,10 +334,7 @@ export const protect = async (req, res, next) => {
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        status: "error",
-        message: "您没有权限执行此操作",
-      });
+      return next(new AppError("您没有权限执行此操作", 403));
     }
     next();
   };

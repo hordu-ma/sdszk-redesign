@@ -8,7 +8,7 @@
 import express from 'express'
 import {
   getCategories,
-  getCategory,
+  getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
@@ -32,7 +32,7 @@ router.get(
   resourceCache('news_categories:core', CacheTTL.LONG),
   getCoreCategories
 )
-router.get('/:id', getCategory)
+router.get('/:id', getCategoryById)
 
 // 需要认证的路由
 router.use(authenticateToken)

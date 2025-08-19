@@ -1,8 +1,9 @@
 // activityLogController.js - 活动日志控制器
 import ActivityLog from '../models/ActivityLog.js'
+import { AppError, BadRequestError, NotFoundError } from '../utils/appError.js'
 
 // 获取活动日志列表
-export const getActivityLogs = async (req, res) => {
+export const getActivityLogs = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, type } = req.query
     const query = type ? { type } : {}
@@ -27,10 +28,7 @@ export const getActivityLogs = async (req, res) => {
     })
   } catch (error) {
     console.error('获取活动日志失败:', error)
-    res.status(500).json({
-      success: false,
-      message: '获取活动日志失败',
-    })
+    next(error)
   }
 }
 

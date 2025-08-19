@@ -3,6 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import { AppError, BadRequestError, NotFoundError } from '../utils/appError.js'
 
 // 获取当前文件的目录路径
 const __filename = fileURLToPath(import.meta.url)
@@ -90,20 +91,11 @@ export const uploadSingle = fieldName => {
     uploadMiddleware(req, res, err => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({
-            status: 'fail',
-            message: '文件过大，请上传小于10MB的文件',
-          })
+          return next(new BadRequestError('文件过大，请上传小于10MB的文件'))
         }
-        return res.status(400).json({
-          status: 'fail',
-          message: err.message,
-        })
+        return next(new BadRequestError(err.message))
       } else if (err) {
-        return res.status(400).json({
-          status: 'fail',
-          message: err.message,
-        })
+        return next(new BadRequestError(err.message))
       }
       next()
     })
@@ -118,25 +110,13 @@ export const uploadMultiple = (fieldName, maxCount = 5) => {
     uploadMiddleware(req, res, err => {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({
-            status: 'fail',
-            message: '文件过大，请上传小于10MB的文件',
-          })
+          return next(new BadRequestError('文件过大，请上传小于10MB的文件'))
         } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-          return res.status(400).json({
-            status: 'fail',
-            message: `最多只能上传${maxCount}个文件`,
-          })
+          return next(new BadRequestError(`最多只能上传${maxCount}个文件`))
         }
-        return res.status(400).json({
-          status: 'fail',
-          message: err.message,
-        })
+        return next(new BadRequestError(err.message))
       } else if (err) {
-        return res.status(400).json({
-          status: 'fail',
-          message: err.message,
-        })
+        return next(new BadRequestError(err.message))
       }
       next()
     })
@@ -144,13 +124,10 @@ export const uploadMultiple = (fieldName, maxCount = 5) => {
 }
 
 // 处理上传的文件
-export const handleFileUpload = (req, res) => {
+export const handleFileUpload = (req, res, next) => {
   try {
     if (!req.file && !req.files) {
-      return res.status(400).json({
-        status: 'fail',
-        message: '没有上传文件',
-      })
+      return next(new BadRequestError('没有上传文件'))
     }
 
     // 单文件上传的情况
@@ -198,15 +175,12 @@ export const handleFileUpload = (req, res) => {
       })
     }
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除文件
-export const deleteFile = async (req, res) => {
+export const deleteFile = async (req, res, next) => {
   try {
     const { filename } = req.params
 
@@ -227,10 +201,7 @@ export const deleteFile = async (req, res) => {
     }
 
     if (!filePath) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '文件不存在',
-      })
+      return next(new NotFoundError('文件不存在'))
     }
 
     // 删除文件
@@ -241,9 +212,6 @@ export const deleteFile = async (req, res) => {
       message: '文件已删除',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }

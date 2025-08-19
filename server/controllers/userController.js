@@ -1,8 +1,9 @@
 // userController.js - 用户控制器
 import User from '../models/User.js'
+import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from '../utils/appError.js'
 
 // 获取所有用户
-export const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find().select('-__v -loginHistory').lean() // 使用 lean() 提高性能
     res.status(200).json({
@@ -12,23 +13,17 @@ export const getAllUsers = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取单个用户
-export const getUser = async (req, res) => {
+export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select('-__v -loginHistory').lean() // 使用 lean() 提高性能
 
     if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '未找到此用户',
-      })
+      return next(new NotFoundError('未找到此用户'))
     }
 
     res.status(200).json({
@@ -38,22 +33,16 @@ export const getUser = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新用户
-export const updateUser = async (req, res) => {
+export const updateUser = async (req, res, next) => {
   try {
     // 确保不能通过此路由更新密码
     if (req.body.password) {
-      return res.status(400).json({
-        status: 'fail',
-        message: '此路由不用于密码更新，请使用 /updatePassword',
-      })
+      return next(new BadRequestError('此路由不用于密码更新，请使用 /updatePassword'))
     }
 
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -62,10 +51,7 @@ export const updateUser = async (req, res) => {
     }).select('-__v')
 
     if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '未找到此用户',
-      })
+      return next(new NotFoundError('未找到此用户'))
     }
 
     res.status(200).json({
@@ -75,23 +61,17 @@ export const updateUser = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除用户
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id)
 
     if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '未找到此用户',
-      })
+      return next(new NotFoundError('未找到此用户'))
     }
 
     res.status(204).json({
@@ -99,25 +79,19 @@ export const deleteUser = async (req, res) => {
       data: null,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新当前登录用户的密码
-export const updatePassword = async (req, res) => {
+export const updatePassword = async (req, res, next) => {
   try {
     // 1) 获取当前用户
     const user = await User.findById(req.user._id).select('+password')
 
     // 2) 检查提交的当前密码是否正确
     if (!(await user.comparePassword(req.body.currentPassword))) {
-      return res.status(401).json({
-        status: 'fail',
-        message: '当前密码不正确',
-      })
+      return next(new UnauthorizedError('当前密码不正确'))
     }
 
     // 3) 如果是正确的，则更新密码
@@ -130,10 +104,7 @@ export const updatePassword = async (req, res) => {
       message: '密码更新成功',
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
@@ -148,7 +119,7 @@ export const getMe = (req, res) => {
 }
 
 // 更新当前用户个人信息
-export const updateMyProfile = async (req, res) => {
+export const updateMyProfile = async (req, res, next) => {
   try {
     // 过滤掉不允许更新的字段
     const filteredBody = {}
@@ -162,10 +133,7 @@ export const updateMyProfile = async (req, res) => {
 
     // 确保不能通过此路由更新密码、角色等敏感信息
     if (req.body.password || req.body.role || req.body.permissions) {
-      return res.status(400).json({
-        status: 'fail',
-        message: '此路由不允许更新密码、角色或权限信息',
-      })
+      return next(new BadRequestError('此路由不允许更新密码、角色或权限信息'))
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
@@ -181,21 +149,15 @@ export const updateMyProfile = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 上传用户头像
-export const uploadAvatar = async (req, res) => {
+export const uploadAvatar = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        status: 'fail',
-        message: '请选择要上传的头像文件',
-      })
+      return next(new BadRequestError('请选择要上传的头像文件'))
     }
 
     // 构建头像URL
@@ -217,15 +179,12 @@ export const uploadAvatar = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取用户统计信息
-export const getUserStats = async (req, res) => {
+export const getUserStats = async (req, res, next) => {
   try {
     const userId = req.user._id
 
@@ -284,15 +243,12 @@ export const getUserStats = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取用户活动日志
-export const getMyActivityLog = async (req, res) => {
+export const getMyActivityLog = async (req, res, next) => {
   try {
     const userId = req.user._id
     const { page = 1, limit = 20 } = req.query
@@ -318,25 +274,19 @@ export const getMyActivityLog = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除用户账号（软删除）
-export const deleteMyAccount = async (req, res) => {
+export const deleteMyAccount = async (req, res, next) => {
   try {
     const { password } = req.body
 
     // 验证密码
     const user = await User.findById(req.user._id).select('+password')
     if (!(await user.comparePassword(password))) {
-      return res.status(401).json({
-        status: 'fail',
-        message: '密码不正确',
-      })
+      return next(new UnauthorizedError('密码不正确'))
     }
 
     // 软删除用户账号
@@ -350,9 +300,6 @@ export const deleteMyAccount = async (req, res) => {
       message: '账号已成功删除',
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }

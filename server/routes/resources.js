@@ -9,7 +9,7 @@ import {
   togglePublishStatus,
   toggleFeaturedStatus,
   toggleTopStatus,
-  updateStatus,
+  updateResourceStatus,
   incrementDownloadCount,
   getResourceStats,
   batchDeleteResources,
@@ -37,7 +37,7 @@ router.post('/batch-status', batchUpdateResources)
 router.post('/', createResource)
 router.put('/:id', updateResource)
 router.delete('/:id', deleteResource)
-router.patch('/:id/status', updateStatus)
+router.patch('/:id/status', updateResourceStatus)
 router.patch('/:id/toggle-publish', togglePublishStatus)
 router.patch('/:id/toggle-top', toggleTopStatus)
 router.patch('/:id/toggle-featured', toggleFeaturedStatus)

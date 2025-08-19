@@ -5,12 +5,13 @@ import Resource from "../models/Resource.js";
 import ActivityLog from "../models/ActivityLog.js";
 import NewsCategory from "../models/NewsCategory.js";
 import ResourceCategory from "../models/ResourceCategory.js";
+import { AppError, BadRequestError, NotFoundError } from "../utils/appError.js";
 import os from "os";
 import fs from "fs";
 import path from "path";
 
 // 获取总体统计数据
-export const getOverviewStats = async (req, res) => {
+export const getOverviewStats = async (req, res, next) => {
   try {
     // 获取当前时间和时间范围
     const now = new Date();
@@ -96,16 +97,12 @@ export const getOverviewStats = async (req, res) => {
     });
   } catch (error) {
     console.error("获取仪表盘数据失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取仪表盘数据失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 获取访问量趋势
-export const getVisitTrends = async (req, res) => {
+export const getVisitTrends = async (req, res, next) => {
   try {
     const period = parseInt(req.query.period) || 7;
     const startDate = new Date();
@@ -187,16 +184,12 @@ export const getVisitTrends = async (req, res) => {
     });
   } catch (error) {
     console.error("getVisitTrends error:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取访问量趋势失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 获取内容分布
-export const getContentDistribution = async (req, res) => {
+export const getContentDistribution = async (req, res, next) => {
   try {
     const type = req.query.type || "category";
 
@@ -305,16 +298,12 @@ export const getContentDistribution = async (req, res) => {
     });
   } catch (error) {
     console.error("获取内容分布失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取内容分布失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 获取最新动态
-export const getRecentActivities = async (req, res) => {
+export const getRecentActivity = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
 
@@ -385,16 +374,12 @@ export const getRecentActivities = async (req, res) => {
     });
   } catch (error) {
     console.error("获取最新动态失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取最新动态失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 获取系统状态
-export const getSystemStatus = async (req, res) => {
+export const getSystemStatus = async (req, res, next) => {
   try {
     // 检查数据库连接
     const dbStatus = await checkDatabaseStatus();
@@ -453,16 +438,12 @@ export const getSystemStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("获取系统状态失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取系统状态失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 获取性能指标
-export const getPerformanceMetrics = async (req, res) => {
+export const getPerformanceMetrics = async (req, res, next) => {
   try {
     // 获取系统性能指标
     const cpuUsage = os.loadavg()[0] * 100; // CPU使用率
@@ -541,16 +522,12 @@ export const getPerformanceMetrics = async (req, res) => {
     });
   } catch (error) {
     console.error("获取性能指标失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "获取性能指标失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 导出报告
-export const exportReport = async (req, res) => {
+export const exportReport = async (req, res, next) => {
   try {
     const { type, content, format } = req.body;
 
@@ -566,11 +543,7 @@ export const exportReport = async (req, res) => {
     });
   } catch (error) {
     console.error("导出报告失败:", error);
-    res.status(500).json({
-      success: false,
-      message: "导出报告失败",
-      error: error.message,
-    });
+    next(error);
   }
 };
 

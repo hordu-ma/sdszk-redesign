@@ -1,9 +1,10 @@
 // activityController.js - 活动控制器
 import Activity from '../models/Activity.js'
 import ActivityLog from '../models/ActivityLog.js'
+import { AppError, BadRequestError, UnauthorizedError, NotFoundError, ForbiddenError } from '../utils/appError.js'
 
 // 获取活动列表
-export const getActivityList = async (req, res) => {
+export const getActivityList = async (req, res, next) => {
   try {
     const { category, status, page = 1, limit = 10, search } = req.query
 
@@ -58,25 +59,19 @@ export const getActivityList = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取单个活动
-export const getActivityById = async (req, res) => {
+export const getActivityById = async (req, res, next) => {
   try {
     const activity = await Activity.findById(req.params.id)
       .populate('createdBy', 'username name')
       .populate('updatedBy', 'username name')
 
     if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+      return next(new NotFoundError('活动不存在'))
     }
 
     // 如果活动未发布，只有创建者或管理员可以查看
@@ -86,10 +81,7 @@ export const getActivityById = async (req, res) => {
         (req.user._id.toString() !== activity.createdBy._id.toString() &&
           req.user.role !== 'admin'))
     ) {
-      return res.status(403).json({
-        status: 'fail',
-        message: '您没有权限查看此活动',
-      })
+      return next(new ForbiddenError('您没有权限查看此活动'))
     }
 
     // 更新浏览量
@@ -101,15 +93,12 @@ export const getActivityById = async (req, res) => {
       data: activity,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 创建活动
-export const createActivity = async (req, res) => {
+export const createActivity = async (req, res, next) => {
   try {
     // 设置创建者
     req.body.createdBy = req.user._id
@@ -150,32 +139,26 @@ export const createActivity = async (req, res) => {
       data: savedActivity,
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新活动
-export const updateActivity = async (req, res) => {
+export const updateActivity = async (req, res, next) => {
   try {
     // 设置更新者
     req.body.updatedBy = req.user._id
 
     // 如果有开始和结束日期，更新状态
     if (req.body.startDate || req.body.endDate) {
-      const activity = await Activity.findById(req.params.id)
+      const existingActivity = await Activity.findById(req.params.id)
 
-      if (!activity) {
-        return res.status(404).json({
-          status: 'fail',
-          message: '活动不存在',
-        })
+      if (!existingActivity) {
+        return next(new NotFoundError('活动不存在'))
       }
 
-      const startDate = new Date(req.body.startDate || activity.startDate)
-      const endDate = new Date(req.body.endDate || activity.endDate)
+      const startDate = new Date(req.body.startDate || existingActivity.startDate)
+      const endDate = new Date(req.body.endDate || existingActivity.endDate)
       const now = new Date()
 
       if (now < startDate) {
@@ -187,16 +170,13 @@ export const updateActivity = async (req, res) => {
       }
     }
 
-    const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedActivity = await Activity.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     })
 
-    if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+    if (!updatedActivity) {
+      return next(new NotFoundError('活动不存在'))
     }
 
     // 记录活动
@@ -205,10 +185,10 @@ export const updateActivity = async (req, res) => {
       username: req.user.username,
       action: 'update',
       entityType: 'activity',
-      entityId: activity._id,
+      entityId: updatedActivity._id,
       details: {
-        title: activity.title,
-        category: activity.category,
+        title: updatedActivity.title,
+        category: updatedActivity.category,
         fields: Object.keys(req.body),
       },
       ip: req.ip,
@@ -217,26 +197,20 @@ export const updateActivity = async (req, res) => {
 
     res.json({
       status: 'success',
-      data: activity,
+      data: updatedActivity,
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 删除活动
-export const deleteActivity = async (req, res) => {
+export const deleteActivity = async (req, res, next) => {
   try {
     const activity = await Activity.findById(req.params.id)
 
     if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+      return next(new NotFoundError('活动不存在'))
     }
 
     // 记录活动
@@ -261,23 +235,17 @@ export const deleteActivity = async (req, res) => {
       message: '活动已删除',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 发布/取消发布活动
-export const togglePublishStatus = async (req, res) => {
+export const togglePublishStatus = async (req, res, next) => {
   try {
     const activity = await Activity.findById(req.params.id)
 
     if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+      return next(new NotFoundError('活动不存在'))
     }
 
     activity.isPublished = !activity.isPublished
@@ -305,23 +273,17 @@ export const togglePublishStatus = async (req, res) => {
       message: activity.isPublished ? '活动已发布' : '活动已取消发布',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 设置/取消设置为精选活动
-export const toggleFeaturedStatus = async (req, res) => {
+export const toggleFeaturedStatus = async (req, res, next) => {
   try {
     const activity = await Activity.findById(req.params.id)
 
     if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+      return next(new NotFoundError('活动不存在'))
     }
 
     activity.isFeatured = !activity.isFeatured
@@ -334,15 +296,12 @@ export const toggleFeaturedStatus = async (req, res) => {
       message: activity.isFeatured ? '已设为精选活动' : '已取消精选活动',
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 获取即将开始的活动（首页展示用）
-export const getUpcomingActivities = async (req, res) => {
+export const getUpcomingActivities = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 4
 
@@ -361,32 +320,23 @@ export const getUpcomingActivities = async (req, res) => {
       data: activities,
     })
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: err.message,
-    })
+    next(err)
   }
 }
 
 // 更新活动参与者数量
-export const updateAttendeeCount = async (req, res) => {
+export const updateAttendeeCount = async (req, res, next) => {
   try {
     const { count } = req.body
 
     if (typeof count !== 'number') {
-      return res.status(400).json({
-        status: 'fail',
-        message: '参与者数量必须是数字',
-      })
+      return next(new BadRequestError('参与者数量必须是数字'))
     }
 
     const activity = await Activity.findById(req.params.id)
 
     if (!activity) {
-      return res.status(404).json({
-        status: 'fail',
-        message: '活动不存在',
-      })
+      return next(new NotFoundError('活动不存在'))
     }
 
     activity.currentAttendees = count
@@ -400,9 +350,6 @@ export const updateAttendeeCount = async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    })
+    next(err)
   }
 }
