@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
+import { getHelmetConfig, nonceMiddleware, cspViolationHandler } from "./config/security.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import path from "path";
@@ -85,24 +86,16 @@ if (validateCorsConfig()) {
 }
 // 处理所有OPTIONS预检请求，确保返回CORS头
 app.options("*", cors());
-// 配置Helmet安全头，启用CSP
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com"],
-        imgSrc: ["'self'", "data:", "https:", "http:"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-        connectSrc: ["'self'", "https://*.google-analytics.com"],
-        frameSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
-      },
-    },
-  })
-);
+
+// CSP nonce中间件 - 为每个请求生成唯一的nonce
+app.use(nonceMiddleware);
+
+// 配置Helmet安全头，使用环境相关的CSP策略
+const environment = process.env.NODE_ENV || 'development';
+app.use(helmet(getHelmetConfig(environment)));
+
+// CSP违规报告端点
+app.post('/csp-violation-report', express.json({ type: 'application/csp-report' }), cspViolationHandler);
 app.use(morgan("dev"));
 
 // 日志中间件配置

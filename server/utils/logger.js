@@ -106,6 +106,11 @@ export const perfLogger = createLogger('performance');
 export const auditLogger = createLogger('audit');
 
 /**
+ * 安全日志器
+ */
+export const securityLogger = createLogger('security');
+
+/**
  * 记录 HTTP 请求日志
  * @param {Object} req - Express 请求对象
  * @param {Object} res - Express 响应对象
@@ -250,6 +255,64 @@ export const logCacheOperation = (operation, key, context = {}) => {
     key,
     ...context,
   }, `Cache ${operation}: ${key}`);
+};
+
+/**
+ * 记录CSP违规报告
+ * @param {Object} violationReport - CSP违规报告
+ * @param {Object} context - 请求上下文（用户代理、IP等）
+ */
+export const logCSPViolation = (violationReport, context = {}) => {
+  securityLogger.warn({
+    type: 'csp_violation',
+    violation: violationReport,
+    timestamp: new Date().toISOString(),
+    ...context,
+  }, 'Content Security Policy violation detected');
+};
+
+/**
+ * 记录安全事件
+ * @param {string} eventType - 事件类型（brute_force, suspicious_activity, etc.）
+ * @param {Object} context - 事件上下文
+ */
+export const logSecurityEvent = (eventType, context = {}) => {
+  securityLogger.warn({
+    type: 'security_event',
+    eventType,
+    timestamp: new Date().toISOString(),
+    ...context,
+  }, `Security event detected: ${eventType}`);
+};
+
+/**
+ * 记录安全策略变更
+ * @param {string} policy - 策略名称（csp, cors, helmet等）
+ * @param {Object} changes - 变更内容
+ * @param {Object} context - 变更上下文
+ */
+export const logSecurityPolicyChange = (policy, changes, context = {}) => {
+  securityLogger.info({
+    type: 'policy_change',
+    policy,
+    changes,
+    timestamp: new Date().toISOString(),
+    ...context,
+  }, `Security policy updated: ${policy}`);
+};
+
+/**
+ * 记录认证失败事件
+ * @param {string} reason - 失败原因
+ * @param {Object} context - 认证上下文
+ */
+export const logAuthFailure = (reason, context = {}) => {
+  securityLogger.warn({
+    type: 'auth_failure',
+    reason,
+    timestamp: new Date().toISOString(),
+    ...context,
+  }, `Authentication failed: ${reason}`);
 };
 
 // 导出主日志器作为默认导出
