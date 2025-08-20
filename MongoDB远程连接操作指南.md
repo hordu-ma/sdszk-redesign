@@ -7,7 +7,7 @@
 - **服务器IP**: 60.205.124.67
 - **服务器MongoDB端口**: 27017
 - **本地隧道端口**: 27018
-- **生产数据库名**: `sdszk-db`
+- **数据库名**: `sdszk`（开发和生产环境统一）
 - **开发数据库名**: `sdszk`
 
 ## 🚀 快速连接步骤
@@ -35,7 +35,6 @@ cd /Users/liguoma/my-devs/sdszk-redesign
 1. **打开MongoDB Compass应用**
 
 2. **选择连接方式**：
-
    - 点击 "New Connection" 或 "Add new connection"
 
 3. **输入连接信息**：
@@ -43,14 +42,13 @@ cd /Users/liguoma/my-devs/sdszk-redesign
    **方式A：使用连接字符串（推荐）**
 
    ```
-   mongodb://localhost:27018/sdszk-db
+   mongodb://localhost:27018/sdszk
    ```
 
    **方式B：手动填写连接参数**
-
    - **Hostname**: `localhost`
    - **Port**: `27018`
-   - **Database Name**: `sdszk-db`
+   - **Database Name**: `sdszk`
    - **Authentication**: 通常选择 "None"（通过SSH隧道已经认证）
 
 4. **测试连接**：
@@ -139,14 +137,14 @@ lsof -i :27018
 nc -z localhost 27018
 
 # 测试MongoDB连接
-mongosh "mongodb://localhost:27018/sdszk-db" --eval "db.runCommand({ping: 1})"
+mongosh "mongodb://localhost:27018/sdszk" --eval "db.runCommand({ping: 1})"
 ```
 
 ## 📊 数据库信息
 
 ### 生产环境数据库结构
 
-- **数据库名**: `sdszk-db`
+- **数据库名**: `sdszk`
 - **主要集合（Collections）**:
   - `users` - 用户信息
   - `news` - 新闻文章
@@ -167,7 +165,7 @@ mongosh "mongodb://localhost:27018/sdszk-db" --eval "db.runCommand({ping: 1})"
 ### 远程生产数据库
 
 ```
-mongodb://localhost:27018/sdszk-db
+mongodb://localhost:27018/sdszk
 ```
 
 ### 本地开发数据库
@@ -191,12 +189,10 @@ echo "$(date): 断开MongoDB远程连接" >> ~/.mongodb_connection.log
 ## 🔐 安全注意事项
 
 1. **SSH密钥管理**：
-
    - 确保SSH私钥安全存储
    - 定期更新SSH密钥
 
 2. **网络安全**：
-
    - 仅在受信任的网络环境下建立连接
    - 使用VPN（如有必要）
 
@@ -214,9 +210,9 @@ echo "$(date): 断开MongoDB远程连接" >> ~/.mongodb_connection.log
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-06-30  
-**适用项目**: 山东省思政课一体化中心  
+**文档版本**: v1.0
+**最后更新**: 2025-06-30
+**适用项目**: 山东省思政课一体化中心
 **维护者**: 项目开发团队
 
 ---

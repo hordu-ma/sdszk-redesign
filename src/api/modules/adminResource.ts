@@ -162,10 +162,10 @@ export class AdminResourceApi extends BaseApi {
   ): Promise<
     ApiResponse<{ fileUrl: string; fileName: string; fileSize: number }>
   > {
-    console.log("🔄 Upload request: /api/uploads/resource");
+    console.log("🔄 Upload request: /uploads/resource");
 
     // 直接使用axios实例，绕过BaseApi的路径处理机制
-    const response = await this.api.post("/api/uploads/resource", formData, {
+    const response = await this.api.post("/uploads/resource", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
