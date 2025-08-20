@@ -74,6 +74,8 @@ interface NewsItem {
   author: any;
   category: NewsCategory;
   viewCount?: number;
+  categoryKey?: string;
+  categoryName?: string;
 }
 
 const route = useRoute();
@@ -242,7 +244,7 @@ async function fetchNews() {
           title: item.title,
           categoryKey: item.categoryKey || item.category?.key,
           categoryName: item.categoryName || item.category?.name,
-          categoryId: item.category?._id || item.category?.id,
+          categoryId: item.category?._id,
         })),
       );
     } else {
@@ -299,8 +301,8 @@ const filteredNews = computed(() => {
     date: new Date(news.publishDate || news.createdAt).toLocaleDateString(
       "zh-CN",
     ),
-    categoryKey: news.categoryKey || news.category?.key || "center",
-    categoryName: news.categoryName || news.category?.name || "中心动态",
+    categoryKey: news.categoryKey || news.category.key || "center",
+    categoryName: news.categoryName || news.category.name || "中心动态",
   }));
 });
 
