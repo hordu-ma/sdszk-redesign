@@ -22,7 +22,7 @@ export interface CreateNewsDTO extends Partial<News> {
   content: string
 }
 
-export interface UpdateNewsDTO extends Partial<News> {}
+export interface UpdateNewsDTO extends Partial<News> { }
 
 export interface NewsQueryParams extends QueryParams {
   category?: string
@@ -39,7 +39,9 @@ export class NewsApi extends BaseApi {
 
   // 获取新闻列表
   async getList(params?: NewsQueryParams): Promise<PaginatedResponse<News>> {
-    const response = await this.get<News[]>('', params)
+    console.log('📤 NewsApi.getList 调用参数:', params)
+    const response = await this.get<News[]>('', { params })
+    console.log('📥 NewsApi.getList 响应:', response)
     return {
       ...response,
       data: response.data,

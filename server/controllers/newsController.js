@@ -68,9 +68,17 @@ const buildAdvancedQuery = (queryParams) => {
 
   // 分类筛选
   if (queryParams.category) {
-    query.category = mongoose.Types.ObjectId.isValid(queryParams.category)
-      ? new mongoose.Types.ObjectId(queryParams.category)
-      : queryParams.category;
+    console.log("🏷️ 处理分类筛选:");
+    console.log("  - 原始分类参数:", queryParams.category);
+    console.log("  - 是否为有效ObjectId:", mongoose.Types.ObjectId.isValid(queryParams.category));
+
+    if (mongoose.Types.ObjectId.isValid(queryParams.category)) {
+      query.category = new mongoose.Types.ObjectId(queryParams.category);
+      console.log("  - 转换为ObjectId:", query.category);
+    } else {
+      query.category = queryParams.category;
+      console.log("  - 保持原样:", query.category);
+    }
   }
 
   // 状态筛选
@@ -171,6 +179,10 @@ const buildSortOptions = (sortBy) => {
 // 获取新闻列表（增强版）
 export const getNewsList = async (req, res) => {
   try {
+    console.log("🔍 收到新闻列表请求:");
+    console.log("  - URL:", req.originalUrl);
+    console.log("  - Query参数:", JSON.stringify(req.query, null, 2));
+
     const {
       page = 1,
       limit = 10,
@@ -186,6 +198,11 @@ export const getNewsList = async (req, res) => {
       features,
       contentTypes,
     } = req.query;
+
+    console.log("📋 解析后的参数:");
+    console.log("  - category:", category);
+    console.log("  - page:", page);
+    console.log("  - limit:", limit);
 
     // 构建查询条件
     const query = buildAdvancedQuery({
@@ -206,8 +223,8 @@ export const getNewsList = async (req, res) => {
     // 构建排序条件
     const sortOptions = buildSortOptions(sortBy);
 
-    console.log("查询条件:", JSON.stringify(query, null, 2));
-    console.log("排序条件:", sortOptions);
+    console.log("🔎 MongoDB查询条件:", JSON.stringify(query, null, 2));
+    console.log("📊 排序条件:", sortOptions);
 
     const news = await News.find(query)
       .select("title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount") // 限制返回字段
@@ -219,6 +236,16 @@ export const getNewsList = async (req, res) => {
       .lean(); // 使用 lean() 提高性能
 
     const total = await News.countDocuments(query);
+
+    console.log("📰 数据库查询结果:");
+    console.log("  - 找到新闻数量:", news.length);
+    console.log("  - 总数:", total);
+    console.log("  - 新闻分类分布:", news.map(item => ({
+      title: item.title.substring(0, 20) + "...",
+      categoryId: item.category?._id,
+      categoryKey: item.category?.key,
+      categoryName: item.category?.name
+    })));
 
     // 应用字段映射：后端 -> 前端
     const mappedNews = news.map((item) => mapBackendToFrontend(item));

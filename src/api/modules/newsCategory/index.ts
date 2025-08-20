@@ -41,7 +41,9 @@ export class NewsCategoryApi extends BaseApi {
   async getList(params?: {
     includeInactive?: boolean;
   }): Promise<ApiResponse<NewsCategory[]>> {
-    const response = await this.get<NewsCategory[]>("", params);
+    console.log('📤 NewsCategoryApi.getList 调用参数:', params)
+    const response = await this.get<NewsCategory[]>("", { params });
+    console.log('📥 NewsCategoryApi.getList 响应:', response)
     return response;
   }
 

@@ -6,10 +6,7 @@
     <div class="news-content">
       <!-- 分类导航 -->
       <div class="category-nav">
-        <a-tabs
-          v-model:activeKey="activeCategory"
-          @change="handleCategoryChange"
-        >
+        <a-tabs v-model:activeKey="activeCategory">
           <a-tab-pane key="all" tab="全部资讯"></a-tab-pane>
           <a-tab-pane
             v-for="category in categories"
@@ -82,7 +79,6 @@ interface NewsItem {
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
-const activeCategory = ref("all");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalNews = ref(0);
@@ -90,61 +86,67 @@ const totalNews = ref(0);
 // 数据状态
 const newsList = ref<NewsItem[]>([]);
 const categories = ref<NewsCategory[]>([]);
+const categoriesLoaded = ref(false); // 新增：分类数据是否已加载
 
-// 初始化时从路由参数获取分类
-onMounted(async () => {
-  await fetchCategories(); // 先获取分类
-  if (route.query.category) {
-    activeCategory.value = route.query.category as string;
-  }
-  // 确保初始数据加载
-  fetchNews();
-});
-
-// 监听路由查询参数变化
-watch(
-  () => route.query.category,
-  (newCategory) => {
-    const targetCategory = (newCategory as string) || "all";
-    if (activeCategory.value !== targetCategory) {
-      activeCategory.value = targetCategory;
-      currentPage.value = 1;
-      fetchNews();
-    }
-  },
-  { immediate: false },
-);
-
-// 监听分类变化，更新路由参数
-watch(
-  activeCategory,
-  (newCategory) => {
-    // 每次分类变化都更新路由和重新获取数据
+// 使用可写计算属性将 activeCategory 与路由查询参数同步
+const activeCategory = computed<string>({
+  get: () => (route.query.category as string) || "all",
+  set: (val) => {
     router.push({
       path: "/news",
-      query: { ...(newCategory !== "all" ? { category: newCategory } : {}) },
+      query: val === "all" ? {} : { category: val },
     });
-    currentPage.value = 1;
-    fetchNews();
   },
-  { immediate: false },
-);
+});
 
 // 获取分类列表
-const fetchCategories = async () => {
+async function fetchCategories() {
   try {
     const response = await newsCategoryApi.instance.getList();
     if (response.success) {
       categories.value = response.data;
+      categoriesLoaded.value = true;
+      console.log("分类数据加载完成:", categories.value);
+      console.log(
+        "分类详细信息:",
+        categories.value.map((cat) => ({
+          _id: cat._id,
+          key: cat.key,
+          name: cat.name,
+        })),
+      );
     }
   } catch (error) {
     console.error("获取分类失败:", error);
     message.error("获取分类失败");
+    categoriesLoaded.value = true; // 即使失败也标记为已加载，避免无限等待
   }
-};
+}
 
 // 获取新闻数据
-const fetchNews = async () => {
+async function fetchNews() {
+  // 如果分类数据还未加载完成，等待加载
+  if (!categoriesLoaded.value) {
+    console.log("⏳ 分类数据未加载完成，等待加载...");
+    return;
+  }
+
+  // 双重检查：确保categories数据有效
+  if (
+    activeCategory.value !== "all" &&
+    (!Array.isArray(categories.value) || categories.value.length === 0)
+  ) {
+    console.warn("⚠️ 分类数据无效，重新加载分类");
+    try {
+      await fetchCategories();
+      if (!categoriesLoaded.value || categories.value.length === 0) {
+        console.error("❌ 重新加载分类失败，继续请求所有新闻");
+      }
+    } catch (error) {
+      console.error("❌ 重新加载分类出错:", error);
+    }
+  }
+
   loading.value = true;
   try {
     const params: { page: number; limit: number; category?: string } = {
@@ -154,32 +156,95 @@ const fetchNews = async () => {
 
     // 如果有选择分类，添加分类筛选
     if (activeCategory.value !== "all") {
-      // 根据分类key查找分类ID
-      const selectedCategory = categories.value.find(
-        (cat) => cat.key === activeCategory.value,
+      console.log("当前分类:", activeCategory.value);
+      console.log(
+        "可用分类列表:",
+        categories.value.map((cat) => ({
+          _id: cat._id,
+          key: cat.key,
+          name: cat.name,
+        })),
       );
-      if (selectedCategory) {
+
+      // 容错处理：确保categories是数组且有数据
+      if (!Array.isArray(categories.value) || categories.value.length === 0) {
+        console.warn("⚠️ 分类数据为空或格式错误，跳过分类筛选");
+        return;
+      }
+
+      // 根据分类key查找分类ID，添加容错处理
+      const selectedCategory = categories.value.find((cat) => {
+        // 确保cat对象存在且有key属性
+        if (!cat || typeof cat !== "object") {
+          console.warn("⚠️ 发现无效分类数据:", cat);
+          return false;
+        }
+        return cat.key === activeCategory.value;
+      });
+
+      console.log("查找结果:", selectedCategory);
+
+      if (selectedCategory && selectedCategory._id) {
+        // 确保_id存在且有效
         params.category = selectedCategory._id;
+        console.log(
+          "✅ 找到分类:",
+          selectedCategory.name,
+          "ID:",
+          selectedCategory._id,
+        );
       } else {
-        console.warn(
-          "未找到分类:",
+        console.error(
+          "❌ 未找到分类或分类ID无效:",
           activeCategory.value,
           "可用分类:",
-          categories.value,
+          categories.value.map((cat) => ({
+            key: cat?.key || "undefined",
+            name: cat?.name || "undefined",
+            _id: cat?._id || "undefined",
+          })),
         );
+        // 即使找不到分类，也继续请求（返回所有新闻）
+        console.log("🔄 继续请求所有新闻");
       }
     }
 
+    console.log("📤 发送新闻请求参数:", JSON.stringify(params, null, 2));
     const response = await newsApi.instance.getList(params);
-    console.log("新闻接口响应", response);
+    console.log("📥 新闻接口响应", response);
 
     if (response.success) {
-      newsList.value = response.data.map((item: any) => ({
-        ...item,
-        id: item.id,
-        publishDate: item.publishDate || item.createdAt, // 确保有值
-      }));
+      console.log("🔍 原始响应数据:", response.data);
+      newsList.value = response.data.map((item: any) => {
+        // 确保分类信息完整传递
+        const mappedItem = {
+          ...item,
+          id: item.id || item._id,
+          publishDate: item.publishDate || item.createdAt,
+          // 保留原有的分类信息结构
+          categoryKey: item.categoryKey || item.category?.key,
+          categoryName: item.categoryName || item.category?.name,
+        };
+        console.log(`🏷️ 映射新闻 "${item.title}":`, {
+          categoryKey: mappedItem.categoryKey,
+          categoryName: mappedItem.categoryName,
+          category: item.category,
+        });
+        return mappedItem;
+      });
       totalNews.value = response.pagination?.total || 0;
+      console.log(
+        `📊 获取到 ${newsList.value.length} 条新闻，总数: ${totalNews.value}`,
+      );
+      console.log(
+        "新闻分类分布:",
+        newsList.value.map((item) => ({
+          title: item.title,
+          categoryKey: item.categoryKey || item.category?.key,
+          categoryName: item.categoryName || item.category?.name,
+          categoryId: item.category?._id || item.category?.id,
+        })),
+      );
     } else {
       message.error("获取新闻失败");
     }
@@ -189,7 +254,42 @@ const fetchNews = async () => {
   } finally {
     loading.value = false;
   }
-};
+}
+
+// 监听分类数据加载状态，加载完成后立即获取新闻数据
+watch(
+  categoriesLoaded,
+  (loaded) => {
+    if (loaded) {
+      console.log("🎯 分类数据加载完成，开始获取新闻数据");
+      console.log("当前URL分类参数:", activeCategory.value);
+      fetchNews();
+    }
+  },
+  { immediate: false },
+);
+
+// 监听 activeCategory (源自路由) 的变化来获取数据
+watch(
+  activeCategory,
+  () => {
+    if (categoriesLoaded.value) {
+      console.log("🔄 分类切换:", activeCategory.value);
+      currentPage.value = 1; // 分类变化时重置到第一页
+      fetchNews();
+    } else {
+      console.log("⏳ 分类数据尚未加载完成，等待...");
+    }
+  },
+  { immediate: false }, // 不立即执行，等待分类数据加载完成
+);
+
+// 组件挂载时先获取分类列表
+onMounted(async () => {
+  console.log("🚀 组件挂载，开始加载分类数据");
+  console.log("初始URL参数:", route.query);
+  await fetchCategories();
+});
 
 // 计算显示的新闻列表
 const filteredNews = computed(() => {
@@ -199,22 +299,17 @@ const filteredNews = computed(() => {
     date: new Date(news.publishDate || news.createdAt).toLocaleDateString(
       "zh-CN",
     ),
-    categoryKey: news.category?.key || "center",
-    categoryName: news.category?.name || "中心动态",
+    categoryKey: news.categoryKey || news.category?.key || "center",
+    categoryName: news.categoryName || news.category?.name || "中心动态",
   }));
 });
 
-// 分类变更处理
-const handleCategoryChange = (key: string) => {
-  activeCategory.value = key;
-};
-
 // 分页变更处理
-const handlePageChange = (page: number) => {
+function handlePageChange(page: number) {
   currentPage.value = page;
   fetchNews();
   window.scrollTo(0, 0); // 回到顶部
-};
+}
 </script>
 
 <style scoped>
