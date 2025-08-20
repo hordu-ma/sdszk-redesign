@@ -35,7 +35,6 @@
     "dayjs": "^1.11.13",
     "echarts": "^6.0.0",
     "element-plus": "^2.10.7",
-    "helmet": "8.1.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "vue": "^3.5.18",
@@ -44,7 +43,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
-    "@types/js-yaml": "4.0.9",
     "@types/mongoose": "5.11.96",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "8.39.1",
@@ -73,7 +71,6 @@
     "vite": "7.1.2",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-imagemin": "0.4.0",
     "vitest": "3.2.4",
     "vue-eslint-parser": "10.2.0",
     "vue-tsc": "3.0.5"

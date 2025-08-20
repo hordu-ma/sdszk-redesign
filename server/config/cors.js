@@ -92,18 +92,13 @@ const corsOriginHandler = (origin, callback) => {
 
   // 处理无 origin 的请求
   if (!origin) {
-    if (isProduction) {
-      sysLogger.warn({
-        origin: 'undefined',
-        environment: 'production',
-        security: true
-      }, 'CORS: 生产环境拒绝无origin请求');
-      return callback(new Error('Not allowed by CORS - No origin header in production'));
-    } else {
-      // 开发环境允许无origin请求（支持工具如curl、Postman等）
-      sysLogger.debug('CORS: 开发环境允许无origin请求');
-      return callback(null, true);
-    }
+    // 生产环境也允许无origin请求（支持nginx代理、curl、健康检查等）
+    sysLogger.debug({
+      origin: 'undefined',
+      environment: isProduction ? 'production' : 'development',
+      note: 'Allowing request without origin header (nginx proxy, health checks, etc.)'
+    }, 'CORS: 允许无origin请求');
+    return callback(null, true);
   }
 
   // 检查origin是否在白名单中

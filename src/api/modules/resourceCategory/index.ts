@@ -36,7 +36,7 @@ export class ResourceCategoryApi extends BaseApi {
 
   // 获取所有分类
   async getList(params?: { includeInactive?: boolean }): Promise<ApiResponse<ResourceCategory[]>> {
-    return await this.get<ResourceCategory[]>('', params)
+    return await this.get<ResourceCategory[]>('', { params })
   }
 
   // 获取单个分类

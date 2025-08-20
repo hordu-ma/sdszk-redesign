@@ -6,7 +6,7 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { createHtmlPlugin } from "vite-plugin-html";
 import viteCompression from "vite-plugin-compression";
-import viteImagemin from "vite-plugin-imagemin";
+// import viteImagemin from "vite-plugin-imagemin";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -48,47 +48,47 @@ export default defineConfig(({ mode }) => {
         ext: ".br",
         deleteOriginFile: false,
       }),
-      // 图片压缩 - 优化配置以平衡质量和大小
-      viteImagemin({
-        // GIF 优化
-        gifsicle: {
-          optimizationLevel: 3, // 降低优化级别以加快构建
-          interlaced: false,
-        },
-        // PNG 优化 - 禁用 optipng，使用 pngquant 代替
-        optipng: false,
-        // JPEG 优化
-        mozjpeg: {
-          quality: 85, // 提高质量以保持视觉效果
-          progressive: true, // 启用渐进式加载
-        },
-        // PNG 量化压缩
-        pngquant: {
-          quality: [0.7, 0.85], // 提高质量范围
-          speed: 4,
-        },
-        // SVG 优化
-        svgo: {
-          plugins: [
-            {
-              name: 'removeViewBox',
-              active: false, // 保留 viewBox 以确保 SVG 正确缩放
-            },
-            {
-              name: 'removeEmptyAttrs',
-              active: false, // 保留可能需要的空属性
-            },
-            {
-              name: 'removeDoctype',
-            },
-            {
-              name: 'removeComments',
-            },
-          ],
-        },
-        // 输出详细信息
-        verbose: true,
-      }),
+      // 图片压缩 - 暂时禁用以解决构建问题
+      // viteImagemin({
+      //   // GIF 优化
+      //   gifsicle: {
+      //     optimizationLevel: 3, // 降低优化级别以加快构建
+      //     interlaced: false,
+      //   },
+      //   // PNG 优化 - 禁用 optipng，使用 pngquant 代替
+      //   optipng: false,
+      //   // JPEG 优化
+      //   mozjpeg: {
+      //     quality: 85, // 提高质量以保持视觉效果
+      //     progressive: true, // 启用渐进式加载
+      //   },
+      //   // PNG 量化压缩
+      //   pngquant: {
+      //     quality: [0.7, 0.85], // 提高质量范围
+      //     speed: 4,
+      //   },
+      //   // SVG 优化
+      //   svgo: {
+      //     plugins: [
+      //       {
+      //         name: 'removeViewBox',
+      //         active: false, // 保留 viewBox 以确保 SVG 正确缩放
+      //       },
+      //       {
+      //         name: 'removeEmptyAttrs',
+      //         active: false, // 保留可能需要的空属性
+      //       },
+      //       {
+      //         name: 'removeDoctype',
+      //       },
+      //       {
+      //         name: 'removeComments',
+      //       },
+      //     ],
+      //   },
+      //   // 输出详细信息
+      //   verbose: true,
+      // }),
     ],
     resolve: {
       alias: {
