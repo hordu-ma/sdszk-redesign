@@ -122,6 +122,24 @@ const handleValidationError = (error: ApiError) => {
 // 处理认证错误
 const handleAuthError = async (error: ApiError) => {
   const store = initStore()
+
+  // 检查是否真的需要登出 - 避免误报
+  if (store.isAuthenticated) {
+    // 如果用户实际已登录，可能是临时的网络问题或token同步问题
+    console.warn('检测到认证错误，但用户状态显示已登录，尝试刷新认证状态')
+
+    // 尝试重新初始化用户信息
+    try {
+      await store.initUserInfo()
+      // 如果重新初始化成功，显示警告而不是强制登出
+      message.warning('认证状态已刷新，请重试操作')
+      return
+    } catch (refreshError) {
+      console.error('认证状态刷新失败:', refreshError)
+    }
+  }
+
+  // 只有在真正需要时才登出
   await store.logout()
   message.error(error.message || '登录已过期，请重新登录')
   router.push('/admin/login')

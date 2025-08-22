@@ -177,6 +177,7 @@ import {
 import { adminNewsApi, type NewsFormData } from "@/api/modules/adminNews";
 import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
 import QuillEditor from "@/components/common/QuillEditor.vue";
+import { useUserStore } from "@/stores/user";
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi();
@@ -184,6 +185,8 @@ import type { Rule } from "ant-design-vue/es/form";
 import type { UploadProps } from "ant-design-vue";
 
 const router = useRouter();
+const userStore = useUserStore();
+const { requireAuth } = userStore.useAuthGuard();
 const formRef = ref();
 const quillEditorRef = ref();
 
@@ -296,10 +299,7 @@ const handleRemoveImage = () => {
 const handleSaveDraft = async () => {
   try {
     // 检查认证状态
-    const token = localStorage.getItem("token");
-    if (!token) {
-      message.error("请先登录");
-      router.push("/admin/login");
+    if (!(await requireAuth())) {
       return;
     }
 
@@ -329,10 +329,7 @@ const handleSaveDraft = async () => {
 const handlePublish = async () => {
   try {
     // 检查认证状态
-    const token = localStorage.getItem("token");
-    if (!token) {
-      message.error("请先登录");
-      router.push("/admin/login");
+    if (!(await requireAuth())) {
       return;
     }
 

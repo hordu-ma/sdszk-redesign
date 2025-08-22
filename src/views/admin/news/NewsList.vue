@@ -405,6 +405,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import { message } from "ant-design-vue";
 import {
   PlusOutlined,
@@ -426,6 +427,8 @@ import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
 import type { TableColumnsType, TableProps } from "ant-design-vue";
 
 const router = useRouter();
+const userStore = useUserStore();
+const { requireAuth } = userStore.useAuthGuard();
 
 // 创建API实例
 const adminNewsApi = new AdminNewsApi();
@@ -820,7 +823,7 @@ const removeSearchHistory = (index: number) => {
   searchHistory.value.splice(index, 1);
   localStorage.setItem(
     "newsSearchHistory",
-    JSON.stringify(searchHistory.value)
+    JSON.stringify(searchHistory.value),
   );
   message.success("搜索历史已删除");
 };
@@ -866,14 +869,11 @@ const handleBatchModalOk = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   console.log("NewsList组件已挂载");
 
   // 检查认证状态
-  const token = localStorage.getItem("token");
-  if (!token) {
-    message.error("请先登录");
-    router.push("/admin/login");
+  if (!(await requireAuth())) {
     return;
   }
 

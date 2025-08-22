@@ -34,4 +34,28 @@ app.use(Antd)
 import permissions from './directives'
 app.use(permissions)
 
-app.mount('#app')
+// 初始化用户状态
+import { useUserStore } from './stores/user'
+
+// 应用挂载前初始化用户状态
+const initializeApp = async () => {
+  try {
+    const userStore = useUserStore()
+
+    // 如果有存储的token，则初始化用户信息
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+      console.log('🔄 正在初始化用户状态...')
+      await userStore.initUserInfo()
+      console.log('✅ 用户状态初始化完成')
+    }
+  } catch (error) {
+    console.error('⚠️ 用户状态初始化失败:', error)
+    // 即使初始化失败也要继续挂载应用
+  }
+
+  app.mount('#app')
+}
+
+// 启动应用
+initializeApp()

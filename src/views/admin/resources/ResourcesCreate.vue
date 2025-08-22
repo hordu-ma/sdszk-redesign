@@ -288,6 +288,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import { message } from "ant-design-vue";
 import {
   ArrowLeftOutlined,
@@ -313,6 +314,8 @@ import type { UploadProps } from "ant-design-vue";
 // 引入富文本编辑器
 
 const router = useRouter();
+const userStore = useUserStore();
+const { requireAuth } = userStore.useAuthGuard();
 const formRef = ref();
 const quillEditorRef = ref();
 
@@ -614,14 +617,15 @@ const handlePublish = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   // 检查认证状态
-  const token = localStorage.getItem("token");
-  console.log("🔐 Auth token:", token ? "Present" : "Missing");
+  console.log(
+    "🔐 Auth state:",
+    userStore.isAuthenticated ? "Authenticated" : "Not authenticated",
+  );
 
-  if (!token) {
-    message.error("请先登录");
-    router.push("/admin/login");
+  // 检查认证状态
+  if (!(await requireAuth())) {
     return;
   }
 

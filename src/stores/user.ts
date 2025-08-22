@@ -3,6 +3,8 @@ import { ref, computed } from "vue";
 import api from "../utils/api";
 import { debounce } from "../utils/debounce";
 import type { BackendPermissions, PermissionList } from "../types/permissions";
+import router from "@/router";
+import { message } from "ant-design-vue";
 
 export interface UserInfo {
   id: string;
@@ -53,8 +55,17 @@ export const useUserStore = defineStore(
     const loading = ref(false);
     const initInProgress = ref(false); // 添加标记，避免重复初始化
 
-    // 计算属性
-    const isAuthenticated = computed(() => !!token.value);
+    // 计算属性 - 增强认证状态检查
+    const isAuthenticated = computed(() => {
+      // 检查token是否存在且用户信息已加载
+      const hasToken = !!token.value;
+      const hasUserInfo = !!userInfo.value;
+
+      // 同时检查localStorage中的token作为备份验证
+      const hasStoredToken = !!localStorage.getItem("token");
+
+      return hasToken && hasUserInfo && hasStoredToken;
+    });
     const isAdmin = computed(() => userInfo.value?.role === "admin");
     const isEditor = computed(
       () => userInfo.value?.role === "editor" || isAdmin.value
@@ -258,6 +269,120 @@ export const useUserStore = defineStore(
     }
 
     /**
+     * 稳定的认证状态检查
+     */
+    function isAuthenticationValid(): boolean {
+      const hasToken = !!token.value;
+      const hasUserInfo = !!userInfo.value;
+      const hasStoredToken = !!localStorage.getItem("token");
+
+      // 所有条件都必须满足
+      return hasToken && hasUserInfo && hasStoredToken;
+    }
+
+    /**
+     * 安全的认证状态检查 - 提供给组件使用
+     */
+    function checkAuthenticationSafely(): boolean {
+      try {
+        // 首先检查基本状态
+        if (!isAuthenticationValid()) {
+          // 尝试从localStorage恢复
+          const savedToken = localStorage.getItem("token");
+          if (savedToken && !token.value) {
+            // 静默恢复token，但不触发用户信息获取
+            token.value = savedToken;
+            // 返回false，让组件知道需要等待完整初始化
+            return false;
+          }
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error("认证状态检查失败:", error);
+        return false;
+      }
+    }
+
+    /**
+     * 组合函数：为组件提供完整的认证检查和处理
+     * 使用方法：const { requireAuth, isReady } = userStore.useAuthGuard()
+     */
+    function useAuthGuard() {
+      const isReady = computed(() => !initInProgress.value);
+
+      /**
+       * 要求认证的函数 - 在组件中调用
+       * @param onFail 认证失败时的回调
+       */
+      const requireAuth = async (onFail?: () => void): Promise<boolean> => {
+        try {
+          // 如果正在初始化中，等待完成
+          if (initInProgress.value) {
+            await new Promise((resolve) => {
+              const checkInterval = setInterval(() => {
+                if (!initInProgress.value) {
+                  clearInterval(checkInterval);
+                  resolve(true);
+                }
+              }, 100);
+
+              // 5秒超时
+              setTimeout(() => {
+                clearInterval(checkInterval);
+                resolve(false);
+              }, 5000);
+            });
+          }
+
+          // 检查认证状态
+          if (!checkAuthenticationSafely()) {
+            // 尝试自动恢复
+            const savedToken = localStorage.getItem("token");
+            if (savedToken && savedToken === token.value) {
+              // token一致，可能只是用户信息丢失，尝试重新获取
+              try {
+                await initUserInfo();
+                if (isAuthenticated.value) {
+                  return true;
+                }
+              } catch (error) {
+                console.error("自动恢复用户信息失败:", error);
+              }
+            }
+
+            // 认证失败，执行失败回调
+            if (onFail) {
+              onFail();
+            } else {
+              // 默认处理：显示错误并跳转登录
+              message.error("请先登录");
+              router.push("/admin/login");
+            }
+            return false;
+          }
+
+          return true;
+        } catch (error) {
+          console.error("认证检查异常:", error);
+          if (onFail) {
+            onFail();
+          } else {
+            message.error("认证检查失败，请重新登录");
+            router.push("/admin/login");
+          }
+          return false;
+        }
+      };
+
+      return {
+        requireAuth,
+        isReady,
+        isAuthenticated,
+      };
+    }
+
+    /**
      * 初始化用户信息（防抖版本）
      */
     const debouncedUserInfoInit = debounce(async () => {
@@ -354,6 +479,13 @@ export const useUserStore = defineStore(
       hasPermission,
       initUserInfo,
       transformPermissions,
+
+      // 新增的安全检查方法
+      checkAuthenticationSafely,
+      isAuthenticationValid,
+
+      // 组合函数：用于组件中的认证检查
+      useAuthGuard,
     };
   },
   {
