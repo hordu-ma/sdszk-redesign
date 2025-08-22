@@ -2,10 +2,6 @@
 
 > 基于 Vue3 + TypeScript + Node.js + MongoDB 构建的现代化思政教育平台。
 
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/your-repo/sdszk-redesign/blob/main/LICENSE)
-[![Vue3](https://img.shields.io/badge/Vue.js-3.3.4-4FC08D.svg)](https://vuejs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18.x-339933.svg)](https://nodejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-4.4.9-646CFF.svg)](https://vitejs.dev/)
 
 本项目是一个功能完善的全栈应用，旨在提供一个集新闻资讯、教学资源、在线活动和后台管理于一体的思政教育平台。
 
