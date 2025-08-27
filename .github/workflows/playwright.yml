@@ -7,7 +7,7 @@ on:
 
 # 环境变量
 env:
-  NODE_VERSION: "18"
+  NODE_VERSION: "20"
   CACHE_VERSION: v1
 
 jobs:
@@ -58,14 +58,23 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
-      # 检查应用是否能正常构建
-      - name: 构建应用
-        run: npm run build
-
+      # 启动服务用于E2E测试
+      - name: 启动服务
+        run: |
+          chmod +x ./dev-start.sh ./dev-stop.sh
+          ./dev-start.sh
+          echo "Waiting for servers to start..."
+          sleep 30
+      
       - name: 运行Playwright测试
         run: npx playwright test
         env:
           CI: true
+
+      # 停止服务
+      - name: 停止服务
+        if: always()
+        run: ./dev-stop.sh
 
       # 上传测试报告
       - name: 上传Playwright报告
