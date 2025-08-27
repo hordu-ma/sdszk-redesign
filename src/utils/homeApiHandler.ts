@@ -38,7 +38,7 @@ export async function getCoreCategoriesWithCache() {
 // 对getCoreCategoriesWithCache进行防抖处理
 export const debouncedGetCoreCategories = debounce(
   getCoreCategoriesWithCache,
-  800
+  800,
 );
 
 // 资源数据缓存
@@ -49,7 +49,7 @@ const resourcesCache = new Map<string, { data: any; timestamp: number }>();
  */
 export async function getResourcesByCategoryWithCache(
   category: string,
-  limit = 5
+  limit = 5,
 ) {
   const cacheKey = `${category}-${limit}`;
   const now = Date.now();
@@ -90,7 +90,7 @@ export async function getResourcesByCategoryWithCache(
 // 对资源获取函数进行防抖处理
 export const debouncedGetResources = debounce(
   getResourcesByCategoryWithCache,
-  800
+  800,
 );
 
 // 新闻数据缓存
@@ -101,7 +101,7 @@ const newsCache = new Map<string, { data: any; timestamp: number }>();
  */
 export async function getNewsByCategoryWithCache(
   categoryId: string,
-  limit = 3
+  limit = 3,
 ) {
   const cacheKey = `${categoryId}-${limit}`;
   const now = Date.now();

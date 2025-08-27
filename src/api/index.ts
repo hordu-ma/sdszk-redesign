@@ -15,35 +15,35 @@ export const newsApi = {
   get instance() {
     if (!_newsApi) _newsApi = new NewsApi();
     return _newsApi;
-  }
+  },
 };
 
 export const newsCategoryApi = {
   get instance() {
     if (!_newsCategoryApi) _newsCategoryApi = new NewsCategoryApi();
     return _newsCategoryApi;
-  }
+  },
 };
 
 export const resourceApi = {
   get instance() {
     if (!_resourceApi) _resourceApi = new ResourceApi();
     return _resourceApi;
-  }
+  },
 };
 
 export const resourceCategoryApi = {
   get instance() {
     if (!_resourceCategoryApi) _resourceCategoryApi = new ResourceCategoryApi();
     return _resourceCategoryApi;
-  }
+  },
 };
 
 export const settingsApi = {
   get instance() {
     if (!_settingsApi) _settingsApi = new SettingsApi();
     return _settingsApi;
-  }
+  },
 };
 
 // 导出类型

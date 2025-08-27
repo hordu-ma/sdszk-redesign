@@ -1,5 +1,5 @@
 // Resource.js - 资源模型
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const resourceSchema = new mongoose.Schema(
   {
@@ -24,7 +24,7 @@ const resourceSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'ResourceCategory',
+      ref: "ResourceCategory",
       required: true,
     },
     videoUrl: {
@@ -102,13 +102,13 @@ const resourceSchema = new mongoose.Schema(
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment',
+        ref: "Comment",
       },
     ],
     shares: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Share',
+        ref: "Share",
       },
     ],
     fileUrl: {
@@ -140,31 +140,31 @@ const resourceSchema = new mongoose.Schema(
     relatedResources: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resource',
+        ref: "Resource",
       },
     ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
   },
   {
     timestamps: true,
-  }
-)
+  },
+);
 
 // 创建全文搜索索引
 resourceSchema.index(
   {
-    title: 'text',
-    content: 'text',
-    summary: 'text',
-    tags: 'text',
+    title: "text",
+    content: "text",
+    summary: "text",
+    tags: "text",
   },
   {
     weights: {
@@ -173,10 +173,10 @@ resourceSchema.index(
       summary: 3,
       content: 1,
     },
-    name: 'resource_text_index',
-  }
-)
+    name: "resource_text_index",
+  },
+);
 
-const Resource = mongoose.model('Resource', resourceSchema)
+const Resource = mongoose.model("Resource", resourceSchema);
 
-export default Resource
+export default Resource;

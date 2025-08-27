@@ -8,26 +8,31 @@
         <a-space>
           <a-button
             type="primary"
-            @click="downloadResource"
             :loading="downloading"
             :disabled="!resource"
+            @click="downloadResource"
           >
-            <template #icon><DownloadOutlined /></template>
+            <template #icon>
+              <DownloadOutlined />
+            </template>
             下载
           </a-button>
           <a-button
-            @click="shareResource"
             :loading="sharing"
             :disabled="!resource"
+            @click="shareResource"
           >
-            <template #icon><ShareAltOutlined /></template>
+            <template #icon>
+              <ShareAltOutlined />
+            </template>
             分享
           </a-button>
         </a-space>
       </template>
     </a-page-header>
 
-    <a-row :gutter="[24, 24]" class="resource-content">
+    <a-row :gutter="[24, 24]"
+class="resource-content">
       <!-- 资源详情 -->
       <a-col :span="16">
         <a-card v-if="loading">
@@ -35,9 +40,10 @@
         </a-card>
         <a-card v-else-if="resource">
           <!-- 媒体预览区域 -->
-          <div class="media-preview" v-if="getMediaUrl(resource)">
+          <div v-if="getMediaUrl(resource)" class="media-preview">
             <!-- 视频播放器 -->
-            <div v-if="isVideoFile(resource)" class="video-container">
+            <div v-if="isVideoFile(resource)"
+class="video-container">
               <video
                 :src="getMediaUrl(resource)"
                 controls
@@ -50,7 +56,8 @@
             </div>
 
             <!-- 音频播放器 -->
-            <div v-else-if="isAudioFile(resource)" class="audio-container">
+            <div v-else-if="isAudioFile(resource)"
+class="audio-container">
               <audio
                 :src="getMediaUrl(resource)"
                 controls
@@ -63,7 +70,8 @@
             </div>
 
             <!-- 图片预览 -->
-            <div v-else-if="isImageFile(resource)" class="image-container">
+            <div v-else-if="isImageFile(resource)"
+class="image-container">
               <img
                 :src="getMediaUrl(resource)"
                 :alt="resource.title"
@@ -73,7 +81,8 @@
             </div>
 
             <!-- PDF预览 -->
-            <div v-else-if="isPdfFile(resource)" class="pdf-container">
+            <div v-else-if="isPdfFile(resource)"
+class="pdf-container">
               <iframe
                 :src="getMediaUrl(resource)"
                 class="media-player pdf-viewer"
@@ -109,12 +118,15 @@
               >
             </div>
             <div
-              class="content"
               v-if="resource?.description"
+              class="content"
               v-html="resource.description"
-            ></div>
-            <div class="tags" v-if="resource?.tags?.length">
-              <a-tag v-for="tag in resource.tags" :key="tag">{{ tag }}</a-tag>
+            />
+            <div v-if="resource?.tags?.length" class="tags">
+              <a-tag v-for="tag in resource.tags"
+:key="tag">
+                {{ tag }}
+              </a-tag>
             </div>
           </div>
         </a-card>
@@ -125,15 +137,17 @@
             sub-title="请检查资源ID是否正确"
           >
             <template #extra>
-              <a-button type="primary" @click="() => router.push('/resources')"
-                >返回资源中心</a-button
-              >
+              <a-button type="primary"
+@click="() => router.push('/resources')">
+                返回资源中心
+              </a-button>
             </template>
           </a-result>
         </a-card>
 
         <!-- 暂时禁用评论系统 -->
-        <a-card title="评论" class="comment-section" v-if="false">
+        <a-card title="评论"
+class="comment-section" v-if="false">
           <a-empty description="评论功能开发中..." />
         </a-card>
       </a-col>
@@ -142,7 +156,8 @@
       <a-col :span="8">
         <a-card title="相关资源">
           <template v-if="relatedResources.length">
-            <a-list :data-source="relatedResources" size="small">
+            <a-list :data-source="relatedResources"
+size="small">
               <template #renderItem="{ item }">
                 <a-list-item>
                   <a @click="() => router.push(`/resources/detail/${item.id}`)">

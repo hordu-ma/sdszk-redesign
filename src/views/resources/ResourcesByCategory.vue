@@ -4,11 +4,11 @@
       <h2>{{ categoryTitle }}</h2>
       <a-spin :spinning="loading">
         <a-row :gutter="[24, 24]">
-          <a-col :span="8" v-for="resource in resources" :key="resource.id">
+          <a-col v-for="resource in resources" :span="8" :key="resource.id">
             <a-card
               hoverable
-              @click="goToDetail(resource.id)"
               class="resource-card"
+              @click="goToDetail(resource.id)"
             >
               <template #cover>
                 <div class="resource-cover">
@@ -18,7 +18,8 @@
                     :alt="resource.title"
                     class="resource-thumbnail"
                   />
-                  <div v-else class="resource-placeholder">
+                  <div v-else
+class="resource-placeholder">
                     <file-outlined />
                   </div>
                 </div>

@@ -1,7 +1,12 @@
 // authController.js - 认证控制器
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from "../utils/appError.js";
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../utils/appError.js";
 import { authLogger, logAuthEvent, logError } from "../utils/logger.js";
 
 // 生成JWT令牌
@@ -18,7 +23,7 @@ const createSendToken = (user, statusCode, res) => {
   // 设置cookie选项
   const cookieOptions = {
     expires: new Date(
-      Date.now() + 24 * 60 * 60 * 1000 // 1天
+      Date.now() + 24 * 60 * 60 * 1000, // 1天
     ),
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -52,28 +57,37 @@ const createSendToken = (user, statusCode, res) => {
 // 登录
 export const login = async (req, res, next) => {
   try {
-    authLogger.debug({
-      requestBody: { username: req.body.username, hasPassword: !!req.body.password },
-      environment: {
-        NODE_ENV: process.env.NODE_ENV,
-        MONGODB_URI: process.env.MONGODB_URI ? "已设置" : "未设置",
-        JWT_SECRET: process.env.JWT_SECRET ? "已设置" : "未设置",
-      }
-    }, "登录流程开始");
+    authLogger.debug(
+      {
+        requestBody: {
+          username: req.body.username,
+          hasPassword: !!req.body.password,
+        },
+        environment: {
+          NODE_ENV: process.env.NODE_ENV,
+          MONGODB_URI: process.env.MONGODB_URI ? "已设置" : "未设置",
+          JWT_SECRET: process.env.JWT_SECRET ? "已设置" : "未设置",
+        },
+      },
+      "登录流程开始",
+    );
 
     const { username, password } = req.body;
 
     // 1) 检查用户名和密码是否存在
-    authLogger.debug({
-      username,
-      passwordLength: password ? password.length : 0
-    }, "步骤1: 检查用户名和密码");
+    authLogger.debug(
+      {
+        username,
+        passwordLength: password ? password.length : 0,
+      },
+      "步骤1: 检查用户名和密码",
+    );
 
     if (!username || !password) {
-      logAuthEvent('login_failed', {
-        reason: 'missing_credentials',
-        username: username || 'undefined',
-        ip: req.ip
+      logAuthEvent("login_failed", {
+        reason: "missing_credentials",
+        username: username || "undefined",
+        ip: req.ip,
       });
       return next(new BadRequestError("请提供用户名和密码"));
     }
@@ -84,21 +98,24 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({ username }).select("+password");
 
     if (!user) {
-      logAuthEvent('login_failed', {
-        reason: 'user_not_found',
+      logAuthEvent("login_failed", {
+        reason: "user_not_found",
         username,
-        ip: req.ip
+        ip: req.ip,
       });
       return next(new UnauthorizedError("用户名或密码错误"));
     }
 
-    authLogger.debug({
-      userId: user._id,
-      username: user.username,
-      role: user.role,
-      active: user.active,
-      hasPassword: !!user.password
-    }, "用户存在，验证用户信息");
+    authLogger.debug(
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role,
+        active: user.active,
+        hasPassword: !!user.password,
+      },
+      "用户存在，验证用户信息",
+    );
 
     authLogger.debug("步骤3: 验证密码");
     try {
@@ -106,20 +123,20 @@ export const login = async (req, res, next) => {
       authLogger.debug({ passwordMatch }, "密码匹配结果");
 
       if (!passwordMatch) {
-        logAuthEvent('login_failed', {
-          reason: 'invalid_password',
+        logAuthEvent("login_failed", {
+          reason: "invalid_password",
           username,
           userId: user._id,
-          ip: req.ip
+          ip: req.ip,
         });
         return next(new UnauthorizedError("用户名或密码错误"));
       }
       authLogger.debug("密码验证通过");
     } catch (pwdError) {
       logError(pwdError, {
-        context: 'password_verification',
+        context: "password_verification",
         username,
-        userId: user._id
+        userId: user._id,
       });
       return next(new UnauthorizedError("用户名或密码错误"));
     }
@@ -128,11 +145,11 @@ export const login = async (req, res, next) => {
     authLogger.debug({ active: user.active }, "步骤4: 检查用户激活状态");
 
     if (!user.active) {
-      logAuthEvent('login_failed', {
-        reason: 'account_disabled',
+      logAuthEvent("login_failed", {
+        reason: "account_disabled",
         username,
         userId: user._id,
-        ip: req.ip
+        ip: req.ip,
       });
       return next(new UnauthorizedError("该账户已被禁用"));
     }
@@ -141,20 +158,20 @@ export const login = async (req, res, next) => {
     // 4) 如果一切正常，发送令牌给客户端
     authLogger.debug("步骤5: 生成token并发送响应");
 
-    logAuthEvent('login_success', {
+    logAuthEvent("login_success", {
       username,
       userId: user._id,
       role: user.role,
-      ip: req.ip
+      ip: req.ip,
     });
 
     createSendToken(user, 200, res);
     authLogger.info({ username, userId: user._id }, "登录成功");
   } catch (error) {
     logError(error, {
-      context: 'login_process',
+      context: "login_process",
       username: req.body.username,
-      ip: req.ip
+      ip: req.ip,
     });
     next(error);
   }
@@ -267,7 +284,7 @@ export const changePassword = async (req, res, next) => {
     // 验证当前密码
     const isCurrentPasswordCorrect = await user.correctPassword(
       oldPassword,
-      user.password
+      user.password,
     );
     if (!isCurrentPasswordCorrect) {
       return next(new BadRequestError("当前密码错误"));
@@ -308,7 +325,7 @@ export const protect = async (req, res, next) => {
     // 2) 验证token
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "your-secret-key"
+      process.env.JWT_SECRET || "your-secret-key",
     );
 
     // 3) 检查用户是否仍然存在

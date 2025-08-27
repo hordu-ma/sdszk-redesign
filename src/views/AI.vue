@@ -75,8 +75,9 @@
                 placeholder="请输入您的问题，比如：如何在新时代背景下开展大学生思想政治教育？"
                 rows="1"
                 disabled
-              ></textarea>
-              <button class="send-button" disabled>
+              />
+              <button class="send-button"
+disabled>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

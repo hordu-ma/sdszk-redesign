@@ -6,13 +6,14 @@
     <div class="news-content">
       <!-- 分类导航 -->
       <div class="category-nav">
-        <a-tabs v-model:activeKey="activeCategory">
-          <a-tab-pane key="all" tab="全部资讯"></a-tab-pane>
+        <a-tabs v-model:active-key="activeCategory">
+          <a-tab-pane
+key="all" tab="全部资讯" />
           <a-tab-pane
             v-for="category in categories"
             :key="category.key"
             :tab="category.name"
-          ></a-tab-pane>
+          />
         </a-tabs>
       </div>
 
@@ -28,13 +29,13 @@
           </div>
 
           <!-- 分页 -->
-          <div class="pagination-container" v-if="totalNews > 0">
+          <div v-if="totalNews > 0" class="pagination-container">
             <a-pagination
               v-model:current="currentPage"
               :total="totalNews"
-              :pageSize="pageSize"
-              @change="handlePageChange"
+              :page-size="pageSize"
               show-less-items
+              @change="handlePageChange"
             />
           </div>
 

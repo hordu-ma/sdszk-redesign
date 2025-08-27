@@ -7,7 +7,8 @@
         <p>管理新闻分类，包括创建、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button type="primary" @click="showCreateModal">
+        <a-button type="primary"
+@click="showCreateModal">
           <template #icon>
             <PlusOutlined />
           </template>
@@ -29,9 +30,10 @@
           <template v-if="column.key === 'name'">
             <div class="category-name">
               <span class="name-text">{{ record.name }}</span>
-              <a-tag v-if="record.isDefault" color="blue" size="small"
-                >默认</a-tag
-              >
+              <a-tag v-if="record.isDefault"
+color="blue" size="small">
+                默认
+              </a-tag>
             </div>
           </template>
 
@@ -54,15 +56,16 @@
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link" size="small" @click="handleEdit(record)">
+              <a-button type="link"
+size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
               <a-popconfirm
                 :title="`确定要删除分类「${record.name}」吗？`"
                 ok-text="确定"
                 cancel-text="取消"
-                @confirm="handleDelete(record)"
                 :disabled="record.isDefault"
+                @confirm="handleDelete(record)"
               >
                 <a-button
                   type="link"
@@ -93,7 +96,8 @@
         :rules="modalRules"
         layout="vertical"
       >
-        <a-form-item label="分类名称" name="name">
+        <a-form-item label="分类名称"
+name="name">
           <a-input
             v-model:value="modalForm.name"
             placeholder="请输入分类名称"
@@ -103,7 +107,8 @@
           />
         </a-form-item>
 
-        <a-form-item label="分类标识" name="key">
+        <a-form-item label="分类标识"
+name="key">
           <a-input
             v-model:value="modalForm.key"
             placeholder="请输入分类标识，如：center、notice、policy"
@@ -115,7 +120,8 @@
           </div>
         </a-form-item>
 
-        <a-form-item label="分类描述" name="description">
+        <a-form-item label="分类描述"
+name="description">
           <a-textarea
             v-model:value="modalForm.description"
             placeholder="请输入分类描述（可选）"
@@ -125,7 +131,8 @@
           />
         </a-form-item>
 
-        <a-form-item label="排序" name="sort">
+        <a-form-item label="排序"
+name="sort">
           <a-input-number
             v-model:value="modalForm.sort"
             placeholder="数字越小排序越靠前"
@@ -303,7 +310,7 @@ const fetchCategories = async () => {
       "🔢 数据类型:",
       typeof data,
       "是否为数组:",
-      Array.isArray(data)
+      Array.isArray(data),
     );
 
     if (!Array.isArray(data)) {

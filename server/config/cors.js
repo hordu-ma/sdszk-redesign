@@ -3,7 +3,7 @@
  * 根据环境提供不同级别的安全策略
  */
 
-import { sysLogger } from '../utils/logger.js';
+import { sysLogger } from "../utils/logger.js";
 
 /**
  * 获取生产环境允许的域名列表
@@ -18,20 +18,18 @@ const getProductionOrigins = () => {
 
   // 从环境变量中添加额外的生产域名
   if (process.env.FRONTEND_URL) {
-    const envOrigins = process.env.FRONTEND_URL
-      .split(",")
+    const envOrigins = process.env.FRONTEND_URL.split(",")
       .map((url) => url.trim())
-      .filter(url => url.startsWith('https://'));
+      .filter((url) => url.startsWith("https://"));
 
     origins.push(...envOrigins);
   }
 
   // 添加其他生产环境域名
   if (process.env.PRODUCTION_DOMAINS) {
-    const prodDomains = process.env.PRODUCTION_DOMAINS
-      .split(",")
+    const prodDomains = process.env.PRODUCTION_DOMAINS.split(",")
       .map((url) => url.trim())
-      .filter(url => url.startsWith('https://'));
+      .filter((url) => url.startsWith("https://"));
 
     origins.push(...prodDomains);
   }
@@ -65,12 +63,12 @@ const getDevelopmentOrigins = () => {
 
   // 从环境变量添加额外的开发端口
   if (process.env.DEV_PORTS) {
-    const devPorts = process.env.DEV_PORTS
-      .split(",")
-      .map((port) => {
-        const trimmed = port.trim();
-        return trimmed.startsWith('http') ? trimmed : `http://localhost:${trimmed}`;
-      });
+    const devPorts = process.env.DEV_PORTS.split(",").map((port) => {
+      const trimmed = port.trim();
+      return trimmed.startsWith("http")
+        ? trimmed
+        : `http://localhost:${trimmed}`;
+    });
 
     developmentPorts.push(...devPorts);
   }
@@ -87,35 +85,48 @@ const getDevelopmentOrigins = () => {
  * @param {Function} callback - 回调函数
  */
 const corsOriginHandler = (origin, callback) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const allowedOrigins = isProduction ? getProductionOrigins() : getDevelopmentOrigins();
+  const isProduction = process.env.NODE_ENV === "production";
+  const allowedOrigins = isProduction
+    ? getProductionOrigins()
+    : getDevelopmentOrigins();
 
   // 处理无 origin 的请求
   if (!origin) {
     // 生产环境也允许无origin请求（支持nginx代理、curl、健康检查等）
-    sysLogger.debug({
-      origin: 'undefined',
-      environment: isProduction ? 'production' : 'development',
-      note: 'Allowing request without origin header (nginx proxy, health checks, etc.)'
-    }, 'CORS: 允许无origin请求');
+    sysLogger.debug(
+      {
+        origin: "undefined",
+        environment: isProduction ? "production" : "development",
+        note: "Allowing request without origin header (nginx proxy, health checks, etc.)",
+      },
+      "CORS: 允许无origin请求",
+    );
     return callback(null, true);
   }
 
   // 检查origin是否在白名单中
   if (allowedOrigins.includes(origin)) {
-    sysLogger.debug({ origin, environment: isProduction ? 'production' : 'development' }, 'CORS: 允许的origin');
+    sysLogger.debug(
+      { origin, environment: isProduction ? "production" : "development" },
+      "CORS: 允许的origin",
+    );
     return callback(null, true);
   }
 
   // 记录被拒绝的请求
-  sysLogger.warn({
-    rejectedOrigin: origin,
-    allowedOriginsCount: allowedOrigins.length,
-    environment: isProduction ? 'production' : 'development',
-    security: true
-  }, 'CORS: 拒绝未授权的origin');
+  sysLogger.warn(
+    {
+      rejectedOrigin: origin,
+      allowedOriginsCount: allowedOrigins.length,
+      environment: isProduction ? "production" : "development",
+      security: true,
+    },
+    "CORS: 拒绝未授权的origin",
+  );
 
-  callback(new Error(`Not allowed by CORS - Origin ${origin} not in whitelist`));
+  callback(
+    new Error(`Not allowed by CORS - Origin ${origin} not in whitelist`),
+  );
 };
 
 /**
@@ -123,7 +134,7 @@ const corsOriginHandler = (origin, callback) => {
  * @returns {Object} CORS 配置对象
  */
 export const getCorsConfig = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
 
   const config = {
     origin: corsOriginHandler,
@@ -138,12 +149,12 @@ export const getCorsConfig = () => {
       "X-Requested-With",
       "Accept",
       "Origin",
-      ...(isProduction ? [] : ["X-Debug-Mode", "X-Development-Mode"])
+      ...(isProduction ? [] : ["X-Debug-Mode", "X-Development-Mode"]),
     ],
     exposedHeaders: [
       "set-cookie",
       "Set-Cookie",
-      ...(isProduction ? [] : ["X-Total-Count", "X-Debug-Info"])
+      ...(isProduction ? [] : ["X-Total-Count", "X-Debug-Info"]),
     ],
     preflightContinue: false,
     optionsSuccessStatus: 204,
@@ -152,12 +163,17 @@ export const getCorsConfig = () => {
   };
 
   // 记录 CORS 配置信息
-  sysLogger.info({
-    environment: isProduction ? 'production' : 'development',
-    allowedOriginsCount: isProduction ? getProductionOrigins().length : getDevelopmentOrigins().length,
-    maxAge: config.maxAge,
-    credentialsEnabled: config.credentials
-  }, 'CORS configuration loaded');
+  sysLogger.info(
+    {
+      environment: isProduction ? "production" : "development",
+      allowedOriginsCount: isProduction
+        ? getProductionOrigins().length
+        : getDevelopmentOrigins().length,
+      maxAge: config.maxAge,
+      credentialsEnabled: config.credentials,
+    },
+    "CORS configuration loaded",
+  );
 
   return config;
 };
@@ -168,35 +184,45 @@ export const getCorsConfig = () => {
  */
 export const validateCorsConfig = () => {
   try {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const origins = isProduction ? getProductionOrigins() : getDevelopmentOrigins();
+    const isProduction = process.env.NODE_ENV === "production";
+    const origins = isProduction
+      ? getProductionOrigins()
+      : getDevelopmentOrigins();
 
     if (origins.length === 0) {
-      sysLogger.error('CORS: 没有配置任何允许的域名');
+      sysLogger.error("CORS: 没有配置任何允许的域名");
       return false;
     }
 
     // 检查生产环境是否只有 HTTPS 域名
     if (isProduction) {
-      const insecureOrigins = origins.filter(origin => !origin.startsWith('https://'));
+      const insecureOrigins = origins.filter(
+        (origin) => !origin.startsWith("https://"),
+      );
       if (insecureOrigins.length > 0) {
-        sysLogger.warn({
-          insecureOrigins,
-          environment: 'production'
-        }, 'CORS: 生产环境发现非HTTPS域名');
+        sysLogger.warn(
+          {
+            insecureOrigins,
+            environment: "production",
+          },
+          "CORS: 生产环境发现非HTTPS域名",
+        );
       }
     }
 
-    sysLogger.info({
-      environment: isProduction ? 'production' : 'development',
-      totalOrigins: origins.length,
-      httpsOrigins: origins.filter(o => o.startsWith('https://')).length,
-      httpOrigins: origins.filter(o => o.startsWith('http://')).length
-    }, 'CORS configuration validated');
+    sysLogger.info(
+      {
+        environment: isProduction ? "production" : "development",
+        totalOrigins: origins.length,
+        httpsOrigins: origins.filter((o) => o.startsWith("https://")).length,
+        httpOrigins: origins.filter((o) => o.startsWith("http://")).length,
+      },
+      "CORS configuration validated",
+    );
 
     return true;
   } catch (error) {
-    sysLogger.error({ error: error.message }, 'CORS: 配置验证失败');
+    sysLogger.error({ error: error.message }, "CORS: 配置验证失败");
     return false;
   }
 };
@@ -206,7 +232,7 @@ export const validateCorsConfig = () => {
  * @returns {string[]} 当前环境允许的域名列表
  */
 export const getAllowedOrigins = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
   return isProduction ? getProductionOrigins() : getDevelopmentOrigins();
 };
 
@@ -214,5 +240,5 @@ export default {
   getCorsConfig,
   validateCorsConfig,
   getAllowedOrigins,
-  corsOriginHandler
+  corsOriginHandler,
 };

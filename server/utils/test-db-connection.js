@@ -1,6 +1,6 @@
 // test-db-connection.js - MongoDB连接测试脚本
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 // 加载环境变量
 dotenv.config();
@@ -16,7 +16,7 @@ const connectDB = async (isReconnect = false) => {
       {
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
-      }
+      },
     );
 
     if (isReconnect) {
@@ -30,16 +30,26 @@ const connectDB = async (isReconnect = false) => {
   } catch (err) {
     if (isReconnect) {
       reconnectAttempts++;
-      console.error(`❌ MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次):`, err.message);
+      console.error(
+        `❌ MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次):`,
+        err.message,
+      );
 
       if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.error(`💀 已达到最大重连次数(${MAX_RECONNECT_ATTEMPTS})，停止重连`);
+        console.error(
+          `💀 已达到最大重连次数(${MAX_RECONNECT_ATTEMPTS})，停止重连`,
+        );
         return;
       }
 
       // 指数退避策略：1s, 2s, 4s, 8s, 16s, 32s, 最大60s
-      const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1), 60000);
-      console.log(`⏰ ${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试...`);
+      const delay = Math.min(
+        INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1),
+        60000,
+      );
+      console.log(
+        `⏰ ${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试...`,
+      );
 
       setTimeout(() => connectDB(true), delay);
     } else {
@@ -77,9 +87,9 @@ connectDB()
   });
 
 // 优雅退出
-process.on('SIGINT', async () => {
-  console.log('\n📝 测试结束，关闭数据库连接...');
+process.on("SIGINT", async () => {
+  console.log("\n📝 测试结束，关闭数据库连接...");
   await mongoose.connection.close();
-  console.log('✅ 连接已关闭');
+  console.log("✅ 连接已关闭");
   process.exit(0);
 });

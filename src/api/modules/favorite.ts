@@ -1,133 +1,146 @@
 // favorite.ts - 收藏功能API
-import { BaseApi } from '../base'
-import type { ApiResponse } from '../types'
+import { BaseApi } from "../base";
+import type { ApiResponse } from "../types";
 
 // 收藏项目接口
 export interface FavoriteItem {
-  _id: string
-  user: string
-  itemType: 'news' | 'resource'
+  _id: string;
+  user: string;
+  itemType: "news" | "resource";
   itemId: {
-    _id: string
-    title: string
-    description?: string
-    image?: string
-    status: string
-    createdAt: string
-  }
-  category: string
-  tags: string[]
-  notes?: string
-  isPublic: boolean
-  createdAt: string
-  updatedAt: string
+    _id: string;
+    title: string;
+    description?: string;
+    image?: string;
+    status: string;
+    createdAt: string;
+  };
+  category: string;
+  tags: string[];
+  notes?: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 添加收藏请求接口
 export interface AddFavoriteRequest {
-  itemType: 'news' | 'resource'
-  itemId: string
-  category?: string
-  tags?: string[]
-  notes?: string
-  isPublic?: boolean
+  itemType: "news" | "resource";
+  itemId: string;
+  category?: string;
+  tags?: string[];
+  notes?: string;
+  isPublic?: boolean;
 }
 
 // 收藏列表查询参数接口
 export interface FavoriteQueryParams {
-  itemType?: 'news' | 'resource'
-  category?: string
-  page?: number
-  limit?: number
-  sort?: string
+  itemType?: "news" | "resource";
+  category?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
 }
 
 // 收藏统计接口
 export interface FavoriteStats {
-  total: number
+  total: number;
   byType: Array<{
-    _id: string
-    count: number
-    categories: string[]
-  }>
+    _id: string;
+    count: number;
+    categories: string[];
+  }>;
   byCategory: Array<{
-    _id: string
-    count: number
-  }>
+    _id: string;
+    count: number;
+  }>;
 }
 
 // 收藏API类
 export class FavoriteApi extends BaseApi {
   // 添加收藏
-  addFavorite(data: AddFavoriteRequest): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.post('/favorites', data)
+  addFavorite(
+    data: AddFavoriteRequest,
+  ): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
+    return this.post("/favorites", data);
   }
 
   // 移除收藏
   removeFavorite(itemType: string, itemId: string): Promise<ApiResponse<void>> {
-    return this.delete(`/favorites/${itemType}/${itemId}`)
+    return this.delete(`/favorites/${itemType}/${itemId}`);
   }
 
   // 检查是否已收藏
-  checkFavorite(itemType: string, itemId: string): Promise<ApiResponse<{ isFavorited: boolean }>> {
-    return this.get(`/favorites/check/${itemType}/${itemId}`)
+  checkFavorite(
+    itemType: string,
+    itemId: string,
+  ): Promise<ApiResponse<{ isFavorited: boolean }>> {
+    return this.get(`/favorites/check/${itemType}/${itemId}`);
   }
 
   // 获取收藏列表
   getFavorites(params?: FavoriteQueryParams): Promise<
     ApiResponse<{
-      favorites: FavoriteItem[]
-      total: number
-      page: number
-      limit: number
-      totalPages: number
+      favorites: FavoriteItem[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
     }>
   > {
-    return this.get('/favorites', { params })
+    return this.get("/favorites", { params });
   }
 
   // 获取收藏统计
   getFavoriteStats(): Promise<ApiResponse<FavoriteStats>> {
-    return this.get('/favorites/stats')
+    return this.get("/favorites/stats");
   }
 
   // 更新收藏分类
   updateFavoriteCategory(
     id: string,
-    category: string
+    category: string,
   ): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.patch(`/favorites/${id}/category`, { category })
+    return this.patch(`/favorites/${id}/category`, { category });
   }
 
   // 批量更新收藏分类
   batchUpdateCategory(
     favoriteIds: string[],
-    category: string
+    category: string,
   ): Promise<ApiResponse<{ modifiedCount: number }>> {
-    return this.patch('/favorites/batch/category', { favoriteIds, category })
+    return this.patch("/favorites/batch/category", { favoriteIds, category });
   }
 
   // 批量删除收藏
-  batchDeleteFavorites(favoriteIds: string[]): Promise<ApiResponse<{ deletedCount: number }>> {
+  batchDeleteFavorites(
+    favoriteIds: string[],
+  ): Promise<ApiResponse<{ deletedCount: number }>> {
     return this.request<{ deletedCount: number }>({
-      method: 'DELETE',
-      url: '/favorites/batch',
+      method: "DELETE",
+      url: "/favorites/batch",
       data: { favoriteIds },
-    })
+    });
   }
 
   // 添加收藏标签
-  addFavoriteTag(id: string, tag: string): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
-    return this.post(`/favorites/${id}/tags`, { tag })
+  addFavoriteTag(
+    id: string,
+    tag: string,
+  ): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
+    return this.post(`/favorites/${id}/tags`, { tag });
   }
 
   // 移除收藏标签
-  removeFavoriteTag(id: string, tag: string): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
+  removeFavoriteTag(
+    id: string,
+    tag: string,
+  ): Promise<ApiResponse<{ favorite: FavoriteItem }>> {
     return this.request<{ favorite: FavoriteItem }>({
-      method: 'DELETE',
+      method: "DELETE",
       url: `/favorites/${id}/tags`,
       data: { tag },
-    })
+    });
   }
 }
 
@@ -138,5 +151,5 @@ export const favoriteApi = {
   get instance() {
     if (!_favoriteApi) _favoriteApi = new FavoriteApi();
     return _favoriteApi;
-  }
+  },
 };

@@ -29,7 +29,7 @@ export default defineConfig({
     timeout: 5000,
   },
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? [['github'], ['html']] : 'html',
+  reporter: process.env.CI ? [["github"], ["html"]] : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* 基础URL配置，用于page.goto()和测试请求 */
@@ -84,12 +84,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000, // 增加超时时间以等待服务器启动
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: "npm run dev",
+        url: "http://localhost:5173",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000, // 增加超时时间以等待服务器启动
+        stdout: "pipe",
+        stderr: "pipe",
+      },
 });

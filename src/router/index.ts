@@ -15,11 +15,11 @@ import AdminLogin from "../views/admin/auth/AdminLogin.vue";
 // 预加载函数 - 在空闲时预加载重要组件
 const preloadComponents = () => {
   // 确保在浏览器环境中运行
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     // 使用 requestIdleCallback 在浏览器空闲时预加载
-    if ('requestIdleCallback' in window) {
+    if ("requestIdleCallback" in window) {
       requestIdleCallback(() => {
         try {
           // 预加载常用页面
@@ -27,19 +27,24 @@ const preloadComponents = () => {
           import("../views/Resources.vue").catch(console.warn);
           import("../views/user/UserLayout.vue").catch(console.warn);
         } catch (error) {
-          console.warn('预加载组件失败:', error);
+          console.warn("预加载组件失败:", error);
         }
       });
 
       // 延迟预加载管理后台组件
-      requestIdleCallback(() => {
-        try {
-          import("../components/admin/AdminLayout.vue").catch(console.warn);
-          import("../views/admin/dashboard/AdminDashboard.vue").catch(console.warn);
-        } catch (error) {
-          console.warn('预加载管理后台组件失败:', error);
-        }
-      }, { timeout: 2000 });
+      requestIdleCallback(
+        () => {
+          try {
+            import("../components/admin/AdminLayout.vue").catch(console.warn);
+            import("../views/admin/dashboard/AdminDashboard.vue").catch(
+              console.warn,
+            );
+          } catch (error) {
+            console.warn("预加载管理后台组件失败:", error);
+          }
+        },
+        { timeout: 2000 },
+      );
     } else {
       // 降级方案：使用 setTimeout
       setTimeout(() => {
@@ -48,12 +53,12 @@ const preloadComponents = () => {
           import("../views/Resources.vue").catch(console.warn);
           import("../views/user/UserLayout.vue").catch(console.warn);
         } catch (error) {
-          console.warn('预加载组件失败:', error);
+          console.warn("预加载组件失败:", error);
         }
       }, 1000);
     }
   } catch (error) {
-    console.warn('预加载初始化失败:', error);
+    console.warn("预加载初始化失败:", error);
   }
 };
 
@@ -408,7 +413,7 @@ router.beforeEach(async (to, _from, next) => {
     if (to.meta.permissions) {
       const requiredPermissions = to.meta.permissions as string[];
       const hasPermission = requiredPermissions.some((permission) =>
-        userStore.hasPermission(permission)
+        userStore.hasPermission(permission),
       );
 
       if (!hasPermission) {
@@ -435,14 +440,16 @@ router.afterEach((to) => {
   }
 
   // 在开发环境下输出性能日志
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     // 延迟一小段时间让组件完全加载后再输出报告
     setTimeout(() => {
-      import("../utils/performance").then(({ logPerformanceReport }) => {
-        logPerformanceReport?.();
-      }).catch(() => {
-        // 静默处理性能监控加载失败
-      });
+      import("../utils/performance")
+        .then(({ logPerformanceReport }) => {
+          logPerformanceReport?.();
+        })
+        .catch(() => {
+          // 静默处理性能监控加载失败
+        });
     }, 100);
   }
 });

@@ -1,18 +1,20 @@
 <template>
-  <page-layout title="资源中心" description="大中小学思政课一体化教育资源库">
+  <page-layout title="资源中心"
+description="大中小学思政课一体化教育资源库">
     <div class="resources-content">
       <!-- 分类导航 -->
       <div class="category-nav">
         <a-tabs
-          v-model:activeKey="activeCategory"
+          v-model:active-key="activeCategory"
           @change="handleCategoryChange"
         >
-          <a-tab-pane key="all" tab="全部资源"></a-tab-pane>
+          <a-tab-pane
+key="all" tab="全部资源" />
           <a-tab-pane
             v-for="category in categories"
             :key="category.key"
             :tab="category.name"
-          ></a-tab-pane>
+          />
         </a-tabs>
       </div>
 
@@ -20,7 +22,7 @@
       <div class="resources-list">
         <a-spin :spinning="loading">
           <a-row :gutter="[24, 24]">
-            <a-col :span="8" v-for="resource in resources" :key="resource.id">
+            <a-col v-for="resource in resources" :span="8" :key="resource.id">
               <a-card
                 hoverable
                 class="resource-card"
@@ -33,7 +35,8 @@
                       :src="resource.thumbnail"
                       :alt="resource.title"
                     />
-                    <div v-else class="resource-icon">
+                    <div v-else
+class="resource-icon">
                       <FileOutlined
                         v-if="
                           resource.fileType?.includes('document') ||
@@ -60,7 +63,7 @@
                       <div
                         class="resource-summary"
                         v-html="truncateHtml(resource.description || '')"
-                      ></div>
+                      />
                       <div class="resource-info">
                         <span
                           ><UserOutlined />
@@ -92,18 +95,19 @@
           </a-row>
 
           <!-- 分页 -->
-          <div class="pagination-container" v-if="total > 0">
+          <div v-if="total > 0" class="pagination-container">
             <a-pagination
               v-model:current="currentPage"
               :total="total"
-              :pageSize="pageSize"
-              @change="handlePageChange"
+              :page-size="pageSize"
               show-less-items
+              @change="handlePageChange"
             />
           </div>
 
           <!-- 无数据提示 -->
-          <a-empty v-if="resources.length === 0" description="暂无相关资源" />
+          <a-empty v-if="resources.length === 0"
+description="暂无相关资源" />
         </a-spin>
       </div>
     </div>

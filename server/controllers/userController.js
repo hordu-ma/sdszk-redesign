@@ -1,270 +1,290 @@
 // userController.js - 用户控制器
-import User from '../models/User.js'
-import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from '../utils/appError.js'
+import User from "../models/User.js";
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../utils/appError.js";
 
 // 获取所有用户
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select('-__v -loginHistory').lean() // 使用 lean() 提高性能
+    const users = await User.find().select("-__v -loginHistory").lean(); // 使用 lean() 提高性能
     res.status(200).json({
       data: users,
       pagination: {
         total: users.length,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 获取单个用户
 export const getUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select('-__v -loginHistory').lean() // 使用 lean() 提高性能
+    const user = await User.findById(req.params.id)
+      .select("-__v -loginHistory")
+      .lean(); // 使用 lean() 提高性能
 
     if (!user) {
-      return next(new NotFoundError('未找到此用户'))
+      return next(new NotFoundError("未找到此用户"));
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 更新用户
 export const updateUser = async (req, res, next) => {
   try {
     // 确保不能通过此路由更新密码
     if (req.body.password) {
-      return next(new BadRequestError('此路由不用于密码更新，请使用 /updatePassword'))
+      return next(
+        new BadRequestError("此路由不用于密码更新，请使用 /updatePassword"),
+      );
     }
 
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    }).select('-__v')
+    }).select("-__v");
 
     if (!user) {
-      return next(new NotFoundError('未找到此用户'))
+      return next(new NotFoundError("未找到此用户"));
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         user,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 删除用户
 export const deleteUser = async (req, res, next) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id)
+    const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
-      return next(new NotFoundError('未找到此用户'))
+      return next(new NotFoundError("未找到此用户"));
     }
 
     res.status(204).json({
-      status: 'success',
+      status: "success",
       data: null,
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 更新当前登录用户的密码
 export const updatePassword = async (req, res, next) => {
   try {
     // 1) 获取当前用户
-    const user = await User.findById(req.user._id).select('+password')
+    const user = await User.findById(req.user._id).select("+password");
 
     // 2) 检查提交的当前密码是否正确
     if (!(await user.comparePassword(req.body.currentPassword))) {
-      return next(new UnauthorizedError('当前密码不正确'))
+      return next(new UnauthorizedError("当前密码不正确"));
     }
 
     // 3) 如果是正确的，则更新密码
-    user.password = req.body.newPassword
-    await user.save()
+    user.password = req.body.newPassword;
+    await user.save();
 
     // 4) 重新登录用户，发送新JWT
     res.status(200).json({
-      status: 'success',
-      message: '密码更新成功',
-    })
+      status: "success",
+      message: "密码更新成功",
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 获取当前登录的用户信息
 export const getMe = (req, res) => {
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       user: req.user,
     },
-  })
-}
+  });
+};
 
 // 更新当前用户个人信息
 export const updateMyProfile = async (req, res, next) => {
   try {
     // 过滤掉不允许更新的字段
-    const filteredBody = {}
-    const allowedFields = ['name', 'email', 'phone', 'department', 'position', 'avatar']
+    const filteredBody = {};
+    const allowedFields = [
+      "name",
+      "email",
+      "phone",
+      "department",
+      "position",
+      "avatar",
+    ];
 
-    Object.keys(req.body).forEach(key => {
+    Object.keys(req.body).forEach((key) => {
       if (allowedFields.includes(key)) {
-        filteredBody[key] = req.body[key]
+        filteredBody[key] = req.body[key];
       }
-    })
+    });
 
     // 确保不能通过此路由更新密码、角色等敏感信息
     if (req.body.password || req.body.role || req.body.permissions) {
-      return next(new BadRequestError('此路由不允许更新密码、角色或权限信息'))
+      return next(new BadRequestError("此路由不允许更新密码、角色或权限信息"));
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
-      new: true,
-      runValidators: true,
-    }).select('-password -__v')
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      filteredBody,
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).select("-password -__v");
 
     res.status(200).json({
-      status: 'success',
-      message: '个人信息更新成功',
+      status: "success",
+      message: "个人信息更新成功",
       data: {
         user: updatedUser,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 上传用户头像
 export const uploadAvatar = async (req, res, next) => {
   try {
     if (!req.file) {
-      return next(new BadRequestError('请选择要上传的头像文件'))
+      return next(new BadRequestError("请选择要上传的头像文件"));
     }
 
     // 构建头像URL
-    const avatarUrl = `/${process.env.UPLOAD_DIR || 'uploads'}/${req.file.filename}`
+    const avatarUrl = `/${process.env.UPLOAD_DIR || "uploads"}/${req.file.filename}`;
 
     // 更新用户头像
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { avatar: avatarUrl },
-      { new: true, runValidators: true }
-    ).select('-password -__v')
+      { new: true, runValidators: true },
+    ).select("-password -__v");
 
     res.status(200).json({
-      status: 'success',
-      message: '头像上传成功',
+      status: "success",
+      message: "头像上传成功",
       data: {
         user: updatedUser,
         avatarUrl,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 获取用户统计信息
 export const getUserStats = async (req, res, next) => {
   try {
-    const userId = req.user._id
+    const userId = req.user._id;
 
     // 导入需要的模型
-    const { Favorite, ViewHistory } = await import('../models/index.js')
+    const { Favorite, ViewHistory } = await import("../models/index.js");
 
     // 获取收藏统计
     const favoriteStats = await Favorite.aggregate([
       { $match: { user: userId } },
       {
         $group: {
-          _id: '$itemType',
+          _id: "$itemType",
           count: { $sum: 1 },
         },
       },
-    ])
+    ]);
 
     // 获取浏览历史统计
     const viewStats = await ViewHistory.aggregate([
       { $match: { user: userId } },
       {
         $group: {
-          _id: '$itemType',
-          totalViews: { $sum: '$viewCount' },
-          uniqueItems: { $addToSet: '$itemId' },
+          _id: "$itemType",
+          totalViews: { $sum: "$viewCount" },
+          uniqueItems: { $addToSet: "$itemId" },
         },
       },
       {
         $addFields: {
-          uniqueItemCount: { $size: '$uniqueItems' },
+          uniqueItemCount: { $size: "$uniqueItems" },
         },
       },
-    ])
+    ]);
 
     // 获取最近浏览
     const recentViews = await ViewHistory.find({ user: userId })
-      .sort('-lastViewedAt')
+      .sort("-lastViewedAt")
       .limit(5)
-      .populate('itemId', 'title')
-      .lean()
+      .populate("itemId", "title")
+      .lean();
 
     // 获取最近收藏
     const recentFavorites = await Favorite.find({ user: userId })
-      .sort('-createdAt')
+      .sort("-createdAt")
       .limit(5)
-      .populate('itemId', 'title')
-      .lean()
+      .populate("itemId", "title")
+      .lean();
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         favoriteStats,
         viewStats,
         recentViews,
         recentFavorites,
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 获取用户活动日志
 export const getMyActivityLog = async (req, res, next) => {
   try {
-    const userId = req.user._id
-    const { page = 1, limit = 20 } = req.query
+    const userId = req.user._id;
+    const { page = 1, limit = 20 } = req.query;
 
-    const { ActivityLog } = await import('../models/index.js')
+    const { ActivityLog } = await import("../models/index.js");
 
     const activities = await ActivityLog.find({ userId })
-      .sort('-timestamp')
+      .sort("-timestamp")
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .lean()
+      .lean();
 
-    const total = await ActivityLog.countDocuments({ userId })
+    const total = await ActivityLog.countDocuments({ userId });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         activities,
         total,
@@ -272,34 +292,34 @@ export const getMyActivityLog = async (req, res, next) => {
         limit: parseInt(limit),
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 // 删除用户账号（软删除）
 export const deleteMyAccount = async (req, res, next) => {
   try {
-    const { password } = req.body
+    const { password } = req.body;
 
     // 验证密码
-    const user = await User.findById(req.user._id).select('+password')
+    const user = await User.findById(req.user._id).select("+password");
     if (!(await user.comparePassword(password))) {
-      return next(new UnauthorizedError('密码不正确'))
+      return next(new UnauthorizedError("密码不正确"));
     }
 
     // 软删除用户账号
     await User.findByIdAndUpdate(req.user._id, {
       active: false,
       deletedAt: new Date(),
-    })
+    });
 
     res.status(200).json({
-      status: 'success',
-      message: '账号已成功删除',
-    })
+      status: "success",
+      message: "账号已成功删除",
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};

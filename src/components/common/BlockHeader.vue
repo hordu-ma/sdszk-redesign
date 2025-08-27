@@ -2,11 +2,12 @@
   <div class="block-header">
     <h3>
       <div class="title-container">
-        <i :class="['fas', iconClass, 'header-icon']"></i>
+        <i :class="['fas', iconClass, 'header-icon']" />
         <span class="title-text">{{ title }}</span>
       </div>
-      <router-link v-if="moreLink" :to="moreLink" class="more-link">
-        更多<i class="fas fa-angle-right"></i>
+      <router-link v-if="moreLink"
+:to="moreLink" class="more-link">
+        更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
   </div>
@@ -14,10 +15,10 @@
 
 <script setup lang="ts">
 defineProps<{
-  title: string
-  iconClass: string
-  moreLink?: string
-}>()
+  title: string;
+  iconClass: string;
+  moreLink?: string;
+}>();
 </script>
 
 <style scoped>
@@ -36,7 +37,7 @@ defineProps<{
   padding: 12px 20px;
   border-radius: 0;
   margin: 0;
-  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
   font-size: 20px;
   position: relative;
 }

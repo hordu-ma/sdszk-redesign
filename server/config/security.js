@@ -3,14 +3,14 @@
  * 提供环境相关的内容安全策略(CSP)和其他安全头配置
  */
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
 /**
  * 生成CSP nonce值
  * @returns {string} base64编码的随机nonce
  */
 export const generateNonce = () => {
-  return crypto.randomBytes(16).toString('base64');
+  return crypto.randomBytes(16).toString("base64");
 };
 
 /**
@@ -24,27 +24,27 @@ const developmentCSP = {
       "'self'",
       "'unsafe-inline'",
       "https://fonts.googleapis.com",
-      "https://cdnjs.cloudflare.com"
+      "https://cdnjs.cloudflare.com",
     ],
     scriptSrc: [
       "'self'",
       "'unsafe-inline'",
       "'unsafe-eval'", // Vite开发服务器需要
       "https://www.googletagmanager.com",
-      "https://www.google-analytics.com"
+      "https://www.google-analytics.com",
     ],
     imgSrc: [
       "'self'",
       "data:",
       "https:",
       "http://localhost:*", // 允许本地开发图片
-      "blob:"
+      "blob:",
     ],
     fontSrc: [
       "'self'",
       "https://fonts.gstatic.com",
       "https://cdnjs.cloudflare.com",
-      "data:"
+      "data:",
     ],
     connectSrc: [
       "'self'",
@@ -52,7 +52,7 @@ const developmentCSP = {
       "http://localhost:*",
       "https://localhost:*",
       "https://*.google-analytics.com",
-      "https://api.example.com" // 根据实际API调整
+      "https://api.example.com", // 根据实际API调整
     ],
     frameSrc: ["'self'"],
     objectSrc: ["'none'"],
@@ -91,18 +91,18 @@ const productionCSP = {
       "data:",
       "https://images.example.com", // 指定图片CDN域名
       "https://*.googleapis.com", // Google服务图片
-      "blob:"
+      "blob:",
     ],
     fontSrc: [
       "'self'",
       "https://fonts.gstatic.com",
       "https://cdnjs.cloudflare.com",
-      "data:"
+      "data:",
     ],
     connectSrc: [
       "'self'",
       "https://*.google-analytics.com",
-      "https://api.production-domain.com" // 替换为实际的生产API域名
+      "https://api.production-domain.com", // 替换为实际的生产API域名
     ],
     frameSrc: ["'self'"],
     objectSrc: ["'none'"],
@@ -155,7 +155,7 @@ const baseHelmetConfig = {
   hsts: {
     maxAge: 31536000, // 1年
     includeSubDomains: true,
-    preload: true
+    preload: true,
   },
 
   // IE不兼容模式
@@ -180,24 +180,24 @@ const baseHelmetConfig = {
  * @param {string} nonce - 可选的nonce值
  * @returns {object} CSP配置对象
  */
-export const getCSPConfig = (environment = 'development', nonce = null) => {
+export const getCSPConfig = (environment = "development", nonce = null) => {
   let cspConfig;
 
   switch (environment) {
-    case 'production':
+    case "production":
       cspConfig = { ...productionCSP };
       break;
-    case 'test':
+    case "test":
       cspConfig = { ...testCSP };
       break;
-    case 'development':
+    case "development":
     default:
       cspConfig = { ...developmentCSP };
       break;
   }
 
   // 如果提供了nonce，添加到script和style源
-  if (nonce && environment === 'production') {
+  if (nonce && environment === "production") {
     cspConfig.directives.scriptSrc.push(`'nonce-${nonce}'`);
     cspConfig.directives.styleSrc.push(`'nonce-${nonce}'`);
   }
@@ -211,14 +211,14 @@ export const getCSPConfig = (environment = 'development', nonce = null) => {
  * @param {object} options - 额外配置选项
  * @returns {object} 完整的Helmet配置
  */
-export const getHelmetConfig = (environment = 'development', options = {}) => {
+export const getHelmetConfig = (environment = "development", options = {}) => {
   const { nonce, customCSP } = options;
 
   return {
     ...baseHelmetConfig,
     contentSecurityPolicy: customCSP || getCSPConfig(environment, nonce),
     // 在开发环境中可能需要禁用某些安全头
-    ...(environment === 'development' && {
+    ...(environment === "development" && {
       hsts: false, // 开发环境通常不使用HTTPS
     }),
   };
@@ -231,22 +231,24 @@ export const getHelmetConfig = (environment = 'development', options = {}) => {
  */
 export const cspViolationHandler = (req, res) => {
   // 使用结构化日志记录CSP违规
-  import('../utils/logger.js').then(({ logCSPViolation }) => {
-    logCSPViolation(req.body, {
-      userAgent: req.get('User-Agent'),
-      ip: req.ip,
-      referer: req.get('Referer'),
-      origin: req.get('Origin'),
+  import("../utils/logger.js")
+    .then(({ logCSPViolation }) => {
+      logCSPViolation(req.body, {
+        userAgent: req.get("User-Agent"),
+        ip: req.ip,
+        referer: req.get("Referer"),
+        origin: req.get("Origin"),
+      });
+    })
+    .catch(() => {
+      // 降级到console输出
+      console.warn("CSP Violation Report:", {
+        timestamp: new Date().toISOString(),
+        userAgent: req.get("User-Agent"),
+        violation: req.body,
+        ip: req.ip,
+      });
     });
-  }).catch(() => {
-    // 降级到console输出
-    console.warn('CSP Violation Report:', {
-      timestamp: new Date().toISOString(),
-      userAgent: req.get('User-Agent'),
-      violation: req.body,
-      ip: req.ip,
-    });
-  });
 
   res.status(204).end();
 };

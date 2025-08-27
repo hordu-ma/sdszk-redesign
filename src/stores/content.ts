@@ -156,7 +156,7 @@ export const useContentStore = defineStore("content", {
     // 通用加载状态处理
     setLoading(
       module: "news" | "resources" | "activities",
-      status: boolean
+      status: boolean,
     ): void {
       this[module].loading = status;
     },
@@ -189,7 +189,7 @@ export const useContentStore = defineStore("content", {
 
     async updateNews(
       id: string | number,
-      newsData: Record<string, any>
+      newsData: Record<string, any>,
     ): Promise<any> {
       try {
         const response = await api.put(`/news/${id}`, newsData);
@@ -238,7 +238,7 @@ export const useContentStore = defineStore("content", {
 
     async updateResource(
       id: string | number,
-      resourceData: Record<string, any>
+      resourceData: Record<string, any>,
     ): Promise<any> {
       try {
         const response = await api.put(`/resources/${id}`, resourceData);

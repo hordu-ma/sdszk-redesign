@@ -29,7 +29,7 @@ const router = express.Router();
 router.get(
   "/public",
   resourceCache("settings", CacheTTL.VERY_LONG),
-  getPublicSettings
+  getPublicSettings,
 );
 
 // 需要认证的路由
@@ -49,7 +49,7 @@ router.put(
   "/:key",
   checkRole(["admin"]),
   clearCacheMiddleware("settings:*"),
-  updateSetting
+  updateSetting,
 );
 
 // 批量更新设置
@@ -57,7 +57,7 @@ router.put(
   "/",
   checkRole(["admin"]),
   clearCacheMiddleware("settings:*"),
-  bulkUpdateSettings
+  bulkUpdateSettings,
 );
 
 // 删除设置
@@ -65,7 +65,7 @@ router.delete(
   "/:key",
   checkRole(["admin"]),
   clearCacheMiddleware("settings:*"),
-  deleteSetting
+  deleteSetting,
 );
 
 // 重置为默认设置
@@ -73,7 +73,7 @@ router.post(
   "/reset",
   checkRole(["admin"]),
   clearCacheMiddleware("settings:*"),
-  resetToDefault
+  resetToDefault,
 );
 
 export default router;

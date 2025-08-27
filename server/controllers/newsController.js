@@ -70,7 +70,10 @@ const buildAdvancedQuery = (queryParams) => {
   if (queryParams.category) {
     console.log("🏷️ 处理分类筛选:");
     console.log("  - 原始分类参数:", queryParams.category);
-    console.log("  - 是否为有效ObjectId:", mongoose.Types.ObjectId.isValid(queryParams.category));
+    console.log(
+      "  - 是否为有效ObjectId:",
+      mongoose.Types.ObjectId.isValid(queryParams.category),
+    );
 
     if (mongoose.Types.ObjectId.isValid(queryParams.category)) {
       query.category = new mongoose.Types.ObjectId(queryParams.category);
@@ -227,7 +230,9 @@ export const getNewsList = async (req, res) => {
     console.log("📊 排序条件:", sortOptions);
 
     const news = await News.find(query)
-      .select("title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount") // 限制返回字段
+      .select(
+        "title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount",
+      ) // 限制返回字段
       .populate("category", "name key")
       .populate("createdBy", "username name")
       .sort(sortOptions)
@@ -240,12 +245,15 @@ export const getNewsList = async (req, res) => {
     console.log("📰 数据库查询结果:");
     console.log("  - 找到新闻数量:", news.length);
     console.log("  - 总数:", total);
-    console.log("  - 新闻分类分布:", news.map(item => ({
-      title: item.title.substring(0, 20) + "...",
-      categoryId: item.category?._id,
-      categoryKey: item.category?.key,
-      categoryName: item.category?.name
-    })));
+    console.log(
+      "  - 新闻分类分布:",
+      news.map((item) => ({
+        title: item.title.substring(0, 20) + "...",
+        categoryId: item.category?._id,
+        categoryKey: item.category?.key,
+        categoryName: item.category?.name,
+      })),
+    );
 
     // 应用字段映射：后端 -> 前端
     const mappedNews = news.map((item) => mapBackendToFrontend(item));
@@ -258,7 +266,7 @@ export const getNewsList = async (req, res) => {
         limit: parseInt(limit),
         total,
       },
-      "获取新闻列表成功"
+      "获取新闻列表成功",
     );
   } catch (err) {
     console.error("获取新闻列表错误:", err);
@@ -270,7 +278,9 @@ export const getNewsList = async (req, res) => {
 export const getNewsById = async (req, res) => {
   try {
     const news = await News.findById(req.params.id)
-      .select("title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount") // 限制返回字段
+      .select(
+        "title content summary thumbnail category status isTop isFeatured publishDate author createdBy viewCount",
+      ) // 限制返回字段
       .populate("category", "name key")
       .populate("createdBy", "username name")
       .lean(); // 使用 lean() 提高性能
@@ -361,7 +371,7 @@ export const batchDeleteNews = async (req, res) => {
     return response.success(
       res,
       { deletedCount: result.deletedCount },
-      "批量删除成功"
+      "批量删除成功",
     );
   } catch (err) {
     console.error("批量删除新闻错误:", err);
@@ -384,13 +394,13 @@ export const batchUpdateNewsStatus = async (req, res) => {
 
     const result = await News.updateMany(
       { _id: { $in: ids } },
-      { status, updatedAt: new Date() }
+      { status, updatedAt: new Date() },
     );
 
     return response.success(
       res,
       { modifiedCount: result.modifiedCount },
-      "批量更新状态成功"
+      "批量更新状态成功",
     );
   } catch (err) {
     console.error("批量更新新闻状态错误:", err);
@@ -413,13 +423,13 @@ export const batchUpdateNewsCategory = async (req, res) => {
 
     const result = await News.updateMany(
       { _id: { $in: ids } },
-      { category, updatedAt: new Date() }
+      { category, updatedAt: new Date() },
     );
 
     return response.success(
       res,
       { modifiedCount: result.modifiedCount },
-      "批量更新分类成功"
+      "批量更新分类成功",
     );
   } catch (err) {
     console.error("批量更新新闻分类错误:", err);
@@ -442,13 +452,13 @@ export const batchAddTags = async (req, res) => {
 
     const result = await News.updateMany(
       { _id: { $in: ids } },
-      { $addToSet: { tags: { $each: tags } }, updatedAt: new Date() }
+      { $addToSet: { tags: { $each: tags } }, updatedAt: new Date() },
     );
 
     return response.success(
       res,
       { modifiedCount: result.modifiedCount },
-      "批量添加标签成功"
+      "批量添加标签成功",
     );
   } catch (err) {
     console.error("批量添加标签错误:", err);
@@ -487,7 +497,7 @@ export const toggleFeatured = async (req, res) => {
     return response.success(
       res,
       { isFeatured: news.isFeatured },
-      "切换精选状态成功"
+      "切换精选状态成功",
     );
   } catch (err) {
     return response.serverError(res, "切换精选状态失败", err);

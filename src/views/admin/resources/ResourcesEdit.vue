@@ -3,7 +3,8 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <a-button type="text" @click="$router.back()" class="back-btn">
+        <a-button type="text"
+@click="$router.back()" class="back-btn">
           <template #icon>
             <ArrowLeftOutlined />
           </template>
@@ -15,28 +16,35 @@
         </div>
       </div>
       <div class="header-right">
-        <a-button @click="handleSave" :loading="saving"> 保存修改 </a-button>
-        <a-button type="primary" @click="handlePublish" :loading="publishing">
+        <a-button
+:loading="saving" @click="handleSave"> 保存修改 </a-button>
+        <a-button type="primary"
+@click="handlePublish" :loading="publishing">
           {{ formData.status === "published" ? "更新发布" : "发布资源" }}
         </a-button>
       </div>
     </div>
 
     <!-- 加载状态 -->
-    <div v-if="loading" class="loading-container">
+    <div v-if="loading"
+class="loading-container">
       <a-spin size="large" />
     </div>
 
     <!-- 资源表单 -->
-    <div v-else class="form-container">
-      <a-form ref="formRef" :model="formData" :rules="rules" layout="vertical">
+    <div v-else
+class="form-container">
+      <a-form ref="formRef"
+:model="formData" :rules="rules" layout="vertical">
         <a-row :gutter="24">
           <!-- 左侧主要内容 -->
           <a-col :span="16">
             <div class="main-content">
               <!-- 基本信息 -->
-              <a-card title="基本信息" class="section-card">
-                <a-form-item label="资源标题" name="title">
+              <a-card title="基本信息"
+class="section-card">
+                <a-form-item label="资源标题"
+name="title">
                   <a-input
                     v-model:value="formData.title"
                     placeholder="请输入资源标题"
@@ -46,7 +54,8 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="资源描述" name="description">
+                <a-form-item label="资源描述"
+name="description">
                   <QuillEditor
                     ref="quillEditorRef"
                     v-model="formData.description"
@@ -55,7 +64,8 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="资源摘要" name="summary">
+                <a-form-item label="资源摘要"
+name="summary">
                   <a-textarea
                     v-model:value="formData.summary"
                     placeholder="请输入资源摘要（可选）"
@@ -67,34 +77,39 @@
               </a-card>
 
               <!-- 当前文件信息 -->
-              <a-card title="当前文件" class="section-card">
-                <div class="current-file" v-if="formData.fileUrl">
+              <a-card title="当前文件"
+class="section-card">
+                <div v-if="formData.fileUrl" class="current-file">
                   <div class="file-preview">
                     <!-- 图片预览 -->
-                    <div v-if="isImageFile" class="image-preview">
-                      <img :src="formData.fileUrl" alt="资源图片" />
+                    <div v-if="isImageFile"
+class="image-preview">
+                      <img
+:src="formData.fileUrl" alt="资源图片" />
                     </div>
 
                     <!-- 视频预览 -->
-                    <div v-else-if="isVideoFile" class="video-preview">
+                    <div v-else-if="isVideoFile"
+class="video-preview">
                       <video
-                        :src="formData.fileUrl"
-                        controls
-                        width="100%"
-                      ></video>
+:src="formData.fileUrl" controls
+width="100%"
+/>
                     </div>
 
                     <!-- 音频预览 -->
-                    <div v-else-if="isAudioFile" class="audio-preview">
+                    <div v-else-if="isAudioFile"
+class="audio-preview">
                       <audio
                         :src="formData.fileUrl"
                         controls
                         style="width: 100%"
-                      ></audio>
+                      />
                     </div>
 
                     <!-- 文档文件信息 -->
-                    <div v-else class="file-info">
+                    <div v-else
+class="file-info">
                       <div class="file-icon">
                         <FileOutlined style="font-size: 48px; color: #1890ff" />
                       </div>
@@ -113,7 +128,8 @@
                       </template>
                       替换文件
                     </a-button>
-                    <a-button danger @click="removeFile">
+                    <a-button danger
+@click="removeFile">
                       <template #icon>
                         <DeleteOutlined />
                       </template>
@@ -123,9 +139,11 @@
                 </div>
 
                 <!-- 无文件状态 -->
-                <div v-else class="no-file">
+                <div v-else
+class="no-file">
                   <a-empty description="暂无文件" />
-                  <a-button type="primary" @click="showReplaceModal">
+                  <a-button type="primary"
+@click="showReplaceModal">
                     <template #icon>
                       <UploadOutlined />
                     </template>
@@ -140,8 +158,10 @@
           <a-col :span="8">
             <div class="settings-panel">
               <!-- 发布设置 -->
-              <a-card title="发布设置" size="small" class="setting-card">
-                <a-form-item label="资源分类" name="categoryId">
+              <a-card title="发布设置"
+size="small" class="setting-card">
+                <a-form-item label="资源分类"
+name="categoryId">
                   <a-select
                     v-model:value="formData.categoryId"
                     placeholder="请选择分类"
@@ -163,20 +183,22 @@
                   </a-tag>
                 </a-form-item>
 
-                <a-form-item label="资源类型" name="type">
+                <a-form-item label="资源类型"
+name="type">
                   <a-select
                     v-model:value="formData.type"
                     placeholder="请选择类型"
                   >
-                    <a-select-option value="document">文档</a-select-option>
-                    <a-select-option value="video">视频</a-select-option>
-                    <a-select-option value="image">图片</a-select-option>
-                    <a-select-option value="audio">音频</a-select-option>
-                    <a-select-option value="other">其他</a-select-option>
+                    <a-select-option value="document"> 文档 </a-select-option>
+                    <a-select-option value="video"> 视频 </a-select-option>
+                    <a-select-option value="image"> 图片 </a-select-option>
+                    <a-select-option value="audio"> 音频 </a-select-option>
+                    <a-select-option value="other"> 其他 </a-select-option>
                   </a-select>
                 </a-form-item>
 
-                <a-form-item label="发布时间" name="publishDate">
+                <a-form-item label="发布时间"
+name="publishDate">
                   <a-date-picker
                     v-model:value="formData.publishDate"
                     show-time
@@ -185,7 +207,8 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="标签" name="tags">
+                <a-form-item label="标签"
+name="tags">
                   <a-select
                     v-model:value="formData.tags"
                     mode="tags"
@@ -196,12 +219,13 @@
               </a-card>
 
               <!-- 访问权限 -->
-              <a-card title="访问权限" size="small" class="setting-card">
+              <a-card title="访问权限"
+size="small" class="setting-card">
                 <a-form-item name="accessLevel">
                   <a-radio-group v-model:value="formData.accessLevel">
-                    <a-radio value="public">公开</a-radio>
-                    <a-radio value="registered">注册用户</a-radio>
-                    <a-radio value="vip">VIP用户</a-radio>
+                    <a-radio value="public"> 公开 </a-radio>
+                    <a-radio value="registered"> 注册用户 </a-radio>
+                    <a-radio value="vip"> VIP用户 </a-radio>
                   </a-radio-group>
                 </a-form-item>
 
@@ -219,7 +243,8 @@
               </a-card>
 
               <!-- 首页展示图 -->
-              <a-card title="首页展示图" size="small" class="setting-card">
+              <a-card title="首页展示图"
+size="small" class="setting-card">
                 <a-form-item name="thumbnail">
                   <div class="thumbnail-upload">
                     <a-upload
@@ -228,23 +253,26 @@
                       list-type="picture-card"
                       :show-upload-list="false"
                       :before-upload="beforeThumbnailUpload"
-                      @change="handleThumbnailChange"
                       accept="image/*"
+                      @change="handleThumbnailChange"
                     >
-                      <div v-if="formData.thumbnail" class="thumbnail-preview">
-                        <img :src="formData.thumbnail" alt="缩略图" />
+                      <div v-if="formData.thumbnail"
+class="thumbnail-preview">
+                        <img
+:src="formData.thumbnail" alt="缩略图" />
                         <div class="thumbnail-actions">
                           <a-button
                             type="text"
                             size="small"
-                            @click.stop="removeThumbnail"
                             danger
+                            @click.stop="removeThumbnail"
                           >
                             删除
                           </a-button>
                         </div>
                       </div>
-                      <div v-else class="thumbnail-upload-placeholder">
+                      <div v-else
+class="thumbnail-upload-placeholder">
                         <plus-outlined />
                         <div class="upload-text">上传图片</div>
                       </div>
@@ -257,7 +285,8 @@
               </a-card>
 
               <!-- 高级设置 -->
-              <a-card title="高级设置" size="small" class="setting-card">
+              <a-card title="高级设置"
+size="small" class="setting-card">
                 <a-form-item>
                   <a-checkbox v-model:checked="formData.isFeatured">
                     推荐资源
@@ -270,7 +299,8 @@
                   </a-checkbox>
                 </a-form-item>
 
-                <a-form-item label="排序权重" name="sortOrder">
+                <a-form-item label="排序权重"
+name="sortOrder">
                   <a-input-number
                     v-model:value="formData.sortOrder"
                     placeholder="数字越大排序越靠前"
@@ -282,7 +312,8 @@
               </a-card>
 
               <!-- 统计信息 -->
-              <a-card title="统计信息" size="small" class="setting-card">
+              <a-card title="统计信息"
+size="small" class="setting-card">
                 <div class="stats-info">
                   <div class="stat-item">
                     <span class="label">浏览量：</span>
@@ -320,8 +351,8 @@
     <a-modal
       v-model:open="replaceModalVisible"
       title="替换文件"
-      @ok="handleFileReplace"
       :confirm-loading="uploading"
+      @ok="handleFileReplace"
     >
       <a-upload-dragger
         v-model:file-list="newFileList"

@@ -3,16 +3,19 @@
     <div class="info-block notice">
       <div class="block-header">
         <h3>
-          <i class="fas fa-bullhorn header-icon"></i>
+          <i class="fas fa-bullhorn header-icon" />
           <span class="title-text">通知公告</span>
-          <router-link to="/news?category=notice" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
+          <router-link to="/news?category=notice"
+class="more-link">
+            更多<i class="fas fa-angle-right" />
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="notice in noticeNews as any[]" :key="notice.id">
-          <router-link :to="`/news/detail/${notice.id}`" class="info-link">
+        <li v-for="notice in noticeNews as any[]"
+:key="notice.id">
+          <router-link :to="`/news/detail/${notice.id}`"
+class="info-link">
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ notice.title }}</span>
@@ -26,7 +29,8 @@
             </div>
           </router-link>
         </li>
-        <li v-if="!noticeLoading && noticeNews.length === 0" class="no-data">
+        <li v-if="!noticeLoading && noticeNews.length === 0"
+class="no-data">
           暂无通知公告
         </li>
       </ul>
@@ -34,16 +38,19 @@
     <div class="info-block policy">
       <div class="block-header">
         <h3>
-          <i class="fas fa-file-alt header-icon"></i>
+          <i class="fas fa-file-alt header-icon" />
           <span class="title-text">政策文件</span>
-          <router-link to="/news?category=policy" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
+          <router-link to="/news?category=policy"
+class="more-link">
+            更多<i class="fas fa-angle-right" />
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="policy in policyNews as any[]" :key="policy.id">
-          <router-link :to="`/news/detail/${policy.id}`" class="info-link">
+        <li v-for="policy in policyNews as any[]"
+:key="policy.id">
+          <router-link :to="`/news/detail/${policy.id}`"
+class="info-link">
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ policy.title }}</span>
@@ -57,7 +64,8 @@
             </div>
           </router-link>
         </li>
-        <li v-if="!policyLoading && policyNews.length === 0" class="no-data">
+        <li v-if="!policyLoading && policyNews.length === 0"
+class="no-data">
           暂无政策文件
         </li>
       </ul>
@@ -65,16 +73,19 @@
     <div class="info-block theory">
       <div class="block-header">
         <h3>
-          <i class="fas fa-book header-icon"></i>
+          <i class="fas fa-book header-icon" />
           <span class="title-text">理论前沿</span>
-          <router-link to="/resources?category=theory" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
+          <router-link to="/resources?category=theory"
+class="more-link">
+            更多<i class="fas fa-angle-right" />
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="theory in theories as any[]" :key="theory.id">
-          <router-link :to="`/resources/detail/${theory.id}`" class="info-link">
+        <li v-for="theory in theories as any[]"
+:key="theory.id">
+          <router-link :to="`/resources/detail/${theory.id}`"
+class="info-link">
             <div class="info-content">
               <div class="info-header">
                 <span class="info-title">{{ theory.title }}</span>
@@ -95,15 +106,17 @@
     <div class="info-block teaching">
       <div class="block-header">
         <h3>
-          <i class="fas fa-chalkboard-teacher header-icon"></i>
+          <i class="fas fa-chalkboard-teacher header-icon" />
           <span class="title-text">教学研究</span>
-          <router-link to="/resources?category=teaching" class="more-link">
-            更多<i class="fas fa-angle-right"></i>
+          <router-link to="/resources?category=teaching"
+class="more-link">
+            更多<i class="fas fa-angle-right" />
           </router-link>
         </h3>
       </div>
       <ul class="styled-list">
-        <li v-for="research in researches as any[]" :key="research.id">
+        <li v-for="research in researches as any[]"
+:key="research.id">
           <router-link
             :to="`/resources/detail/${research.id}`"
             class="info-link"

@@ -18,31 +18,36 @@
     </div>
 
     <!-- 设置标签页 -->
-    <a-tabs v-model:activeKey="activeTab" type="card">
+    <a-tabs v-model:active-key="activeTab"
+type="card">
       <!-- 网站基本信息 -->
-      <a-tab-pane key="site" tab="网站信息">
+      <a-tab-pane key="site"
+tab="网站信息">
         <div class="settings-form">
           <a-form
+            ref="siteFormRef"
             :model="siteSettings"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 18 }"
-            ref="siteFormRef"
           >
-            <a-form-item label="网站名称" name="siteName">
+            <a-form-item label="网站名称"
+name="siteName">
               <a-input
                 v-model:value="siteSettings.siteName"
                 placeholder="请输入网站名称"
               />
             </a-form-item>
 
-            <a-form-item label="网站标题" name="siteTitle">
+            <a-form-item label="网站标题"
+name="siteTitle">
               <a-input
                 v-model:value="siteSettings.siteTitle"
                 placeholder="请输入网站标题"
               />
             </a-form-item>
 
-            <a-form-item label="网站描述" name="siteDescription">
+            <a-form-item label="网站描述"
+name="siteDescription">
               <a-textarea
                 v-model:value="siteSettings.siteDescription"
                 placeholder="请输入网站描述"
@@ -50,7 +55,8 @@
               />
             </a-form-item>
 
-            <a-form-item label="关键词" name="siteKeywords">
+            <a-form-item label="关键词"
+name="siteKeywords">
               <a-select
                 v-model:value="siteSettings.siteKeywords"
                 mode="tags"
@@ -59,7 +65,8 @@
               />
             </a-form-item>
 
-            <a-form-item label="网站Logo" name="siteLogo">
+            <a-form-item label="网站Logo"
+name="siteLogo">
               <div class="logo-upload">
                 <a-upload
                   :file-list="logoFileList"
@@ -76,7 +83,8 @@
               </div>
             </a-form-item>
 
-            <a-form-item label="网站图标" name="siteFavicon">
+            <a-form-item label="网站图标"
+name="siteFavicon">
               <div class="favicon-upload">
                 <a-upload
                   :file-list="faviconFileList"
@@ -93,28 +101,32 @@
               </div>
             </a-form-item>
 
-            <a-form-item label="联系邮箱" name="contactEmail">
+            <a-form-item label="联系邮箱"
+name="contactEmail">
               <a-input
                 v-model:value="siteSettings.contactEmail"
                 placeholder="请输入联系邮箱"
               />
             </a-form-item>
 
-            <a-form-item label="联系电话" name="contactPhone">
+            <a-form-item label="联系电话"
+name="contactPhone">
               <a-input
                 v-model:value="siteSettings.contactPhone"
                 placeholder="请输入联系电话"
               />
             </a-form-item>
 
-            <a-form-item label="网站地址" name="siteUrl">
+            <a-form-item label="网站地址"
+name="siteUrl">
               <a-input
                 v-model:value="siteSettings.siteUrl"
                 placeholder="请输入网站地址"
               />
             </a-form-item>
 
-            <a-form-item label="ICP备案号" name="icpNumber">
+            <a-form-item label="ICP备案号"
+name="icpNumber">
               <a-input
                 v-model:value="siteSettings.icpNumber"
                 placeholder="请输入ICP备案号"
@@ -125,23 +137,26 @@
       </a-tab-pane>
 
       <!-- 系统配置 -->
-      <a-tab-pane key="system" tab="系统配置">
+      <a-tab-pane key="system"
+tab="系统配置">
         <div class="settings-form">
           <a-form
+            ref="systemFormRef"
             :model="systemSettings"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 18 }"
-            ref="systemFormRef"
           >
-            <a-form-item label="网站状态" name="siteStatus">
+            <a-form-item label="网站状态"
+name="siteStatus">
               <a-radio-group v-model:value="systemSettings.siteStatus">
-                <a-radio value="online">正常运行</a-radio>
-                <a-radio value="maintenance">维护模式</a-radio>
-                <a-radio value="offline">关闭网站</a-radio>
+                <a-radio value="online"> 正常运行 </a-radio>
+                <a-radio value="maintenance"> 维护模式 </a-radio>
+                <a-radio value="offline"> 关闭网站 </a-radio>
               </a-radio-group>
             </a-form-item>
 
-            <a-form-item label="维护提示" name="maintenanceMessage">
+            <a-form-item label="维护提示"
+name="maintenanceMessage">
               <a-textarea
                 v-model:value="systemSettings.maintenanceMessage"
                 placeholder="网站维护时显示的提示信息"
@@ -149,24 +164,28 @@
               />
             </a-form-item>
 
-            <a-form-item label="用户注册" name="allowRegistration">
+            <a-form-item label="用户注册"
+name="allowRegistration">
               <a-switch v-model:checked="systemSettings.allowRegistration" />
               <span class="setting-tip">关闭后新用户无法注册</span>
             </a-form-item>
 
-            <a-form-item label="邮箱验证" name="requireEmailVerification">
+            <a-form-item label="邮箱验证"
+name="requireEmailVerification">
               <a-switch
                 v-model:checked="systemSettings.requireEmailVerification"
               />
               <span class="setting-tip">新用户注册需要邮箱验证</span>
             </a-form-item>
 
-            <a-form-item label="管理员审核" name="requireAdminApproval">
+            <a-form-item label="管理员审核"
+name="requireAdminApproval">
               <a-switch v-model:checked="systemSettings.requireAdminApproval" />
               <span class="setting-tip">新用户注册需要管理员审核</span>
             </a-form-item>
 
-            <a-form-item label="文件上传大小限制" name="maxFileSize">
+            <a-form-item label="文件上传大小限制"
+name="maxFileSize">
               <a-input-number
                 v-model:value="systemSettings.maxFileSize"
                 :min="1"
@@ -175,7 +194,8 @@
               />
             </a-form-item>
 
-            <a-form-item label="允许上传的文件类型" name="allowedFileTypes">
+            <a-form-item label="允许上传的文件类型"
+name="allowedFileTypes">
               <a-select
                 v-model:value="systemSettings.allowedFileTypes"
                 mode="multiple"
@@ -185,17 +205,20 @@
               />
             </a-form-item>
 
-            <a-form-item label="评论功能" name="enableComments">
+            <a-form-item label="评论功能"
+name="enableComments">
               <a-switch v-model:checked="systemSettings.enableComments" />
               <span class="setting-tip">启用新闻和资源评论功能</span>
             </a-form-item>
 
-            <a-form-item label="评论审核" name="moderateComments">
+            <a-form-item label="评论审核"
+name="moderateComments">
               <a-switch v-model:checked="systemSettings.moderateComments" />
               <span class="setting-tip">评论需要审核后才能显示</span>
             </a-form-item>
 
-            <a-form-item label="缓存时间" name="cacheTime">
+            <a-form-item label="缓存时间"
+name="cacheTime">
               <a-input-number
                 v-model:value="systemSettings.cacheTime"
                 :min="0"
@@ -208,27 +231,31 @@
       </a-tab-pane>
 
       <!-- 邮件配置 -->
-      <a-tab-pane key="email" tab="邮件设置">
+      <a-tab-pane key="email"
+tab="邮件设置">
         <div class="settings-form">
           <a-form
+            ref="emailFormRef"
             :model="emailSettings"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 18 }"
-            ref="emailFormRef"
           >
-            <a-form-item label="邮件服务" name="enabled">
+            <a-form-item label="邮件服务"
+name="enabled">
               <a-switch v-model:checked="emailSettings.enabled" />
               <span class="setting-tip">启用邮件发送功能</span>
             </a-form-item>
 
-            <a-form-item label="SMTP服务器" name="smtpHost">
+            <a-form-item label="SMTP服务器"
+name="smtpHost">
               <a-input
                 v-model:value="emailSettings.smtpHost"
                 placeholder="如：smtp.qq.com"
               />
             </a-form-item>
 
-            <a-form-item label="SMTP端口" name="smtpPort">
+            <a-form-item label="SMTP端口"
+name="smtpPort">
               <a-input-number
                 v-model:value="emailSettings.smtpPort"
                 :min="1"
@@ -236,43 +263,49 @@
               />
             </a-form-item>
 
-            <a-form-item label="加密方式" name="encryption">
+            <a-form-item label="加密方式"
+name="encryption">
               <a-radio-group v-model:value="emailSettings.encryption">
-                <a-radio value="none">无</a-radio>
-                <a-radio value="ssl">SSL</a-radio>
-                <a-radio value="tls">TLS</a-radio>
+                <a-radio value="none"> 无 </a-radio>
+                <a-radio value="ssl"> SSL </a-radio>
+                <a-radio value="tls"> TLS </a-radio>
               </a-radio-group>
             </a-form-item>
 
-            <a-form-item label="用户名" name="username">
+            <a-form-item label="用户名"
+name="username">
               <a-input
                 v-model:value="emailSettings.username"
                 placeholder="SMTP用户名"
               />
             </a-form-item>
 
-            <a-form-item label="密码" name="password">
+            <a-form-item label="密码"
+name="password">
               <a-input-password
                 v-model:value="emailSettings.password"
                 placeholder="SMTP密码"
               />
             </a-form-item>
 
-            <a-form-item label="发件人名称" name="fromName">
+            <a-form-item label="发件人名称"
+name="fromName">
               <a-input
                 v-model:value="emailSettings.fromName"
                 placeholder="发件人显示名称"
               />
             </a-form-item>
 
-            <a-form-item label="发件人邮箱" name="fromEmail">
+            <a-form-item label="发件人邮箱"
+name="fromEmail">
               <a-input
                 v-model:value="emailSettings.fromEmail"
                 placeholder="发件人邮箱地址"
               />
             </a-form-item>
 
-            <a-form-item label="测试邮件" name="testEmail">
+            <a-form-item label="测试邮件"
+name="testEmail">
               <a-input-group compact>
                 <a-input
                   v-model:value="testEmailAddress"
@@ -293,15 +326,17 @@
       </a-tab-pane>
 
       <!-- 安全设置 -->
-      <a-tab-pane key="security" tab="安全设置">
+      <a-tab-pane key="security"
+tab="安全设置">
         <div class="settings-form">
           <a-form
+            ref="securityFormRef"
             :model="securitySettings"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 18 }"
-            ref="securityFormRef"
           >
-            <a-form-item label="登录失败限制" name="maxLoginAttempts">
+            <a-form-item label="登录失败限制"
+name="maxLoginAttempts">
               <a-input-number
                 v-model:value="securitySettings.maxLoginAttempts"
                 :min="3"
@@ -311,7 +346,8 @@
               <div class="setting-tip">连续登录失败超过此次数将锁定账户</div>
             </a-form-item>
 
-            <a-form-item label="账户锁定时间" name="lockoutDuration">
+            <a-form-item label="账户锁定时间"
+name="lockoutDuration">
               <a-input-number
                 v-model:value="securitySettings.lockoutDuration"
                 :min="5"
@@ -320,18 +356,20 @@
               />
             </a-form-item>
 
-            <a-form-item label="密码复杂度" name="passwordComplexity">
+            <a-form-item label="密码复杂度"
+name="passwordComplexity">
               <a-checkbox-group
                 v-model:value="securitySettings.passwordComplexity"
               >
-                <a-checkbox value="uppercase">包含大写字母</a-checkbox>
-                <a-checkbox value="lowercase">包含小写字母</a-checkbox>
-                <a-checkbox value="numbers">包含数字</a-checkbox>
-                <a-checkbox value="symbols">包含特殊字符</a-checkbox>
+                <a-checkbox value="uppercase"> 包含大写字母 </a-checkbox>
+                <a-checkbox value="lowercase"> 包含小写字母 </a-checkbox>
+                <a-checkbox value="numbers"> 包含数字 </a-checkbox>
+                <a-checkbox value="symbols"> 包含特殊字符 </a-checkbox>
               </a-checkbox-group>
             </a-form-item>
 
-            <a-form-item label="最小密码长度" name="minPasswordLength">
+            <a-form-item label="最小密码长度"
+name="minPasswordLength">
               <a-input-number
                 v-model:value="securitySettings.minPasswordLength"
                 :min="6"
@@ -340,7 +378,8 @@
               />
             </a-form-item>
 
-            <a-form-item label="密码过期时间" name="passwordExpiry">
+            <a-form-item label="密码过期时间"
+name="passwordExpiry">
               <a-input-number
                 v-model:value="securitySettings.passwordExpiry"
                 :min="0"
@@ -350,7 +389,8 @@
               <div class="setting-tip">0表示密码永不过期</div>
             </a-form-item>
 
-            <a-form-item label="会话超时" name="sessionTimeout">
+            <a-form-item label="会话超时"
+name="sessionTimeout">
               <a-input-number
                 v-model:value="securitySettings.sessionTimeout"
                 :min="30"
@@ -359,12 +399,14 @@
               />
             </a-form-item>
 
-            <a-form-item label="强制HTTPS" name="forceHttps">
+            <a-form-item label="强制HTTPS"
+name="forceHttps">
               <a-switch v-model:checked="securitySettings.forceHttps" />
               <span class="setting-tip">强制使用HTTPS访问</span>
             </a-form-item>
 
-            <a-form-item label="IP白名单" name="ipWhitelist">
+            <a-form-item label="IP白名单"
+name="ipWhitelist">
               <a-textarea
                 v-model:value="securitySettings.ipWhitelist"
                 placeholder="每行一个IP地址或IP段，支持CIDR格式"
@@ -377,19 +419,23 @@
       </a-tab-pane>
 
       <!-- 备份与恢复 -->
-      <a-tab-pane key="backup" tab="备份恢复">
+      <a-tab-pane key="backup"
+tab="备份恢复">
         <div class="backup-section">
-          <a-card title="数据备份" class="backup-card">
+          <a-card title="数据备份"
+class="backup-card">
             <div class="backup-info">
               <p>定期备份系统数据，确保数据安全。</p>
               <div class="backup-stats">
-                <a-statistic title="上次备份时间" :value="lastBackupTime" />
+                <a-statistic title="上次备份时间"
+:value="lastBackupTime" />
                 <a-statistic
                   title="备份文件大小"
                   :value="backupSize"
                   suffix="MB"
                 />
-                <a-statistic title="备份文件数量" :value="backupCount" />
+                <a-statistic title="备份文件数量"
+:value="backupCount" />
               </div>
             </div>
             <div class="backup-actions">
@@ -401,32 +447,36 @@
                 >
                   立即备份
                 </a-button>
-                <a-button @click="downloadBackup">下载备份</a-button>
-                <a-button @click="showBackupList">备份列表</a-button>
+                <a-button @click="downloadBackup"> 下载备份 </a-button>
+                <a-button @click="showBackupList"> 备份列表 </a-button>
               </a-space>
             </div>
           </a-card>
 
-          <a-card title="自动备份设置" class="backup-card">
+          <a-card title="自动备份设置"
+class="backup-card">
             <a-form
               :model="backupSettings"
               :label-col="{ span: 6 }"
               :wrapper-col="{ span: 18 }"
             >
-              <a-form-item label="自动备份" name="autoBackup">
+              <a-form-item label="自动备份"
+name="autoBackup">
                 <a-switch v-model:checked="backupSettings.autoBackup" />
                 <span class="setting-tip">启用自动备份功能</span>
               </a-form-item>
 
-              <a-form-item label="备份频率" name="backupFrequency">
+              <a-form-item label="备份频率"
+name="backupFrequency">
                 <a-select v-model:value="backupSettings.backupFrequency">
-                  <a-select-option value="daily">每天</a-select-option>
-                  <a-select-option value="weekly">每周</a-select-option>
-                  <a-select-option value="monthly">每月</a-select-option>
+                  <a-select-option value="daily"> 每天 </a-select-option>
+                  <a-select-option value="weekly"> 每周 </a-select-option>
+                  <a-select-option value="monthly"> 每月 </a-select-option>
                 </a-select>
               </a-form-item>
 
-              <a-form-item label="备份时间" name="backupTime">
+              <a-form-item label="备份时间"
+name="backupTime">
                 <a-time-picker
                   v-model:value="backupSettings.backupTime"
                   format="HH:mm"
@@ -434,7 +484,8 @@
                 />
               </a-form-item>
 
-              <a-form-item label="保留份数" name="backupRetention">
+              <a-form-item label="保留份数"
+name="backupRetention">
                 <a-input-number
                   v-model:value="backupSettings.backupRetention"
                   :min="1"
@@ -446,7 +497,8 @@
             </a-form>
           </a-card>
 
-          <a-card title="数据恢复" class="backup-card">
+          <a-card title="数据恢复"
+class="backup-card">
             <div class="restore-section">
               <p>
                 从备份文件恢复系统数据。<span style="color: #ff4d4f"
@@ -481,8 +533,10 @@
     </a-tabs>
 
     <!-- 图片预览模态框 -->
-    <a-modal v-model:open="previewVisible" :footer="null" :width="800">
-      <img alt="preview" style="width: 100%" :src="previewImage" />
+    <a-modal v-model:open="previewVisible"
+:footer="null" :width="800">
+      <img
+alt="preview" style="width: 100%" :src="previewImage" />
     </a-modal>
   </div>
 </template>

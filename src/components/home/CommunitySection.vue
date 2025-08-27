@@ -3,11 +3,12 @@
     <div class="block-header">
       <h3>
         <div class="title-container">
-          <i class="fas fa-university header-icon"></i>
+          <i class="fas fa-university header-icon" />
           <span class="title-text">一体化共同体</span>
         </div>
-        <router-link to="/community" class="more-link">
-          更多<i class="fas fa-angle-right"></i>
+        <router-link to="/community"
+class="more-link">
+          更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
     </div>
@@ -19,7 +20,8 @@
         target="_blank"
         class="school-logo"
       >
-        <img :src="school.logo" :alt="school.name" />
+        <img
+:src="school.logo" :alt="school.name" />
         <p class="school-name">{{ school.name }}</p>
       </a>
     </div>
@@ -32,7 +34,7 @@ defineProps({
     type: Array,
     required: true,
   },
-})
+});
 </script>
 
 <style scoped>

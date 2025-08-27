@@ -77,7 +77,7 @@ async function up() {
       await collection.updateOne(
         { key: category.key },
         { $set: category },
-        { upsert: true }
+        { upsert: true },
       );
     }
 
@@ -118,7 +118,7 @@ async function up() {
             updatedAt: new Date(),
           },
         },
-        { upsert: true }
+        { upsert: true },
       );
     }
 

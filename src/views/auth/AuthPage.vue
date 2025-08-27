@@ -2,13 +2,16 @@
   <div class="auth-container">
     <el-card class="auth-card">
       <div class="auth-header">
-        <img src="@/assets/images/logo.png" alt="中心logo" class="auth-logo" />
-        <h2>{{ isLogin ? '用户登录' : '用户注册' }}</h2>
+        <img
+src="@/assets/images/logo.png" alt="中心logo" class="auth-logo" />
+        <h2>{{ isLogin ? "用户登录" : "用户注册" }}</h2>
       </div>
 
-      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+      <el-tabs v-model="activeTab"
+@tab-click="handleTabClick">
         <!-- 登录面板 -->
-        <el-tab-pane label="登录" name="login">
+        <el-tab-pane label="登录"
+name="login">
           <el-form
             ref="loginFormRef"
             :model="loginForm"
@@ -35,8 +38,11 @@
             </el-form-item>
 
             <div class="form-options">
-              <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-              <el-button link type="primary" @click="handleForgotPassword"> 忘记密码？ </el-button>
+              <el-checkbox v-model="rememberMe"> 记住我 </el-checkbox>
+              <el-button link
+type="primary" @click="handleForgotPassword">
+                忘记密码？
+              </el-button>
             </div>
 
             <el-button
@@ -51,7 +57,8 @@
         </el-tab-pane>
 
         <!-- 注册面板 -->
-        <el-tab-pane label="注册" name="register">
+        <el-tab-pane label="注册"
+name="register">
           <el-form
             ref="registerFormRef"
             :model="registerForm"
@@ -107,7 +114,7 @@
                     :loading="sendingCode"
                     @click="handleSendVerificationCode"
                   >
-                    {{ countdown ? `${countdown}s` : '获取验证码' }}
+                    {{ countdown ? `${countdown}s` : "获取验证码" }}
                   </el-button>
                 </template>
               </el-input>
@@ -138,204 +145,210 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
-import { User, Lock, Message, Phone, Key } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/user'
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
+import { User, Lock, Message, Phone, Key } from "@element-plus/icons-vue";
+import { useUserStore } from "@/stores/user";
 
 // 路由实例
-const router = useRouter()
-const userStore = useUserStore()
+const router = useRouter();
+const userStore = useUserStore();
 
 // 表单状态
-const activeTab = ref('login')
-const isLogin = computed(() => activeTab.value === 'login')
-const rememberMe = ref(false)
-const loginLoading = ref(false)
-const registerLoading = ref(false)
-const sendingCode = ref(false)
-const countdown = ref(0)
+const activeTab = ref("login");
+const isLogin = computed(() => activeTab.value === "login");
+const rememberMe = ref(false);
+const loginLoading = ref(false);
+const registerLoading = ref(false);
+const sendingCode = ref(false);
+const countdown = ref(0);
 
 // 表单引用
-const loginFormRef = ref<FormInstance>()
-const registerFormRef = ref<FormInstance>()
+const loginFormRef = ref<FormInstance>();
+const registerFormRef = ref<FormInstance>();
 
 // 登录表单数据
 const loginForm = ref({
-  username: '',
-  password: '',
-})
+  username: "",
+  password: "",
+});
 
 // 注册表单数据
 const registerForm = ref({
-  username: '',
-  password: '',
-  confirmPassword: '',
-  email: '',
-  phone: '',
-  verificationCode: '',
-})
+  username: "",
+  password: "",
+  confirmPassword: "",
+  email: "",
+  phone: "",
+  verificationCode: "",
+});
 
 // 登录表单验证规则
 const loginRules: FormRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-}
+  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+  password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+};
 
 // 注册表单验证规则
 const registerRules: FormRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 4, max: 16, message: '用户名长度为4-16位字符', trigger: 'blur' },
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 4, max: 16, message: "用户名长度为4-16位字符", trigger: "blur" },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 20, message: '密码长度为8-20位字符', trigger: 'blur' },
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 8, max: 20, message: "密码长度为8-20位字符", trigger: "blur" },
   ],
   confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: "请确认密码", trigger: "blur" },
     {
       validator: (rule: any, value: string, callback: Function) => {
         if (value !== registerForm.value.password) {
-          callback(new Error('两次输入的密码不一致'))
+          callback(new Error("两次输入的密码不一致"));
         } else {
-          callback()
+          callback();
         }
       },
-      trigger: 'blur',
+      trigger: "blur",
     },
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱格式", trigger: "blur" },
   ],
   phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' },
+    { required: true, message: "请输入手机号", trigger: "blur" },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: "请输入正确的手机号格式",
+      trigger: "blur",
+    },
   ],
   verificationCode: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
-    { len: 6, message: '验证码为6位数字', trigger: 'blur' },
+    { required: true, message: "请输入验证码", trigger: "blur" },
+    { len: 6, message: "验证码为6位数字", trigger: "blur" },
   ],
-}
+};
 
 // 计算手机号是否有效
 const isPhoneValid = computed(() => {
-  const phoneRegex = /^1[3-9]\d{9}$/
-  return phoneRegex.test(registerForm.value.phone)
-})
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  return phoneRegex.test(registerForm.value.phone);
+});
 
 // 切换标签时重置表单
 const handleTabClick = () => {
   loginForm.value = {
-    username: '',
-    password: '',
-  }
+    username: "",
+    password: "",
+  };
   registerForm.value = {
-    username: '',
-    password: '',
-    confirmPassword: '',
-    email: '',
-    phone: '',
-    verificationCode: '',
-  }
-}
+    username: "",
+    password: "",
+    confirmPassword: "",
+    email: "",
+    phone: "",
+    verificationCode: "",
+  };
+};
 
 // 处理登录
 const handleLogin = async () => {
-  if (!loginFormRef.value) return
+  if (!loginFormRef.value) return;
 
   try {
-    const valid = await loginFormRef.value.validate()
+    const valid = await loginFormRef.value.validate();
     if (valid) {
-      loginLoading.value = true
+      loginLoading.value = true;
       const success = await userStore.login({
         username: loginForm.value.username,
         password: loginForm.value.password,
         remember: rememberMe.value,
-      })
+      });
 
       if (success) {
-        ElMessage.success('登录成功')
-        router.push('/')
+        ElMessage.success("登录成功");
+        router.push("/");
       } else {
-        ElMessage.error('登录失败，请检查用户名和密码')
+        ElMessage.error("登录失败，请检查用户名和密码");
       }
     }
   } catch (error) {
-    console.error('登录失败:', error)
-    ElMessage.error('登录失败，请重试')
+    console.error("登录失败:", error);
+    ElMessage.error("登录失败，请重试");
   } finally {
-    loginLoading.value = false
+    loginLoading.value = false;
   }
-}
+};
 
 // 处理注册
 const handleRegister = async () => {
-  if (!registerFormRef.value) return
+  if (!registerFormRef.value) return;
 
   try {
-    const valid = await registerFormRef.value.validate()
+    const valid = await registerFormRef.value.validate();
     if (valid) {
-      registerLoading.value = true
+      registerLoading.value = true;
       const success = await userStore.register({
         username: registerForm.value.username,
         password: registerForm.value.password,
         email: registerForm.value.email,
         phone: registerForm.value.phone,
         verificationCode: registerForm.value.verificationCode,
-      })
+      });
 
       if (success) {
-        ElMessage.success('注册成功')
-        activeTab.value = 'login' // 注册成功后切换到登录面板
+        ElMessage.success("注册成功");
+        activeTab.value = "login"; // 注册成功后切换到登录面板
       } else {
-        ElMessage.error('注册失败，请重试')
+        ElMessage.error("注册失败，请重试");
       }
     }
   } catch (error) {
-    console.error('注册失败:', error)
-    ElMessage.error('注册失败，请重试')
+    console.error("注册失败:", error);
+    ElMessage.error("注册失败，请重试");
   } finally {
-    registerLoading.value = false
+    registerLoading.value = false;
   }
-}
+};
 
 // 处理发送验证码
 const handleSendVerificationCode = async () => {
-  if (countdown.value > 0 || !isPhoneValid.value) return
+  if (countdown.value > 0 || !isPhoneValid.value) return;
 
   try {
-    sendingCode.value = true
-    const success = await userStore.sendVerificationCode(registerForm.value.phone)
+    sendingCode.value = true;
+    const success = await userStore.sendVerificationCode(
+      registerForm.value.phone,
+    );
 
     if (success) {
-      ElMessage.success('验证码已发送')
-      countdown.value = 60
+      ElMessage.success("验证码已发送");
+      countdown.value = 60;
       const timer = setInterval(() => {
-        countdown.value--
+        countdown.value--;
         if (countdown.value <= 0) {
-          clearInterval(timer)
+          clearInterval(timer);
         }
-      }, 1000)
+      }, 1000);
     } else {
-      ElMessage.error('发送验证码失败，请重试')
+      ElMessage.error("发送验证码失败，请重试");
     }
   } catch (error) {
-    console.error('发送验证码失败:', error)
-    ElMessage.error('发送验证码失败，请重试')
+    console.error("发送验证码失败:", error);
+    ElMessage.error("发送验证码失败，请重试");
   } finally {
-    sendingCode.value = false
+    sendingCode.value = false;
   }
-}
+};
 
 // 处理忘记密码
 const handleForgotPassword = () => {
   // TODO: 实现忘记密码逻辑
-  ElMessage.info('忘记密码功能开发中')
-}
+  ElMessage.info("忘记密码功能开发中");
+};
 </script>
 
 <style scoped>

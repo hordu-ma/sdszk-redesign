@@ -6,7 +6,7 @@
  */
 export function debounce<T extends (...args: any[]) => Promise<any>>(
   fn: T,
-  delay: number = 300
+  delay: number = 300,
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let timer: number | null = null;
 
@@ -33,7 +33,7 @@ export function debounce<T extends (...args: any[]) => Promise<any>>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   fn: T,
-  limit: number = 300
+  limit: number = 300,
 ): (...args: Parameters<T>) => void {
   let lastCall = 0;
 

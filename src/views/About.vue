@@ -30,7 +30,9 @@
             </div>
             <div class="timeline-item">
               <span class="time">2021年6月</span>
-              <div class="event">平台正式上线并投入运营，开启思政课一体化建设新篇章</div>
+              <div class="event">
+                平台正式上线并投入运营，开启思政课一体化建设新篇章
+              </div>
             </div>
             <div class="timeline-item">
               <span class="time">2021-2025</span>
@@ -47,7 +49,9 @@
           <div class="data-card">
             <div class="data-number">2.67万</div>
             <div class="data-label">注册用户</div>
-            <div class="data-desc">涵盖大中小学思政课教师、教育管理者及相关人员</div>
+            <div class="data-desc">
+              涵盖大中小学思政课教师、教育管理者及相关人员
+            </div>
           </div>
           <div class="data-card">
             <div class="data-number">3万+</div>
@@ -67,7 +71,9 @@
         <h2>覆盖区域</h2>
         <div class="section-content">
           <div class="region-content">
-            <p class="region-desc">一体化中心平台的影响力已扩展至全国范围，覆盖多个重点省份：</p>
+            <p class="region-desc">
+              一体化中心平台的影响力已扩展至全国范围，覆盖多个重点省份：
+            </p>
             <div class="region-list">
               <span class="region-item">北京</span>
               <span class="region-item">天津</span>
@@ -119,7 +125,7 @@
 }
 
 .content-section h2 {
-  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
   font-size: 24px;
   padding: 15px 20px;
   background: linear-gradient(to right, #9a2314, #c44836);
@@ -152,7 +158,7 @@
 }
 
 .timeline-item::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 8px;
@@ -163,7 +169,7 @@
 }
 
 .timeline-item::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 5px;
   top: 20px;

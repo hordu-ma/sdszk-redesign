@@ -1,4 +1,4 @@
-import { getRedisClient, isRedisConnected } from '../config/redis.js'
+import { getRedisClient, isRedisConnected } from "../config/redis.js";
 
 /**
  * 缓存服务类
@@ -7,8 +7,8 @@ import { getRedisClient, isRedisConnected } from '../config/redis.js'
 class CacheService {
   constructor() {
     // 内存缓存作为降级方案
-    this.memoryCache = new Map()
-    this.memoryCacheTTL = new Map()
+    this.memoryCache = new Map();
+    this.memoryCacheTTL = new Map();
   }
 
   /**
@@ -18,10 +18,10 @@ class CacheService {
    * @returns {string} 缓存键
    */
   generateKey(prefix, identifier) {
-    if (typeof identifier === 'object') {
-      return `${prefix}:${JSON.stringify(identifier)}`
+    if (typeof identifier === "object") {
+      return `${prefix}:${JSON.stringify(identifier)}`;
     }
-    return `${prefix}:${identifier}`
+    return `${prefix}:${identifier}`;
   }
 
   /**
@@ -33,26 +33,26 @@ class CacheService {
    */
   async set(key, value, ttl = 3600) {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        const serialized = JSON.stringify(value)
+        const serialized = JSON.stringify(value);
         if (ttl > 0) {
-          await client.setEx(key, ttl, serialized)
+          await client.setEx(key, ttl, serialized);
         } else {
-          await client.set(key, serialized)
+          await client.set(key, serialized);
         }
-        return true
+        return true;
       } else {
         // 降级到内存缓存
-        this.setMemoryCache(key, value, ttl)
-        return true
+        this.setMemoryCache(key, value, ttl);
+        return true;
       }
     } catch (error) {
-      console.error(`缓存设置失败 [${key}]:`, error.message)
+      console.error(`缓存设置失败 [${key}]:`, error.message);
       // 降级到内存缓存
-      this.setMemoryCache(key, value, ttl)
-      return false
+      this.setMemoryCache(key, value, ttl);
+      return false;
     }
   }
 
@@ -63,19 +63,19 @@ class CacheService {
    */
   async get(key) {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        const value = await client.get(key)
-        return value ? JSON.parse(value) : null
+        const value = await client.get(key);
+        return value ? JSON.parse(value) : null;
       } else {
         // 从内存缓存获取
-        return this.getMemoryCache(key)
+        return this.getMemoryCache(key);
       }
     } catch (error) {
-      console.error(`缓存获取失败 [${key}]:`, error.message)
+      console.error(`缓存获取失败 [${key}]:`, error.message);
       // 降级到内存缓存
-      return this.getMemoryCache(key)
+      return this.getMemoryCache(key);
     }
   }
 
@@ -86,19 +86,19 @@ class CacheService {
    */
   async del(key) {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        await client.del(key)
+        await client.del(key);
       }
-      
+
       // 同时清理内存缓存
-      this.memoryCache.delete(key)
-      this.memoryCacheTTL.delete(key)
-      return true
+      this.memoryCache.delete(key);
+      this.memoryCacheTTL.delete(key);
+      return true;
     } catch (error) {
-      console.error(`缓存删除失败 [${key}]:`, error.message)
-      return false
+      console.error(`缓存删除失败 [${key}]:`, error.message);
+      return false;
     }
   }
 
@@ -109,30 +109,30 @@ class CacheService {
    */
   async delByPattern(pattern) {
     try {
-      const client = getRedisClient()
-      let count = 0
-      
+      const client = getRedisClient();
+      let count = 0;
+
       if (isRedisConnected() && client) {
-        const keys = await client.keys(pattern)
+        const keys = await client.keys(pattern);
         if (keys.length > 0) {
-          count = await client.del(keys)
+          count = await client.del(keys);
         }
       }
-      
+
       // 清理内存缓存中的匹配项
-      const regex = new RegExp(pattern.replace(/\*/g, '.*'))
+      const regex = new RegExp(pattern.replace(/\*/g, ".*"));
       for (const key of this.memoryCache.keys()) {
         if (regex.test(key)) {
-          this.memoryCache.delete(key)
-          this.memoryCacheTTL.delete(key)
-          count++
+          this.memoryCache.delete(key);
+          this.memoryCacheTTL.delete(key);
+          count++;
         }
       }
-      
-      return count
+
+      return count;
     } catch (error) {
-      console.error(`批量删除缓存失败 [${pattern}]:`, error.message)
-      return 0
+      console.error(`批量删除缓存失败 [${pattern}]:`, error.message);
+      return 0;
     }
   }
 
@@ -143,16 +143,16 @@ class CacheService {
    */
   async exists(key) {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        return await client.exists(key) === 1
+        return (await client.exists(key)) === 1;
       } else {
-        return this.memoryCache.has(key) && !this.isMemoryCacheExpired(key)
+        return this.memoryCache.has(key) && !this.isMemoryCacheExpired(key);
       }
     } catch (error) {
-      console.error(`检查缓存存在失败 [${key}]:`, error.message)
-      return false
+      console.error(`检查缓存存在失败 [${key}]:`, error.message);
+      return false;
     }
   }
 
@@ -164,15 +164,15 @@ class CacheService {
    */
   async expire(key, ttl) {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        return await client.expire(key, ttl)
+        return await client.expire(key, ttl);
       }
-      return false
+      return false;
     } catch (error) {
-      console.error(`设置过期时间失败 [${key}]:`, error.message)
-      return false
+      console.error(`设置过期时间失败 [${key}]:`, error.message);
+      return false;
     }
   }
 
@@ -182,46 +182,46 @@ class CacheService {
    */
   async flush() {
     try {
-      const client = getRedisClient()
-      
+      const client = getRedisClient();
+
       if (isRedisConnected() && client) {
-        await client.flushDb()
+        await client.flushDb();
       }
-      
+
       // 清空内存缓存
-      this.memoryCache.clear()
-      this.memoryCacheTTL.clear()
-      return true
+      this.memoryCache.clear();
+      this.memoryCacheTTL.clear();
+      return true;
     } catch (error) {
-      console.error('清空缓存失败:', error.message)
-      return false
+      console.error("清空缓存失败:", error.message);
+      return false;
     }
   }
 
   // 内存缓存辅助方法
   setMemoryCache(key, value, ttl) {
-    this.memoryCache.set(key, value)
+    this.memoryCache.set(key, value);
     if (ttl > 0) {
-      this.memoryCacheTTL.set(key, Date.now() + ttl * 1000)
+      this.memoryCacheTTL.set(key, Date.now() + ttl * 1000);
     }
   }
 
   getMemoryCache(key) {
     if (this.isMemoryCacheExpired(key)) {
-      this.memoryCache.delete(key)
-      this.memoryCacheTTL.delete(key)
-      return null
+      this.memoryCache.delete(key);
+      this.memoryCacheTTL.delete(key);
+      return null;
     }
-    return this.memoryCache.get(key) || null
+    return this.memoryCache.get(key) || null;
   }
 
   isMemoryCacheExpired(key) {
-    const expireTime = this.memoryCacheTTL.get(key)
-    if (!expireTime) return false
+    const expireTime = this.memoryCacheTTL.get(key);
+    if (!expireTime) return false;
     if (Date.now() > expireTime) {
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   /**
@@ -233,24 +233,24 @@ class CacheService {
    */
   async wrap(key, fn, ttl = 3600) {
     // 尝试从缓存获取
-    const cached = await this.get(key)
+    const cached = await this.get(key);
     if (cached !== null) {
-      console.log(`缓存命中: ${key}`)
-      return cached
+      console.log(`缓存命中: ${key}`);
+      return cached;
     }
 
     // 缓存未命中，执行函数获取数据
-    console.log(`缓存未命中: ${key}`)
-    const result = await fn()
-    
+    console.log(`缓存未命中: ${key}`);
+    const result = await fn();
+
     // 将结果存入缓存
     if (result !== null && result !== undefined) {
-      await this.set(key, result, ttl)
+      await this.set(key, result, ttl);
     }
-    
-    return result
+
+    return result;
   }
 }
 
 // 导出单例
-export default new CacheService()
+export default new CacheService();

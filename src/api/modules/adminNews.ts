@@ -100,7 +100,7 @@ export class AdminNewsApi extends BaseApi {
 
   // 获取新闻列表
   getList(
-    params?: NewsQueryParams
+    params?: NewsQueryParams,
   ): Promise<ApiResponse<PaginatedResponse<NewsItem>>> {
     return this.get("", { params });
   }
@@ -118,7 +118,7 @@ export class AdminNewsApi extends BaseApi {
   // 更新新闻
   update(
     id: string,
-    data: Partial<NewsFormData>
+    data: Partial<NewsFormData>,
   ): Promise<ApiResponse<NewsItem>> {
     return this.put(`/${id}`, data);
   }
@@ -135,21 +135,21 @@ export class AdminNewsApi extends BaseApi {
 
   // 批量更新状态
   batchUpdateStatus(
-    params: BatchUpdateStatusParams
+    params: BatchUpdateStatusParams,
   ): Promise<ApiResponse<{ modifiedCount: number }>> {
     return this.post("/batch-update-status", params);
   }
 
   // 批量更新分类
   batchUpdateCategory(
-    params: BatchUpdateCategoryParams
+    params: BatchUpdateCategoryParams,
   ): Promise<ApiResponse<{ modifiedCount: number }>> {
     return this.post("/batch-update-category", params);
   }
 
   // 批量添加标签
   batchAddTags(
-    params: BatchAddTagsParams
+    params: BatchAddTagsParams,
   ): Promise<ApiResponse<{ modifiedCount: number }>> {
     return this.post("/batch-add-tags", params);
   }

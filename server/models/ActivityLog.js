@@ -68,7 +68,7 @@ const activityLogSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // 创建索引以提高查询性能
@@ -85,7 +85,7 @@ activityLogSchema.statics.logActivity = async function (data) {
 // 静态方法：获取用户最近活动
 activityLogSchema.statics.getUserActivity = async function (
   userId,
-  limit = 10
+  limit = 10,
 ) {
   return await this.find({ user: userId })
     .sort({ createdAt: -1 })
@@ -97,7 +97,7 @@ activityLogSchema.statics.getUserActivity = async function (
 // 静态方法：获取实体活动历史
 activityLogSchema.statics.getEntityHistory = async function (
   entityType,
-  entityId
+  entityId,
 ) {
   return await this.find({ entityType, entityId })
     .sort({ createdAt: -1 })

@@ -1,7 +1,7 @@
 // 性能优化配置更新
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import { resolve } from "path";
 
 // 生产环境性能优化配置
 export default defineConfig({
@@ -19,7 +19,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      "@": resolve(__dirname, "src"),
     },
   },
 
@@ -29,42 +29,44 @@ export default defineConfig({
       output: {
         manualChunks: {
           // 将Vue相关依赖打包到单独chunk
-          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          "vue-vendor": ["vue", "vue-router", "pinia"],
           // UI组件库单独打包
-          'ui-vendor': ['element-plus', 'ant-design-vue'],
+          "ui-vendor": ["element-plus", "ant-design-vue"],
           // 工具库单独打包
-          'utils-vendor': ['axios', 'echarts'],
+          "utils-vendor": ["axios", "echarts"],
         },
         // 优化chunk文件名
-        chunkFileNames: 'js/[name]-[hash].js',
-        entryFileNames: 'js/[name]-[hash].js',
-        assetFileNames: assetInfo => {
+        chunkFileNames: "js/[name]-[hash].js",
+        entryFileNames: "js/[name]-[hash].js",
+        assetFileNames: (assetInfo) => {
           if (!assetInfo.name) {
-            return `assets/[name]-[hash][extname]`
+            return `assets/[name]-[hash][extname]`;
           }
-          const info = assetInfo.name.split('.')
-          const extType = info[info.length - 1]
-          if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
-            return `media/[name]-[hash].${extType}`
+          const info = assetInfo.name.split(".");
+          const extType = info[info.length - 1];
+          if (
+            /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)
+          ) {
+            return `media/[name]-[hash].${extType}`;
           }
           if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(assetInfo.name)) {
-            return `images/[name]-[hash].${extType}`
+            return `images/[name]-[hash].${extType}`;
           }
           if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
-            return `fonts/[name]-[hash].${extType}`
+            return `fonts/[name]-[hash].${extType}`;
           }
-          return `assets/[name]-[hash].${extType}`
+          return `assets/[name]-[hash].${extType}`;
         },
       },
     },
 
     // 压缩优化
-    minify: 'terser',
+    minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true, // 生产环境移除console
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info'],
+        pure_funcs: ["console.log", "console.info"],
       },
     },
 
@@ -103,6 +105,13 @@ export default defineConfig({
 
   // 预构建优化
   optimizeDeps: {
-    include: ['vue', 'vue-router', 'pinia', 'axios', 'element-plus', 'ant-design-vue'],
+    include: [
+      "vue",
+      "vue-router",
+      "pinia",
+      "axios",
+      "element-plus",
+      "ant-design-vue",
+    ],
   },
-})
+});

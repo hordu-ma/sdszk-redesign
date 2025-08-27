@@ -17,11 +17,12 @@
     "test:e2e:report": "playwright show-report playwright-report",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:headed": "playwright test --headed",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint": "eslint 'server/**/*.js' --ignore-pattern 'server/scripts/mongo-init.js' --ignore-pattern 'server/tests/**' --fix --max-warnings 100",
     "format": "prettier --write src/",
     "server": "node server/app.js",
     "server:dev": "nodemon server/app.js",
     "prepare": "husky install",
+    "audit:fix": "npm audit fix --force",
     "test:api": "node scripts/test-api-connectivity.mjs",
     "build:aliyun": "vue-tsc && vite build --config vite.config.aliyun.ts --mode aliyun",
     "deploy:aliyun": "bash scripts/deploy-frontend.sh"
@@ -29,7 +30,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
     "@element-plus/icons-vue": "^2.3.2",
-    "@vueup/vue-quill": "^1.2.0",
+    "@tinymce/tinymce-vue": "6.3.0",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.11.0",
     "dayjs": "^1.11.13",

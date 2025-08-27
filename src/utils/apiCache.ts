@@ -77,7 +77,7 @@ class ApiCache {
       params?: Record<string, any>;
       ttl?: number;
       tags?: string[];
-    }
+    },
   ): void {
     if (!CACHE_CONFIG.enabled) return;
 
@@ -148,7 +148,7 @@ class ApiCache {
 
   getStats(): CacheStats {
     const timestamps = Array.from(this.cache.values()).map(
-      (item) => item.timestamp
+      (item) => item.timestamp,
     );
     return {
       totalItems: this.cache.size,
@@ -207,7 +207,7 @@ export async function withCache<T>(
     ttl?: number;
     tags?: string[];
     forceRefresh?: boolean;
-  }
+  },
 ): Promise<T> {
   if (!CACHE_CONFIG.enabled || options?.forceRefresh) {
     const data = await fetchFn();

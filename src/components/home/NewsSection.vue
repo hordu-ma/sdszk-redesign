@@ -2,11 +2,16 @@
   <div class="news-section">
     <div class="carousel-container">
       <el-carousel height="400px">
-        <el-carousel-item v-for="item in carouselItems" :key="item.id">
-          <div class="carousel-item-wrapper" @click="handleCarouselClick(item)">
-            <img :src="item.image" :alt="item.title" class="carousel-img" />
+        <el-carousel-item v-for="item in carouselItems"
+:key="item.id">
+          <div class="carousel-item-wrapper"
+@click="handleCarouselClick(item)">
+            <img
+:src="item.image" :alt="item.title" class="carousel-img" />
             <div class="carousel-overlay">
-              <div class="carousel-title">{{ item.title }}</div>
+              <div class="carousel-title">
+                {{ item.title }}
+              </div>
             </div>
           </div>
         </el-carousel-item>
@@ -14,10 +19,11 @@
     </div>
     <div class="center-news">
       <h3>
-        <i class="fas fa-newspaper header-icon"></i>
+        <i class="fas fa-newspaper header-icon" />
         <span class="title-text">中心动态</span>
-        <router-link to="/news?category=center" class="more-link">
-          更多<i class="fas fa-angle-right"></i>
+        <router-link to="/news?category=center"
+class="more-link">
+          更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
       <div class="news-container">
@@ -26,7 +32,8 @@
           :key="news.id"
           class="news-item"
         >
-          <router-link :to="`/news/detail/${news.id}`" class="news-link">
+          <router-link :to="`/news/detail/${news.id}`"
+class="news-link">
             <div class="news-wrapper">
               <div class="date-block">
                 <span class="day">{{ formatDay(news.date) }}</span>
@@ -38,7 +45,8 @@
             </div>
           </router-link>
         </div>
-        <div v-if="!centerLoading && centerNews.length === 0" class="no-data">
+        <div v-if="!centerLoading && centerNews.length === 0"
+class="no-data">
           暂无中心动态
         </div>
       </div>

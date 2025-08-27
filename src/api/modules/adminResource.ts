@@ -84,7 +84,7 @@ export class AdminResourceApi extends BaseApi {
 
   // 获取资源列表
   getList(
-    params?: ResourceQueryParams
+    params?: ResourceQueryParams,
   ): Promise<ApiResponse<PaginatedResponse<ResourceItem>>> {
     return this.get("", { params });
   }
@@ -102,7 +102,7 @@ export class AdminResourceApi extends BaseApi {
   // 更新资源
   update(
     id: string,
-    data: Partial<ResourceFormData>
+    data: Partial<ResourceFormData>,
   ): Promise<ApiResponse<ResourceItem>> {
     return this.put(`/${id}`, data);
   }
@@ -135,7 +135,7 @@ export class AdminResourceApi extends BaseApi {
   // 更新资源状态
   updateStatus(
     id: string,
-    status: "draft" | "published" | "archived"
+    status: "draft" | "published" | "archived",
   ): Promise<ApiResponse<ResourceItem>> {
     return this.patch(`/${id}/status`, { status });
   }
@@ -143,14 +143,14 @@ export class AdminResourceApi extends BaseApi {
   // 批量更新资源状态
   batchUpdateStatus(
     ids: string[],
-    status: "draft" | "published" | "archived"
+    status: "draft" | "published" | "archived",
   ): Promise<ApiResponse<void>> {
     return this.post("/batch-status", { ids, status });
   }
 
   // 增加下载次数
   incrementDownloadCount(
-    id: string
+    id: string,
   ): Promise<ApiResponse<{ downloadCount: number }>> {
     return this.post(`/${id}/download`);
   }
@@ -158,7 +158,7 @@ export class AdminResourceApi extends BaseApi {
   // 上传文件
   async upload(
     formData: FormData,
-    onProgress?: (progressEvent: any) => void
+    onProgress?: (progressEvent: any) => void,
   ): Promise<
     ApiResponse<{ fileUrl: string; fileName: string; fileSize: number }>
   > {

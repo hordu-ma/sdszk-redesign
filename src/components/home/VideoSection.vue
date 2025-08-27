@@ -1,52 +1,57 @@
 <template>
   <div class="video-section">
     <h3>
-      <i class="fas fa-video header-icon"></i>
+      <i class="fas fa-video header-icon" />
       <span class="title-text">影像思政</span>
-      <router-link to="/resources/video" class="more-link">
-        更多<i class="fas fa-angle-right"></i>
+      <router-link to="/resources/video"
+class="more-link">
+        更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
     <div class="video-grid">
-      <div v-for="video in videos" :key="video.id" class="video-card">
-        <VideoPlayer :src="video.url" :poster="video.poster" />
-        <p class="video-title">{{ video.title }}</p>
+      <div v-for="video in videos"
+:key="video.id" class="video-card">
+        <VideoPlayer :src="video.url"
+:poster="video.poster" />
+        <p class="video-title">
+          {{ video.title }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import VideoPlayer from '../VideoPlayer.vue'
+import VideoPlayer from "../VideoPlayer.vue";
 
 interface Video {
-  id: number
-  title: string
-  url: string
-  poster: string
+  id: number;
+  title: string;
+  url: string;
+  poster: string;
 }
 
 // 测试数据
 const videos = [
   {
     id: 1,
-    title: '思政课教学示范',
-    url: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
-    poster: 'https://media.w3.org/2010/05/sintel/poster.png',
+    title: "思政课教学示范",
+    url: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    poster: "https://media.w3.org/2010/05/sintel/poster.png",
   },
   {
     id: 2,
-    title: '红色文化教育',
-    url: 'https://media.w3.org/2010/05/bunny/trailer.mp4',
-    poster: 'https://media.w3.org/2010/05/bunny/poster.png',
+    title: "红色文化教育",
+    url: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    poster: "https://media.w3.org/2010/05/bunny/poster.png",
   },
   {
     id: 3,
-    title: '爱国主义教育',
-    url: 'https://media.w3.org/2010/05/video/movie_300.mp4',
-    poster: 'https://media.w3.org/2010/05/video/poster.png',
+    title: "爱国主义教育",
+    url: "https://media.w3.org/2010/05/video/movie_300.mp4",
+    poster: "https://media.w3.org/2010/05/video/poster.png",
   },
-]
+];
 </script>
 
 <style scoped>
@@ -86,7 +91,8 @@ const videos = [
 
 h3 {
   font-family:
-    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+    "STZhongsong", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Heiti SC", sans-serif;
   font-size: 24px;
   font-weight: 600;
   color: #333;

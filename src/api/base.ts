@@ -26,7 +26,7 @@ export abstract class BaseApi {
   }
 
   protected async request<T>(
-    config: AxiosRequestConfig
+    config: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
       const fullUrl = this.getUrl(config.url || "");
@@ -68,7 +68,7 @@ export abstract class BaseApi {
 
   protected async get<T>(
     path: string,
-    config?: { params?: any }
+    config?: { params?: any },
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "GET",

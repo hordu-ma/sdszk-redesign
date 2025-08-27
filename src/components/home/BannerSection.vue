@@ -1,7 +1,11 @@
 <template>
   <div class="platform-banner">
     <router-link to="/ai">
-      <img src="../../assets/images/banner.jpg" alt="平台宣传图" class="banner-img" />
+      <img
+        src="../../assets/images/banner.jpg"
+        alt="平台宣传图"
+        class="banner-img"
+      >
     </router-link>
   </div>
 </template>

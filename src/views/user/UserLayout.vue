@@ -5,12 +5,17 @@
       <aside class="user-sidebar">
         <div class="user-info">
           <div class="avatar-container">
-            <el-avatar :size="60" :src="userInfo?.avatar" class="user-avatar">
-              <i class="el-icon-user-solid"></i>
+            <el-avatar :size="60"
+:src="userInfo?.avatar" class="user-avatar">
+              <i class="el-icon-user-solid" />
             </el-avatar>
           </div>
-          <h3 class="user-name">{{ userInfo?.name || '用户' }}</h3>
-          <p class="user-role">{{ getRoleText(userInfo?.role) }}</p>
+          <h3 class="user-name">
+            {{ userInfo?.name || "用户" }}
+          </h3>
+          <p class="user-role">
+            {{ getRoleText(userInfo?.role) }}
+          </p>
         </div>
 
         <nav class="user-nav">
@@ -21,7 +26,7 @@
             class="nav-item"
             :class="{ active: isCurrentRoute(item.path) }"
           >
-            <i :class="item.icon"></i>
+            <i :class="item.icon" />
             <span>{{ item.name }}</span>
           </router-link>
         </nav>
@@ -30,11 +35,13 @@
       <!-- 右侧内容区域 -->
       <main class="user-content">
         <div class="content-header">
-          <h2 class="page-title">{{ currentPageTitle }}</h2>
+          <h2 class="page-title">
+            {{ currentPageTitle }}
+          </h2>
           <div class="breadcrumb">
             <el-breadcrumb separator="/">
               <el-breadcrumb-item>
-                <router-link to="/">首页</router-link>
+                <router-link to="/"> 首页 </router-link>
               </el-breadcrumb-item>
               <el-breadcrumb-item>个人中心</el-breadcrumb-item>
               <el-breadcrumb-item>{{ currentPageTitle }}</el-breadcrumb-item>
@@ -51,60 +58,60 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { useUserStore } from "@/stores/user";
 
-const route = useRoute()
-const userStore = useUserStore()
+const route = useRoute();
+const userStore = useUserStore();
 
 // 计算属性
-const userInfo = computed(() => userStore.userInfo)
+const userInfo = computed(() => userStore.userInfo);
 
 // 导航菜单项
 const menuItems = [
   {
-    path: '/user/profile',
-    name: '个人资料',
-    icon: 'fas fa-user',
+    path: "/user/profile",
+    name: "个人资料",
+    icon: "fas fa-user",
   },
   {
-    path: '/user/favorites',
-    name: '我的收藏',
-    icon: 'fas fa-heart',
+    path: "/user/favorites",
+    name: "我的收藏",
+    icon: "fas fa-heart",
   },
   {
-    path: '/user/history',
-    name: '浏览历史',
-    icon: 'fas fa-history',
+    path: "/user/history",
+    name: "浏览历史",
+    icon: "fas fa-history",
   },
   {
-    path: '/user/settings',
-    name: '账户设置',
-    icon: 'fas fa-cog',
+    path: "/user/settings",
+    name: "账户设置",
+    icon: "fas fa-cog",
   },
-]
+];
 
 // 获取角色文本
 const getRoleText = (role?: string) => {
   const roleMap: Record<string, string> = {
-    admin: '管理员',
-    editor: '编辑',
-    user: '普通用户',
-  }
-  return roleMap[role || 'user'] || '普通用户'
-}
+    admin: "管理员",
+    editor: "编辑",
+    user: "普通用户",
+  };
+  return roleMap[role || "user"] || "普通用户";
+};
 
 // 判断是否为当前路由
 const isCurrentRoute = (path: string) => {
-  return route.path === path
-}
+  return route.path === path;
+};
 
 // 当前页面标题
 const currentPageTitle = computed(() => {
-  const currentItem = menuItems.find(item => item.path === route.path)
-  return currentItem?.name || '个人中心'
-})
+  const currentItem = menuItems.find((item) => item.path === route.path);
+  return currentItem?.name || "个人中心";
+});
 </script>
 
 <style scoped>

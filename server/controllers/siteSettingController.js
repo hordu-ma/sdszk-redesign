@@ -1,6 +1,12 @@
 // siteSettingController.js - 站点设置控制器
-import SiteSetting from '../models/SiteSetting.js'
-import { AppError, BadRequestError, UnauthorizedError, NotFoundError, ForbiddenError } from '../utils/appError.js'
+import SiteSetting from "../models/SiteSetting.js";
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+  ForbiddenError,
+} from "../utils/appError.js";
 import ActivityLog from "../models/ActivityLog.js";
 import cacheService from "../services/cacheService.js";
 
@@ -24,7 +30,7 @@ export const getAllSettings = async (req, res, next) => {
           return result;
         }, {});
       },
-      300 // 5分钟缓存
+      300, // 5分钟缓存
     );
 
     res.json({
@@ -51,7 +57,7 @@ export const getSettingsByGroup = async (req, res) => {
       async () => {
         return await SiteSetting.find({ group }).sort({ key: 1 });
       },
-      300 // 5分钟缓存
+      300, // 5分钟缓存
     );
 
     res.json({
@@ -74,7 +80,7 @@ export const getSetting = async (req, res, next) => {
     const setting = await SiteSetting.findOne({ key });
 
     if (!setting) {
-      return next(new NotFoundError("设置不存在"))
+      return next(new NotFoundError("设置不存在"));
     }
 
     res.json({
@@ -117,7 +123,7 @@ export const updateSetting = async (req, res, next) => {
         type: type || existingSetting?.type,
         updatedBy: req.user._id,
       },
-      { new: true, upsert: true, runValidators: true }
+      { new: true, upsert: true, runValidators: true },
     );
 
     // 记录活动
@@ -195,7 +201,7 @@ export const bulkUpdateSettings = async (req, res) => {
           type: type || existingSetting?.type,
           updatedBy: req.user._id,
         },
-        { new: true, upsert: true, runValidators: true }
+        { new: true, upsert: true, runValidators: true },
       );
 
       // 记录活动
@@ -428,7 +434,7 @@ export const getPublicSettings = async (req, res, next) => {
           return result;
         }, {});
       },
-      3600 // 1小时缓存
+      3600, // 1小时缓存
     );
 
     res.json({

@@ -41,9 +41,9 @@ export class NewsCategoryApi extends BaseApi {
   async getList(params?: {
     includeInactive?: boolean;
   }): Promise<ApiResponse<NewsCategory[]>> {
-    console.log('📤 NewsCategoryApi.getList 调用参数:', params)
+    console.log("📤 NewsCategoryApi.getList 调用参数:", params);
     const response = await this.get<NewsCategory[]>("", { params });
-    console.log('📥 NewsCategoryApi.getList 响应:', response)
+    console.log("📥 NewsCategoryApi.getList 响应:", response);
     return response;
   }
 
@@ -59,7 +59,7 @@ export class NewsCategoryApi extends BaseApi {
         ttl: 10 * 60 * 1000, // 10分钟缓存
         tags: ["news-categories", "core-categories"],
         forceRefresh,
-      }
+      },
     );
   }
 
@@ -70,7 +70,7 @@ export class NewsCategoryApi extends BaseApi {
 
   // 创建分类
   async create(
-    data: CreateNewsCategoryDTO
+    data: CreateNewsCategoryDTO,
   ): Promise<ApiResponse<NewsCategory>> {
     return await this.post<NewsCategory>("", data);
   }
@@ -78,7 +78,7 @@ export class NewsCategoryApi extends BaseApi {
   // 更新分类
   async update(
     id: string,
-    data: UpdateNewsCategoryDTO
+    data: UpdateNewsCategoryDTO,
   ): Promise<ApiResponse<NewsCategory>> {
     return await this.put<NewsCategory>(`/${id}`, data);
   }
@@ -90,7 +90,7 @@ export class NewsCategoryApi extends BaseApi {
 
   // 更新分类排序
   async updateOrder(
-    categories: { id: string; order: number }[]
+    categories: { id: string; order: number }[],
   ): Promise<ApiResponse<void>> {
     return await this.post<void>("/reorder", { categories });
   }

@@ -40,7 +40,7 @@ interface LoginResponse {
   status: string;
   token: string;
   data?: {
-    user: Omit<UserInfo, 'permissions'> & {
+    user: Omit<UserInfo, "permissions"> & {
       permissions: BackendPermissions | PermissionList;
     };
   };
@@ -68,7 +68,7 @@ export const useUserStore = defineStore(
     });
     const isAdmin = computed(() => userInfo.value?.role === "admin");
     const isEditor = computed(
-      () => userInfo.value?.role === "editor" || isAdmin.value
+      () => userInfo.value?.role === "editor" || isAdmin.value,
     );
     const userPermissions = computed(() => userInfo.value?.permissions || []);
 
@@ -107,7 +107,11 @@ export const useUserStore = defineStore(
      * 设置用户信息（内部使用）
      * @private
      */
-    function _setUserData(userData: Omit<UserInfo, 'permissions'> & { permissions: BackendPermissions | PermissionList }) {
+    function _setUserData(
+      userData: Omit<UserInfo, "permissions"> & {
+        permissions: BackendPermissions | PermissionList;
+      },
+    ) {
       const transformedPermissions = Array.isArray(userData.permissions)
         ? userData.permissions
         : transformPermissions(userData.permissions);
@@ -123,7 +127,9 @@ export const useUserStore = defineStore(
     /**
      * 权限转换函数：将后端嵌套对象格式转换为前端字符串数组格式
      */
-    function transformPermissions(backendPermissions: BackendPermissions | any): PermissionList {
+    function transformPermissions(
+      backendPermissions: BackendPermissions | any,
+    ): PermissionList {
       const permissions: PermissionList = [];
 
       if (!backendPermissions || typeof backendPermissions !== "object") {
@@ -135,7 +141,7 @@ export const useUserStore = defineStore(
         for (const [module, actions] of Object.entries(backendPermissions)) {
           if (actions && typeof actions === "object") {
             for (const [action, hasPermission] of Object.entries(
-              actions as Record<string, boolean>
+              actions as Record<string, boolean>,
             )) {
               if (hasPermission === true) {
                 const permissionKey = `${module}:${action}`;
@@ -172,7 +178,10 @@ export const useUserStore = defineStore(
      * 处理登录响应
      * @private
      */
-    function _processLoginResponse(response: LoginResponse, remember: boolean = false) {
+    function _processLoginResponse(
+      response: LoginResponse,
+      remember: boolean = false,
+    ) {
       if (response.status !== "success") {
         throw new Error(response.message || "登录失败");
       }
@@ -195,7 +204,9 @@ export const useUserStore = defineStore(
      * 执行登录请求
      * @private
      */
-    async function _performLogin(payload: LoginPayload): Promise<LoginResponse> {
+    async function _performLogin(
+      payload: LoginPayload,
+    ): Promise<LoginResponse> {
       const response = await api.post("/auth/login", payload);
 
       if (typeof response.data !== "object" || response.data === null) {
@@ -228,8 +239,8 @@ export const useUserStore = defineStore(
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message ||
-          error.message ||
-          "登录失败，请检查网络连接"
+            error.message ||
+            "登录失败，请检查网络连接",
         );
       } finally {
         loading.value = false;
@@ -491,7 +502,7 @@ export const useUserStore = defineStore(
   {
     persist: {
       // 只持久化核心认证数据，避免持久化临时状态
-      paths: ['token', 'userInfo'],
+      paths: ["token", "userInfo"],
     } as any,
-  }
+  },
 );

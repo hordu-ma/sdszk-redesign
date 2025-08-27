@@ -3,9 +3,9 @@
  * 使用 pino 库提供高性能、结构化的日志记录功能
  */
 
-import pino from 'pino';
-import { fileURLToPath } from 'url';
-import path from 'path';
+import pino from "pino";
+import { fileURLToPath } from "url";
+import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,34 +13,35 @@ const __dirname = path.dirname(__filename);
 // 日志配置
 const loggerConfig = {
   // 基础配置
-  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+  level:
+    process.env.LOG_LEVEL ||
+    (process.env.NODE_ENV === "production" ? "info" : "debug"),
 
   // 生产环境配置
-  ...(process.env.NODE_ENV === 'production'
+  ...(process.env.NODE_ENV === "production"
     ? {
-      // 生产环境：JSON 格式，便于日志聚合工具解析
-      serializers: pino.stdSerializers,
-    }
+        // 生产环境：JSON 格式，便于日志聚合工具解析
+        serializers: pino.stdSerializers,
+      }
     : {
-      // 开发环境：美化输出，便于阅读
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'yyyy-mm-dd HH:MM:ss',
-          ignore: 'pid,hostname',
-          singleLine: false,
+        // 开发环境：美化输出，便于阅读
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "yyyy-mm-dd HH:MM:ss",
+            ignore: "pid,hostname",
+            singleLine: false,
+          },
         },
-      },
-    }
-  ),
+      }),
 
   // 基础字段
   base: {
     pid: process.pid,
-    hostname: process.env.HOSTNAME || 'localhost',
-    service: 'sdszk-server',
-    version: process.env.npm_package_version || '1.0.0',
+    hostname: process.env.HOSTNAME || "localhost",
+    service: "sdszk-server",
+    version: process.env.npm_package_version || "1.0.0",
   },
 
   // 时间戳配置
@@ -73,42 +74,42 @@ export const createLogger = (module, context = {}) => {
 /**
  * 数据库操作日志器
  */
-export const dbLogger = createLogger('database');
+export const dbLogger = createLogger("database");
 
 /**
  * 认证相关日志器
  */
-export const authLogger = createLogger('auth');
+export const authLogger = createLogger("auth");
 
 /**
  * API 请求日志器
  */
-export const apiLogger = createLogger('api');
+export const apiLogger = createLogger("api");
 
 /**
  * 系统日志器
  */
-export const sysLogger = createLogger('system');
+export const sysLogger = createLogger("system");
 
 /**
  * 错误日志器
  */
-export const errorLogger = createLogger('error');
+export const errorLogger = createLogger("error");
 
 /**
  * 性能日志器
  */
-export const perfLogger = createLogger('performance');
+export const perfLogger = createLogger("performance");
 
 /**
  * 审计日志器
  */
-export const auditLogger = createLogger('audit');
+export const auditLogger = createLogger("audit");
 
 /**
  * 安全日志器
  */
-export const securityLogger = createLogger('security');
+export const securityLogger = createLogger("security");
 
 /**
  * 记录 HTTP 请求日志
@@ -121,10 +122,10 @@ export const logHttpRequest = (req, res, duration) => {
     method: req.method,
     url: req.originalUrl || req.url,
     statusCode: res.statusCode,
-    userAgent: req.get('User-Agent'),
+    userAgent: req.get("User-Agent"),
     ip: req.ip || req.connection.remoteAddress,
     duration: `${duration}ms`,
-    size: res.get('Content-Length') || 0,
+    size: res.get("Content-Length") || 0,
   };
 
   // 添加用户信息（如果已认证）
@@ -135,11 +136,11 @@ export const logHttpRequest = (req, res, duration) => {
 
   // 根据状态码决定日志级别
   if (res.statusCode >= 500) {
-    apiLogger.error(logData, 'HTTP request failed');
+    apiLogger.error(logData, "HTTP request failed");
   } else if (res.statusCode >= 400) {
-    apiLogger.warn(logData, 'HTTP request warning');
+    apiLogger.warn(logData, "HTTP request warning");
   } else {
-    apiLogger.info(logData, 'HTTP request completed');
+    apiLogger.info(logData, "HTTP request completed");
   }
 };
 
@@ -150,13 +151,21 @@ export const logHttpRequest = (req, res, duration) => {
  * @param {Object} context - 操作上下文
  * @param {number} duration - 操作耗时（毫秒）
  */
-export const logDbOperation = (operation, collection, context = {}, duration) => {
-  dbLogger.info({
-    operation,
-    collection,
-    duration: duration ? `${duration}ms` : undefined,
-    ...context,
-  }, `Database ${operation} operation on ${collection}`);
+export const logDbOperation = (
+  operation,
+  collection,
+  context = {},
+  duration,
+) => {
+  dbLogger.info(
+    {
+      operation,
+      collection,
+      duration: duration ? `${duration}ms` : undefined,
+      ...context,
+    },
+    `Database ${operation} operation on ${collection}`,
+  );
 };
 
 /**
@@ -165,11 +174,14 @@ export const logDbOperation = (operation, collection, context = {}, duration) =>
  * @param {Object} context - 事件上下文
  */
 export const logAuthEvent = (event, context = {}) => {
-  authLogger.info({
-    event,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, `Authentication event: ${event}`);
+  authLogger.info(
+    {
+      event,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    `Authentication event: ${event}`,
+  );
 };
 
 /**
@@ -178,15 +190,18 @@ export const logAuthEvent = (event, context = {}) => {
  * @param {Object} context - 错误上下文
  */
 export const logError = (error, context = {}) => {
-  errorLogger.error({
-    error: {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      code: error.code,
+  errorLogger.error(
+    {
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+      },
+      ...context,
     },
-    ...context,
-  }, `Error occurred: ${error.message}`);
+    `Error occurred: ${error.message}`,
+  );
 };
 
 /**
@@ -196,13 +211,16 @@ export const logError = (error, context = {}) => {
  * @param {string} unit - 单位
  * @param {Object} context - 额外上下文
  */
-export const logPerformance = (metric, value, unit = 'ms', context = {}) => {
-  perfLogger.info({
-    metric,
-    value,
-    unit,
-    ...context,
-  }, `Performance metric: ${metric} = ${value}${unit}`);
+export const logPerformance = (metric, value, unit = "ms", context = {}) => {
+  perfLogger.info(
+    {
+      metric,
+      value,
+      unit,
+      ...context,
+    },
+    `Performance metric: ${metric} = ${value}${unit}`,
+  );
 };
 
 /**
@@ -211,11 +229,14 @@ export const logPerformance = (metric, value, unit = 'ms', context = {}) => {
  * @param {Object} context - 操作上下文
  */
 export const logAudit = (action, context = {}) => {
-  auditLogger.info({
-    action,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, `Audit: ${action}`);
+  auditLogger.info(
+    {
+      action,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    `Audit: ${action}`,
+  );
 };
 
 /**
@@ -223,23 +244,29 @@ export const logAudit = (action, context = {}) => {
  * @param {Object} config - 系统配置信息
  */
 export const logSystemStart = (config = {}) => {
-  sysLogger.info({
-    nodeVersion: process.version,
-    platform: process.platform,
-    environment: process.env.NODE_ENV,
-    ...config,
-  }, 'System started successfully');
+  sysLogger.info(
+    {
+      nodeVersion: process.version,
+      platform: process.platform,
+      environment: process.env.NODE_ENV,
+      ...config,
+    },
+    "System started successfully",
+  );
 };
 
 /**
  * 系统关闭日志
  * @param {string} reason - 关闭原因
  */
-export const logSystemShutdown = (reason = 'normal') => {
-  sysLogger.info({
-    reason,
-    uptime: process.uptime(),
-  }, 'System shutting down');
+export const logSystemShutdown = (reason = "normal") => {
+  sysLogger.info(
+    {
+      reason,
+      uptime: process.uptime(),
+    },
+    "System shutting down",
+  );
 };
 
 /**
@@ -249,12 +276,15 @@ export const logSystemShutdown = (reason = 'normal') => {
  * @param {Object} context - 额外上下文
  */
 export const logCacheOperation = (operation, key, context = {}) => {
-  const cacheLogger = createLogger('cache');
-  cacheLogger.debug({
-    operation,
-    key,
-    ...context,
-  }, `Cache ${operation}: ${key}`);
+  const cacheLogger = createLogger("cache");
+  cacheLogger.debug(
+    {
+      operation,
+      key,
+      ...context,
+    },
+    `Cache ${operation}: ${key}`,
+  );
 };
 
 /**
@@ -263,12 +293,15 @@ export const logCacheOperation = (operation, key, context = {}) => {
  * @param {Object} context - 请求上下文（用户代理、IP等）
  */
 export const logCSPViolation = (violationReport, context = {}) => {
-  securityLogger.warn({
-    type: 'csp_violation',
-    violation: violationReport,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, 'Content Security Policy violation detected');
+  securityLogger.warn(
+    {
+      type: "csp_violation",
+      violation: violationReport,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    "Content Security Policy violation detected",
+  );
 };
 
 /**
@@ -277,12 +310,15 @@ export const logCSPViolation = (violationReport, context = {}) => {
  * @param {Object} context - 事件上下文
  */
 export const logSecurityEvent = (eventType, context = {}) => {
-  securityLogger.warn({
-    type: 'security_event',
-    eventType,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, `Security event detected: ${eventType}`);
+  securityLogger.warn(
+    {
+      type: "security_event",
+      eventType,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    `Security event detected: ${eventType}`,
+  );
 };
 
 /**
@@ -292,13 +328,16 @@ export const logSecurityEvent = (eventType, context = {}) => {
  * @param {Object} context - 变更上下文
  */
 export const logSecurityPolicyChange = (policy, changes, context = {}) => {
-  securityLogger.info({
-    type: 'policy_change',
-    policy,
-    changes,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, `Security policy updated: ${policy}`);
+  securityLogger.info(
+    {
+      type: "policy_change",
+      policy,
+      changes,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    `Security policy updated: ${policy}`,
+  );
 };
 
 /**
@@ -307,12 +346,15 @@ export const logSecurityPolicyChange = (policy, changes, context = {}) => {
  * @param {Object} context - 认证上下文
  */
 export const logAuthFailure = (reason, context = {}) => {
-  securityLogger.warn({
-    type: 'auth_failure',
-    reason,
-    timestamp: new Date().toISOString(),
-    ...context,
-  }, `Authentication failed: ${reason}`);
+  securityLogger.warn(
+    {
+      type: "auth_failure",
+      reason,
+      timestamp: new Date().toISOString(),
+      ...context,
+    },
+    `Authentication failed: ${reason}`,
+  );
 };
 
 // 导出主日志器作为默认导出

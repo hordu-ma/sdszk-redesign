@@ -8,7 +8,7 @@
       </div>
       <div class="header-right">
         <a-space>
-          <a-button @click="refreshData" :loading="refreshing">
+          <a-button :loading="refreshing" @click="refreshData">
             <template #icon>
               <ReloadOutlined />
             </template>
@@ -26,7 +26,7 @@
 
     <!-- 统计卡片区域 -->
     <div class="stats-grid">
-      <div class="stat-card" v-for="stat in statsData" :key="stat.key">
+      <div v-for="stat in statsData" class="stat-card" :key="stat.key">
         <div
           class="stat-icon"
           :style="{ backgroundColor: stat.color + '20', color: stat.color }"
@@ -34,8 +34,12 @@
           <component :is="stat.icon" />
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-value">
+            {{ stat.value }}
+          </div>
+          <div class="stat-label">
+            {{ stat.label }}
+          </div>
           <div
             class="stat-trend"
             :class="{
@@ -67,11 +71,12 @@
                 style="width: 120px"
                 @change="loadVisitTrends"
               >
-                <a-select-option value="7">近7天</a-select-option>
-                <a-select-option value="30">近30天</a-select-option>
-                <a-select-option value="90">近90天</a-select-option>
+                <a-select-option value="7"> 近7天 </a-select-option>
+                <a-select-option value="30"> 近30天 </a-select-option>
+                <a-select-option value="90"> 近90天 </a-select-option>
               </a-select>
-              <a-button type="text" @click="toggleChartType">
+              <a-button type="text"
+@click="toggleChartType">
                 <template #icon>
                   <BarChartOutlined v-if="chartType === 'line'" />
                   <LineChartOutlined v-else />
@@ -79,7 +84,9 @@
               </a-button>
             </div>
           </div>
-          <div class="chart-container" ref="chartRef"></div>
+          <div ref="chartRef"
+class="chart-container"
+/>
         </div>
 
         <!-- 内容分布图表 -->
@@ -91,27 +98,33 @@
               style="width: 120px"
               @change="loadContentDistribution"
             >
-              <a-select-option value="category">按分类</a-select-option>
-              <a-select-option value="status">按状态</a-select-option>
+              <a-select-option value="category"> 按分类 </a-select-option>
+              <a-select-option value="status"> 按状态 </a-select-option>
             </a-select>
           </div>
-          <div class="chart-container" ref="contentChartRef"></div>
+          <div ref="contentChartRef"
+class="chart-container"
+/>
         </div>
 
         <!-- 最新动态 -->
         <div class="activity-card">
           <div class="card-header">
             <h3>最新动态</h3>
-            <a-button type="link" @click="viewAllActivities">查看全部</a-button>
+            <a-button type="link"
+@click="viewAllActivities">
+              查看全部
+            </a-button>
           </div>
           <div class="activity-list">
             <div
-              class="activity-item"
               v-for="activity in recentActivities"
               :key="activity.id"
+              class="activity-item"
             >
               <div class="activity-avatar">
-                <a-avatar :src="activity.user.avatar" :size="32">
+                <a-avatar :src="activity.user.avatar"
+:size="32">
                   {{ activity.user.username?.charAt(0)?.toUpperCase() }}
                 </a-avatar>
               </div>
@@ -126,7 +139,8 @@
                 </div>
               </div>
             </div>
-            <div v-if="recentActivities.length === 0" class="empty-state">
+            <div v-if="recentActivities.length === 0"
+class="empty-state">
               <a-empty description="暂无动态" />
             </div>
           </div>
@@ -165,9 +179,9 @@
           </div>
           <div class="system-status">
             <div
-              class="status-item"
               v-for="item in systemStatus.items"
               :key="item.key"
+              class="status-item"
             >
               <div class="status-info">
                 <span class="status-label">{{ item.label }}</span>
@@ -201,9 +215,9 @@
           </div>
           <div class="performance-metrics">
             <div
-              class="metric-item"
               v-for="metric in performanceMetrics"
               :key="metric.key"
+              class="metric-item"
             >
               <div class="metric-header">
                 <span class="metric-label">{{ metric.label }}</span>
@@ -225,30 +239,31 @@
     <a-modal
       v-model:open="exportModalVisible"
       title="导出数据报告"
+      :confirm-loading="exporting"
       @ok="handleExport"
       @cancel="exportModalVisible = false"
-      :confirm-loading="exporting"
     >
-      <a-form :model="exportForm" layout="vertical">
+      <a-form :model="exportForm"
+layout="vertical">
         <a-form-item label="报告类型">
           <a-radio-group v-model:value="exportForm.type">
-            <a-radio value="daily">日报</a-radio>
-            <a-radio value="weekly">周报</a-radio>
-            <a-radio value="monthly">月报</a-radio>
+            <a-radio value="daily"> 日报 </a-radio>
+            <a-radio value="weekly"> 周报 </a-radio>
+            <a-radio value="monthly"> 月报 </a-radio>
           </a-radio-group>
         </a-form-item>
         <a-form-item label="包含内容">
           <a-checkbox-group v-model:value="exportForm.content">
-            <a-checkbox value="stats">统计数据</a-checkbox>
-            <a-checkbox value="trends">趋势图表</a-checkbox>
-            <a-checkbox value="activities">活动记录</a-checkbox>
-            <a-checkbox value="performance">性能指标</a-checkbox>
+            <a-checkbox value="stats"> 统计数据 </a-checkbox>
+            <a-checkbox value="trends"> 趋势图表 </a-checkbox>
+            <a-checkbox value="activities"> 活动记录 </a-checkbox>
+            <a-checkbox value="performance"> 性能指标 </a-checkbox>
           </a-checkbox-group>
         </a-form-item>
         <a-form-item label="导出格式">
           <a-radio-group v-model:value="exportForm.format">
-            <a-radio value="pdf">PDF</a-radio>
-            <a-radio value="excel">Excel</a-radio>
+            <a-radio value="pdf"> PDF </a-radio>
+            <a-radio value="excel"> Excel </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -511,7 +526,7 @@ const loadStats = async () => {
 const loadVisitTrends = async () => {
   try {
     const response = await dashboardApi.getVisitTrends(
-      Number(chartPeriod.value)
+      Number(chartPeriod.value),
     );
     if (isUnmounted) return;
 
@@ -577,7 +592,7 @@ const loadVisitTrends = async () => {
 const loadContentDistribution = async () => {
   try {
     const response = await dashboardApi.getContentDistribution(
-      contentChartType.value
+      contentChartType.value,
     );
     if (isUnmounted) return;
 
@@ -980,7 +995,7 @@ onMounted(async () => {
         loadPerformanceMetrics();
       }
     },
-    5 * 60 * 1000
+    5 * 60 * 1000,
   );
 
   window.addEventListener("resize", handleResize);

@@ -10,7 +10,8 @@
       class="admin-main"
       :class="{ 'admin-main--collapsed': sidebarCollapsed }"
     >
-      <AdminHeader @toggle-sidebar="toggleSidebar" @logout="handleLogout" />
+      <AdminHeader @toggle-sidebar="toggleSidebar"
+@logout="handleLogout" />
       <div class="admin-content">
         <router-view v-slot="{ Component, route }">
           <keep-alive>
@@ -54,7 +55,7 @@ watch(
     if (sidebarRef.value) {
       sidebarRef.value.$forceUpdate();
     }
-  }
+  },
 );
 
 // 切换侧边栏

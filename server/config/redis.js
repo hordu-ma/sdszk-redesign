@@ -14,11 +14,17 @@ const redisConfig = {
     reconnectStrategy: (retries) => {
       const maxRetries = process.env.NODE_ENV === "development" ? 3 : 10;
       if (retries > maxRetries) {
-        sysLogger.error({ retries, maxRetries }, "Redis: 重连次数超过限制，停止重连");
+        sysLogger.error(
+          { retries, maxRetries },
+          "Redis: 重连次数超过限制，停止重连",
+        );
         return new Error("重连次数过多");
       }
       const delay = Math.min(retries * 100, 3000);
-      sysLogger.info({ retries, delay }, `Redis: 将在 ${delay}ms 后进行第 ${retries} 次重连`);
+      sysLogger.info(
+        { retries, delay },
+        `Redis: 将在 ${delay}ms 后进行第 ${retries} 次重连`,
+      );
       return delay;
     },
     connectTimeout: process.env.NODE_ENV === "development" ? 3000 : 10000,
@@ -55,7 +61,7 @@ export async function initRedis() {
 
     // 错误事件
     redisClient.on("error", (err) => {
-      logError(err, { context: 'redis-connection' });
+      logError(err, { context: "redis-connection" });
       isConnected = false;
     });
 
@@ -80,7 +86,7 @@ export async function initRedis() {
     sysLogger.info("Redis: 初始化成功");
     return redisClient;
   } catch (error) {
-    logError(error, { context: 'redis-initialization' });
+    logError(error, { context: "redis-initialization" });
     sysLogger.warn("Redis初始化失败，应用将继续运行，使用内存缓存作为降级方案");
     // Redis连接失败不应该导致应用崩溃
     return null;
@@ -104,7 +110,7 @@ export async function closeRedis() {
       await redisClient.quit();
       sysLogger.info("Redis: 连接已正常关闭");
     } catch (error) {
-      logError(error, { context: 'redis-shutdown' });
+      logError(error, { context: "redis-shutdown" });
       // 强制关闭连接
       await redisClient.disconnect();
       sysLogger.warn("Redis: 强制断开连接");
@@ -115,7 +121,12 @@ export async function closeRedis() {
 }
 
 // Redis操作包装器，提供自动重试和错误处理
-export async function redisOperation(operation, key, value = null, options = {}) {
+export async function redisOperation(
+  operation,
+  key,
+  value = null,
+  options = {},
+) {
   if (!isRedisConnected()) {
     sysLogger.debug({ operation, key }, "Redis不可用，跳过操作");
     return null;
@@ -126,19 +137,19 @@ export async function redisOperation(operation, key, value = null, options = {})
     let result;
 
     switch (operation) {
-      case 'get':
+      case "get":
         result = await redisClient.get(key);
         break;
-      case 'set':
+      case "set":
         result = await redisClient.set(key, value, options);
         break;
-      case 'del':
+      case "del":
         result = await redisClient.del(key);
         break;
-      case 'exists':
+      case "exists":
         result = await redisClient.exists(key);
         break;
-      case 'expire':
+      case "expire":
         result = await redisClient.expire(key, value);
         break;
       default:
@@ -146,19 +157,22 @@ export async function redisOperation(operation, key, value = null, options = {})
     }
 
     const duration = Date.now() - startTime;
-    sysLogger.debug({
-      operation,
-      key,
-      duration: `${duration}ms`,
-      success: true
-    }, `Redis操作完成: ${operation}`);
+    sysLogger.debug(
+      {
+        operation,
+        key,
+        duration: `${duration}ms`,
+        success: true,
+      },
+      `Redis操作完成: ${operation}`,
+    );
 
     return result;
   } catch (error) {
     logError(error, {
-      context: 'redis-operation',
+      context: "redis-operation",
       operation,
-      key
+      key,
     });
     return null;
   }

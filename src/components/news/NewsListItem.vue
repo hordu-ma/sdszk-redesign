@@ -1,6 +1,7 @@
 <template>
   <div class="news-item">
-    <router-link :to="`/news/detail/${news.id}`" class="news-link">
+    <router-link :to="`/news/detail/${news.id}`"
+class="news-link">
       <div class="news-wrapper">
         <div class="date-block">
           <div class="day">
@@ -11,7 +12,9 @@
           </div>
         </div>
         <div class="news-content-inner">
-          <h3 class="news-title">{{ news.title }}</h3>
+          <h3 class="news-title">
+            {{ news.title }}
+          </h3>
           <div class="news-meta">
             <span
               class="category-tag"
@@ -19,14 +22,16 @@
             >
               {{ news.categoryName || "中心动态" }}
             </span>
-            <span class="news-author" v-if="displayAuthor"
-              >作者：{{ displayAuthor }}</span
-            >
-            <span class="news-views" v-if="news.viewCount"
-              >阅读：{{ news.viewCount }}</span
-            >
+            <span v-if="displayAuthor"
+class="news-author"
+            >作者：{{ displayAuthor }}</span>
+            <span v-if="news.viewCount"
+class="news-views"
+            >阅读：{{ news.viewCount }}</span>
           </div>
-          <p class="news-summary">{{ displaySummary }}</p>
+          <p class="news-summary">
+            {{ displaySummary }}
+          </p>
         </div>
       </div>
     </router-link>

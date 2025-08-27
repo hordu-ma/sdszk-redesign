@@ -1,5 +1,5 @@
 // ResourceCategory.js - 资源分类模型
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const resourceCategorySchema = new mongoose.Schema(
   {
@@ -29,30 +29,33 @@ const resourceCategorySchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
   },
   {
     timestamps: true,
-  }
-)
+  },
+);
 
 // 创建索引
-resourceCategorySchema.index({ order: 1 })
+resourceCategorySchema.index({ order: 1 });
 
 // 添加虚拟字段：资源数量
-resourceCategorySchema.virtual('resourceCount', {
-  ref: 'Resource',
-  localField: '_id',
-  foreignField: 'category',
+resourceCategorySchema.virtual("resourceCount", {
+  ref: "Resource",
+  localField: "_id",
+  foreignField: "category",
   count: true,
-})
+});
 
-const ResourceCategory = mongoose.model('ResourceCategory', resourceCategorySchema)
+const ResourceCategory = mongoose.model(
+  "ResourceCategory",
+  resourceCategorySchema,
+);
 
-export default ResourceCategory
+export default ResourceCategory;

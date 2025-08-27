@@ -1,16 +1,16 @@
 // Comment.js - 评论模型
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema(
   {
     resource: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Resource',
+      ref: "Resource",
       required: true,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     content: {
@@ -21,13 +21,13 @@ const commentSchema = new mongoose.Schema(
     },
     parentComment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment',
+      ref: "Comment",
       default: null,
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
       },
     ],
     isDeleted: {
@@ -39,16 +39,16 @@ const commentSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
-)
+  },
+);
 
 // 评论回复虚拟字段
-commentSchema.virtual('replies', {
-  ref: 'Comment',
-  localField: '_id',
-  foreignField: 'parentComment',
-})
+commentSchema.virtual("replies", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "parentComment",
+});
 
-const Comment = mongoose.model('Comment', commentSchema)
+const Comment = mongoose.model("Comment", commentSchema);
 
-export default Comment
+export default Comment;

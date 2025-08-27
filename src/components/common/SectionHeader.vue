@@ -2,21 +2,23 @@
   <div class="block-header">
     <h3>
       <div class="title-container">
-        <i :class="icon" class="header-icon"></i>
+        <i
+:class="icon" class="header-icon" />
         <span class="title-text">{{ title }}</span>
       </div>
-      <router-link v-if="moreLink" :to="moreLink" class="more-link">
-        更多<i class="fas fa-angle-right"></i>
+      <router-link v-if="moreLink"
+:to="moreLink" class="more-link">
+        更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'SectionHeader',
+  name: "SectionHeader",
   props: {
     title: {
       type: String,
@@ -28,10 +30,10 @@ export default defineComponent({
     },
     moreLink: {
       type: String,
-      default: '',
+      default: "",
     },
   },
-})
+});
 </script>
 
 <style scoped>

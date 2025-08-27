@@ -3,7 +3,8 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <a-button type="text" @click="$router.back()" class="back-btn">
+        <a-button type="text"
+@click="$router.back()" class="back-btn">
           <template #icon>
             <ArrowLeftOutlined />
           </template>
@@ -15,27 +16,33 @@
         </div>
       </div>
       <div class="header-right">
-        <a-button @click="handleSave" :loading="saving"> 保存修改 </a-button>
-        <a-button type="primary" @click="handlePublish" :loading="publishing">
+        <a-button
+:loading="saving" @click="handleSave"> 保存修改 </a-button>
+        <a-button type="primary"
+@click="handlePublish" :loading="publishing">
           {{ formData.status === "published" ? "更新发布" : "发布新闻" }}
         </a-button>
       </div>
     </div>
 
     <!-- 加载状态 -->
-    <div v-if="loading" class="loading-container">
+    <div v-if="loading"
+class="loading-container">
       <a-spin size="large" />
     </div>
 
     <!-- 新闻表单 -->
-    <div v-else class="form-container">
-      <a-form ref="formRef" :model="formData" :rules="rules" layout="vertical">
+    <div v-else
+class="form-container">
+      <a-form ref="formRef"
+:model="formData" :rules="rules" layout="vertical">
         <a-row :gutter="24">
           <!-- 左侧主要内容 -->
           <a-col :span="16">
             <div class="main-content">
               <!-- 标题 -->
-              <a-form-item label="新闻标题" name="title">
+              <a-form-item label="新闻标题"
+name="title">
                 <a-input
                   v-model:value="formData.title"
                   placeholder="请输入新闻标题"
@@ -46,7 +53,8 @@
               </a-form-item>
 
               <!-- 摘要 -->
-              <a-form-item label="新闻摘要" name="summary">
+              <a-form-item label="新闻摘要"
+name="summary">
                 <a-textarea
                   v-model:value="formData.summary"
                   placeholder="请输入新闻摘要（可选）"
@@ -57,7 +65,8 @@
               </a-form-item>
 
               <!-- 内容编辑器 -->
-              <a-form-item label="新闻内容" name="content">
+              <a-form-item label="新闻内容"
+name="content">
                 <QuillEditor
                   ref="quillEditorRef"
                   v-model="formData.content"
@@ -72,8 +81,10 @@
           <a-col :span="8">
             <div class="settings-panel">
               <!-- 发布设置 -->
-              <a-card title="发布设置" size="small" class="setting-card">
-                <a-form-item label="新闻分类" name="category">
+              <a-card title="发布设置"
+size="small" class="setting-card">
+                <a-form-item label="新闻分类"
+name="category">
                   <a-select
                     v-model:value="formData.category"
                     placeholder="请选择分类"
@@ -95,7 +106,8 @@
                   </a-tag>
                 </a-form-item>
 
-                <a-form-item label="发布时间" name="publishTime">
+                <a-form-item label="发布时间"
+name="publishTime">
                   <a-date-picker
                     v-model:value="formData.publishTime"
                     show-time
@@ -104,7 +116,8 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="标签" name="tags">
+                <a-form-item label="标签"
+name="tags">
                   <a-select
                     v-model:value="formData.tags"
                     mode="tags"
@@ -115,10 +128,13 @@
               </a-card>
 
               <!-- 特色图片 -->
-              <a-card title="特色图片" size="small" class="setting-card">
+              <a-card title="特色图片"
+size="small" class="setting-card">
                 <div class="image-upload">
-                  <div v-if="formData.featuredImage" class="image-preview">
-                    <img :src="formData.featuredImage" alt="特色图片" />
+                  <div v-if="formData.featuredImage"
+class="image-preview">
+                    <img
+:src="formData.featuredImage" alt="特色图片" />
                     <div class="image-actions">
                       <a-button
                         type="text"
@@ -131,7 +147,8 @@
                       </a-button>
                     </div>
                   </div>
-                  <div v-else class="upload-placeholder">
+                  <div v-else
+class="upload-placeholder">
                     <PlusOutlined />
                     <div class="upload-text">上传图片</div>
                   </div>
@@ -140,7 +157,8 @@
               </a-card>
 
               <!-- 高级设置 -->
-              <a-card title="高级设置" size="small" class="setting-card">
+              <a-card title="高级设置"
+size="small" class="setting-card">
                 <a-form-item>
                   <a-checkbox v-model:checked="formData.isTop">
                     置顶新闻
@@ -154,7 +172,8 @@
               </a-card>
 
               <!-- 统计信息 -->
-              <a-card title="统计信息" size="small" class="setting-card">
+              <a-card title="统计信息"
+size="small" class="setting-card">
                 <div class="stats-info">
                   <div class="stat-item">
                     <span class="label">浏览量：</span>

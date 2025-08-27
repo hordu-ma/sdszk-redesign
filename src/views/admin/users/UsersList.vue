@@ -7,12 +7,17 @@
         <p>管理系统用户账号和权限</p>
       </div>
       <div class="action-section">
-        <a-button type="primary" @click="showCreateModal">
-          <template #icon><PlusOutlined /></template>
+        <a-button type="primary"
+@click="showCreateModal">
+          <template #icon>
+            <PlusOutlined />
+          </template>
           新增用户
         </a-button>
         <a-button @click="exportUsers">
-          <template #icon><DownloadOutlined /></template>
+          <template #icon>
+            <DownloadOutlined />
+          </template>
           导出用户
         </a-button>
       </div>
@@ -26,26 +31,26 @@
             v-model:value="searchForm.keyword"
             placeholder="搜索用户名、邮箱或手机号"
             @search="handleSearch"
-            @pressEnter="handleSearch"
+            @press-enter="handleSearch"
           />
         </a-col>
         <a-col :span="4">
           <a-select
             v-model:value="searchForm.status"
             placeholder="状态筛选"
-            allowClear
+            allow-clear
             @change="handleSearch"
           >
-            <a-select-option value="active">正常</a-select-option>
-            <a-select-option value="inactive">禁用</a-select-option>
-            <a-select-option value="banned">封禁</a-select-option>
+            <a-select-option value="active"> 正常 </a-select-option>
+            <a-select-option value="inactive"> 禁用 </a-select-option>
+            <a-select-option value="banned"> 封禁 </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="4">
           <a-select
             v-model:value="searchForm.role"
             placeholder="角色筛选"
-            allowClear
+            allow-clear
             @change="handleSearch"
           >
             <a-select-option
@@ -60,21 +65,23 @@
         <a-col :span="8">
           <a-range-picker
             v-model:value="dateRange"
-            @change="handleDateChange"
             placeholder="注册时间"
+            @change="handleDateChange"
           />
         </a-col>
       </a-row>
     </div>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedRowKeys.length > 0" class="batch-actions">
+    <div v-if="selectedRowKeys.length > 0"
+class="batch-actions">
       <a-space>
         <span>已选择 {{ selectedRowKeys.length }} 项</span>
-        <a-button @click="batchUpdateStatus('active')">批量启用</a-button>
-        <a-button @click="batchUpdateStatus('inactive')">批量禁用</a-button>
-        <a-button danger @click="batchDelete">批量删除</a-button>
-        <a-button @click="clearSelection">取消选择</a-button>
+        <a-button @click="batchUpdateStatus('active')"> 批量启用 </a-button>
+        <a-button @click="batchUpdateStatus('inactive')"> 批量禁用 </a-button>
+        <a-button
+danger @click="batchDelete"> 批量删除 </a-button>
+        <a-button @click="clearSelection"> 取消选择 </a-button>
       </a-space>
     </div>
 
@@ -91,39 +98,52 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'avatar'">
-            <a-avatar :src="record.avatar" :size="40">
+            <a-avatar :src="record.avatar"
+:size="40">
               {{ record.username?.charAt(0)?.toUpperCase() }}
             </a-avatar>
           </template>
 
           <template v-else-if="column.key === 'userInfo'">
             <div class="user-info">
-              <div class="username">{{ record.username }}</div>
-              <div class="email">{{ record.email }}</div>
-              <div v-if="record.phone" class="phone">{{ record.phone }}</div>
+              <div class="username">
+                {{ record.username }}
+              </div>
+              <div class="email">
+                {{ record.email }}
+              </div>
+              <div v-if="record.phone"
+class="phone">
+                {{ record.phone }}
+              </div>
             </div>
           </template>
 
           <template v-else-if="column.key === 'status'">
             <a-tag
               :color="getStatusColor(record.status)"
-              @click="quickToggleStatus(record)"
               style="cursor: pointer"
+              @click="quickToggleStatus(record)"
             >
               {{ getStatusText(record.status) }}
             </a-tag>
           </template>
 
           <template v-else-if="column.key === 'role'">
-            <a-tag color="blue">{{ getRoleDisplayName(record.role) }}</a-tag>
+            <a-tag color="blue">
+              {{ getRoleDisplayName(record.role) }}
+            </a-tag>
           </template>
 
           <template v-else-if="column.key === 'lastLogin'">
             <div v-if="record.lastLoginAt">
               <div>{{ formatDate(record.lastLoginAt) }}</div>
-              <div class="text-gray-500 text-xs">{{ record.lastLoginIp }}</div>
+              <div class="text-gray-500 text-xs">
+                {{ record.lastLoginIp }}
+              </div>
             </div>
-            <span v-else class="text-gray-400">从未登录</span>
+            <span v-else
+class="text-gray-400">从未登录</span>
           </template>
 
           <template v-else-if="column.key === 'loginCount'">
@@ -135,22 +155,26 @@
 
           <template v-else-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link" size="small" @click="viewUser(record)">
+              <a-button type="link"
+size="small" @click="viewUser(record)">
                 查看
               </a-button>
-              <a-button type="link" size="small" @click="editUser(record)">
+              <a-button type="link"
+size="small" @click="editUser(record)">
                 编辑
               </a-button>
               <a-dropdown>
-                <a-button type="link" size="small">
+                <a-button type="link"
+size="small">
                   更多 <DownOutlined />
                 </a-button>
                 <template #overlay>
                   <a-menu @click="onMenuClick(record)">
-                    <a-menu-item key="resetPassword">重置密码</a-menu-item>
-                    <a-menu-item key="viewLogs">查看日志</a-menu-item>
+                    <a-menu-item key="resetPassword"> 重置密码 </a-menu-item>
+                    <a-menu-item key="viewLogs"> 查看日志 </a-menu-item>
                     <a-menu-divider />
-                    <a-menu-item key="delete" danger>删除用户</a-menu-item>
+                    <a-menu-item
+key="delete" danger> 删除用户 </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -165,25 +189,27 @@
       v-model:open="modalVisible"
       :title="isEditing ? '编辑用户' : '创建用户'"
       :confirm-loading="modalLoading"
+      width="600px"
       @ok="handleSubmit"
       @cancel="resetForm"
-      width="600px"
     >
       <a-form
+        ref="userFormRef"
         :model="userForm"
         :rules="userFormRules"
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
-        ref="userFormRef"
       >
-        <a-form-item label="用户名" name="username">
+        <a-form-item label="用户名"
+name="username">
           <a-input
             v-model:value="userForm.username"
             placeholder="请输入用户名"
           />
         </a-form-item>
 
-        <a-form-item label="邮箱" name="email">
+        <a-form-item label="邮箱"
+name="email">
           <a-input
             v-model:value="userForm.email"
             type="email"
@@ -191,19 +217,24 @@
           />
         </a-form-item>
 
-        <a-form-item label="手机号" name="phone">
-          <a-input v-model:value="userForm.phone" placeholder="请输入手机号" />
+        <a-form-item label="手机号"
+name="phone">
+          <a-input v-model:value="userForm.phone"
+placeholder="请输入手机号" />
         </a-form-item>
 
-        <a-form-item v-if="!isEditing" label="密码" name="password">
+        <a-form-item v-if="!isEditing"
+label="密码" name="password">
           <a-input-password
             v-model:value="userForm.password"
             placeholder="请输入密码"
           />
         </a-form-item>
 
-        <a-form-item label="角色" name="role">
-          <a-select v-model:value="userForm.role" placeholder="请选择角色">
+        <a-form-item label="角色"
+name="role">
+          <a-select v-model:value="userForm.role"
+placeholder="请选择角色">
             <a-select-option
               v-for="role in roles"
               :key="role.name"
@@ -214,17 +245,19 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item label="状态" name="status">
+        <a-form-item label="状态"
+name="status">
           <a-radio-group v-model:value="userForm.status">
-            <a-radio value="active">正常</a-radio>
-            <a-radio value="inactive">禁用</a-radio>
-            <a-radio value="banned">封禁</a-radio>
+            <a-radio value="active"> 正常 </a-radio>
+            <a-radio value="inactive"> 禁用 </a-radio>
+            <a-radio value="banned"> 封禁 </a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="权限" name="permissions">
+        <a-form-item label="权限"
+name="permissions">
           <a-tree
-            v-model:checkedKeys="userForm.permissions"
+            v-model:checked-keys="userForm.permissions"
             :tree-data="permissionTree"
             checkable
             :default-expand-all="true"
@@ -247,19 +280,21 @@
       @cancel="passwordModalVisible = false"
     >
       <a-form
+        ref="passwordFormRef"
         :model="passwordForm"
         :rules="passwordFormRules"
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
-        ref="passwordFormRef"
       >
-        <a-form-item label="新密码" name="newPassword">
+        <a-form-item label="新密码"
+name="newPassword">
           <a-input-password
             v-model:value="passwordForm.newPassword"
             placeholder="请输入新密码"
           />
         </a-form-item>
-        <a-form-item label="确认密码" name="confirmPassword">
+        <a-form-item label="确认密码"
+name="confirmPassword">
           <a-input-password
             v-model:value="passwordForm.confirmPassword"
             placeholder="请再次输入新密码"
@@ -508,7 +543,7 @@ const loadPermissions = async () => {
           name: p.name,
           displayName: p.displayName,
         })),
-      })
+      }),
     );
   } catch (error) {
     console.error("权限加载错误:", error);
@@ -672,7 +707,7 @@ const handleResetPassword = async () => {
     if (currentUserId.value) {
       await adminUserApi.resetPassword(
         currentUserId.value,
-        passwordForm.newPassword
+        passwordForm.newPassword,
       );
       message.success("密码重置成功");
       passwordModalVisible.value = false;

@@ -1,22 +1,25 @@
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium, FullConfig } from "@playwright/test";
 
 /**
  * Playwright 全局配置
  * 在所有测试运行前执行的设置
  */
 async function globalSetup(config: FullConfig) {
-  console.log('🚀 启动 Playwright 全局配置...');
+  console.log("🚀 启动 Playwright 全局配置...");
 
   // 等待开发服务器启动
-  await waitForServer('http://localhost:5173', 30000);
+  await waitForServer("http://localhost:5173", 30000);
 
-  console.log('✅ 全局配置完成');
+  console.log("✅ 全局配置完成");
 }
 
 /**
  * 等待服务器启动
  */
-async function waitForServer(url: string, timeout: number = 30000): Promise<void> {
+async function waitForServer(
+  url: string,
+  timeout: number = 30000,
+): Promise<void> {
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
@@ -25,8 +28,8 @@ async function waitForServer(url: string, timeout: number = 30000): Promise<void
       const page = await browser.newPage();
 
       const response = await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: 5000
+        waitUntil: "networkidle",
+        timeout: 5000,
       });
 
       await browser.close();
@@ -39,7 +42,7 @@ async function waitForServer(url: string, timeout: number = 30000): Promise<void
       // 服务器还未就绪，继续等待
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   throw new Error(`❌ 服务器 ${url} 在 ${timeout}ms 内未能启动`);

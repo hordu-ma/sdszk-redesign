@@ -1,21 +1,21 @@
 // Share.js - 分享模型
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const shareSchema = new mongoose.Schema(
   {
     resource: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Resource',
+      ref: "Resource",
       required: true,
     },
     sharedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     shareType: {
       type: String,
-      enum: ['email', 'link', 'wechat'],
+      enum: ["email", "link", "wechat"],
       required: true,
     },
     recipientEmail: {
@@ -23,9 +23,11 @@ const shareSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (email) {
-          return email ? /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) : true
+          return email
+            ? /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
+            : true;
         },
-        message: '请提供有效的电子邮件地址',
+        message: "请提供有效的电子邮件地址",
       },
     },
     message: {
@@ -39,8 +41,8 @@ const shareSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'sent', 'failed'],
-      default: 'pending',
+      enum: ["pending", "sent", "failed"],
+      default: "pending",
     },
     accessCount: {
       type: Number,
@@ -49,9 +51,9 @@ const shareSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
-)
+  },
+);
 
-const Share = mongoose.model('Share', shareSchema)
+const Share = mongoose.model("Share", shareSchema);
 
-export default Share
+export default Share;

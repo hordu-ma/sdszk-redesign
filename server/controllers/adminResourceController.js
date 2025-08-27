@@ -36,7 +36,7 @@ export const getAdminResourceList = async (req, res) => {
               limit: parseInt(limit),
               total: 0,
             },
-            "获取资源列表成功"
+            "获取资源列表成功",
           );
         }
       }
@@ -108,7 +108,7 @@ export const getAdminResourceList = async (req, res) => {
         limit: parseInt(limit),
         total,
       },
-      "获取资源列表成功"
+      "获取资源列表成功",
     );
   } catch (err) {
     console.error("获取管理员资源列表失败:", err);
@@ -121,7 +121,7 @@ export const getAdminResourceDetail = async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id).populate(
       "category",
-      "name key color description"
+      "name key color description",
     );
 
     if (!resource) {
@@ -386,16 +386,19 @@ export const updateAdminResource = async (req, res) => {
     if (fileType !== undefined) updateData.mimeType = fileType;
     if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
     if (type !== undefined) updateData.type = type;
-    if (publishDate !== undefined) updateData.publishDate = new Date(publishDate);
+    if (publishDate !== undefined)
+      updateData.publishDate = new Date(publishDate);
     if (accessLevel !== undefined) updateData.accessLevel = accessLevel;
     if (allowDownload !== undefined) updateData.allowDownload = allowDownload;
     if (allowComment !== undefined) updateData.allowComment = allowComment;
-    if (sortOrder !== undefined) updateData.sortOrder = parseInt(sortOrder) || 0;
+    if (sortOrder !== undefined)
+      updateData.sortOrder = parseInt(sortOrder) || 0;
     if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
     if (status !== undefined) updateData.isPublished = status === "published";
     if (isTop !== undefined) updateData.isTop = isTop;
     if (isFeatured !== undefined) updateData.featured = isFeatured;
-    if (downloadPermission !== undefined) updateData.downloadPermission = downloadPermission;
+    if (downloadPermission !== undefined)
+      updateData.downloadPermission = downloadPermission;
 
     // 更新修改时间和修改者
     updateData.updatedAt = new Date();
@@ -404,11 +407,9 @@ export const updateAdminResource = async (req, res) => {
     }
 
     // 执行更新
-    const updatedResource = await Resource.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    ).populate("category", "name key color description");
+    const updatedResource = await Resource.findByIdAndUpdate(id, updateData, {
+      new: true,
+    }).populate("category", "name key color description");
 
     const resourceObj = updatedResource.toObject();
     const transformedResource = {

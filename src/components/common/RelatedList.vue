@@ -2,22 +2,26 @@
   <div class="related-list">
     <div class="block-header">
       <h3>
-        <i :class="icon" class="header-icon"></i>
+        <i
+:class="icon" class="header-icon" />
         <span class="title-text">{{ title }}</span>
       </h3>
     </div>
     <ul class="styled-list">
-      <li v-for="item in items" :key="item.id">
-        <router-link :to="getItemLink(item)" class="info-link">
+      <li v-for="item in items"
+:key="item.id">
+        <router-link :to="getItemLink(item)"
+class="info-link">
           <div class="info-content">
             <div class="info-header">
               <span class="info-title">{{ item.title }}</span>
             </div>
             <div class="info-footer">
-              <span class="info-date" v-if="item.date">
+              <span v-if="item.date" class="info-date">
                 发布日期：{{ formatDate(item.date) }}
               </span>
-              <slot name="footer" :item="item"></slot>
+              <slot
+name="footer" :item="item" />
             </div>
           </div>
         </router-link>
@@ -27,17 +31,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 interface RelatedItem {
-  id: string | number
-  title: string
-  date?: string | Date
-  [key: string]: any
+  id: string | number;
+  title: string;
+  date?: string | Date;
+  [key: string]: any;
 }
 
 export default defineComponent({
-  name: 'RelatedList',
+  name: "RelatedList",
   props: {
     title: {
       type: String,
@@ -45,7 +49,7 @@ export default defineComponent({
     },
     icon: {
       type: String,
-      default: 'fas fa-list',
+      default: "fas fa-list",
     },
     items: {
       type: Array as () => RelatedItem[],
@@ -53,18 +57,18 @@ export default defineComponent({
     },
     linkPrefix: {
       type: String,
-      default: '',
+      default: "",
     },
   },
   methods: {
     formatDate(date: string | Date): string {
-      return new Date(date).toLocaleDateString('zh-CN')
+      return new Date(date).toLocaleDateString("zh-CN");
     },
     getItemLink(item: RelatedItem): string {
-      return `${this.linkPrefix}/${item.id}`
+      return `${this.linkPrefix}/${item.id}`;
     },
   },
-})
+});
 </script>
 
 <style scoped>

@@ -4,21 +4,27 @@
 
     <news-section />
 
-    <info-section :theories="theories" :researches="researches" />
+    <info-section :theories="theories"
+:researches="researches" />
 
     <!-- 影像思政组件 -->
     <div class="video-section">
       <h3>
-        <i class="fas fa-video header-icon"></i>
+        <i class="fas fa-video header-icon" />
         <span class="title-text">影像思政</span>
-        <router-link to="/resources?category=video" class="more-link">
-          更多<i class="fas fa-angle-right"></i>
+        <router-link to="/resources?category=video"
+class="more-link">
+          更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
       <div class="video-grid">
-        <div v-for="video in videos" :key="video.id" class="video-card">
-          <video-player :src="video.fileUrl" :poster="video.poster || ''" />
-          <p class="video-title">{{ video.title }}</p>
+        <div v-for="video in videos"
+:key="video.id" class="video-card">
+          <video-player :src="video.fileUrl"
+:poster="video.poster || ''" />
+          <p class="video-title">
+            {{ video.title }}
+          </p>
         </div>
       </div>
     </div>
@@ -26,14 +32,16 @@
     <!-- 十佳百优思政教师组件 -->
     <div class="teachers-section">
       <h3>
-        <i class="fas fa-user-tie header-icon"></i>
+        <i class="fas fa-user-tie header-icon" />
         <span class="title-text">'十佳百优'思政教师</span>
-        <router-link to="/teachers" class="more-link">
-          更多<i class="fas fa-angle-right"></i>
+        <router-link to="/teachers"
+class="more-link">
+          更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
       <div class="teachers-grid">
-        <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
+        <div v-for="teacher in teachers"
+:key="teacher.id" class="teacher-card">
           <img
             :src="teacher.avatar"
             :alt="teacher.name"
@@ -41,7 +49,9 @@
           />
           <h4>{{ teacher.name }}</h4>
           <p>{{ teacher.title }}</p>
-          <p class="teacher-institution">{{ teacher.description }}</p>
+          <p class="teacher-institution">
+            {{ teacher.description }}
+          </p>
         </div>
       </div>
     </div>
@@ -49,10 +59,11 @@
     <!-- 一体化共同体组件 -->
     <div class="community-section">
       <h3>
-        <i class="fas fa-university header-icon"></i>
+        <i class="fas fa-university header-icon" />
         <span class="title-text">一体化共同体</span>
-        <router-link to="/community" class="more-link">
-          更多<i class="fas fa-angle-right"></i>
+        <router-link to="/community"
+class="more-link">
+          更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
       <div class="school-logos">
@@ -63,7 +74,8 @@
           target="_blank"
           class="school-logo"
         >
-          <img :src="school.logo" :alt="school.name" />
+          <img
+:src="school.logo" :alt="school.name" />
           <p class="school-name">{{ school.name }}</p>
         </a>
       </div>

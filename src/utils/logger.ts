@@ -74,7 +74,7 @@ class Logger {
     if (typeof window !== "undefined" && (window as any).Sentry) {
       (window as any).Sentry.captureMessage(
         `[${level}] ${message}`,
-        level.toLowerCase() as any
+        level.toLowerCase() as any,
       );
     }
 

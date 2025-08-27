@@ -57,9 +57,9 @@
             allow-clear
             @change="handleSearch"
           >
-            <a-select-option value="published">已发布</a-select-option>
-            <a-select-option value="draft">草稿</a-select-option>
-            <a-select-option value="archived">归档</a-select-option>
+            <a-select-option value="published"> 已发布 </a-select-option>
+            <a-select-option value="draft"> 草稿 </a-select-option>
+            <a-select-option value="archived"> 归档 </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="4">
@@ -69,34 +69,38 @@
             allow-clear
             @change="handleSearch"
           >
-            <a-select-option value="document">文档</a-select-option>
-            <a-select-option value="video">视频</a-select-option>
-            <a-select-option value="image">图片</a-select-option>
-            <a-select-option value="audio">音频</a-select-option>
-            <a-select-option value="other">其他</a-select-option>
+            <a-select-option value="document"> 文档 </a-select-option>
+            <a-select-option value="video"> 视频 </a-select-option>
+            <a-select-option value="image"> 图片 </a-select-option>
+            <a-select-option value="audio"> 音频 </a-select-option>
+            <a-select-option value="other"> 其他 </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="6">
           <a-range-picker
             v-model:value="filters.dateRange"
-            @change="handleSearch"
             style="width: 100%"
+            @change="handleSearch"
           />
         </a-col>
       </a-row>
     </div>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedRowKeys.length > 0" class="batch-actions">
+    <div v-if="selectedRowKeys.length > 0"
+class="batch-actions">
       <a-space>
         <span>已选择 {{ selectedRowKeys.length }} 项</span>
-        <a-button size="small" @click="handleBatchPublish">批量发布</a-button>
-        <a-button size="small" @click="handleBatchArchive">批量归档</a-button>
+        <a-button
+size="small" @click="handleBatchPublish"> 批量发布 </a-button>
+        <a-button
+size="small" @click="handleBatchArchive"> 批量归档 </a-button>
         <a-popconfirm
           title="确定要删除选中的资源吗？"
           @confirm="handleBatchDelete"
         >
-          <a-button size="small" danger>批量删除</a-button>
+          <a-button
+size="small" danger> 批量删除 </a-button>
         </a-popconfirm>
       </a-space>
     </div>
@@ -117,7 +121,8 @@
             <div class="resource-title">
               <a @click="handlePreview(record)">{{ record.title }}</a>
               <div class="resource-meta">
-                <a-tag size="small" :color="getTypeColor(record.type)">
+                <a-tag size="small"
+:color="getTypeColor(record.type)">
                   {{ getTypeText(record.type) }}
                 </a-tag>
                 <span class="author">{{ record.author?.name }}</span>
@@ -126,7 +131,8 @@
           </template>
 
           <template v-if="column.key === 'category'">
-            <a-tag v-if="record.category" :color="record.category.color">
+            <a-tag v-if="record.category"
+:color="record.category.color">
               {{ record.category.name }}
             </a-tag>
             <span v-else>-</span>
@@ -157,11 +163,13 @@
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link" size="small" @click="handleEdit(record)">
+              <a-button type="link"
+size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
               <a-dropdown>
-                <a-button type="link" size="small">
+                <a-button type="link"
+size="small">
                   更多
                   <DownOutlined />
                 </a-button>
@@ -176,21 +184,22 @@
                       下载
                     </a-menu-item>
                     <a-menu-item
-                      key="publish"
                       v-if="record.status !== 'published'"
+                      key="publish"
                     >
                       <CheckOutlined />
                       发布
                     </a-menu-item>
                     <a-menu-item
-                      key="archive"
                       v-if="record.status === 'published'"
+                      key="archive"
                     >
                       <InboxOutlined />
                       归档
                     </a-menu-item>
                     <a-menu-divider />
-                    <a-menu-item key="delete" class="danger-action">
+                    <a-menu-item key="delete"
+class="danger-action">
                       <DeleteOutlined />
                       删除
                     </a-menu-item>
@@ -210,7 +219,8 @@
       :footer="null"
       width="800px"
     >
-      <div v-if="previewResource" class="resource-preview">
+      <div v-if="previewResource"
+class="resource-preview">
         <div class="preview-meta">
           <a-space>
             <a-tag :color="getTypeColor(previewResource.type || 'other')">
@@ -224,11 +234,14 @@
             >
           </a-space>
         </div>
-        <div class="preview-content" v-html="previewResource.description"></div>
-        <div v-if="previewResource.tags?.length" class="preview-tags">
-          <a-tag v-for="tag in previewResource.tags" :key="tag">{{
-            tag
-          }}</a-tag>
+        <div
+class="preview-content" v-html="previewResource.description" />
+        <div v-if="previewResource.tags?.length"
+class="preview-tags">
+          <a-tag v-for="tag in previewResource.tags"
+:key="tag">
+            {{ tag }}
+          </a-tag>
         </div>
       </div>
     </a-modal>

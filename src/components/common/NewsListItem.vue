@@ -3,45 +3,57 @@
   <div class="news-item">
     <div class="news-content">
       <h3 class="news-title">
-        <router-link :to="`/news/detail/${(news as any)._id || news.id}`">{{
-          news.title
-        }}</router-link>
+        <router-link :to="`/news/detail/${(news as any)._id || news.id}`">
+          {{ news.title }}
+        </router-link>
       </h3>
-      <p class="news-summary" v-if="news.summary">{{ news.summary }}</p>
+      <p v-if="news.summary" class="news-summary">
+        {{ news.summary }}
+      </p>
       <div class="news-meta">
-        <span class="news-date">{{ formatDate(news.publishDate || news.createdAt) }}</span>
-        <span class="news-author" v-if="news.author"
-          >作者：{{
-            typeof news.author === 'object' ? (news.author as any).username : news.author
-          }}</span
+        <span class="news-date">{{
+          formatDate(news.publishDate || news.createdAt)
+        }}</span>
+        <span v-if="news.author"
+class="news-author"
+        >作者：{{
+            typeof news.author === "object"
+              ? (news.author as any).username
+            : news.author
+        }}</span>
+        <span v-if="news.viewCount"
+class="news-views"
+          >阅读：{{ news.viewCount }}</span
         >
-        <span class="news-views" v-if="news.viewCount">阅读：{{ news.viewCount }}</span>
         <span
-          class="news-category"
           v-if="
             news.category &&
-            (typeof (news.category as any) === 'object'
-              ? (news.category as any).name
-              : news.category)
+              (typeof (news.category as any) === 'object'
+                ? (news.category as any).name
+                : news.category)
           "
+          class="news-category"
           >分类：{{
-            typeof (news.category as any) === 'object' ? (news.category as any).name : news.category
+            typeof (news.category as any) === "object"
+            ? (news.category as any).name
+            : news.category
           }}</span
         >
       </div>
     </div>
-    <div class="news-cover" v-if="news.cover">
-      <img :src="news.cover" :alt="news.title" />
+    <div v-if="news.cover" class="news-cover">
+      <img
+:src="news.cover" :alt="news.title" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import type { News } from '@/types/news'
+import { defineComponent } from "vue";
+import type { News } from "@/types/news";
 
 export default defineComponent({
-  name: 'NewsListItem',
+  name: "NewsListItem",
   props: {
     news: {
       type: Object as () => News,
@@ -50,14 +62,14 @@ export default defineComponent({
   },
   methods: {
     formatDate(date: string) {
-      return new Date(date).toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })
+      return new Date(date).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
     },
   },
-})
+});
 </script>
 
 <style scoped>

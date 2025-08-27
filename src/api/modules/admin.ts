@@ -97,7 +97,7 @@ class DashboardApi extends BaseApi {
 
   // 获取访问量趋势
   public getVisitTrends(
-    period: number = 7
+    period: number = 7,
   ): Promise<ApiResponse<VisitTrend[]>> {
     return this.get("/admin/dashboard/visit-trends", {
       params: { period },
@@ -106,7 +106,7 @@ class DashboardApi extends BaseApi {
 
   // 获取内容分布
   public getContentDistribution(
-    type: "category" | "status"
+    type: "category" | "status",
   ): Promise<ApiResponse<ContentDistribution[]>> {
     return this.get("/admin/dashboard/content-distribution", {
       params: { type },
@@ -115,7 +115,7 @@ class DashboardApi extends BaseApi {
 
   // 获取最新动态
   public getRecentActivities(
-    params?: PaginationParams
+    params?: PaginationParams,
   ): Promise<ApiResponse<{ items: RecentActivity[] }>> {
     return this.get("/admin/dashboard/activities", { params });
   }
@@ -137,7 +137,7 @@ class DashboardApi extends BaseApi {
 
   // 导出报告
   public exportReport(
-    params: ExportReportParams
+    params: ExportReportParams,
   ): Promise<ApiResponse<{ downloadUrl: string }>> {
     return this.post("/admin/dashboard/export-report", params);
   }

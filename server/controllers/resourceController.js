@@ -4,7 +4,12 @@ import ActivityLog from "../models/ActivityLog.js";
 import ResourceCategory from "../models/ResourceCategory.js";
 import response from "../utils/responseHelper.js";
 import mongoose from "mongoose";
-import { AppError, BadRequestError, UnauthorizedError, NotFoundError } from "../utils/appError.js";
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../utils/appError.js";
 
 // 字段映射函数：前端字段名 -> 后端字段名
 const mapFrontendToBackend = (data) => {
@@ -30,8 +35,6 @@ const mapFrontendToBackend = (data) => {
     mapped.mimeType = mapped.fileType;
     delete mapped.fileType;
   }
-
-
 
   // status 到 isPublished 的转换
   if (mapped.status !== undefined) {
@@ -123,8 +126,6 @@ const mapBackendToFrontend = (data) => {
     delete mapped.mimeType;
   }
 
-
-
   // isPublished 到 status 的转换
   if (mapped.isPublished !== undefined) {
     mapped.status = mapped.isPublished ? "published" : "draft";
@@ -159,14 +160,16 @@ export const getResourceList = async (req, res) => {
               limit: parseInt(limit),
               total: 0,
             },
-            "获取资源列表成功"
+            "获取资源列表成功",
           );
         }
       }
     }
 
     const resources = await Resource.find(query)
-      .select("title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType") // 限制返回字段
+      .select(
+        "title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType",
+      ) // 限制返回字段
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
@@ -176,7 +179,7 @@ export const getResourceList = async (req, res) => {
 
     // 应用字段映射：后端 -> 前端
     const mappedResources = resources.map((resource) =>
-      mapBackendToFrontend(resource)
+      mapBackendToFrontend(resource),
     );
 
     return response.paginated(
@@ -187,7 +190,7 @@ export const getResourceList = async (req, res) => {
         limit: parseInt(limit),
         total,
       },
-      "获取资源列表成功"
+      "获取资源列表成功",
     );
   } catch (err) {
     return response.serverError(res, "获取资源列表失败", err);
@@ -269,7 +272,7 @@ export const updateResource = async (req, res, next) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!resource) {
@@ -662,7 +665,7 @@ export const updateResourceStatus = async (req, res, next) => {
         isPublished,
         updatedAt: new Date(),
       },
-      { new: true }
+      { new: true },
     ).populate("category", "name slug");
 
     // 记录活动日志

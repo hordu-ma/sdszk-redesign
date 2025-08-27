@@ -49,7 +49,7 @@ const api = axios.create({
 console.log("🚀 API Configuration:");
 console.log(
   "- baseURL:",
-  API_CONFIG.baseURL || (import.meta.env.DEV ? "(使用代理)" : "/")
+  API_CONFIG.baseURL || (import.meta.env.DEV ? "(使用代理)" : "/"),
 );
 console.log("- timeout:", API_CONFIG.timeout);
 console.log("- Environment:", import.meta.env.MODE);
@@ -64,7 +64,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // 响应拦截器：处理错误和重试
@@ -85,7 +85,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // 添加响应转换器

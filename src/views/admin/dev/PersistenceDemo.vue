@@ -11,7 +11,8 @@
       <el-row :gutter="20">
         <!-- 用户状态演示 -->
         <el-col :span="12">
-          <el-card shadow="never" class="inner-card">
+          <el-card shadow="never"
+class="inner-card">
             <template #header>
               <h3>👤 用户状态 (user store)</h3>
             </template>
@@ -60,7 +61,7 @@
             </div>
 
             <div class="action-buttons">
-              <el-button @click="clearUserAuth" type="danger" size="small">
+              <el-button type="danger" @click="clearUserAuth" size="small">
                 清除认证状态
               </el-button>
             </div>
@@ -69,7 +70,8 @@
 
         <!-- 状态对比演示 -->
         <el-col :span="12">
-          <el-card shadow="never" class="inner-card">
+          <el-card shadow="never"
+class="inner-card">
             <template #header>
               <h3>📊 状态对比演示</h3>
             </template>
@@ -109,13 +111,13 @@
             <div class="state-section">
               <h4>🧪 测试操作</h4>
               <div class="test-actions">
-                <el-button @click="simulateLogin" type="success" size="small">
+                <el-button type="success" @click="simulateLogin" size="small">
                   模拟登录
                 </el-button>
-                <el-button @click="simulateLoading" type="warning" size="small">
+                <el-button type="warning" @click="simulateLoading" size="small">
                   模拟加载
                 </el-button>
-                <el-button @click="clearUserAuth" type="danger" size="small">
+                <el-button type="danger" @click="clearUserAuth" size="small">
                   清除数据
                 </el-button>
               </div>
@@ -157,7 +159,8 @@
           </template>
         </el-alert>
 
-        <div class="current-state" style="margin-top: 15px">
+        <div class="current-state"
+style="margin-top: 15px">
           <h4>🔍 当前持久化数据预览:</h4>
           <el-row :gutter="10">
             <el-col :span="24">
@@ -169,12 +172,13 @@
           </el-row>
         </div>
 
-        <div class="refresh-reminder" style="margin-top: 15px">
+        <div class="refresh-reminder"
+style="margin-top: 15px">
           <el-button
-            @click="refreshPage"
             type="warning"
             size="large"
             style="width: 100%"
+            @click="refreshPage"
           >
             🔄 刷新页面测试持久化效果
           </el-button>

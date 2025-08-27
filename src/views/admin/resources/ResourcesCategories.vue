@@ -7,7 +7,8 @@
         <p>管理资源分类，包括创建、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button type="primary" @click="showCreateModal">
+        <a-button type="primary"
+@click="showCreateModal">
           <template #icon>
             <PlusOutlined />
           </template>
@@ -29,9 +30,10 @@
           <template v-if="column.key === 'name'">
             <div class="category-name">
               <span class="name-text">{{ record.name }}</span>
-              <a-tag v-if="record.isDefault" color="gold" size="small"
-                >默认</a-tag
-              >
+              <a-tag v-if="record.isDefault"
+color="gold" size="small">
+                默认
+              </a-tag>
             </div>
           </template>
 
@@ -40,7 +42,7 @@
               <div
                 class="color-box"
                 :style="{ backgroundColor: record.color || '#1890ff' }"
-              ></div>
+              />
               <span>{{ record.color || "#1890ff" }}</span>
             </div>
           </template>
@@ -71,15 +73,15 @@
               <a-button
                 type="link"
                 size="small"
-                @click="handleEdit(record)"
                 :disabled="record.isDefault"
+                @click="handleEdit(record)"
               >
                 编辑
               </a-button>
               <a-popconfirm
                 title="确定要删除此分类吗？删除后该分类下的资源将移至未分类。"
-                @confirm="handleDelete(record)"
                 :disabled="record.isDefault"
+                @confirm="handleDelete(record)"
               >
                 <a-button
                   type="link"
@@ -110,7 +112,8 @@
         :rules="modalRules"
         layout="vertical"
       >
-        <a-form-item label="分类标识" name="key">
+        <a-form-item label="分类标识"
+name="key">
           <a-input
             v-model:value="modalForm.key"
             placeholder="请输入分类标识"
@@ -119,7 +122,8 @@
           />
         </a-form-item>
 
-        <a-form-item label="分类名称" name="name">
+        <a-form-item label="分类名称"
+name="name">
           <a-input
             v-model:value="modalForm.name"
             placeholder="请输入分类名称"
@@ -128,7 +132,8 @@
           />
         </a-form-item>
 
-        <a-form-item label="分类描述" name="description">
+        <a-form-item label="分类描述"
+name="description">
           <a-textarea
             v-model:value="modalForm.description"
             placeholder="请输入分类描述（可选）"
@@ -138,18 +143,22 @@
           />
         </a-form-item>
 
-        <a-form-item label="分类颜色" name="color">
+        <a-form-item label="分类颜色"
+name="color">
           <div class="color-picker">
             <a-input
               v-model:value="modalForm.color"
               placeholder="请选择或输入颜色值"
               style="flex: 1"
             />
-            <input type="color" v-model="modalForm.color" class="color-input" />
+            <input v-model="modalForm.color"
+type="color" class="color-input"
+/>
           </div>
         </a-form-item>
 
-        <a-form-item label="排序" name="sort">
+        <a-form-item label="排序"
+name="sort">
           <a-input-number
             v-model:value="modalForm.sort"
             placeholder="数字越小排序越靠前"
@@ -324,7 +333,7 @@ const fetchCategories = async () => {
       "🔢 资源分类数据类型:",
       typeof data,
       "是否为数组:",
-      Array.isArray(data)
+      Array.isArray(data),
     );
 
     if (!Array.isArray(data)) {
@@ -387,7 +396,7 @@ const onStatusChange = (record: ResourceCategory) => (checked: boolean) => {
 // 状态变更
 const handleStatusChange = async (
   record: ResourceCategory & { updating?: boolean },
-  checked: boolean
+  checked: boolean,
 ) => {
   record.updating = true;
   try {

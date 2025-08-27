@@ -1,20 +1,25 @@
 <template>
   <div
     class="admin-sidebar"
-    :class="{ 'admin-sidebar--collapsed': collapsed, 'mobile-visible': isMobileVisible }"
+    :class="{
+      'admin-sidebar--collapsed': collapsed,
+      'mobile-visible': isMobileVisible,
+    }"
   >
     <!-- 顶部Logo区域 -->
     <div class="sidebar-header">
       <div class="logo-container">
-        <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
-        <span v-if="!collapsed" class="logo-text">管理后台</span>
+        <img
+src="@/assets/images/logo.png" alt="Logo" class="logo" />
+        <span v-if="!collapsed"
+class="logo-text">管理后台</span>
       </div>
     </div>
 
     <!-- 菜单列表 -->
     <div class="sidebar-menu">
       <a-menu
-        v-model:selectedKeys="selectedKeys"
+        v-model:selected-keys="selectedKeys"
         mode="inline"
         theme="dark"
         :inline-collapsed="collapsed"
@@ -31,30 +36,32 @@
           <template #icon>
             <FileTextOutlined />
           </template>
-          <template #title>新闻管理</template>
-          <a-menu-item key="/admin/news/list">新闻列表</a-menu-item>
-          <a-menu-item key="/admin/news/create">发布新闻</a-menu-item>
-          <a-menu-item key="/admin/news/categories">分类管理</a-menu-item>
+          <template #title> 新闻管理 </template>
+          <a-menu-item key="/admin/news/list"> 新闻列表 </a-menu-item>
+          <a-menu-item key="/admin/news/create"> 发布新闻 </a-menu-item>
+          <a-menu-item key="/admin/news/categories"> 分类管理 </a-menu-item>
         </a-sub-menu>
 
         <a-sub-menu key="resources">
           <template #icon>
             <FolderOutlined />
           </template>
-          <template #title>资源管理</template>
-          <a-menu-item key="/admin/resources/list">资源列表</a-menu-item>
-          <a-menu-item key="/admin/resources/create">上传资源</a-menu-item>
-          <a-menu-item key="/admin/resources/categories">分类管理</a-menu-item>
+          <template #title> 资源管理 </template>
+          <a-menu-item key="/admin/resources/list"> 资源列表 </a-menu-item>
+          <a-menu-item key="/admin/resources/create"> 上传资源 </a-menu-item>
+          <a-menu-item key="/admin/resources/categories">
+            分类管理
+          </a-menu-item>
         </a-sub-menu>
 
         <a-sub-menu key="users">
           <template #icon>
             <UserOutlined />
           </template>
-          <template #title>用户管理</template>
-          <a-menu-item key="/admin/users/list">用户列表</a-menu-item>
-          <a-menu-item key="/admin/users/roles">角色管理</a-menu-item>
-          <a-menu-item key="/admin/users/permissions">权限管理</a-menu-item>
+          <template #title> 用户管理 </template>
+          <a-menu-item key="/admin/users/list"> 用户列表 </a-menu-item>
+          <a-menu-item key="/admin/users/roles"> 角色管理 </a-menu-item>
+          <a-menu-item key="/admin/users/permissions"> 权限管理 </a-menu-item>
         </a-sub-menu>
 
         <a-menu-item key="/admin/settings">
@@ -69,83 +76,83 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, watch, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   DashboardOutlined,
   FileTextOutlined,
   FolderOutlined,
   UserOutlined,
   SettingOutlined,
-} from '@ant-design/icons-vue'
+} from "@ant-design/icons-vue";
 
 interface Props {
-  collapsed: boolean
+  collapsed: boolean;
 }
 
 interface Emits {
-  (e: 'toggle'): void
-  (e: 'menu-click', path: string): void
+  (e: "toggle"): void;
+  (e: "menu-click", path: string): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const route = useRoute()
-const router = useRouter()
-const selectedKeys = ref<string[]>([])
-const isMobileVisible = ref(false)
+const route = useRoute();
+const router = useRouter();
+const selectedKeys = ref<string[]>([]);
+const isMobileVisible = ref(false);
 
 // 监听路由变化，更新选中的菜单项
 watch(
   () => route.path,
-  newPath => {
-    selectedKeys.value = [newPath]
+  (newPath) => {
+    selectedKeys.value = [newPath];
     // 在移动端，点击菜单后自动隐藏侧边栏
     if (window.innerWidth <= 768) {
-      isMobileVisible.value = false
+      isMobileVisible.value = false;
     }
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
 // 处理菜单点击
 const handleMenuClick = ({ key }: { key: string }) => {
   // 确保所有路径都正确处理
-  if (key.startsWith('/admin/')) {
-    selectedKeys.value = [key]
+  if (key.startsWith("/admin/")) {
+    selectedKeys.value = [key];
     // 直接使用 router 进行导航
-    router.push(key).catch(err => {
-      if (err.name !== 'NavigationDuplicated') {
-        console.error('Navigation error:', err)
+    router.push(key).catch((err) => {
+      if (err.name !== "NavigationDuplicated") {
+        console.error("Navigation error:", err);
       }
-    })
+    });
   } else {
     // 如果是子菜单标识而不是完整路径，则不进行导航
-    console.log('非导航菜单项:', key)
+    console.log("非导航菜单项:", key);
   }
-}
+};
 
 // 监听窗口大小变化
 const handleResize = () => {
-  isMobileVisible.value = window.innerWidth > 768
-}
+  isMobileVisible.value = window.innerWidth > 768;
+};
 
 // 暴露方法给父组件
 defineExpose({
   toggleMobileVisibility: () => {
-    isMobileVisible.value = !isMobileVisible.value
+    isMobileVisible.value = !isMobileVisible.value;
   },
-})
+});
 
 onMounted(() => {
-  window.addEventListener('resize', handleResize)
-  handleResize()
-})
+  window.addEventListener("resize", handleResize);
+  handleResize();
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
+  window.removeEventListener("resize", handleResize);
+});
 </script>
 
 <style scoped lang="scss">

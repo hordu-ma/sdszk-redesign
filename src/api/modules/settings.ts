@@ -56,14 +56,14 @@ export class SettingsApi extends BaseApi {
   // 更新单个设置
   async updateSetting(
     key: string,
-    data: Partial<SiteSetting>
+    data: Partial<SiteSetting>,
   ): Promise<ApiResponse<SiteSetting>> {
     return this.put(`/${key}`, data);
   }
 
   // 批量更新设置
   async bulkUpdateSettings(
-    settings: BulkUpdateSetting[]
+    settings: BulkUpdateSetting[],
   ): Promise<ApiResponse<{ results: BulkUpdateResult[] }>> {
     return this.put("", { settings });
   }

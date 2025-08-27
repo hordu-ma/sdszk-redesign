@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const newsCategorySchema = new mongoose.Schema(
   {
@@ -25,7 +25,7 @@ const newsCategorySchema = new mongoose.Schema(
     },
     color: {
       type: String,
-      default: '#1890ff',
+      default: "#1890ff",
     },
     icon: {
       type: String,
@@ -37,47 +37,51 @@ const newsCategorySchema = new mongoose.Schema(
     isCore: {
       type: Boolean,
       default: false,
-      description: '是否为核心分类（中心动态、通知公告、政策文件）',
+      description: "是否为核心分类（中心动态、通知公告、政策文件）",
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
   },
   {
     timestamps: true,
-  }
-)
+  },
+);
 
 // 创建索引
-newsCategorySchema.index({ order: 1 })
+newsCategorySchema.index({ order: 1 });
 
 // 添加静态方法：获取核心分类
 newsCategorySchema.statics.getCoreCategories = function () {
-  return this.find({ isCore: true }).sort({ order: 1 })
-}
+  return this.find({ isCore: true }).sort({ order: 1 });
+};
 
 // 添加验证：核心分类不能被删除
-newsCategorySchema.pre('deleteOne', { document: true, query: false }, function (next) {
-  if (this.isCore) {
-    next(new Error('核心分类不能被删除'))
-  }
-  next()
-})
+newsCategorySchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  function (next) {
+    if (this.isCore) {
+      next(new Error("核心分类不能被删除"));
+    }
+    next();
+  },
+);
 
 // 添加验证：核心分类的 key 不能被修改
-newsCategorySchema.pre('save', function (next) {
-  if (this.isCore && this.isModified('key')) {
-    next(new Error('核心分类的标识符不能被修改'))
+newsCategorySchema.pre("save", function (next) {
+  if (this.isCore && this.isModified("key")) {
+    next(new Error("核心分类的标识符不能被修改"));
   }
-  next()
-})
+  next();
+});
 
-const NewsCategory = mongoose.model('NewsCategory', newsCategorySchema)
+const NewsCategory = mongoose.model("NewsCategory", newsCategorySchema);
 
-export default NewsCategory
+export default NewsCategory;

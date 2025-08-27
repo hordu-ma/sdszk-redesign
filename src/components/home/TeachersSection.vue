@@ -1,18 +1,23 @@
 <template>
   <div class="teachers-section">
     <h3>
-      <i class="fas fa-user-tie header-icon"></i>
+      <i class="fas fa-user-tie header-icon" />
       <span class="title-text">'十佳百优'思政教师</span>
-      <router-link to="/teachers" class="more-link">
-        更多<i class="fas fa-angle-right"></i>
+      <router-link to="/teachers"
+class="more-link">
+        更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
     <div class="teachers-grid">
-      <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
-        <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
+      <div v-for="teacher in teachers"
+:key="teacher.id" class="teacher-card">
+        <img
+:src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
         <h4>{{ teacher.name }}</h4>
         <p>{{ teacher.title }}</p>
-        <p class="teacher-institution">{{ teacher.description }}</p>
+        <p class="teacher-institution">
+          {{ teacher.description }}
+        </p>
       </div>
     </div>
   </div>
@@ -20,16 +25,16 @@
 
 <script setup lang="ts">
 interface Teacher {
-  id: number
-  name: string
-  title: string
-  avatar: string
-  description: string
+  id: number;
+  name: string;
+  title: string;
+  avatar: string;
+  description: string;
 }
 
 defineProps<{
-  teachers: Teacher[]
-}>()
+  teachers: Teacher[];
+}>();
 </script>
 
 <style scoped>
@@ -43,7 +48,8 @@ defineProps<{
 
 .teachers-section h3 {
   font-family:
-    'STZhongsong', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC', sans-serif;
+    "STZhongsong", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Heiti SC", sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: #fff;

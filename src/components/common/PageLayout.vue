@@ -3,22 +3,24 @@
     <slot name="header">
       <div class="page-header">
         <h1>{{ title }}</h1>
-        <p v-if="description">{{ description }}</p>
+        <p v-if="description">
+          {{ description }}
+        </p>
       </div>
     </slot>
     <div class="page-content">
       <slot name="content">
-        <slot></slot>
+        <slot />
       </slot>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'PageLayout',
+  name: "PageLayout",
   props: {
     title: {
       type: String,
@@ -26,14 +28,14 @@ export default defineComponent({
     },
     description: {
       type: String,
-      default: '',
+      default: "",
     },
     className: {
       type: String,
-      default: '',
+      default: "",
     },
   },
-})
+});
 </script>
 
 <style scoped>
@@ -53,7 +55,7 @@ export default defineComponent({
   font-weight: bold;
   color: #333;
   margin-bottom: 10px;
-  font-family: 'STZhongsong', 'Microsoft YaHei', sans-serif;
+  font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
 }
 
 .page-header p {

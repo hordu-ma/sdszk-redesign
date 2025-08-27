@@ -1,9 +1,12 @@
 <template>
   <div class="breadcrumb-nav">
     <a-breadcrumb>
-      <a-breadcrumb-item v-for="(item, index) in items" :key="index">
+      <a-breadcrumb-item v-for="(item, index) in items"
+:key="index">
         <template v-if="item.link">
-          <router-link :to="item.link">{{ item.title }}</router-link>
+          <router-link :to="item.link">
+            {{ item.title }}
+          </router-link>
         </template>
         <template v-else>
           {{ item.title }}
@@ -14,22 +17,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 interface BreadcrumbItem {
-  title: string
-  link?: string
+  title: string;
+  link?: string;
 }
 
 export default defineComponent({
-  name: 'BreadcrumbNav',
+  name: "BreadcrumbNav",
   props: {
     items: {
       type: Array as () => BreadcrumbItem[],
       required: true,
     },
   },
-})
+});
 </script>
 
 <style scoped>

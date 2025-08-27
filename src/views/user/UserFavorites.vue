@@ -7,8 +7,8 @@
           v-model="selectedCategory"
           placeholder="选择分类"
           clearable
-          @change="handleCategoryChange"
           style="width: 150px; margin-right: 10px"
+          @change="handleCategoryChange"
         >
           <el-option
             v-for="category in categories"
@@ -22,23 +22,27 @@
           v-model="selectedType"
           placeholder="内容类型"
           clearable
-          @change="loadFavorites"
           style="width: 120px; margin-right: 10px"
+          @change="loadFavorites"
         >
-          <el-option label="全部" value="" />
-          <el-option label="新闻资讯" value="news" />
-          <el-option label="资源文件" value="resource" />
-          <el-option label="活动" value="activity" />
+          <el-option label="全部"
+value="" />
+          <el-option label="新闻资讯"
+value="news" />
+          <el-option label="资源文件"
+value="resource" />
+          <el-option label="活动"
+value="activity" />
         </el-select>
 
         <el-input
           v-model="searchKeyword"
           placeholder="搜索收藏内容"
-          @keyup.enter="loadFavorites"
           style="width: 200px; margin-right: 10px"
+          @keyup.enter="loadFavorites"
         >
           <template #suffix>
-            <el-icon @click="loadFavorites" style="cursor: pointer">
+            <el-icon style="cursor: pointer" @click="loadFavorites">
               <Search />
             </el-icon>
           </template>
@@ -50,13 +54,16 @@
           v-if="selectedItems.length > 0"
           type="danger"
           plain
-          @click="batchDelete"
           :loading="loading"
+          @click="batchDelete"
         >
           批量删除 ({{ selectedItems.length }})
         </el-button>
 
-        <el-button type="primary" @click="showCategoryDialog = true"> 管理分类 </el-button>
+        <el-button type="primary"
+@click="showCategoryDialog = true">
+          管理分类
+        </el-button>
       </div>
     </div>
 
@@ -65,25 +72,33 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <div class="stat-card">
-            <div class="stat-number">{{ stats.total || 0 }}</div>
+            <div class="stat-number">
+              {{ stats.total || 0 }}
+            </div>
             <div class="stat-label">总收藏</div>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="stat-card">
-            <div class="stat-number">{{ stats.news || 0 }}</div>
+            <div class="stat-number">
+              {{ stats.news || 0 }}
+            </div>
             <div class="stat-label">新闻资讯</div>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="stat-card">
-            <div class="stat-number">{{ stats.resources || 0 }}</div>
+            <div class="stat-number">
+              {{ stats.resources || 0 }}
+            </div>
             <div class="stat-label">资源文件</div>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="stat-card">
-            <div class="stat-number">{{ stats.activities || 0 }}</div>
+            <div class="stat-number">
+              {{ stats.activities || 0 }}
+            </div>
             <div class="stat-label">活动</div>
           </div>
         </el-col>
@@ -92,21 +107,32 @@
 
     <!-- 收藏列表 -->
     <div class="favorites-list">
-      <el-checkbox v-model="selectAll" @change="handleSelectAll" class="select-all-checkbox">
+      <el-checkbox
+        v-model="selectAll"
+        class="select-all-checkbox"
+        @change="handleSelectAll"
+      >
         全选
       </el-checkbox>
 
-      <div v-if="loading && !favorites.length" class="loading-wrapper">
-        <el-skeleton :rows="5" animated />
+      <div v-if="loading && !favorites.length"
+class="loading-wrapper">
+        <el-skeleton :rows="5"
+animated />
       </div>
 
-      <div v-else-if="!favorites.length" class="empty-state">
+      <div v-else-if="!favorites.length"
+class="empty-state">
         <el-empty description="暂无收藏内容">
-          <el-button type="primary" @click="$router.push('/')"> 去首页逛逛 </el-button>
+          <el-button type="primary"
+@click="$router.push('/')">
+            去首页逛逛
+          </el-button>
         </el-empty>
       </div>
 
-      <div v-else class="favorites-grid">
+      <div v-else
+class="favorites-grid">
         <div
           v-for="item in favorites"
           :key="item._id"
@@ -115,11 +141,12 @@
         >
           <el-checkbox
             :model-value="selectedItems.includes(item._id)"
-            @change="checked => handleItemSelect(item._id, checked)"
             class="item-checkbox"
+            @change="(checked) => handleItemSelect(item._id, checked)"
           />
 
-          <div class="item-content" @click="openResource(item)">
+          <div class="item-content"
+@click="openResource(item)">
             <div class="item-image">
               <img
                 v-if="item.itemId.image"
@@ -127,23 +154,36 @@
                 :alt="item.itemId.title"
                 @error="handleImageError"
               />
-              <div v-else class="default-image">
-                <i :class="getTypeIcon(item.itemType)"></i>
+              <div v-else
+class="default-image">
+                <i :class="getTypeIcon(item.itemType)" />
               </div>
             </div>
 
             <div class="item-info">
-              <h3 class="item-title">{{ item.itemId.title }}</h3>
-              <p v-if="item.itemId.description" class="item-description">
+              <h3 class="item-title">
+                {{ item.itemId.title }}
+              </h3>
+              <p v-if="item.itemId.description"
+class="item-description">
                 {{ item.itemId.description }}
               </p>
 
               <div class="item-meta">
-                <el-tag :type="getTypeColor(item.itemType)" size="small" class="type-tag">
+                <el-tag
+                  :type="getTypeColor(item.itemType)"
+                  size="small"
+                  class="type-tag"
+                >
                   {{ getTypeText(item.itemType) }}
                 </el-tag>
 
-                <el-tag v-if="item.category" size="small" plain class="category-tag">
+                <el-tag
+                  v-if="item.category"
+                  size="small"
+                  plain
+                  class="category-tag"
+                >
                   {{ item.category }}
                 </el-tag>
 
@@ -152,7 +192,8 @@
                 </span>
               </div>
 
-              <div v-if="item.tags && item.tags.length" class="item-tags">
+              <div v-if="item.tags && item.tags.length"
+class="item-tags">
                 <el-tag
                   v-for="tag in item.tags.slice(0, 3)"
                   :key="tag"
@@ -163,36 +204,40 @@
                 >
                   {{ tag }}
                 </el-tag>
-                <span v-if="item.tags.length > 3" class="more-tags">
+                <span v-if="item.tags.length > 3"
+class="more-tags">
                   +{{ item.tags.length - 3 }}
                 </span>
               </div>
 
-              <p v-if="item.notes" class="item-notes">
-                <i class="fas fa-sticky-note"></i>
+              <p v-if="item.notes"
+class="item-notes">
+                <i class="fas fa-sticky-note" />
                 {{ item.notes }}
               </p>
             </div>
           </div>
 
           <div class="item-actions">
-            <el-button type="text" size="small" @click="editFavorite(item)">
-              <i class="fas fa-edit"></i>
+            <el-button type="text"
+size="small" @click="editFavorite(item)">
+              <i class="fas fa-edit" />
             </el-button>
             <el-button
               type="text"
               size="small"
-              @click="deleteFavorite(item._id)"
               class="delete-btn"
+              @click="deleteFavorite(item._id)"
             >
-              <i class="fas fa-trash"></i>
+              <i class="fas fa-trash" />
             </el-button>
           </div>
         </div>
       </div>
 
       <!-- 分页 -->
-      <div v-if="total > 0" class="pagination-wrapper">
+      <div v-if="total > 0"
+class="pagination-wrapper">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
@@ -206,13 +251,22 @@
     </div>
 
     <!-- 分类管理对话框 -->
-    <el-dialog v-model="showCategoryDialog" title="管理收藏分类" width="500px">
+    <el-dialog v-model="showCategoryDialog"
+title="管理收藏分类" width="500px">
       <div class="category-manager">
         <el-form @submit.prevent="addCategory">
           <el-form-item>
-            <el-input v-model="newCategoryName" placeholder="输入新分类名称" maxlength="20">
+            <el-input
+              v-model="newCategoryName"
+              placeholder="输入新分类名称"
+              maxlength="20"
+            >
               <template #append>
-                <el-button type="primary" @click="addCategory" :disabled="!newCategoryName.trim()">
+                <el-button
+                  type="primary"
+                  :disabled="!newCategoryName.trim()"
+                  @click="addCategory"
+                >
                   添加
                 </el-button>
               </template>
@@ -221,15 +275,19 @@
         </el-form>
 
         <div class="category-list">
-          <div v-for="category in userCategories" :key="category" class="category-item">
+          <div
+            v-for="category in userCategories"
+            :key="category"
+            class="category-item"
+          >
             <span>{{ category }}</span>
             <el-button
               type="text"
               size="small"
-              @click="deleteCategory(category)"
               class="delete-category-btn"
+              @click="deleteCategory(category)"
             >
-              <i class="fas fa-times"></i>
+              <i class="fas fa-times" />
             </el-button>
           </div>
         </div>
@@ -237,8 +295,10 @@
     </el-dialog>
 
     <!-- 编辑收藏对话框 -->
-    <el-dialog v-model="showEditDialog" title="编辑收藏" width="600px">
-      <el-form v-if="editingItem" :model="editForm" label-width="80px">
+    <el-dialog v-model="showEditDialog"
+title="编辑收藏" width="600px">
+      <el-form v-if="editingItem"
+:model="editForm" label-width="80px">
         <el-form-item label="分类">
           <el-select
             v-model="editForm.category"
@@ -265,7 +325,12 @@
             placeholder="添加标签"
             style="width: 100%"
           >
-            <el-option v-for="tag in commonTags" :key="tag" :label="tag" :value="tag" />
+            <el-option
+              v-for="tag in commonTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
+            />
           </el-select>
         </el-form-item>
 
@@ -282,17 +347,20 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="showEditDialog = false">取消</el-button>
-        <el-button type="primary" @click="updateFavorite" :loading="loading"> 确定 </el-button>
+        <el-button @click="showEditDialog = false"> 取消 </el-button>
+        <el-button type="primary"
+@click="updateFavorite" :loading="loading">
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, computed, watch } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Search } from "@element-plus/icons-vue";
 import {
   getFavorites,
   deleteFavorite as deleteFavoriteApi,
@@ -302,83 +370,91 @@ import {
   getCategories,
   createCategory,
   deleteCategory as deleteCategoryApi,
-} from '@/services/favorite.service'
+} from "@/services/favorite.service";
 
 // 响应式数据
 // 定义收藏项接口
 interface Favorite {
-  _id: string
-  user: string
-  itemType: 'news' | 'resource'
+  _id: string;
+  user: string;
+  itemType: "news" | "resource";
   itemId: {
-    _id: string
-    title: string
-    description?: string
-    image?: string
-    status: string
-    createdAt: string
-  }
-  category: string
-  tags: string[]
-  notes?: string
-  isPublic: boolean
-  createdAt: string
-  updatedAt: string
+    _id: string;
+    title: string;
+    description?: string;
+    image?: string;
+    status: string;
+    createdAt: string;
+  };
+  category: string;
+  tags: string[];
+  notes?: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 定义统计数据接口
 interface FavoriteStats {
-  total: number
-  news: number
-  resources: number
-  activities: number
+  total: number;
+  news: number;
+  resources: number;
+  activities: number;
 }
 
-const loading = ref(false)
-const favorites = ref<Favorite[]>([])
+const loading = ref(false);
+const favorites = ref<Favorite[]>([]);
 const stats = ref<FavoriteStats>({
   total: 0,
   news: 0,
   resources: 0,
   activities: 0,
-})
-const selectedItems = ref<string[]>([])
-const selectAll = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(12)
-const total = ref(0)
+});
+const selectedItems = ref<string[]>([]);
+const selectAll = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(12);
+const total = ref(0);
 
 // 筛选条件
-const selectedCategory = ref('')
-const selectedType = ref('')
-const searchKeyword = ref('')
+const selectedCategory = ref("");
+const selectedType = ref("");
+const searchKeyword = ref("");
 
 // 分类管理
-const showCategoryDialog = ref(false)
-const userCategories = ref<string[]>([])
-const newCategoryName = ref('')
+const showCategoryDialog = ref(false);
+const userCategories = ref<string[]>([]);
+const newCategoryName = ref("");
 
 // 编辑收藏
-const showEditDialog = ref(false)
-const editingItem = ref<Favorite | null>(null)
+const showEditDialog = ref(false);
+const editingItem = ref<Favorite | null>(null);
 const editForm = reactive({
-  category: '',
+  category: "",
   tags: [] as string[],
-  notes: '',
-})
+  notes: "",
+});
 
 // 常用标签
-const commonTags = ref<string[]>(['重要', '学习', '参考', '收藏', '推荐', '实用', '有趣'])
+const commonTags = ref<string[]>([
+  "重要",
+  "学习",
+  "参考",
+  "收藏",
+  "推荐",
+  "实用",
+  "有趣",
+]);
 
 // 计算属性
 const categories = computed(() => [
-  { label: '全部', value: '' },
-  ...userCategories.value.map(cat => ({ label: cat, value: cat })),
-])
+  { label: "全部", value: "" },
+  ...userCategories.value.map((cat) => ({ label: cat, value: cat })),
+]);
 
 // 加载收藏列表
 const loadFavorites = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const params = {
       page: currentPage.value,
@@ -386,251 +462,257 @@ const loadFavorites = async () => {
       category: selectedCategory.value,
       resourceType: selectedType.value,
       keyword: searchKeyword.value,
-    }
+    };
 
-    const response = await getFavorites(params)
-    favorites.value = response.data || []
-    total.value = response.total || 0
+    const response = await getFavorites(params);
+    favorites.value = response.data || [];
+    total.value = response.total || 0;
 
     // 清空选择
-    selectedItems.value = []
-    selectAll.value = false
+    selectedItems.value = [];
+    selectAll.value = false;
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : '加载收藏失败'
-    ElMessage.error(errorMessage)
+    const errorMessage =
+      error instanceof Error ? error.message : "加载收藏失败";
+    ElMessage.error(errorMessage);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 加载统计数据
 const loadStats = async () => {
   try {
-    const response = await getFavoriteStats()
-    stats.value = response.data || {}
+    const response = await getFavoriteStats();
+    stats.value = response.data || {};
   } catch (error) {
-    console.error('加载统计失败:', error)
+    console.error("加载统计失败:", error);
   }
-}
+};
 
 // 加载用户分类
 const loadCategories = async () => {
   try {
-    const response = await getCategories()
-    userCategories.value = response.data || []
+    const response = await getCategories();
+    userCategories.value = response.data || [];
   } catch (error) {
-    console.error('加载分类失败:', error)
+    console.error("加载分类失败:", error);
   }
-}
+};
 
 // 处理分类变化
 const handleCategoryChange = () => {
-  currentPage.value = 1
-  loadFavorites()
-}
+  currentPage.value = 1;
+  loadFavorites();
+};
 
 // 全选处理
 const handleSelectAll = (checked: boolean | string | number) => {
-  const isChecked = Boolean(checked)
+  const isChecked = Boolean(checked);
   if (isChecked) {
-    selectedItems.value = favorites.value.map(item => item._id)
+    selectedItems.value = favorites.value.map((item) => item._id);
   } else {
-    selectedItems.value = []
+    selectedItems.value = [];
   }
-}
+};
 
 // 单项选择处理
 const handleItemSelect = (id: string, checked: boolean | string | number) => {
-  const isChecked = Boolean(checked)
+  const isChecked = Boolean(checked);
   if (isChecked) {
-    selectedItems.value.push(id)
+    selectedItems.value.push(id);
   } else {
-    const index = selectedItems.value.indexOf(id)
+    const index = selectedItems.value.indexOf(id);
     if (index > -1) {
-      selectedItems.value.splice(index, 1)
+      selectedItems.value.splice(index, 1);
     }
   }
-}
+};
 
 // 打开资源
 const openResource = (item: any) => {
   // 根据类型构建URL
-  let url = ''
-  if (item.itemType === 'news') {
-    url = `/news/${item.itemId._id}`
-  } else if (item.itemType === 'resource') {
-    url = `/resources/${item.itemId._id}`
+  let url = "";
+  if (item.itemType === "news") {
+    url = `/news/${item.itemId._id}`;
+  } else if (item.itemType === "resource") {
+    url = `/resources/${item.itemId._id}`;
   }
 
   if (url) {
-    window.open(url, '_blank')
+    window.open(url, "_blank");
   }
-}
+};
 
 // 删除单个收藏
 const deleteFavorite = async (id: string) => {
   try {
-    await ElMessageBox.confirm('确定要删除这个收藏吗？', '确认删除', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm("确定要删除这个收藏吗？", "确认删除", {
+      type: "warning",
+    });
 
-    await deleteFavoriteApi(id)
-    ElMessage.success('删除成功')
-    loadFavorites()
-    loadStats()
+    await deleteFavoriteApi(id);
+    ElMessage.success("删除成功");
+    loadFavorites();
+    loadStats();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '删除失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "删除失败");
     }
   }
-}
+};
 
 // 批量删除
 const batchDelete = async () => {
   try {
     await ElMessageBox.confirm(
       `确定要删除选中的 ${selectedItems.value.length} 个收藏吗？`,
-      '批量删除',
-      { type: 'warning' }
-    )
+      "批量删除",
+      { type: "warning" },
+    );
 
-    loading.value = true
-    await batchDeleteFavorites(selectedItems.value)
-    ElMessage.success('批量删除成功')
-    selectedItems.value = []
-    selectAll.value = false
-    loadFavorites()
-    loadStats()
+    loading.value = true;
+    await batchDeleteFavorites(selectedItems.value);
+    ElMessage.success("批量删除成功");
+    selectedItems.value = [];
+    selectAll.value = false;
+    loadFavorites();
+    loadStats();
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '批量删除失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "批量删除失败");
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 编辑收藏
 const editFavorite = (item: any) => {
-  editingItem.value = item
-  editForm.category = item.category || ''
-  editForm.tags = item.tags || []
-  editForm.notes = item.notes || ''
-  showEditDialog.value = true
-}
+  editingItem.value = item;
+  editForm.category = item.category || "";
+  editForm.tags = item.tags || [];
+  editForm.notes = item.notes || "";
+  showEditDialog.value = true;
+};
 
 // 更新收藏
 const updateFavorite = async () => {
-  if (!editingItem.value) return
+  if (!editingItem.value) return;
 
-  loading.value = true
+  loading.value = true;
   try {
-    await updateFavoriteApi(editingItem.value._id, editForm)
-    ElMessage.success('更新成功')
-    showEditDialog.value = false
-    loadFavorites()
+    await updateFavoriteApi(editingItem.value._id, editForm);
+    ElMessage.success("更新成功");
+    showEditDialog.value = false;
+    loadFavorites();
   } catch (error: any) {
-    ElMessage.error(error.message || '更新失败')
+    ElMessage.error(error.message || "更新失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 添加分类
 const addCategory = async () => {
-  const name = newCategoryName.value.trim()
-  if (!name) return
+  const name = newCategoryName.value.trim();
+  if (!name) return;
 
   try {
-    await createCategory(name)
-    ElMessage.success('分类添加成功')
-    newCategoryName.value = ''
-    loadCategories()
+    await createCategory(name);
+    ElMessage.success("分类添加成功");
+    newCategoryName.value = "";
+    loadCategories();
   } catch (error: any) {
-    ElMessage.error(error.message || '添加分类失败')
+    ElMessage.error(error.message || "添加分类失败");
   }
-}
+};
 
 // 删除分类
 const deleteCategory = async (category: string) => {
   try {
-    await ElMessageBox.confirm(`确定要删除分类"${category}"吗？`, '确认删除', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(`确定要删除分类"${category}"吗？`, "确认删除", {
+      type: "warning",
+    });
 
-    await deleteCategoryApi(category)
-    ElMessage.success('分类删除成功')
-    loadCategories()
+    await deleteCategoryApi(category);
+    ElMessage.success("分类删除成功");
+    loadCategories();
     if (selectedCategory.value === category) {
-      selectedCategory.value = ''
-      loadFavorites()
+      selectedCategory.value = "";
+      loadFavorites();
     }
   } catch (error: any) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '删除分类失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "删除分类失败");
     }
   }
-}
+};
 
 // 获取类型图标
 const getTypeIcon = (type: string) => {
   const iconMap: Record<string, string> = {
-    news: 'fas fa-newspaper',
-    resource: 'fas fa-file-alt',
-    activity: 'fas fa-calendar-alt',
-  }
-  return iconMap[type] || 'fas fa-file'
-}
+    news: "fas fa-newspaper",
+    resource: "fas fa-file-alt",
+    activity: "fas fa-calendar-alt",
+  };
+  return iconMap[type] || "fas fa-file";
+};
 
 // 获取类型颜色
-const getTypeColor = (type: string): 'success' | 'warning' | 'danger' | 'info' | 'primary' => {
-  const colorMap: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
-    news: 'primary',
-    resource: 'success',
-    activity: 'warning',
-  }
-  return colorMap[type] || 'info'
-}
+const getTypeColor = (
+  type: string,
+): "success" | "warning" | "danger" | "info" | "primary" => {
+  const colorMap: Record<
+    string,
+    "success" | "warning" | "danger" | "info" | "primary"
+  > = {
+    news: "primary",
+    resource: "success",
+    activity: "warning",
+  };
+  return colorMap[type] || "info";
+};
 
 // 获取类型文本
 const getTypeText = (type: string) => {
   const textMap: Record<string, string> = {
-    news: '新闻',
-    resource: '资源',
-    activity: '活动',
-  }
-  return textMap[type] || '未知'
-}
+    news: "新闻",
+    resource: "资源",
+    activity: "活动",
+  };
+  return textMap[type] || "未知";
+};
 
 // 格式化日期
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('zh-CN')
-}
+  return new Date(date).toLocaleDateString("zh-CN");
+};
 
 // 处理图片错误
 const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.style.display = 'none'
-  const container = img.parentElement
+  const img = event.target as HTMLImageElement;
+  img.style.display = "none";
+  const container = img.parentElement;
   if (container) {
-    container.innerHTML = '<i class="fas fa-image default-icon"></i>'
+    container.innerHTML = '<i class="fas fa-image default-icon"></i>';
   }
-}
+};
 
 // 监听选择状态
 watch(
   () => selectedItems.value.length,
-  newLength => {
-    selectAll.value = newLength > 0 && newLength === favorites.value.length
-  }
-)
+  (newLength) => {
+    selectAll.value = newLength > 0 && newLength === favorites.value.length;
+  },
+);
 
 // 组件挂载
 onMounted(() => {
-  loadFavorites()
-  loadStats()
-  loadCategories()
-})
+  loadFavorites();
+  loadStats();
+  loadCategories();
+});
 </script>
 
 <style scoped>

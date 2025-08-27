@@ -423,7 +423,7 @@ export const getSystemStatus = async (req, res, next) => {
     // 确定整体状态
     const hasError = systemStatus.items.some((item) => item.status === "error");
     const hasWarning = systemStatus.items.some(
-      (item) => item.status === "warning"
+      (item) => item.status === "warning",
     );
 
     if (hasError) {

@@ -17,23 +17,25 @@
       您的浏览器不支持 HTML5 视频播放
     </video>
 
-    <div class="video-controls" v-show="showControls">
+    <div v-show="showControls" class="video-controls">
       <!-- 进度条 -->
       <div class="progress-bar">
-        <div class="progress" :style="{ width: progress + '%' }"></div>
+        <div
+class="progress" :style="{ width: progress + '%' }" />
         <input
           type="range"
           class="progress-slider"
           :value="progress"
-          @input="onProgressChange"
           min="0"
           max="100"
+          @input="onProgressChange"
         />
       </div>
 
       <div class="controls-buttons">
         <!-- 播放/暂停按钮 -->
-        <button class="control-button" @click="togglePlay">
+        <button class="control-button"
+@click="togglePlay">
           <el-icon :size="20">
             <component :is="isPlaying ? VideoPause : VideoPlay" />
           </el-icon>
@@ -41,15 +43,16 @@
 
         <!-- 音量控制 -->
         <div class="volume-control">
-          <button class="control-button" @click="toggleMute">
+          <button class="control-button"
+@click="toggleMute">
             <el-icon :size="20">
               <component :is="volumeIcon" />
             </el-icon>
           </button>
           <input
+            v-model="volume"
             type="range"
             class="volume-slider"
-            v-model="volume"
             min="0"
             max="1"
             step="0.1"
@@ -63,7 +66,8 @@
         </div>
 
         <!-- 全屏按钮 -->
-        <button class="control-button" @click="toggleFullscreen">
+        <button class="control-button"
+@click="toggleFullscreen">
           <el-icon :size="20">
             <component :is="isFullscreen ? Close : FullScreen" />
           </el-icon>

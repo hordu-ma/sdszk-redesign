@@ -2,7 +2,11 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
-import { getHelmetConfig, nonceMiddleware, cspViolationHandler } from "./config/security.js";
+import {
+  getHelmetConfig,
+  nonceMiddleware,
+  cspViolationHandler,
+} from "./config/security.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import path from "path";
@@ -19,13 +23,13 @@ import {
   sysLogger,
   logSystemStart,
   logSystemShutdown,
-  logError
+  logError,
 } from "./utils/logger.js";
 import {
   requestLogger,
   errorRequestLogger,
   slowRequestLogger,
-  securityLogger
+  securityLogger,
 } from "./middleware/loggerMiddleware.js";
 // 引入 CORS 配置
 import { getCorsConfig, validateCorsConfig } from "./config/cors.js";
@@ -81,7 +85,7 @@ app.use(cookieParser());
 if (validateCorsConfig()) {
   app.use(cors(getCorsConfig()));
 } else {
-  sysLogger.error('CORS 配置验证失败，应用无法启动');
+  sysLogger.error("CORS 配置验证失败，应用无法启动");
   process.exit(1);
 }
 // 处理所有OPTIONS预检请求，确保返回CORS头
@@ -91,17 +95,21 @@ app.options("*", cors());
 app.use(nonceMiddleware);
 
 // 配置Helmet安全头，使用环境相关的CSP策略
-const environment = process.env.NODE_ENV || 'development';
+const environment = process.env.NODE_ENV || "development";
 app.use(helmet(getHelmetConfig(environment)));
 
 // CSP违规报告端点
-app.post('/csp-violation-report', express.json({ type: 'application/csp-report' }), cspViolationHandler);
+app.post(
+  "/csp-violation-report",
+  express.json({ type: "application/csp-report" }),
+  cspViolationHandler,
+);
 app.use(morgan("dev"));
 
 // 日志中间件配置
-app.use(requestLogger);      // 记录所有HTTP请求
-app.use(slowRequestLogger(1000));  // 记录超过1秒的慢请求
-app.use(securityLogger);     // 记录安全敏感操作
+app.use(requestLogger); // 记录所有HTTP请求
+app.use(slowRequestLogger(1000)); // 记录超过1秒的慢请求
+app.use(securityLogger); // 记录安全敏感操作
 
 // 静态文件服务
 const uploadDir = process.env.UPLOAD_DIR || "uploads";
@@ -142,46 +150,61 @@ const connectDB = async (isReconnect = false) => {
       {
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
-      }
+      },
     );
 
     if (isReconnect) {
-      dbLogger.info({
-        reconnectAttempt: reconnectAttempts,
-        type: 'reconnect'
-      }, `MongoDB重连成功 (第${reconnectAttempts}次尝试)`);
+      dbLogger.info(
+        {
+          reconnectAttempt: reconnectAttempts,
+          type: "reconnect",
+        },
+        `MongoDB重连成功 (第${reconnectAttempts}次尝试)`,
+      );
       reconnectAttempts = 0; // 重置重连计数器
     } else {
-      dbLogger.info({ type: 'initial' }, "MongoDB初始连接成功");
+      dbLogger.info({ type: "initial" }, "MongoDB初始连接成功");
     }
 
     return conn;
   } catch (err) {
     if (isReconnect) {
       reconnectAttempts++;
-      dbLogger.error({
-        reconnectAttempt: reconnectAttempts,
-        maxAttempts: MAX_RECONNECT_ATTEMPTS,
-        error: err.message
-      }, `MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次)`);
+      dbLogger.error(
+        {
+          reconnectAttempt: reconnectAttempts,
+          maxAttempts: MAX_RECONNECT_ATTEMPTS,
+          error: err.message,
+        },
+        `MongoDB重连失败 (第${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}次)`,
+      );
 
       if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        dbLogger.fatal({
-          maxAttempts: MAX_RECONNECT_ATTEMPTS
-        }, `已达到最大重连次数，停止重连`);
+        dbLogger.fatal(
+          {
+            maxAttempts: MAX_RECONNECT_ATTEMPTS,
+          },
+          `已达到最大重连次数，停止重连`,
+        );
         return;
       }
 
       // 指数退避策略：1s, 2s, 4s, 8s, 16s, 32s, 最大60s
-      const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1), 60000);
-      dbLogger.info({
-        delay: delay,
-        nextAttempt: reconnectAttempts + 1
-      }, `${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试`);
+      const delay = Math.min(
+        INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1),
+        60000,
+      );
+      dbLogger.info(
+        {
+          delay: delay,
+          nextAttempt: reconnectAttempts + 1,
+        },
+        `${delay / 1000}秒后进行第${reconnectAttempts + 1}次重连尝试`,
+      );
 
       setTimeout(() => connectDB(true), delay);
     } else {
-      logError(err, { context: 'mongodb-initial-connection' });
+      logError(err, { context: "mongodb-initial-connection" });
       throw err; // 初始连接失败时抛出错误
     }
   }
@@ -197,16 +220,16 @@ mongoose.connection.on("disconnected", () => {
 
 // 监听连接错误事件
 mongoose.connection.on("error", (err) => {
-  logError(err, { context: 'mongodb-connection' });
+  logError(err, { context: "mongodb-connection" });
 });
 
 // 初始化数据库和Redis连接
 Promise.all([connectDB(), initRedis()])
   .then(() => {
-    sysLogger.info('数据库和Redis已成功初始化');
+    sysLogger.info("数据库和Redis已成功初始化");
   })
   .catch((err) => {
-    logError(err, { context: 'application-initialization' });
+    logError(err, { context: "application-initialization" });
     process.exit(1);
   });
 
@@ -244,7 +267,7 @@ app.use("/api/admin/permissions", permissionsRoutes);
 app.get("/admin/news/page=:page&limit=:limit", (req, res) => {
   // 将请求重定向到正确格式的URL
   res.redirect(
-    `/admin/news/list?page=${req.params.page}&limit=${req.params.limit}`
+    `/admin/news/list?page=${req.params.page}&limit=${req.params.limit}`,
   );
 });
 
@@ -274,10 +297,10 @@ const server = app.listen(PORT, () => {
     port: PORT,
     apiDocs: `http://localhost:${PORT}/api-docs`,
     environment: process.env.NODE_ENV,
-    nodeVersion: process.version
+    nodeVersion: process.version,
   });
   sysLogger.info({ port: PORT }, `服务运行在 http://localhost:${PORT}`);
-  sysLogger.info({ url: `http://localhost:${PORT}/api-docs` }, 'API文档已启用');
+  sysLogger.info({ url: `http://localhost:${PORT}/api-docs` }, "API文档已启用");
 });
 
 // 优雅地关闭应用程序
@@ -286,26 +309,26 @@ const gracefulShutdown = async (signal) => {
 
   // 停止接受新请求
   server.close(async () => {
-    sysLogger.info('HTTP服务器已关闭');
+    sysLogger.info("HTTP服务器已关闭");
 
     try {
       // 关闭数据库连接
       await mongoose.connection.close();
-      dbLogger.info('MongoDB连接已关闭');
+      dbLogger.info("MongoDB连接已关闭");
 
       // 关闭Redis连接
       await closeRedis();
-      sysLogger.info('Redis连接已关闭');
+      sysLogger.info("Redis连接已关闭");
 
       logSystemShutdown(signal);
       process.exit(0);
     } catch (err) {
-      logError(err, { context: 'graceful-shutdown' });
+      logError(err, { context: "graceful-shutdown" });
       process.exit(1);
     }
   });
 };
 
 // 监听关闭信号
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));

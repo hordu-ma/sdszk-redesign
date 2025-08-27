@@ -13,8 +13,10 @@
       </a-button>
 
       <a-breadcrumb class="breadcrumb">
-        <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
-          <router-link v-if="item.path" :to="item.path">
+        <a-breadcrumb-item v-for="item in breadcrumbItems"
+:key="item.path">
+          <router-link v-if="item.path"
+:to="item.path">
             {{ item.title }}
           </router-link>
           <span v-else>{{ item.title }}</span>
@@ -24,8 +26,10 @@
 
     <div class="header-right">
       <!-- 通知 -->
-      <a-badge :count="notificationCount" class="header-item">
-        <a-button type="text" shape="circle">
+      <a-badge :count="notificationCount"
+class="header-item">
+        <a-button type="text"
+shape="circle">
           <template #icon>
             <BellOutlined />
           </template>
@@ -35,7 +39,8 @@
       <!-- 用户菜单 -->
       <a-dropdown placement="bottomRight">
         <div class="user-info">
-          <a-avatar :src="userInfo.avatar" :size="32">
+          <a-avatar :src="userInfo.avatar"
+:size="32">
             {{ userInfo.username?.charAt(0)?.toUpperCase() }}
           </a-avatar>
           <span class="username">{{ userInfo.username }}</span>
@@ -100,7 +105,7 @@ const userInfo = computed(
       username: "未登录",
       avatar: "",
       name: "未登录用户",
-    }
+    },
 );
 
 // 通知数量
