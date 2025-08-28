@@ -349,14 +349,13 @@ jobs:
           echo "📋 MongoDB容器日志 (最后20行):"
           docker logs $(docker ps -q --filter "ancestor=mongo:5.0") --tail 20 2>/dev/null || echo "无法获取MongoDB日志"
 
-          # 等待服务容器健康检查通过
-          echo "⏳ 等待服务容器启动..."
-          sleep 15
+          # 使用wait-on等待服务就绪
+          echo "⏳ 等待服务就绪..."
+          npm run wait-on -- -t 120000 tcp:localhost:27017 tcp:localhost:6379
+          echo "✅ MongoDB和Redis端口已开放"
 
-          # 使用专用脚本检查MongoDB
+          # 验证服务连接
           ./scripts/test-mongodb.sh
-
-          # 使用专用脚本检查Redis
           ./scripts/test-redis.sh
 
       - name: 启动并验证服务
