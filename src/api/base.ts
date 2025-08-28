@@ -1,9 +1,8 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
-import type { ApiModuleConfig, ApiResponse, QueryParams } from "./types";
+import type { ApiModuleConfig, ApiResponse } from "./types";
 import api from "@/utils/api"; // 使用默认API配置
 import type { ApiErrorResponse } from "@/types/error.types";
 import { handleApiError } from "@/utils/apiErrorHandler";
-import { API_CONFIG } from "@/config";
 
 export abstract class BaseApi {
   protected api: AxiosInstance;
@@ -26,7 +25,7 @@ export abstract class BaseApi {
   }
 
   protected async request<T>(
-    config: AxiosRequestConfig,
+    config: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
       const fullUrl = this.getUrl(config.url || "");
@@ -38,7 +37,7 @@ export abstract class BaseApi {
         data: config.data,
       });
 
-      const response = await this.api.request<any, any>({
+      const response = await this.api.request<ApiResponse<T>>({
         ...config,
         url: fullUrl,
       });
@@ -56,7 +55,7 @@ export abstract class BaseApi {
       console.error("❌ API 请求失败:", {
         url: config.url,
         error: error,
-        response: (error as any)?.response,
+        response: (error as AxiosError)?.response,
       });
 
       if (error instanceof Error) {
@@ -66,9 +65,9 @@ export abstract class BaseApi {
     }
   }
 
-  protected async get<T>(
+  protected async get<T, P = unknown>(
     path: string,
-    config?: { params?: any },
+    config?: { params?: P }
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "GET",
@@ -77,7 +76,10 @@ export abstract class BaseApi {
     });
   }
 
-  protected async post<T>(path: string, data?: any): Promise<ApiResponse<T>> {
+  protected async post<T, D = unknown>(
+    path: string,
+    data?: D
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "POST",
       url: path,
@@ -85,7 +87,10 @@ export abstract class BaseApi {
     });
   }
 
-  protected async put<T>(path: string, data?: any): Promise<ApiResponse<T>> {
+  protected async put<T, D = unknown>(
+    path: string,
+    data?: D
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "PUT",
       url: path,
@@ -100,7 +105,10 @@ export abstract class BaseApi {
     });
   }
 
-  protected async patch<T>(path: string, data?: any): Promise<ApiResponse<T>> {
+  protected async patch<T, D = unknown>(
+    path: string,
+    data?: D
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "PATCH",
       url: path,
