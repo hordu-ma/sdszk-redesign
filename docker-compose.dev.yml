@@ -15,8 +15,21 @@ services:
     networks:
       - sdszk-dev-network
 
+  # Redis 服务 - 开发环境
+  redis:
+    image: redis:7.2-alpine
+    container_name: sdszk-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - sdszk-dev-network
+
 volumes:
   mongodb_dev_data:
+  redis_dev_data:
 
 networks:
   sdszk-dev-network:

@@ -112,7 +112,7 @@ jobs:
 
           # 检查Redis
           echo "🔍 检查Redis连接..."
-          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping >/dev/null 2>&1; do
+          timeout 30 bash -c 'until redis-cli -h redis -p 6379 ping >/dev/null 2>&1; do
             echo "等待Redis启动..."
             sleep 2
           done'
@@ -364,7 +364,7 @@ jobs:
 
           # 检查Redis
           echo "🔍 检查Redis连接..."
-          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping >/dev/null 2>&1; do
+          timeout 30 bash -c 'until redis-cli -h redis -p 6379 ping >/dev/null 2>&1; do
             echo "等待Redis..."
             sleep 2
           done'

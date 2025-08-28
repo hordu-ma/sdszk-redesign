@@ -13,7 +13,7 @@ test.describe("基础功能测试", () => {
     // 检查页面标题
     const title = await page.title();
     console.log(`页面标题: ${title}`);
-    expect(title).toContain("思政课一体化");
+    expect(title).toBe("首页 - 山东省思想政治理论课一体化平台");
 
     // 检查主要元素存在
     const app = page.locator("#app");
