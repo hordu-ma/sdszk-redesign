@@ -299,14 +299,15 @@ GLOBAL_START=$(_now)
 RESULTS_FILE=$(mktemp -t wait-results-XXXX)
 pids=()
 active=0
-declare -A PID_TARGET
+# 使用简单数组而不是关联数组，避免bash版本兼容性问题
+pid_targets=""
 
 launch_wait() {
   local t="$1"
   wait_target "$t" >>"$RESULTS_FILE" &
   local pid=$!
   pids+=("$pid")
-  PID_TARGET["$pid"]="$t"
+  pid_targets="${pid_targets}${pid}:${t};"
   active=$((active + 1))
   debug "启动等待进程 pid=$pid target=$t"
 }

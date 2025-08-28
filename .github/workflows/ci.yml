@@ -116,8 +116,10 @@ jobs:
 
       - name: 代码风格检查
         run: |
-          echo "🔍 运行ESLint检查..."
+          echo "🔍 运行前端ESLint检查..."
           npm run lint
+          echo "🔍 运行后端ESLint检查..."
+          npm run lint:backend
           echo "✅ 代码风格检查通过"
 
       - name: TypeScript类型检查
