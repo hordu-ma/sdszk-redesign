@@ -25,7 +25,7 @@ jobs:
         env:
           MONGO_INITDB_DATABASE: sdszk_test
         options: >-
-          --health-cmd "mongo --eval 'db.runCommand({ping: 1})'"
+          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})' || mongo --eval 'db.runCommand({ping: 1})'"
           --health-interval 15s
           --health-timeout 30s
           --health-retries 10
@@ -108,7 +108,7 @@ jobs:
           cat > server/.env << EOF
           NODE_ENV=test
           MONGODB_URI=mongodb://localhost:27017/sdszk_test
-          REDIS_HOST=redis
+          REDIS_HOST=localhost
           REDIS_PORT=6379
           REDIS_ENABLED=true
           JWT_SECRET=test-secret-key
@@ -141,7 +141,7 @@ jobs:
 
           # 深度探活（脚本包含读写/命令验证）
           ./scripts/test-mongodb.sh
-          REDIS_HOST=redis ./scripts/test-redis.sh
+          REDIS_HOST=localhost ./scripts/test-redis.sh
 
       # 启动并验证服务
       - name: 启动并验证应用服务
@@ -165,7 +165,7 @@ jobs:
 
           echo "✅ 应用服务可访问，执行二次依赖校验..."
           ./scripts/test-mongodb.sh
-          REDIS_HOST=redis ./scripts/test-redis.sh
+          REDIS_HOST=localhost ./scripts/test-redis.sh
 
           echo "📄 后端最近日志 (20行):"
           tail -20 backend.log || true
