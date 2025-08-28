@@ -2,10 +2,10 @@
 // 创建数据库和用户
 
 // 切换到admin数据库
-db = db.getSiblingDB("admin");
+const adminDb = db.getSiblingDB("admin");
 
 // 创建应用数据库用户
-db.createUser({
+adminDb.createUser({
   user: "sdszk_user",
   pwd: process.env.MONGO_PASSWORD || "your_secure_user_password",
   roles: [
@@ -15,57 +15,57 @@ db.createUser({
 });
 
 // 切换到应用数据库
-let dbInstance = db.getSiblingDB("sdszk");
+const appDb = db.getSiblingDB("sdszk");
 
 // 创建基础集合和索引
 print("创建基础集合和索引...");
 
 // 用户集合索引
-db.users.createIndex({ username: 1 }, { unique: true });
-db.users.createIndex({ email: 1 }, { unique: true });
-db.users.createIndex({ createdAt: -1 });
+appDb.users.createIndex({ username: 1 }, { unique: true });
+appDb.users.createIndex({ email: 1 }, { unique: true });
+appDb.users.createIndex({ createdAt: -1 });
 
 // 新闻集合索引
-db.news.createIndex({ title: "text", content: "text" });
-db.news.createIndex({ category: 1 });
-db.news.createIndex({ publishDate: -1 });
-db.news.createIndex({ status: 1 });
-db.news.createIndex({ author: 1 });
+appDb.news.createIndex({ title: "text", content: "text" });
+appDb.news.createIndex({ category: 1 });
+appDb.news.createIndex({ publishDate: -1 });
+appDb.news.createIndex({ status: 1 });
+appDb.news.createIndex({ author: 1 });
 
 // 资源集合索引
-db.resources.createIndex({ title: "text", description: "text" });
-db.resources.createIndex({ category: 1 });
-db.resources.createIndex({ type: 1 });
-db.resources.createIndex({ uploadDate: -1 });
-db.resources.createIndex({ uploader: 1 });
+appDb.resources.createIndex({ title: "text", description: "text" });
+appDb.resources.createIndex({ category: 1 });
+appDb.resources.createIndex({ type: 1 });
+appDb.resources.createIndex({ uploadDate: -1 });
+appDb.resources.createIndex({ uploader: 1 });
 
 // 分类集合索引
-db.newscategories.createIndex({ name: 1 }, { unique: true });
-db.newscategories.createIndex({ sort: 1 });
-db.resourcecategories.createIndex({ name: 1 }, { unique: true });
-db.resourcecategories.createIndex({ sort: 1 });
+appDb.newscategories.createIndex({ name: 1 }, { unique: true });
+appDb.newscategories.createIndex({ sort: 1 });
+appDb.resourcecategories.createIndex({ name: 1 }, { unique: true });
+appDb.resourcecategories.createIndex({ sort: 1 });
 
 // 收藏集合索引
-db.favorites.createIndex(
+appDb.favorites.createIndex(
   { userId: 1, targetType: 1, targetId: 1 },
   { unique: true },
 );
-db.favorites.createIndex({ userId: 1, createdAt: -1 });
+appDb.favorites.createIndex({ userId: 1, createdAt: -1 });
 
 // 浏览历史集合索引
-db.viewhistories.createIndex({ userId: 1, createdAt: -1 });
-db.viewhistories.createIndex({ targetType: 1, targetId: 1 });
+appDb.viewhistories.createIndex({ userId: 1, createdAt: -1 });
+appDb.viewhistories.createIndex({ targetType: 1, targetId: 1 });
 
 // 活动日志集合索引
-db.activitylogs.createIndex({ userId: 1, createdAt: -1 });
-db.activitylogs.createIndex({ action: 1 });
-db.activitylogs.createIndex({ createdAt: -1 });
+appDb.activitylogs.createIndex({ userId: 1, createdAt: -1 });
+appDb.activitylogs.createIndex({ action: 1 });
+appDb.activitylogs.createIndex({ createdAt: -1 });
 
 // 插入默认数据
 print("插入默认数据...");
 
 // 默认管理员用户
-db.users.insertOne({
+appDb.users.insertOne({
   username: "admin",
   name: "系统管理员",
   email: "admin@sust.edu.cn",
@@ -78,7 +78,7 @@ db.users.insertOne({
 });
 
 // 默认新闻分类
-db.newscategories.insertMany([
+appDb.newscategories.insertMany([
   {
     name: "党建工作",
     description: "党建相关新闻和活动",
@@ -114,7 +114,7 @@ db.newscategories.insertMany([
 ]);
 
 // 默认资源分类
-db.resourcecategories.insertMany([
+appDb.resourcecategories.insertMany([
   {
     key: "theory",
     name: "理论前沿",
@@ -145,7 +145,7 @@ db.resourcecategories.insertMany([
 ]);
 
 // 插入示例新闻
-db.news.insertOne({
+appDb.news.insertOne({
   title: "欢迎使用山东省思想政治理论课平台",
   summary: "平台正式上线，为思政教育提供全面支持",
   content: `
@@ -159,8 +159,8 @@ db.news.insertOne({
     </ul>
     <p>让我们共同推进思政教育现代化！</p>
   `,
-  category: db.newscategories.findOne({ name: "党建工作" })._id,
-  author: db.users.findOne({ username: "admin" })._id,
+  category: appDb.newscategories.findOne({ name: "党建工作" })._id,
+  author: appDb.users.findOne({ username: "admin" })._id,
   status: "published",
   publishDate: new Date(),
   viewCount: 0,
@@ -169,7 +169,7 @@ db.news.insertOne({
 });
 
 // 网站配置
-db.sitesettings.insertMany([
+appDb.sitesettings.insertMany([
   {
     key: "site_title",
     value: "山东省思想政治理论课",

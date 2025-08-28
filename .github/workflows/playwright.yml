@@ -8,12 +8,12 @@ on:
 # 环境变量
 env:
   NODE_VERSION: "20"
-  CACHE_VERSION: v2
+  CACHE_VERSION: v3
 
 jobs:
   test:
     name: E2E Tests
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     # 添加服务容器
@@ -23,10 +23,10 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping: 1})'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 3
 
       redis:
         image: redis:7.2-alpine
@@ -36,7 +36,7 @@ jobs:
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 3
 
     steps:
       - name: Checkout代码
@@ -69,17 +69,24 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: 安装前端依赖项
-        run: npm ci
+        run: |
+          echo "📦 安装前端依赖..."
+          npm ci --prefer-offline --no-audit
+          echo "✅ 前端依赖安装完成"
 
       - name: 安装后端依赖项
         run: |
+          echo "📦 安装后端依赖..."
           cd server
-          npm ci
+          npm ci --prefer-offline --no-audit
           cd ..
+          echo "✅ 后端依赖安装完成"
 
       - name: 安装Playwright浏览器
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: |
+          echo "🎭 安装Playwright浏览器..."
+          npx playwright install --with-deps chromium
 
       # 仅在缓存命中时安装系统依赖
       - name: 安装系统依赖
@@ -88,42 +95,73 @@ jobs:
 
       - name: 设置CI环境配置
         run: |
-          # 复制CI环境配置文件
-          cp .env.ci .env
-          cp server/.env.ci server/.env
+          echo "📝 设置CI环境配置..."
 
-          # 设置脚本权限
-          chmod +x scripts/ci-start.sh scripts/ci-stop.sh
+          # 创建基本的环境配置
+          cat > .env << EOF
+          NODE_ENV=test
+          VITE_API_BASE_URL=http://localhost:3000/api
+          EOF
+
+          cat > server/.env << EOF
+          NODE_ENV=test
+          MONGODB_URI=mongodb://localhost:27017/sdszk_test
+          REDIS_HOST=localhost
+          REDIS_PORT=6379
+          REDIS_ENABLED=true
+          JWT_SECRET=test-secret-key
+          PORT=3000
+          CORS_ORIGIN=http://localhost:5173
+          EOF
+
+          echo "✅ CI环境配置完成"
 
       - name: 等待服务就绪
         run: |
-          echo "等待MongoDB服务..."
-          timeout 60 bash -c 'until mongosh --host localhost:27017 --eval "db.runCommand({ping: 1})" >/dev/null 2>&1; do sleep 2; done'
+          echo "⏳ 等待数据库服务启动..."
+
+          # 等待MongoDB
+          timeout 60 bash -c 'until mongosh --host localhost:27017 --quiet --eval "db.runCommand({ping: 1})" >/dev/null 2>&1; do
+            echo "等待MongoDB启动..."
+            sleep 2
+          done'
           echo "✅ MongoDB 已就绪"
 
-          echo "等待Redis服务..."
-          timeout 60 bash -c 'until redis-cli -h localhost -p 6379 ping >/dev/null 2>&1; do sleep 2; done'
+          # 等待Redis
+          timeout 60 bash -c 'until redis-cli -h localhost -p 6379 ping >/dev/null 2>&1; do
+            echo "等待Redis启动..."
+            sleep 2
+          done'
           echo "✅ Redis 已就绪"
 
-      # 启动应用服务
+      # 启动后端服务
       - name: 启动后端服务
         run: |
+          echo "🖥️ 启动后端服务..."
           cd server
           npm start &
           echo $! > /tmp/backend.pid
           cd ..
 
-          echo "等待后端服务启动..."
-          timeout 120 bash -c 'until curl -f http://localhost:3000 >/dev/null 2>&1 || curl -f http://localhost:3000/api/health >/dev/null 2>&1 || curl -f http://localhost:3000/api/status >/dev/null 2>&1; do sleep 3; done'
+          echo "⏳ 等待后端服务启动..."
+          timeout 180 bash -c 'until curl -sf http://localhost:3000 >/dev/null 2>&1 || curl -sf http://localhost:3000/api/health >/dev/null 2>&1; do
+            echo "等待后端服务响应..."
+            sleep 3
+          done'
           echo "✅ 后端服务已启动"
 
+      # 启动前端服务
       - name: 启动前端服务
         run: |
+          echo "🌐 启动前端服务..."
           npm run dev &
           echo $! > /tmp/frontend.pid
 
-          echo "等待前端服务启动..."
-          timeout 120 bash -c 'until curl -f http://localhost:5173 >/dev/null 2>&1; do sleep 3; done'
+          echo "⏳ 等待前端服务启动..."
+          timeout 180 bash -c 'until curl -sf http://localhost:5173 >/dev/null 2>&1; do
+            echo "等待前端服务响应..."
+            sleep 3
+          done'
           echo "✅ 前端服务已启动"
 
       - name: 验证服务状态
@@ -131,29 +169,33 @@ jobs:
           echo "🔍 验证服务状态..."
 
           # 检查后端服务
-          if curl -f http://localhost:3000 >/dev/null 2>&1; then
+          if curl -sf http://localhost:3000 >/dev/null 2>&1; then
             echo "✅ 后端服务响应正常"
           else
-            echo "❌ 后端服务无响应，检查日志..."
+            echo "❌ 后端服务无响应"
             if [ -f /tmp/backend.pid ]; then
+              echo "后端进程状态:"
               ps -p $(cat /tmp/backend.pid) || echo "后端进程不存在"
             fi
             exit 1
           fi
 
           # 检查前端服务
-          if curl -f http://localhost:5173 >/dev/null 2>&1; then
+          if curl -sf http://localhost:5173 >/dev/null 2>&1; then
             echo "✅ 前端服务响应正常"
           else
-            echo "❌ 前端服务无响应，检查日志..."
+            echo "❌ 前端服务无响应"
             if [ -f /tmp/frontend.pid ]; then
+              echo "前端进程状态:"
               ps -p $(cat /tmp/frontend.pid) || echo "前端进程不存在"
             fi
             exit 1
           fi
 
       - name: 运行Playwright测试
-        run: npx playwright test
+        run: |
+          echo "🎭 运行Playwright测试..."
+          npx playwright test --reporter=html,line
         env:
           CI: true
           NODE_ENV: test
@@ -167,9 +209,11 @@ jobs:
           # 停止前端服务
           if [ -f /tmp/frontend.pid ]; then
             pid=$(cat /tmp/frontend.pid)
-            kill $pid 2>/dev/null || true
-            sleep 2
-            kill -9 $pid 2>/dev/null || true
+            if kill -0 "$pid" 2>/dev/null; then
+              kill "$pid" 2>/dev/null || true
+              sleep 2
+              kill -9 "$pid" 2>/dev/null || true
+            fi
             rm -f /tmp/frontend.pid
             echo "✅ 前端服务已停止"
           fi
@@ -177,9 +221,11 @@ jobs:
           # 停止后端服务
           if [ -f /tmp/backend.pid ]; then
             pid=$(cat /tmp/backend.pid)
-            kill $pid 2>/dev/null || true
-            sleep 2
-            kill -9 $pid 2>/dev/null || true
+            if kill -0 "$pid" 2>/dev/null; then
+              kill "$pid" 2>/dev/null || true
+              sleep 2
+              kill -9 "$pid" 2>/dev/null || true
+            fi
             rm -f /tmp/backend.pid
             echo "✅ 后端服务已停止"
           fi
@@ -193,7 +239,7 @@ jobs:
       # 上传测试报告
       - name: 上传Playwright报告
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: playwright-report-${{ github.run_id }}
           path: |

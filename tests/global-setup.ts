@@ -7,7 +7,14 @@ import { chromium, FullConfig } from "@playwright/test";
 async function globalSetup(config: FullConfig) {
   console.log("🚀 启动 Playwright 全局配置...");
 
-  // 等待开发服务器启动
+  // 在CI环境中，服务器由GitHub Actions启动
+  if (process.env.CI) {
+    console.log("CI环境：跳过服务器启动检查");
+    console.log("✅ 全局配置完成");
+    return;
+  }
+
+  // 本地环境等待开发服务器启动
   await waitForServer("http://localhost:5173", 30000);
 
   console.log("✅ 全局配置完成");

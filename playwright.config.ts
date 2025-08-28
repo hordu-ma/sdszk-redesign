@@ -84,14 +84,5 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: "npm run dev",
-        url: "http://localhost:5173",
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000, // 增加超时时间以等待服务器启动
-        stdout: "pipe",
-        stderr: "pipe",
-      },
+  // webServer configuration removed - services are started manually in CI
 });

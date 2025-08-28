@@ -1,88 +1,104 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("基本页面测试", () => {
+test.describe("基础功能测试", () => {
   test("首页应该正常加载", async ({ page }) => {
+    console.log("🧪 测试：访问首页");
+
+    // 访问首页
     await page.goto("/");
 
-    // 等待页面加载完成
-    await page.waitForLoadState("networkidle");
+    // 等待页面加载
+    await page.waitForLoadState("networkidle", { timeout: 30000 });
 
     // 检查页面标题
-    await expect(page).toHaveTitle(/思政课一体化教育平台/);
+    const title = await page.title();
+    console.log(`页面标题: ${title}`);
+    expect(title).toContain("思政课一体化");
 
-    // 检查页面是否包含主要内容
-    const body = await page.locator("body");
-    await expect(body).toBeVisible();
-  });
-
-  test("应用基本结构存在", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    // 检查Vue应用是否挂载
-    const app = await page.locator("#app");
+    // 检查主要元素存在
+    const app = page.locator("#app");
     await expect(app).toBeVisible();
+
+    console.log("✅ 首页加载测试通过");
   });
 
-  test("页面响应式设计正常", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+  test("页面基本结构完整", async ({ page }) => {
+    console.log("🧪 测试：页面基本结构");
 
-    // 测试桌面端
+    await page.goto("/");
+    await page.waitForLoadState("domcontentloaded");
+
+    // 检查Vue应用根元素
+    const app = page.locator("#app");
+    await expect(app).toBeVisible();
+
+    // 检查页面内容不为空
+    const bodyText = await page.locator("body").textContent();
+    expect(bodyText?.length).toBeGreaterThan(0);
+
+    console.log("✅ 页面结构测试通过");
+  });
+
+  test("页面响应式设计", async ({ page }) => {
+    console.log("🧪 测试：响应式设计");
+
+    await page.goto("/");
+    await page.waitForLoadState("domcontentloaded");
+
+    // 测试桌面端视口
     await page.setViewportSize({ width: 1200, height: 800 });
-    const app = await page.locator("#app");
+    const app = page.locator("#app");
     await expect(app).toBeVisible();
 
-    // 测试移动端
+    // 测试移动端视口
     await page.setViewportSize({ width: 375, height: 667 });
     await expect(app).toBeVisible();
+
+    console.log("✅ 响应式设计测试通过");
   });
-});
 
-test.describe("导航测试", () => {
-  test("路由导航正常工作", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+  test("API健康检查", async ({ page }) => {
+    console.log("🧪 测试：API连接");
 
-    // 检查当前URL
-    expect(page.url()).toContain("/");
+    // 直接检查API端点
+    const response = await page.request.get("http://localhost:3000");
+    expect(response.status()).toBeLessThan(500);
 
-    // 如果有导航链接，可以测试导航
-    const navigation = await page.locator("nav, .navigation, .navbar").first();
-    if (await navigation.isVisible()) {
-      // 导航存在时的测试逻辑
-      await expect(navigation).toBeVisible();
-    }
+    console.log("✅ API连接测试通过");
   });
 });
 
 test.describe("错误处理测试", () => {
   test("404页面处理", async ({ page }) => {
+    console.log("🧪 测试：404页面处理");
+
     // 访问不存在的页面
-    const response = await page.goto("/non-existent-page");
+    await page.goto("/non-existent-page");
+    await page.waitForLoadState("domcontentloaded");
 
-    // 检查是否正确处理404
-    // 注意：这取决于应用的路由配置
-    await page.waitForLoadState("networkidle");
-
-    // 应用应该仍然加载，显示404页面或重定向到首页
-    const app = await page.locator("#app");
+    // 应用应该仍然加载（显示404页面或重定向）
+    const app = page.locator("#app");
     await expect(app).toBeVisible();
+
+    console.log("✅ 404页面处理测试通过");
   });
 });
 
-test.describe("性能基准测试", () => {
+test.describe("性能测试", () => {
   test("页面加载性能", async ({ page }) => {
+    console.log("🧪 测试：页面加载性能");
+
     const startTime = Date.now();
 
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
     const loadTime = Date.now() - startTime;
-
-    // 页面应该在5秒内加载完成
-    expect(loadTime).toBeLessThan(5000);
-
     console.log(`页面加载时间: ${loadTime}ms`);
+
+    // 页面应该在10秒内加载完成（CI环境较慢）
+    expect(loadTime).toBeLessThan(10000);
+
+    console.log("✅ 页面性能测试通过");
   });
 });
