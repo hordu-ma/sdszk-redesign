@@ -110,13 +110,8 @@ jobs:
           # 使用专用脚本检查MongoDB
           ./scripts/test-mongodb.sh
 
-          # 检查Redis
-          echo "🔍 检查Redis连接..."
-          timeout 30 bash -c 'until redis-cli -h redis -p 6379 ping >/dev/null 2>&1; do
-            echo "等待Redis启动..."
-            sleep 2
-          done'
-          echo "✅ Redis 连接正常"
+          # 使用专用脚本检查Redis
+          ./scripts/test-redis.sh
 
       - name: 代码风格检查
         run: |
@@ -362,13 +357,8 @@ jobs:
           # 使用专用脚本检查MongoDB
           ./scripts/test-mongodb.sh
 
-          # 检查Redis
-          echo "🔍 检查Redis连接..."
-          timeout 30 bash -c 'until redis-cli -h redis -p 6379 ping >/dev/null 2>&1; do
-            echo "等待Redis..."
-            sleep 2
-          done'
-          echo "✅ Redis 就绪"
+          # 使用专用脚本检查Redis
+          ./scripts/test-redis.sh
 
       - name: 启动应用服务
         run: |

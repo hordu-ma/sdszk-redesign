@@ -108,7 +108,7 @@ jobs:
           cat > server/.env << EOF
           NODE_ENV=test
           MONGODB_URI=mongodb://localhost:27017/sdszk_test
-          REDIS_HOST=localhost
+          REDIS_HOST=redis
           REDIS_PORT=6379
           REDIS_ENABLED=true
           JWT_SECRET=test-secret-key
@@ -141,13 +141,8 @@ jobs:
           # 使用专用脚本检查MongoDB
           ./scripts/test-mongodb.sh
 
-          # 等待Redis
-          echo "🔍 检查Redis连接..."
-          timeout 60 bash -c 'until redis-cli -h localhost -p 6379 ping >/dev/null 2>&1; do
-            echo "等待Redis启动..."
-            sleep 2
-          done'
-          echo "✅ Redis 已就绪"
+          # 使用专用脚本检查Redis
+          REDIS_HOST=redis ./scripts/test-redis.sh
 
       # 启动后端服务
       - name: 启动后端服务
