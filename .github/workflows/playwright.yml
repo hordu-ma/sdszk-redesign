@@ -118,50 +118,59 @@ jobs:
 
           echo "✅ CI环境配置完成"
 
-      - name: 等待服务就绪
+      - name: 等待依赖服务
         run: |
-          echo "⏳ 等待数据库服务启动..."
+          echo "⏳ 使用统一脚本等待依赖服务 (MongoDB / Redis)..."
 
-          # 检查Docker容器状态
-          echo "🐳 检查Docker容器状态..."
+          # 基础容器状态
+          echo "🐳 容器状态:"
           docker ps -a
 
-          # 检查MongoDB容器日志
-          echo "📋 MongoDB容器日志 (最后20行):"
+          # 输出关键容器日志 (截取)
+          echo "📋 MongoDB容器日志(最后20行):"
           docker logs $(docker ps -q --filter "ancestor=mongo:5.0") --tail 20 2>/dev/null || echo "无法获取MongoDB日志"
-
-          # 检查Redis容器日志
-          echo "📋 Redis容器日志 (最后10行):"
+          echo "📋 Redis容器日志(最后10行):"
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "无法获取Redis日志"
 
-          # 使用wait-on等待服务就绪
-          echo "⏳ 等待服务就绪..."
-          npm run wait-on -- -t 120000 tcp:localhost:27017 tcp:localhost:6379
-          echo "✅ MongoDB和Redis端口已开放"
+          # 统一等待脚本（并行等待 + 指数退避 + 汇总）
+          bash scripts/wait-services.sh --timeout 180 \
+            mongo://localhost:27017 \
+            redis://localhost:6379
 
-          # 验证服务连接
+          echo "✅ 基础依赖服务全部就绪，开始验证深度连接..."
+
+          # 深度探活（脚本包含读写/命令验证）
           ./scripts/test-mongodb.sh
           REDIS_HOST=redis ./scripts/test-redis.sh
 
       # 启动并验证服务
-      - name: 启动并验证服务
+      - name: 启动并验证应用服务
         run: |
-          echo "🚀 启动应用服务..."
-          # 启动后端服务器
+          echo "🚀 启动应用服务 (Backend + Frontend)..."
+
+          # 启动后端
           cd server
-          npm start &
+          npm start > ../backend.log 2>&1 &
           echo $! > /tmp/backend.pid
           cd ..
-          # 启动前端服务器
-          npm run dev &
+
+          # 启动前端
+          npm run dev > frontend.log 2>&1 &
           echo $! > /tmp/frontend.pid
-          echo "🔍 验证服务状态..."
-          # 使用wait-on等待所有服务就绪
-          npm run wait-on -- -t 180000 http://localhost:5173 http://localhost:3000/api/health
-          echo "✅ 前端和后端服务已就绪"
-          # 再次确认数据库服务
+
+          echo "⏳ 等待应用层服务 (HTTP) 就绪..."
+          bash scripts/wait-services.sh --timeout 180 \
+            http://localhost:3000/api/health \
+            http://localhost:5173
+
+          echo "✅ 应用服务可访问，执行二次依赖校验..."
           ./scripts/test-mongodb.sh
           REDIS_HOST=redis ./scripts/test-redis.sh
+
+          echo "📄 后端最近日志 (20行):"
+          tail -20 backend.log || true
+          echo "📄 前端最近日志 (20行):"
+          tail -20 frontend.log || true
 
       - name: 运行Playwright测试
         run: |

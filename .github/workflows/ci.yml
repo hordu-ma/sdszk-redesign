@@ -103,12 +103,14 @@ jobs:
           echo "📋 Redis容器日志 (最后10行):"
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "无法获取Redis日志"
 
-          # 使用wait-on等待服务就绪
-          echo "⏳ 等待服务就绪..."
-          npm run wait-on -- -t 120000 tcp:localhost:27017 tcp:localhost:6379
-          echo "✅ MongoDB和Redis端口已开放"
+          # 使用统一脚本等待服务就绪（替换原 wait-on + 单独测试）
+          echo "⏳ 使用统一脚本等待依赖服务..."
+          bash scripts/wait-services.sh --timeout 180 \
+            mongo://localhost:27017 \
+            redis://localhost:6379
+          echo "✅ 基础依赖服务全部就绪"
 
-          # 验证服务连接
+          # 深度验证（保留原有详细检测，便于诊断）
           ./scripts/test-mongodb.sh
           ./scripts/test-redis.sh
 
@@ -349,12 +351,14 @@ jobs:
           echo "📋 MongoDB容器日志 (最后20行):"
           docker logs $(docker ps -q --filter "ancestor=mongo:5.0") --tail 20 2>/dev/null || echo "无法获取MongoDB日志"
 
-          # 使用wait-on等待服务就绪
-          echo "⏳ 等待服务就绪..."
-          npm run wait-on -- -t 120000 tcp:localhost:27017 tcp:localhost:6379
-          echo "✅ MongoDB和Redis端口已开放"
+          # 使用统一脚本等待依赖服务
+          echo "⏳ 使用统一脚本等待依赖服务..."
+          bash scripts/wait-services.sh --timeout 180 \
+            mongo://localhost:27017 \
+            redis://localhost:6379
+          echo "✅ 基础依赖服务全部就绪"
 
-          # 验证服务连接
+          # 深度验证（保持详细诊断）
           ./scripts/test-mongodb.sh
           ./scripts/test-redis.sh
 
