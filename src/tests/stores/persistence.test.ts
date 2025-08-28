@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia } from "pinia";
-import { useUserStore } from "@/stores/user";
-import { useContentStore } from "@/stores/content";
+import { useUserStore } from "../../stores/user";
+import { useContentStore } from "../../stores/content";
 import { createTestPinia, localStorageMock } from "../../../__tests__/setup";
-import type { UserInfo } from "@/stores/user";
+import type { UserInfo } from "../../stores/user";
 
 describe("Pinia状态持久化测试", () => {
   beforeEach(() => {
