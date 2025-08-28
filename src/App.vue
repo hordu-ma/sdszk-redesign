@@ -2,17 +2,16 @@
   <div class="app-container">
     <!-- 根据路由判断是否显示前台布局 -->
     <template v-if="!isAdminRoute">
-      <Header />
+      <header-component />
       <div class="main-content">
         <router-view v-slot="{ Component }">
-          <transition name="fade"
-mode="out-in">
+          <transition name="fade" mode="out-in">
             <component :is="Component" />
           </transition>
         </router-view>
       </div>
-      <FooterLinks />
-      <BackToTop />
+      <footer-links />
+      <back-to-top />
     </template>
     <!-- 管理后台直接显示路由内容 -->
     <template v-else>
@@ -23,14 +22,13 @@ mode="out-in">
 
 <script setup>
 import { computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useUserStore } from "./stores/user";
-import Header from "./components/Header.vue";
+import HeaderComponent from "./components/Header.vue";
 import FooterLinks from "./components/FooterLinks.vue";
 import BackToTop from "./components/BackToTop.vue";
 
 const route = useRoute();
-const router = useRouter();
 const userStore = useUserStore();
 const isAdminRoute = computed(() => route.path.startsWith("/admin"));
 

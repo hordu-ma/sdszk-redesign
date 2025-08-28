@@ -2,16 +2,13 @@
   <div class="auth-container">
     <el-card class="auth-card">
       <div class="auth-header">
-        <img
-src="@/assets/images/logo.png" alt="中心logo" class="auth-logo" />
+        <img src="@/assets/images/logo.png" alt="中心logo" class="auth-logo">
         <h2>{{ isLogin ? "用户登录" : "用户注册" }}</h2>
       </div>
 
-      <el-tabs v-model="activeTab"
-@tab-click="handleTabClick">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
         <!-- 登录面板 -->
-        <el-tab-pane label="登录"
-name="login">
+        <el-tab-pane label="登录" name="login">
           <el-form
             ref="loginFormRef"
             :model="loginForm"
@@ -39,8 +36,7 @@ name="login">
 
             <div class="form-options">
               <el-checkbox v-model="rememberMe"> 记住我 </el-checkbox>
-              <el-button link
-type="primary" @click="handleForgotPassword">
+              <el-button link type="primary" @click="handleForgotPassword">
                 忘记密码？
               </el-button>
             </div>
@@ -57,8 +53,7 @@ type="primary" @click="handleForgotPassword">
         </el-tab-pane>
 
         <!-- 注册面板 -->
-        <el-tab-pane label="注册"
-name="register">
+        <el-tab-pane label="注册" name="register">
           <el-form
             ref="registerFormRef"
             :model="registerForm"

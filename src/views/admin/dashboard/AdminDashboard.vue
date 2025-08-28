@@ -10,13 +10,13 @@
         <a-space>
           <a-button :loading="refreshing" @click="refreshData">
             <template #icon>
-              <ReloadOutlined />
+              <reload-outlined />
             </template>
             刷新数据
           </a-button>
           <a-button @click="exportData">
             <template #icon>
-              <DownloadOutlined />
+              <download-outlined />
             </template>
             导出报告
           </a-button>
@@ -48,9 +48,9 @@
               'trend-neutral': stat.trend === 0,
             }"
           >
-            <ArrowUpOutlined v-if="stat.trend > 0" />
-            <ArrowDownOutlined v-if="stat.trend < 0" />
-            <MinusOutlined v-if="stat.trend === 0" />
+            <arrow-up-outlined v-if="stat.trend > 0" />
+            <arrow-down-outlined v-if="stat.trend < 0" />
+            <minus-outlined v-if="stat.trend === 0" />
             <span>{{ Math.abs(stat.trend) }}%</span>
             <span class="trend-period">较上期</span>
           </div>
@@ -75,18 +75,15 @@
                 <a-select-option value="30"> 近30天 </a-select-option>
                 <a-select-option value="90"> 近90天 </a-select-option>
               </a-select>
-              <a-button type="text"
-@click="toggleChartType">
+              <a-button type="text" @click="toggleChartType">
                 <template #icon>
-                  <BarChartOutlined v-if="chartType === 'line'" />
-                  <LineChartOutlined v-else />
+                  <bar-chart-outlined v-if="chartType === 'line'" />
+                  <line-chart-outlined v-else />
                 </template>
               </a-button>
             </div>
           </div>
-          <div ref="chartRef"
-class="chart-container"
-/>
+          <div ref="chartRef" class="chart-container" />
         </div>
 
         <!-- 内容分布图表 -->
@@ -102,17 +99,14 @@ class="chart-container"
               <a-select-option value="status"> 按状态 </a-select-option>
             </a-select>
           </div>
-          <div ref="contentChartRef"
-class="chart-container"
-/>
+          <div ref="contentChartRef" class="chart-container" />
         </div>
 
         <!-- 最新动态 -->
         <div class="activity-card">
           <div class="card-header">
             <h3>最新动态</h3>
-            <a-button type="link"
-@click="viewAllActivities">
+            <a-button type="link" @click="viewAllActivities">
               查看全部
             </a-button>
           </div>
@@ -123,8 +117,7 @@ class="chart-container"
               class="activity-item"
             >
               <div class="activity-avatar">
-                <a-avatar :src="activity.user.avatar"
-:size="32">
+                <a-avatar :src="activity.user.avatar" :size="32">
                   {{ activity.user.username?.charAt(0)?.toUpperCase() }}
                 </a-avatar>
               </div>
@@ -139,8 +132,7 @@ class="chart-container"
                 </div>
               </div>
             </div>
-            <div v-if="recentActivities.length === 0"
-class="empty-state">
+            <div v-if="recentActivities.length === 0" class="empty-state">
               <a-empty description="暂无动态" />
             </div>
           </div>
@@ -243,8 +235,7 @@ class="empty-state">
       @ok="handleExport"
       @cancel="exportModalVisible = false"
     >
-      <a-form :model="exportForm"
-layout="vertical">
+      <a-form :model="exportForm" layout="vertical">
         <a-form-item label="报告类型">
           <a-radio-group v-model:value="exportForm.type">
             <a-radio value="daily"> 日报 </a-radio>

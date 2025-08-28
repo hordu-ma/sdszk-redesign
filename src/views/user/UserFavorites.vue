@@ -25,14 +25,10 @@
           style="width: 120px; margin-right: 10px"
           @change="loadFavorites"
         >
-          <el-option label="全部"
-value="" />
-          <el-option label="新闻资讯"
-value="news" />
-          <el-option label="资源文件"
-value="resource" />
-          <el-option label="活动"
-value="activity" />
+          <el-option label="全部" value="" />
+          <el-option label="新闻资讯" value="news" />
+          <el-option label="资源文件" value="resource" />
+          <el-option label="活动" value="activity" />
         </el-select>
 
         <el-input
@@ -43,7 +39,7 @@ value="activity" />
         >
           <template #suffix>
             <el-icon style="cursor: pointer" @click="loadFavorites">
-              <Search />
+              <search />
             </el-icon>
           </template>
         </el-input>
@@ -60,8 +56,7 @@ value="activity" />
           批量删除 ({{ selectedItems.length }})
         </el-button>
 
-        <el-button type="primary"
-@click="showCategoryDialog = true">
+        <el-button type="primary" @click="showCategoryDialog = true">
           管理分类
         </el-button>
       </div>
@@ -115,24 +110,19 @@ value="activity" />
         全选
       </el-checkbox>
 
-      <div v-if="loading && !favorites.length"
-class="loading-wrapper">
-        <el-skeleton :rows="5"
-animated />
+      <div v-if="loading && !favorites.length" class="loading-wrapper">
+        <el-skeleton :rows="5" animated />
       </div>
 
-      <div v-else-if="!favorites.length"
-class="empty-state">
+      <div v-else-if="!favorites.length" class="empty-state">
         <el-empty description="暂无收藏内容">
-          <el-button type="primary"
-@click="$router.push('/')">
+          <el-button type="primary" @click="$router.push('/')">
             去首页逛逛
           </el-button>
         </el-empty>
       </div>
 
-      <div v-else
-class="favorites-grid">
+      <div v-else class="favorites-grid">
         <div
           v-for="item in favorites"
           :key="item._id"
@@ -145,17 +135,15 @@ class="favorites-grid">
             @change="(checked) => handleItemSelect(item._id, checked)"
           />
 
-          <div class="item-content"
-@click="openResource(item)">
+          <div class="item-content" @click="openResource(item)">
             <div class="item-image">
               <img
                 v-if="item.itemId.image"
                 :src="item.itemId.image"
                 :alt="item.itemId.title"
                 @error="handleImageError"
-              />
-              <div v-else
-class="default-image">
+              >
+              <div v-else class="default-image">
                 <i :class="getTypeIcon(item.itemType)" />
               </div>
             </div>
@@ -164,8 +152,7 @@ class="default-image">
               <h3 class="item-title">
                 {{ item.itemId.title }}
               </h3>
-              <p v-if="item.itemId.description"
-class="item-description">
+              <p v-if="item.itemId.description" class="item-description">
                 {{ item.itemId.description }}
               </p>
 
@@ -192,8 +179,7 @@ class="item-description">
                 </span>
               </div>
 
-              <div v-if="item.tags && item.tags.length"
-class="item-tags">
+              <div v-if="item.tags && item.tags.length" class="item-tags">
                 <el-tag
                   v-for="tag in item.tags.slice(0, 3)"
                   :key="tag"
@@ -204,14 +190,12 @@ class="item-tags">
                 >
                   {{ tag }}
                 </el-tag>
-                <span v-if="item.tags.length > 3"
-class="more-tags">
+                <span v-if="item.tags.length > 3" class="more-tags">
                   +{{ item.tags.length - 3 }}
                 </span>
               </div>
 
-              <p v-if="item.notes"
-class="item-notes">
+              <p v-if="item.notes" class="item-notes">
                 <i class="fas fa-sticky-note" />
                 {{ item.notes }}
               </p>
@@ -219,8 +203,7 @@ class="item-notes">
           </div>
 
           <div class="item-actions">
-            <el-button type="text"
-size="small" @click="editFavorite(item)">
+            <el-button type="text" size="small" @click="editFavorite(item)">
               <i class="fas fa-edit" />
             </el-button>
             <el-button
@@ -236,8 +219,7 @@ size="small" @click="editFavorite(item)">
       </div>
 
       <!-- 分页 -->
-      <div v-if="total > 0"
-class="pagination-wrapper">
+      <div v-if="total > 0" class="pagination-wrapper">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
@@ -251,8 +233,7 @@ class="pagination-wrapper">
     </div>
 
     <!-- 分类管理对话框 -->
-    <el-dialog v-model="showCategoryDialog"
-title="管理收藏分类" width="500px">
+    <el-dialog v-model="showCategoryDialog" title="管理收藏分类" width="500px">
       <div class="category-manager">
         <el-form @submit.prevent="addCategory">
           <el-form-item>
@@ -295,10 +276,8 @@ title="管理收藏分类" width="500px">
     </el-dialog>
 
     <!-- 编辑收藏对话框 -->
-    <el-dialog v-model="showEditDialog"
-title="编辑收藏" width="600px">
-      <el-form v-if="editingItem"
-:model="editForm" label-width="80px">
+    <el-dialog v-model="showEditDialog" title="编辑收藏" width="600px">
+      <el-form v-if="editingItem" :model="editForm" label-width="80px">
         <el-form-item label="分类">
           <el-select
             v-model="editForm.category"
@@ -348,8 +327,7 @@ title="编辑收藏" width="600px">
 
       <template #footer>
         <el-button @click="showEditDialog = false"> 取消 </el-button>
-        <el-button type="primary"
-@click="updateFavorite" :loading="loading">
+        <el-button type="primary" @click="updateFavorite" :loading="loading">
           确定
         </el-button>
       </template>

@@ -3,10 +3,9 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <a-button type="text"
-@click="$router.back()" class="back-btn">
+        <a-button type="text" @click="$router.back()" class="back-btn">
           <template #icon>
-            <ArrowLeftOutlined />
+            <arrow-left-outlined />
           </template>
           返回
         </a-button>
@@ -19,8 +18,7 @@
         <a-button :loading="saving" @click="handleSaveDraft">
           保存草稿
         </a-button>
-        <a-button type="primary"
-@click="handlePublish" :loading="publishing">
+        <a-button type="primary" @click="handlePublish" :loading="publishing">
           发布新闻
         </a-button>
       </div>
@@ -28,15 +26,13 @@
 
     <!-- 新闻表单 -->
     <div class="form-container">
-      <a-form ref="formRef"
-:model="formData" :rules="rules" layout="vertical">
+      <a-form ref="formRef" :model="formData" :rules="rules" layout="vertical">
         <a-row :gutter="24">
           <!-- 左侧主要内容 -->
           <a-col :span="16">
             <div class="main-content">
               <!-- 标题 -->
-              <a-form-item label="新闻标题"
-name="title">
+              <a-form-item label="新闻标题" name="title">
                 <a-input
                   v-model:value="formData.title"
                   placeholder="请输入新闻标题"
@@ -47,8 +43,7 @@ name="title">
               </a-form-item>
 
               <!-- 摘要 -->
-              <a-form-item label="新闻摘要"
-name="summary">
+              <a-form-item label="新闻摘要" name="summary">
                 <a-textarea
                   v-model:value="formData.summary"
                   placeholder="请输入新闻摘要（可选）"
@@ -59,9 +54,8 @@ name="summary">
               </a-form-item>
 
               <!-- 内容编辑器 -->
-              <a-form-item label="新闻内容"
-name="content">
-                <QuillEditor
+              <a-form-item label="新闻内容" name="content">
+                <quill-editor
                   ref="quillEditorRef"
                   v-model="formData.content"
                   placeholder="请输入新闻内容..."
@@ -79,10 +73,8 @@ name="content">
           <a-col :span="8">
             <div class="settings-panel">
               <!-- 发布设置 -->
-              <a-card title="发布设置"
-size="small" class="setting-card">
-                <a-form-item label="新闻分类"
-name="category">
+              <a-card title="发布设置" size="small" class="setting-card">
+                <a-form-item label="新闻分类" name="category">
                   <a-select
                     v-model:value="formData.category"
                     placeholder="请选择分类"
@@ -98,8 +90,7 @@ name="category">
                   </a-select>
                 </a-form-item>
 
-                <a-form-item label="发布时间"
-name="publishTime">
+                <a-form-item label="发布时间" name="publishTime">
                   <a-date-picker
                     v-model:value="formData.publishTime"
                     show-time
@@ -109,8 +100,7 @@ name="publishTime">
                   />
                 </a-form-item>
 
-                <a-form-item label="标签"
-name="tags">
+                <a-form-item label="标签" name="tags">
                   <a-select
                     v-model:value="formData.tags"
                     mode="tags"
@@ -121,8 +111,7 @@ name="tags">
               </a-card>
 
               <!-- 特色图片 -->
-              <a-card title="特色图片"
-size="small" class="setting-card">
+              <a-card title="特色图片" size="small" class="setting-card">
                 <div class="image-upload">
                   <a-upload
                     v-model:file-list="imageFileList"
@@ -132,10 +121,8 @@ size="small" class="setting-card">
                     :custom-request="handleImageUpload"
                     :show-upload-list="false"
                   >
-                    <div v-if="formData.featuredImage"
-class="image-preview">
-                      <img
-:src="formData.featuredImage" alt="特色图片" />
+                    <div v-if="formData.featuredImage" class="image-preview">
+                      <img :src="formData.featuredImage" alt="特色图片">
                       <div class="image-actions">
                         <a-button
                           type="text"
@@ -143,14 +130,13 @@ class="image-preview">
                           @click.stop="handleRemoveImage"
                         >
                           <template #icon>
-                            <DeleteOutlined />
+                            <delete-outlined />
                           </template>
                         </a-button>
                       </div>
                     </div>
-                    <div v-else
-class="upload-placeholder">
-                      <PlusOutlined />
+                    <div v-else class="upload-placeholder">
+                      <plus-outlined />
                       <div class="upload-text">上传图片</div>
                     </div>
                   </a-upload>
@@ -159,8 +145,7 @@ class="upload-placeholder">
               </a-card>
 
               <!-- 高级设置 -->
-              <a-card title="高级设置"
-size="small" class="setting-card">
+              <a-card title="高级设置" size="small" class="setting-card">
                 <a-form-item>
                   <a-checkbox v-model:checked="formData.isTop">
                     置顶新闻

@@ -5,15 +5,13 @@
     :data-visible="isHeaderVisible"
   >
     <div class="header-content">
-      <button class="mobile-menu-trigger"
-@click="toggleMenu">
+      <button class="mobile-menu-trigger" @click="toggleMenu">
         <span class="sr-only">打开菜单</span>
         <i class="fas fa-bars" />
       </button>
 
       <div class="logo-container">
-        <img
-src="../assets/images/logo.png" alt="中心logo" class="logo" />
+        <img src="../assets/images/logo.png" alt="中心logo" class="logo">
         <h1 class="center-name">
           <span class="full-name">山东省大中小学思政课一体化中心</span>
           <span class="short-name">山东省大中小学思政课一体化中心</span>
@@ -22,43 +20,33 @@ src="../assets/images/logo.png" alt="中心logo" class="logo" />
 
       <!-- 桌面端导航菜单 -->
       <nav class="desktop-nav">
-        <router-link
-to="/" class="nav-item"> 首页 </router-link>
-        <router-link
-to="/about" class="nav-item"> 平台简介 </router-link>
-        <el-dropdown trigger="hover"
-class="nav-dropdown">
-          <router-link
-to="/news" class="nav-item"> 资讯中心 </router-link>
+        <router-link to="/" class="nav-item"> 首页 </router-link>
+        <router-link to="/about" class="nav-item"> 平台简介 </router-link>
+        <el-dropdown trigger="hover" class="nav-dropdown">
+          <router-link to="/news" class="nav-item"> 资讯中心 </router-link>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
-                <router-link to="/news?category=center"
-class="dropdown-link">
+                <router-link to="/news?category=center" class="dropdown-link">
                   中心动态
                 </router-link>
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/news?category=notice"
-class="dropdown-link">
+                <router-link to="/news?category=notice" class="dropdown-link">
                   通知公告
                 </router-link>
               </el-dropdown-item>
               <el-dropdown-item>
-                <router-link to="/news?category=policy"
-class="dropdown-link">
+                <router-link to="/news?category=policy" class="dropdown-link">
                   政策文件
                 </router-link>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item"
-        >活动中心</a>
-        <el-dropdown trigger="hover"
-class="nav-dropdown">
-          <router-link
-to="/resources" class="nav-item"> 资源中心 </router-link>
+        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">活动中心</a>
+        <el-dropdown trigger="hover" class="nav-dropdown">
+          <router-link to="/resources" class="nav-item"> 资源中心 </router-link>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
@@ -88,8 +76,7 @@ to="/resources" class="nav-item"> 资源中心 </router-link>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <router-link
-to="/ai" class="nav-item"> AI思政 </router-link>
+        <router-link to="/ai" class="nav-item"> AI思政 </router-link>
       </nav>
 
       <!-- 搜索和登录区域 -->
@@ -101,18 +88,15 @@ to="/ai" class="nav-item"> AI思政 </router-link>
           @keyup.enter="handleSearch"
         >
           <template #suffix>
-            <el-icon class="search-icon"
-@click="handleSearch">
-              <Search />
+            <el-icon class="search-icon" @click="handleSearch">
+              <search />
             </el-icon>
           </template>
         </el-input>
 
         <div v-if="!isAuthenticated" class="auth-buttons">
-          <router-link to="/auth"
-class="auth-button">
-            <el-button class="custom-auth-button login-button"
-plain>
+          <router-link to="/auth" class="auth-button">
+            <el-button class="custom-auth-button login-button" plain>
               登录/注册
             </el-button>
           </router-link>
@@ -120,10 +104,9 @@ plain>
         <div v-else class="user-menu">
           <el-dropdown @command="handleCommand">
             <span class="user-dropdown-link">
-              <el-avatar :size="32"
-:src="userInfo?.avatar" />
+              <el-avatar :size="32" :src="userInfo?.avatar" />
               {{ userInfo?.name }}
-              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              <el-icon class="el-icon--right"><arrow-down /></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -139,16 +122,13 @@ plain>
 
       <!-- 移动端遮罩层 -->
       <transition name="fade">
-        <div
-v-if="isMenuOpen" class="mobile-overlay" @click="closeMenu" />
+        <div v-if="isMenuOpen" class="mobile-overlay" @click="closeMenu" />
       </transition>
 
       <!-- 移动端菜单容器 -->
-      <div class="mobile-menu"
-:class="{ 'menu-open': isMenuOpen }">
+      <div class="mobile-menu" :class="{ 'menu-open': isMenuOpen }">
         <!-- 移动端关闭按钮 -->
-        <button class="mobile-menu-close"
-@click="closeMenu">
+        <button class="mobile-menu-close" @click="closeMenu">
           <span class="sr-only">关闭菜单</span>
           <i class="fas fa-times" />
         </button>
@@ -211,8 +191,7 @@ v-if="isMenuOpen" class="mobile-overlay" @click="closeMenu" />
           </div>
           <!-- 移动端登录注册按钮 -->
           <div v-if="!isAuthenticated" class="mobile-auth">
-            <router-link to="/auth"
-class="mobile-auth-link" @click="closeMenu">
+            <router-link to="/auth" class="mobile-auth-link" @click="closeMenu">
               登录/注册
             </router-link>
           </div>
@@ -370,6 +349,9 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use "@/styles/mixins" as *;
+@use "@/styles/variables" as *;
+
 .header {
   width: 100%;
   margin: 0;

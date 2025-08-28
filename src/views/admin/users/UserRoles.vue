@@ -7,10 +7,9 @@
         <p>管理系统角色和权限分配</p>
       </div>
       <div class="action-section">
-        <a-button type="primary"
-@click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新增角色
         </a-button>
@@ -46,22 +45,19 @@
           >
             <template #title>
               <div class="role-title">
-                <a-tag :color="getRoleColor(role.name)"
-class="role-tag">
+                <a-tag :color="getRoleColor(role.name)" class="role-tag">
                   {{ role.displayName }}
                 </a-tag>
                 <a-dropdown v-if="!isSystemRole(role.name)">
-                  <a-button type="text"
-size="small">
-                    <MoreOutlined />
+                  <a-button type="text" size="small">
+                    <more-outlined />
                   </a-button>
                   <template #overlay>
                     <a-menu @click="onRoleMenuClick(role)">
                       <a-menu-item key="edit"> 编辑 </a-menu-item>
                       <a-menu-item key="permissions"> 配置权限 </a-menu-item>
                       <a-menu-divider />
-                      <a-menu-item
-key="delete" danger> 删除 </a-menu-item>
+                      <a-menu-item key="delete" danger> 删除 </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
@@ -149,8 +145,7 @@ key="delete" danger> 删除 </a-menu-item>
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item label="角色名称"
-name="name">
+        <a-form-item label="角色名称" name="name">
           <a-input
             v-model:value="roleForm.name"
             placeholder="请输入角色名称（英文标识）"
@@ -158,16 +153,14 @@ name="name">
           />
         </a-form-item>
 
-        <a-form-item label="显示名称"
-name="displayName">
+        <a-form-item label="显示名称" name="displayName">
           <a-input
             v-model:value="roleForm.displayName"
             placeholder="请输入显示名称（中文）"
           />
         </a-form-item>
 
-        <a-form-item label="角色描述"
-name="description">
+        <a-form-item label="角色描述" name="description">
           <a-textarea
             v-model:value="roleForm.description"
             placeholder="请输入角色描述"
@@ -175,8 +168,7 @@ name="description">
           />
         </a-form-item>
 
-        <a-form-item label="权限配置"
-name="permissions">
+        <a-form-item label="权限配置" name="permissions">
           <div class="permissions-config">
             <div class="permissions-header">
               <a-checkbox
@@ -186,8 +178,7 @@ name="permissions">
               >
                 全选
               </a-checkbox>
-              <a-button type="link"
-size="small" @click="expandAllPermissions">
+              <a-button type="link" size="small" @click="expandAllPermissions">
                 {{ allExpanded ? "收起全部" : "展开全部" }}
               </a-button>
             </div>
@@ -208,8 +199,7 @@ size="small" @click="expandAllPermissions">
               <template #title="{ displayName, description }">
                 <div class="permission-item">
                   <span class="permission-name">{{ displayName }}</span>
-                  <span v-if="description"
-class="permission-desc">{{
+                  <span v-if="description" class="permission-desc">{{
                     description
                   }}</span>
                 </div>
@@ -227,10 +217,8 @@ class="permission-desc">{{
       :footer="null"
       width="600px"
     >
-      <div v-if="currentRole"
-class="role-detail">
-        <a-descriptions :column="2"
-bordered>
+      <div v-if="currentRole" class="role-detail">
+        <a-descriptions :column="2" bordered>
           <a-descriptions-item label="角色名称">
             {{ currentRole.name }}
           </a-descriptions-item>
@@ -243,12 +231,10 @@ bordered>
           <a-descriptions-item label="权限数量">
             {{ currentRole.permissions.length }}
           </a-descriptions-item>
-          <a-descriptions-item label="创建时间"
-:span="2">
+          <a-descriptions-item label="创建时间" :span="2">
             {{ formatDate(currentRole.createdAt) }}
           </a-descriptions-item>
-          <a-descriptions-item label="角色描述"
-:span="2">
+          <a-descriptions-item label="角色描述" :span="2">
             {{ currentRole.description || "暂无描述" }}
           </a-descriptions-item>
         </a-descriptions>

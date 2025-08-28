@@ -9,10 +9,8 @@
     <!-- 顶部Logo区域 -->
     <div class="sidebar-header">
       <div class="logo-container">
-        <img
-src="@/assets/images/logo.png" alt="Logo" class="logo" />
-        <span v-if="!collapsed"
-class="logo-text">管理后台</span>
+        <img src="@/assets/images/logo.png" alt="Logo" class="logo">
+        <span v-if="!collapsed" class="logo-text">管理后台</span>
       </div>
     </div>
 
@@ -27,14 +25,14 @@ class="logo-text">管理后台</span>
       >
         <a-menu-item key="/admin/dashboard">
           <template #icon>
-            <DashboardOutlined />
+            <dashboard-outlined />
           </template>
           <span>仪表板</span>
         </a-menu-item>
 
         <a-sub-menu key="news">
           <template #icon>
-            <FileTextOutlined />
+            <file-text-outlined />
           </template>
           <template #title> 新闻管理 </template>
           <a-menu-item key="/admin/news/list"> 新闻列表 </a-menu-item>
@@ -44,7 +42,7 @@ class="logo-text">管理后台</span>
 
         <a-sub-menu key="resources">
           <template #icon>
-            <FolderOutlined />
+            <folder-outlined />
           </template>
           <template #title> 资源管理 </template>
           <a-menu-item key="/admin/resources/list"> 资源列表 </a-menu-item>
@@ -56,7 +54,7 @@ class="logo-text">管理后台</span>
 
         <a-sub-menu key="users">
           <template #icon>
-            <UserOutlined />
+            <user-outlined />
           </template>
           <template #title> 用户管理 </template>
           <a-menu-item key="/admin/users/list"> 用户列表 </a-menu-item>
@@ -66,7 +64,7 @@ class="logo-text">管理后台</span>
 
         <a-menu-item key="/admin/settings">
           <template #icon>
-            <SettingOutlined />
+            <setting-outlined />
           </template>
           <span>系统设置</span>
         </a-menu-item>

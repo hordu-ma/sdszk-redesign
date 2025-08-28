@@ -39,10 +39,8 @@
             borderRadius: '50%',
           }"
         >
-          <div :style="previews.div"
-class="preview-content">
-            <img
-:src="imgSrc" :style="previews.img" class="preview-img" />
+          <div :style="previews.div" class="preview-content">
+            <img :src="imgSrc" :style="previews.img" class="preview-img">
           </div>
         </div>
       </div>
@@ -50,16 +48,13 @@ class="preview-content">
         <div class="control-group">
           <div class="control-title">旋转</div>
           <div class="control-buttons">
-            <el-button
-size="small" @click="rotateLeft"> 逆时针 </el-button>
-            <el-button
-size="small" @click="rotateRight"> 顺时针 </el-button>
+            <el-button size="small" @click="rotateLeft"> 逆时针 </el-button>
+            <el-button size="small" @click="rotateRight"> 顺时针 </el-button>
           </div>
         </div>
         <div class="control-group">
           <div class="control-title">缩放</div>
-          <el-slider v-model="zoom"
-:min="1" :max="3" :step="0.1" />
+          <el-slider v-model="zoom" :min="1" :max="3" :step="0.1" />
         </div>
         <div class="control-group">
           <div class="control-title">图片质量 ({{ outputSize }})</div>
@@ -76,8 +71,7 @@ size="small" @click="rotateRight"> 顺时针 </el-button>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary"
-@click="handleCrop">确认</el-button>
+        <el-button type="primary" @click="handleCrop">确认</el-button>
       </span>
     </template>
   </el-dialog>

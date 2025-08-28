@@ -5,8 +5,7 @@
       <aside class="user-sidebar">
         <div class="user-info">
           <div class="avatar-container">
-            <el-avatar :size="60"
-:src="userInfo?.avatar" class="user-avatar">
+            <el-avatar :size="60" :src="userInfo?.avatar" class="user-avatar">
               <i class="el-icon-user-solid" />
             </el-avatar>
           </div>

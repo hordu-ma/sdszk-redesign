@@ -1,22 +1,18 @@
 <template>
   <div class="article-meta">
-    <span v-if="date"
-class="meta-item">
+    <span v-if="date" class="meta-item">
       <i class="fas fa-calendar-alt" />
       {{ formattedDate }}
     </span>
-    <span v-if="author"
-class="meta-item">
+    <span v-if="author" class="meta-item">
       <i class="fas fa-user" />
       {{ author }}
     </span>
-    <span v-if="source"
-class="meta-item">
+    <span v-if="source" class="meta-item">
       <i class="fas fa-globe" />
       {{ source }}
     </span>
-    <span v-if="viewCount"
-class="meta-item">
+    <span v-if="viewCount" class="meta-item">
       <i class="fas fa-eye" />
       {{ viewCount }} 次阅读
     </span>

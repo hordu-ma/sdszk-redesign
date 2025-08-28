@@ -1,5 +1,5 @@
 // 响应式设计混合宏
-@use 'variables' as *;
+@use "variables" as *;
 
 // 超小屏幕（手机）
 @mixin xs {

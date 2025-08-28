@@ -3,16 +3,13 @@
     <h3>
       <i class="fas fa-user-tie header-icon" />
       <span class="title-text">'十佳百优'思政教师</span>
-      <router-link to="/teachers"
-class="more-link">
+      <router-link to="/teachers" class="more-link">
         更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
     <div class="teachers-grid">
-      <div v-for="teacher in teachers"
-:key="teacher.id" class="teacher-card">
-        <img
-:src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
+      <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
+        <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar">
         <h4>{{ teacher.name }}</h4>
         <p>{{ teacher.title }}</p>
         <p class="teacher-institution">

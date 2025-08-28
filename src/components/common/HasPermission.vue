@@ -5,8 +5,7 @@
     name="unauthorized"
     @onDenied="props.onDenied()"
   />
-  <slot v-else
-name="unauthorized" />
+  <slot v-else name="unauthorized" />
 </template>
 
 <script setup lang="ts">

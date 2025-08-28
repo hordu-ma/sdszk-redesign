@@ -1,19 +1,16 @@
 <template>
   <div class="admin-profile">
-    <a-card title="管理员个人资料"
-class="profile-card">
+    <a-card title="管理员个人资料" class="profile-card">
       <template #extra>
-        <a-button v-if="!isEditing"
-type="primary" @click="startEdit">
+        <a-button v-if="!isEditing" type="primary" @click="startEdit">
           <template #icon>
-            <EditOutlined />
+            <edit-outlined />
           </template>
           编辑资料
         </a-button>
         <a-space v-else>
           <a-button @click="cancelEdit"> 取消 </a-button>
-          <a-button type="primary"
-@click="saveProfile" :loading="saving">
+          <a-button type="primary" @click="saveProfile" :loading="saving">
             保存
           </a-button>
         </a-space>
@@ -22,8 +19,7 @@ type="primary" @click="startEdit">
       <div class="profile-content">
         <!-- 头像区域 -->
         <div class="avatar-section">
-          <a-avatar :size="80"
-:src="formData.avatar" class="user-avatar">
+          <a-avatar :size="80" :src="formData.avatar" class="user-avatar">
             {{ formData.username?.charAt(0)?.toUpperCase() }}
           </a-avatar>
           <div class="avatar-info">
@@ -103,8 +99,7 @@ type="primary" @click="startEdit">
         <a-divider />
         <div class="login-info">
           <h4>登录信息</h4>
-          <a-descriptions :column="2"
-size="small">
+          <a-descriptions :column="2" size="small">
             <a-descriptions-item label="上次登录时间">
               {{
                 userInfo.lastLoginAt
@@ -131,15 +126,13 @@ size="small">
     </a-card>
 
     <!-- 修改密码卡片 -->
-    <a-card title="安全设置"
-class="security-card" style="margin-top: 24px">
+    <a-card title="安全设置" class="security-card" style="margin-top: 24px">
       <div class="security-item">
         <div class="security-info">
           <h4>登录密码</h4>
           <p>定期更换密码，保护账户安全</p>
         </div>
-        <a-button type="primary"
-@click="showPasswordModal = true">
+        <a-button type="primary" @click="showPasswordModal = true">
           修改密码
         </a-button>
       </div>
@@ -158,22 +151,19 @@ class="security-card" style="margin-top: 24px">
         :model="passwordForm"
         :rules="passwordRules"
       >
-        <a-form-item label="当前密码"
-name="oldPassword">
+        <a-form-item label="当前密码" name="oldPassword">
           <a-input-password
             v-model:value="passwordForm.oldPassword"
             placeholder="请输入当前密码"
           />
         </a-form-item>
-        <a-form-item label="新密码"
-name="newPassword">
+        <a-form-item label="新密码" name="newPassword">
           <a-input-password
             v-model:value="passwordForm.newPassword"
             placeholder="请输入新密码"
           />
         </a-form-item>
-        <a-form-item label="确认新密码"
-name="confirmPassword">
+        <a-form-item label="确认新密码" name="confirmPassword">
           <a-input-password
             v-model:value="passwordForm.confirmPassword"
             placeholder="请确认新密码"

@@ -7,10 +7,9 @@
         <p>管理新闻分类，包括创建、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button type="primary"
-@click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新建分类
         </a-button>
@@ -30,8 +29,7 @@
           <template v-if="column.key === 'name'">
             <div class="category-name">
               <span class="name-text">{{ record.name }}</span>
-              <a-tag v-if="record.isDefault"
-color="blue" size="small">
+              <a-tag v-if="record.isDefault" color="blue" size="small">
                 默认
               </a-tag>
             </div>
@@ -56,8 +54,7 @@ color="blue" size="small">
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link"
-size="small" @click="handleEdit(record)">
+              <a-button type="link" size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
               <a-popconfirm
@@ -96,8 +93,7 @@ size="small" @click="handleEdit(record)">
         :rules="modalRules"
         layout="vertical"
       >
-        <a-form-item label="分类名称"
-name="name">
+        <a-form-item label="分类名称" name="name">
           <a-input
             v-model:value="modalForm.name"
             placeholder="请输入分类名称"
@@ -107,8 +103,7 @@ name="name">
           />
         </a-form-item>
 
-        <a-form-item label="分类标识"
-name="key">
+        <a-form-item label="分类标识" name="key">
           <a-input
             v-model:value="modalForm.key"
             placeholder="请输入分类标识，如：center、notice、policy"
@@ -120,8 +115,7 @@ name="key">
           </div>
         </a-form-item>
 
-        <a-form-item label="分类描述"
-name="description">
+        <a-form-item label="分类描述" name="description">
           <a-textarea
             v-model:value="modalForm.description"
             placeholder="请输入分类描述（可选）"
@@ -131,8 +125,7 @@ name="description">
           />
         </a-form-item>
 
-        <a-form-item label="排序"
-name="sort">
+        <a-form-item label="排序" name="sort">
           <a-input-number
             v-model:value="modalForm.sort"
             placeholder="数字越小排序越靠前"

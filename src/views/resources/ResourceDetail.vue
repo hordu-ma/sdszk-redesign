@@ -13,7 +13,7 @@
             @click="downloadResource"
           >
             <template #icon>
-              <DownloadOutlined />
+              <download-outlined />
             </template>
             下载
           </a-button>
@@ -23,7 +23,7 @@
             @click="shareResource"
           >
             <template #icon>
-              <ShareAltOutlined />
+              <share-alt-outlined />
             </template>
             分享
           </a-button>
@@ -31,8 +31,7 @@
       </template>
     </a-page-header>
 
-    <a-row :gutter="[24, 24]"
-class="resource-content">
+    <a-row :gutter="[24, 24]" class="resource-content">
       <!-- 资源详情 -->
       <a-col :span="16">
         <a-card v-if="loading">
@@ -42,8 +41,7 @@ class="resource-content">
           <!-- 媒体预览区域 -->
           <div v-if="getMediaUrl(resource)" class="media-preview">
             <!-- 视频播放器 -->
-            <div v-if="isVideoFile(resource)"
-class="video-container">
+            <div v-if="isVideoFile(resource)" class="video-container">
               <video
                 :src="getMediaUrl(resource)"
                 controls
@@ -56,8 +54,7 @@ class="video-container">
             </div>
 
             <!-- 音频播放器 -->
-            <div v-else-if="isAudioFile(resource)"
-class="audio-container">
+            <div v-else-if="isAudioFile(resource)" class="audio-container">
               <audio
                 :src="getMediaUrl(resource)"
                 controls
@@ -70,19 +67,17 @@ class="audio-container">
             </div>
 
             <!-- 图片预览 -->
-            <div v-else-if="isImageFile(resource)"
-class="image-container">
+            <div v-else-if="isImageFile(resource)" class="image-container">
               <img
                 :src="getMediaUrl(resource)"
                 :alt="resource.title"
                 class="media-player"
                 @error="handleMediaError"
-              />
+              >
             </div>
 
             <!-- PDF预览 -->
-            <div v-else-if="isPdfFile(resource)"
-class="pdf-container">
+            <div v-else-if="isPdfFile(resource)" class="pdf-container">
               <iframe
                 :src="getMediaUrl(resource)"
                 class="media-player pdf-viewer"
@@ -95,27 +90,21 @@ class="pdf-container">
 
           <div class="resource-info">
             <div class="resource-meta">
-              <span
-                ><UserOutlined />
+              <span><user-outlined />
                 {{
                   typeof resource?.author === "string"
                     ? resource.author
                     : resource?.author?.name ||
                       resource?.createdBy?.name ||
                       "未知作者"
-                }}</span
-              >
-              <span
-                ><CalendarOutlined />
+                }}</span>
+              <span><calendar-outlined />
                 {{
                   formatDate(resource?.publishDate || resource?.createdAt)
-                }}</span
-              >
-              <span><EyeOutlined /> {{ resource?.viewCount || 0 }} 查看</span>
-              <span
-                ><DownloadOutlined />
-                {{ resource?.downloadCount || 0 }} 下载</span
-              >
+                }}</span>
+              <span><eye-outlined /> {{ resource?.viewCount || 0 }} 查看</span>
+              <span><download-outlined />
+                {{ resource?.downloadCount || 0 }} 下载</span>
             </div>
             <div
               v-if="resource?.description"
@@ -123,8 +112,7 @@ class="pdf-container">
               v-html="resource.description"
             />
             <div v-if="resource?.tags?.length" class="tags">
-              <a-tag v-for="tag in resource.tags"
-:key="tag">
+              <a-tag v-for="tag in resource.tags" :key="tag">
                 {{ tag }}
               </a-tag>
             </div>
@@ -137,8 +125,7 @@ class="pdf-container">
             sub-title="请检查资源ID是否正确"
           >
             <template #extra>
-              <a-button type="primary"
-@click="() => router.push('/resources')">
+              <a-button type="primary" @click="() => router.push('/resources')">
                 返回资源中心
               </a-button>
             </template>
@@ -146,8 +133,7 @@ class="pdf-container">
         </a-card>
 
         <!-- 暂时禁用评论系统 -->
-        <a-card title="评论"
-class="comment-section" v-if="false">
+        <a-card title="评论" class="comment-section" v-if="false">
           <a-empty description="评论功能开发中..." />
         </a-card>
       </a-col>
@@ -156,8 +142,7 @@ class="comment-section" v-if="false">
       <a-col :span="8">
         <a-card title="相关资源">
           <template v-if="relatedResources.length">
-            <a-list :data-source="relatedResources"
-size="small">
+            <a-list :data-source="relatedResources" size="small">
               <template #renderItem="{ item }">
                 <a-list-item>
                   <a @click="() => router.push(`/resources/detail/${item.id}`)">

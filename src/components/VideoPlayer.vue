@@ -20,8 +20,7 @@
     <div v-show="showControls" class="video-controls">
       <!-- 进度条 -->
       <div class="progress-bar">
-        <div
-class="progress" :style="{ width: progress + '%' }" />
+        <div class="progress" :style="{ width: progress + '%' }" />
         <input
           type="range"
           class="progress-slider"
@@ -29,13 +28,12 @@ class="progress" :style="{ width: progress + '%' }" />
           min="0"
           max="100"
           @input="onProgressChange"
-        />
+        >
       </div>
 
       <div class="controls-buttons">
         <!-- 播放/暂停按钮 -->
-        <button class="control-button"
-@click="togglePlay">
+        <button class="control-button" @click="togglePlay">
           <el-icon :size="20">
             <component :is="isPlaying ? VideoPause : VideoPlay" />
           </el-icon>
@@ -43,8 +41,7 @@ class="progress" :style="{ width: progress + '%' }" />
 
         <!-- 音量控制 -->
         <div class="volume-control">
-          <button class="control-button"
-@click="toggleMute">
+          <button class="control-button" @click="toggleMute">
             <el-icon :size="20">
               <component :is="volumeIcon" />
             </el-icon>
@@ -57,7 +54,7 @@ class="progress" :style="{ width: progress + '%' }" />
             max="1"
             step="0.1"
             @input="onVolumeChange"
-          />
+          >
         </div>
 
         <!-- 时间显示 -->
@@ -66,8 +63,7 @@ class="progress" :style="{ width: progress + '%' }" />
         </div>
 
         <!-- 全屏按钮 -->
-        <button class="control-button"
-@click="toggleFullscreen">
+        <button class="control-button" @click="toggleFullscreen">
           <el-icon :size="20">
             <component :is="isFullscreen ? Close : FullScreen" />
           </el-icon>

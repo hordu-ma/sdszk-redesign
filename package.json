@@ -17,7 +17,9 @@
     "test:e2e:report": "playwright show-report playwright-report",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:headed": "playwright test --headed",
-    "lint": "eslint 'server/**/*.js' --ignore-pattern 'server/scripts/mongo-init.js' --ignore-pattern 'server/tests/**' --fix --max-warnings 100",
+    "lint": "eslint 'src/**/*.{js,ts,vue}' 'server/**/*.js' --ignore-pattern 'server/scripts/mongo-init.js' --ignore-pattern 'server/tests/**' --fix --max-warnings 100",
+    "lint:vue": "eslint 'src/**/*.vue' --fix",
+    "lint:server": "eslint 'server/**/*.js' --ignore-pattern 'server/scripts/mongo-init.js' --ignore-pattern 'server/tests/**' --fix",
     "format": "prettier --write src/",
     "server": "node server/app.js",
     "server:dev": "nodemon server/app.js",
@@ -43,6 +45,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "3.3.1",
     "@playwright/test": "^1.54.2",
     "@types/mongoose": "5.11.96",
     "@types/node": "^24.3.0",

@@ -1,8 +1,7 @@
 <template>
   <div class="breadcrumb-nav">
     <a-breadcrumb>
-      <a-breadcrumb-item v-for="(item, index) in items"
-:key="index">
+      <a-breadcrumb-item v-for="(item, index) in items" :key="index">
         <template v-if="item.link">
           <router-link :to="item.link">
             {{ item.title }}

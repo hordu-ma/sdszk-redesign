@@ -7,10 +7,9 @@
         <p>管理平台的新闻内容，包括发布、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button type="primary"
-@click="$router.push('/admin/news/create')">
+        <a-button type="primary" @click="$router.push('/admin/news/create')">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           发布新闻
         </a-button>
@@ -19,22 +18,19 @@
 
     <!-- 高级搜索和筛选 -->
     <div class="search-section">
-      <a-card size="small"
-:bordered="false">
+      <a-card size="small" :bordered="false">
         <template #title>
           <div class="search-header">
             <span>高级搜索</span>
             <a-space>
-              <a-button type="text"
-size="small" @click="toggleAdvancedSearch">
+              <a-button type="text" size="small" @click="toggleAdvancedSearch">
                 {{ showAdvancedSearch ? "收起" : "展开" }}
                 <template #icon>
-                  <DownOutlined v-if="!showAdvancedSearch" />
-                  <UpOutlined v-else />
+                  <down-outlined v-if="!showAdvancedSearch" />
+                  <up-outlined v-else />
                 </template>
               </a-button>
-              <a-button type="text"
-size="small" @click="clearSearchHistory">
+              <a-button type="text" size="small" @click="clearSearchHistory">
                 清空历史
               </a-button>
             </a-space>
@@ -42,8 +38,7 @@ size="small" @click="clearSearchHistory">
         </template>
 
         <!-- 基础搜索 -->
-        <a-form layout="inline"
-:model="searchForm" @finish="handleSearch">
+        <a-form layout="inline" :model="searchForm" @finish="handleSearch">
           <a-form-item label="关键词">
             <a-input
               v-model:value="searchForm.keyword"
@@ -53,7 +48,7 @@ size="small" @click="clearSearchHistory">
               @press-enter="handleSearch"
             >
               <template #suffix>
-                <SearchOutlined />
+                <search-outlined />
               </template>
             </a-input>
           </a-form-item>
@@ -86,10 +81,9 @@ size="small" @click="clearSearchHistory">
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary"
-html-type="submit">
+            <a-button type="primary" html-type="submit">
               <template #icon>
-                <SearchOutlined />
+                <search-outlined />
               </template>
               搜索
             </a-button>
@@ -100,8 +94,7 @@ html-type="submit">
         </a-form>
 
         <!-- 高级搜索选项 -->
-        <div v-show="showAdvancedSearch"
-class="advanced-search">
+        <div v-show="showAdvancedSearch" class="advanced-search">
           <a-divider />
           <a-row :gutter="16">
             <a-col :span="8">
@@ -209,8 +202,7 @@ class="advanced-search">
             <a-col :span="8">
               <a-form-item>
                 <a-space>
-                  <a-button type="primary"
-@click="handleAdvancedSearch">
+                  <a-button type="primary" @click="handleAdvancedSearch">
                     高级搜索
                   </a-button>
                   <a-button @click="handleSaveSearch"> 保存搜索 </a-button>
@@ -221,13 +213,11 @@ class="advanced-search">
         </div>
 
         <!-- 搜索历史 -->
-        <div v-if="searchHistory.length > 0"
-class="search-history">
+        <div v-if="searchHistory.length > 0" class="search-history">
           <a-divider />
           <div class="history-header">
             <span>搜索历史</span>
-            <a-button type="text"
-size="small" @click="clearSearchHistory">
+            <a-button type="text" size="small" @click="clearSearchHistory">
               清空
             </a-button>
           </div>
@@ -249,34 +239,31 @@ size="small" @click="clearSearchHistory">
 
     <!-- 批量操作 -->
     <div v-if="selectedRowKeys.length > 0" class="batch-actions">
-      <a-card size="small"
-:bordered="false">
+      <a-card size="small" :bordered="false">
         <div class="batch-header">
-          <span class="selected-info"
-            >已选择 {{ selectedRowKeys.length }} 项</span
-          >
+          <span class="selected-info">已选择 {{ selectedRowKeys.length }} 项</span>
           <a-space>
             <a-button :loading="batchLoading" @click="handleBatchPublish">
               <template #icon>
-                <CheckOutlined />
+                <check-outlined />
               </template>
               批量发布
             </a-button>
             <a-button :loading="batchLoading" @click="handleBatchArchive">
               <template #icon>
-                <InboxOutlined />
+                <inbox-outlined />
               </template>
               批量归档
             </a-button>
             <a-button :loading="batchLoading" @click="handleBatchMoveCategory">
               <template #icon>
-                <FolderOutlined />
+                <folder-outlined />
               </template>
               批量移动分类
             </a-button>
             <a-button :loading="batchLoading" @click="handleBatchAddTags">
               <template #icon>
-                <TagOutlined />
+                <tag-outlined />
               </template>
               批量添加标签
             </a-button>
@@ -286,10 +273,9 @@ size="small" @click="clearSearchHistory">
               cancel-text="取消"
               @confirm="handleBatchDelete"
             >
-              <a-button danger
-:loading="batchLoading">
+              <a-button danger :loading="batchLoading">
                 <template #icon>
-                  <DeleteOutlined />
+                  <delete-outlined />
                 </template>
                 批量删除
               </a-button>
@@ -317,12 +303,10 @@ size="small" @click="clearSearchHistory">
                 <span class="title-text">{{ record.title }}</span>
               </a-tooltip>
               <div class="title-tags">
-                <a-tag v-if="record.isTop"
-color="red" size="small">
+                <a-tag v-if="record.isTop" color="red" size="small">
                   置顶
                 </a-tag>
-                <a-tag v-if="record.isFeatured"
-color="gold" size="small">
+                <a-tag v-if="record.isFeatured" color="gold" size="small">
                   精选
                 </a-tag>
               </div>
@@ -351,8 +335,7 @@ color="gold" size="small">
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link"
-size="small" @click="handleEdit(record)">
+              <a-button type="link" size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
               <a-button
@@ -375,8 +358,7 @@ size="small" @click="handleEdit(record)">
                 cancel-text="取消"
                 @confirm="handleDelete(record)"
               >
-                <a-button
-type="link" size="small" danger> 删除 </a-button>
+                <a-button type="link" size="small" danger> 删除 </a-button>
               </a-popconfirm>
             </a-space>
           </template>
@@ -415,8 +397,7 @@ type="link" size="small" danger> 删除 </a-button>
           placeholder="请选择标签"
           style="width: 100%"
         >
-          <a-select-option v-for="tag in availableTags"
-:key="tag" :value="tag">
+          <a-select-option v-for="tag in availableTags" :key="tag" :value="tag">
             {{ tag }}
           </a-select-option>
         </a-select>

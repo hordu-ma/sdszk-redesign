@@ -3,16 +3,13 @@
     <h3>
       <i class="fas fa-video header-icon" />
       <span class="title-text">影像思政</span>
-      <router-link to="/resources/video"
-class="more-link">
+      <router-link to="/resources/video" class="more-link">
         更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>
     <div class="video-grid">
-      <div v-for="video in videos"
-:key="video.id" class="video-card">
-        <VideoPlayer :src="video.url"
-:poster="video.poster" />
+      <div v-for="video in videos" :key="video.id" class="video-card">
+        <video-player :src="video.url" :poster="video.poster" />
         <p class="video-title">
           {{ video.title }}
         </p>

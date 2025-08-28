@@ -3,8 +3,7 @@
     <!-- 头像上传区域 -->
     <div class="profile-header">
       <div class="avatar-section">
-        <el-avatar :size="100"
-:src="formData.avatar" class="user-avatar">
+        <el-avatar :size="100" :src="formData.avatar" class="user-avatar">
           <i class="el-icon-user-solid" />
         </el-avatar>
         <el-upload
@@ -14,8 +13,7 @@
           :auto-upload="false"
           accept="image/*"
         >
-          <el-button
-size="small" type="primary" plain> 更换头像 </el-button>
+          <el-button size="small" type="primary" plain> 更换头像 </el-button>
         </el-upload>
         <!-- 头像裁剪组件 -->
         <avatar-cropper
@@ -61,8 +59,7 @@ size="small" type="primary" plain> 更换头像 </el-button>
             编辑
           </el-button>
           <div v-else>
-            <el-button
-size="small" @click="cancelEdit"> 取消 </el-button>
+            <el-button size="small" @click="cancelEdit"> 取消 </el-button>
             <el-button
               type="primary"
               size="small"
@@ -84,8 +81,7 @@ size="small" @click="cancelEdit"> 取消 </el-button>
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="用户名"
-prop="username">
+            <el-form-item label="用户名" prop="username">
               <el-input
                 v-model="formData.username"
                 :disabled="true"
@@ -94,8 +90,7 @@ prop="username">
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="姓名"
-prop="name">
+            <el-form-item label="姓名" prop="name">
               <el-input
                 v-model="formData.name"
                 :disabled="!isEditing"
@@ -107,8 +102,7 @@ prop="name">
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="邮箱"
-prop="email">
+            <el-form-item label="邮箱" prop="email">
               <el-input
                 v-model="formData.email"
                 :disabled="!isEditing"
@@ -117,8 +111,7 @@ prop="email">
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="手机号"
-prop="phone">
+            <el-form-item label="手机号" prop="phone">
               <el-input
                 v-model="formData.phone"
                 :disabled="!isEditing"
@@ -130,26 +123,21 @@ prop="phone">
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="性别"
-prop="gender">
+            <el-form-item label="性别" prop="gender">
               <el-select
                 v-model="formData.gender"
                 :disabled="!isEditing"
                 placeholder="请选择性别"
                 style="width: 100%"
               >
-                <el-option label="男"
-value="male" />
-                <el-option label="女"
-value="female" />
-                <el-option label="保密"
-value="secret" />
+                <el-option label="男" value="male" />
+                <el-option label="女" value="female" />
+                <el-option label="保密" value="secret" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="生日"
-prop="birthday">
+            <el-form-item label="生日" prop="birthday">
               <el-date-picker
                 v-model="formData.birthday"
                 :disabled="!isEditing"
@@ -163,8 +151,7 @@ prop="birthday">
           </el-col>
         </el-row>
 
-        <el-form-item label="个人简介"
-prop="bio">
+        <el-form-item label="个人简介" prop="bio">
           <el-input
             v-model="formData.bio"
             :disabled="!isEditing"
@@ -176,8 +163,7 @@ prop="bio">
           />
         </el-form-item>
 
-        <el-form-item label="所在地区"
-prop="location">
+        <el-form-item label="所在地区" prop="location">
           <el-input
             v-model="formData.location"
             :disabled="!isEditing"

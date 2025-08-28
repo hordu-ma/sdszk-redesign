@@ -1,6 +1,5 @@
 <template>
-  <div class="back-to-top"
-:class="{ visible: isVisible }" @click="scrollToTop">
+  <div class="back-to-top" :class="{ visible: isVisible }" @click="scrollToTop">
     <i class="fas fa-arrow-up" />
   </div>
 </template>

@@ -15,8 +15,7 @@
             <h4>登录密码</h4>
             <p>定期更换密码，保护账户安全</p>
           </div>
-          <el-button type="primary"
-plain @click="showPasswordDialog = true">
+          <el-button type="primary" plain @click="showPasswordDialog = true">
             修改密码
           </el-button>
         </div>
@@ -37,8 +36,7 @@ plain @click="showPasswordDialog = true">
           >
             验证邮箱
           </el-button>
-          <el-tag
-v-else type="success"> 已验证 </el-tag>
+          <el-tag v-else type="success"> 已验证 </el-tag>
         </div>
 
         <el-divider />
@@ -56,8 +54,7 @@ v-else type="success"> 已验证 </el-tag>
           >
             验证手机
           </el-button>
-          <el-tag
-v-else type="success"> 已验证 </el-tag>
+          <el-tag v-else type="success"> 已验证 </el-tag>
         </div>
       </div>
     </el-card>
@@ -204,8 +201,7 @@ v-else type="success"> 已验证 </el-tag>
             <h4>清除浏览记录</h4>
             <p>删除所有浏览历史记录</p>
           </div>
-          <el-button type="warning"
-plain @click="clearBrowsingHistory">
+          <el-button type="warning" plain @click="clearBrowsingHistory">
             清除记录
           </el-button>
         </div>
@@ -229,16 +225,14 @@ plain @click="clearBrowsingHistory">
     </el-card>
 
     <!-- 修改密码对话框 -->
-    <el-dialog v-model="showPasswordDialog"
-title="修改密码" width="400px">
+    <el-dialog v-model="showPasswordDialog" title="修改密码" width="400px">
       <el-form
         ref="passwordFormRef"
         :model="passwordForm"
         :rules="passwordRules"
         label-width="100px"
       >
-        <el-form-item label="当前密码"
-prop="currentPassword">
+        <el-form-item label="当前密码" prop="currentPassword">
           <el-input
             v-model="passwordForm.currentPassword"
             type="password"
@@ -247,8 +241,7 @@ prop="currentPassword">
           />
         </el-form-item>
 
-        <el-form-item label="新密码"
-prop="newPassword">
+        <el-form-item label="新密码" prop="newPassword">
           <el-input
             v-model="passwordForm.newPassword"
             type="password"
@@ -257,8 +250,7 @@ prop="newPassword">
           />
         </el-form-item>
 
-        <el-form-item label="确认密码"
-prop="confirmPassword">
+        <el-form-item label="确认密码" prop="confirmPassword">
           <el-input
             v-model="passwordForm.confirmPassword"
             type="password"
@@ -281,16 +273,14 @@ prop="confirmPassword">
     </el-dialog>
 
     <!-- 手机验证对话框 -->
-    <el-dialog v-model="showPhoneDialog"
-title="验证手机号" width="400px">
+    <el-dialog v-model="showPhoneDialog" title="验证手机号" width="400px">
       <el-form
         ref="phoneFormRef"
         :model="phoneForm"
         :rules="phoneRules"
         label-width="100px"
       >
-        <el-form-item label="手机号码"
-prop="phone">
+        <el-form-item label="手机号码" prop="phone">
           <el-input
             v-model="phoneForm.phone"
             placeholder="请输入手机号码"
@@ -298,8 +288,7 @@ prop="phone">
           />
         </el-form-item>
 
-        <el-form-item label="验证码"
-prop="code">
+        <el-form-item label="验证码" prop="code">
           <div style="display: flex; gap: 10px">
             <el-input
               v-model="phoneForm.code"
@@ -321,16 +310,14 @@ prop="code">
 
       <template #footer>
         <el-button @click="showPhoneDialog = false"> 取消 </el-button>
-        <el-button type="primary"
-@click="verifyPhone" :loading="phoneLoading">
+        <el-button type="primary" @click="verifyPhone" :loading="phoneLoading">
           验证
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 注销账户确认对话框 -->
-    <el-dialog v-model="showDeleteAccountDialog"
-title="注销账户" width="500px">
+    <el-dialog v-model="showDeleteAccountDialog" title="注销账户" width="500px">
       <div class="delete-account-warning">
         <el-alert
           title="警告"

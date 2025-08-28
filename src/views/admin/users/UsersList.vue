@@ -7,16 +7,15 @@
         <p>管理系统用户账号和权限</p>
       </div>
       <div class="action-section">
-        <a-button type="primary"
-@click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新增用户
         </a-button>
         <a-button @click="exportUsers">
           <template #icon>
-            <DownloadOutlined />
+            <download-outlined />
           </template>
           导出用户
         </a-button>
@@ -73,14 +72,12 @@
     </div>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedRowKeys.length > 0"
-class="batch-actions">
+    <div v-if="selectedRowKeys.length > 0" class="batch-actions">
       <a-space>
         <span>已选择 {{ selectedRowKeys.length }} 项</span>
         <a-button @click="batchUpdateStatus('active')"> 批量启用 </a-button>
         <a-button @click="batchUpdateStatus('inactive')"> 批量禁用 </a-button>
-        <a-button
-danger @click="batchDelete"> 批量删除 </a-button>
+        <a-button danger @click="batchDelete"> 批量删除 </a-button>
         <a-button @click="clearSelection"> 取消选择 </a-button>
       </a-space>
     </div>
@@ -98,8 +95,7 @@ danger @click="batchDelete"> 批量删除 </a-button>
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'avatar'">
-            <a-avatar :src="record.avatar"
-:size="40">
+            <a-avatar :src="record.avatar" :size="40">
               {{ record.username?.charAt(0)?.toUpperCase() }}
             </a-avatar>
           </template>
@@ -112,8 +108,7 @@ danger @click="batchDelete"> 批量删除 </a-button>
               <div class="email">
                 {{ record.email }}
               </div>
-              <div v-if="record.phone"
-class="phone">
+              <div v-if="record.phone" class="phone">
                 {{ record.phone }}
               </div>
             </div>
@@ -142,8 +137,7 @@ class="phone">
                 {{ record.lastLoginIp }}
               </div>
             </div>
-            <span v-else
-class="text-gray-400">从未登录</span>
+            <span v-else class="text-gray-400">从未登录</span>
           </template>
 
           <template v-else-if="column.key === 'loginCount'">
@@ -155,26 +149,22 @@ class="text-gray-400">从未登录</span>
 
           <template v-else-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link"
-size="small" @click="viewUser(record)">
+              <a-button type="link" size="small" @click="viewUser(record)">
                 查看
               </a-button>
-              <a-button type="link"
-size="small" @click="editUser(record)">
+              <a-button type="link" size="small" @click="editUser(record)">
                 编辑
               </a-button>
               <a-dropdown>
-                <a-button type="link"
-size="small">
-                  更多 <DownOutlined />
+                <a-button type="link" size="small">
+                  更多 <down-outlined />
                 </a-button>
                 <template #overlay>
                   <a-menu @click="onMenuClick(record)">
                     <a-menu-item key="resetPassword"> 重置密码 </a-menu-item>
                     <a-menu-item key="viewLogs"> 查看日志 </a-menu-item>
                     <a-menu-divider />
-                    <a-menu-item
-key="delete" danger> 删除用户 </a-menu-item>
+                    <a-menu-item key="delete" danger> 删除用户 </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -200,16 +190,14 @@ key="delete" danger> 删除用户 </a-menu-item>
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="用户名"
-name="username">
+        <a-form-item label="用户名" name="username">
           <a-input
             v-model:value="userForm.username"
             placeholder="请输入用户名"
           />
         </a-form-item>
 
-        <a-form-item label="邮箱"
-name="email">
+        <a-form-item label="邮箱" name="email">
           <a-input
             v-model:value="userForm.email"
             type="email"
@@ -217,24 +205,19 @@ name="email">
           />
         </a-form-item>
 
-        <a-form-item label="手机号"
-name="phone">
-          <a-input v-model:value="userForm.phone"
-placeholder="请输入手机号" />
+        <a-form-item label="手机号" name="phone">
+          <a-input v-model:value="userForm.phone" placeholder="请输入手机号" />
         </a-form-item>
 
-        <a-form-item v-if="!isEditing"
-label="密码" name="password">
+        <a-form-item v-if="!isEditing" label="密码" name="password">
           <a-input-password
             v-model:value="userForm.password"
             placeholder="请输入密码"
           />
         </a-form-item>
 
-        <a-form-item label="角色"
-name="role">
-          <a-select v-model:value="userForm.role"
-placeholder="请选择角色">
+        <a-form-item label="角色" name="role">
+          <a-select v-model:value="userForm.role" placeholder="请选择角色">
             <a-select-option
               v-for="role in roles"
               :key="role.name"
@@ -245,8 +228,7 @@ placeholder="请选择角色">
           </a-select>
         </a-form-item>
 
-        <a-form-item label="状态"
-name="status">
+        <a-form-item label="状态" name="status">
           <a-radio-group v-model:value="userForm.status">
             <a-radio value="active"> 正常 </a-radio>
             <a-radio value="inactive"> 禁用 </a-radio>
@@ -254,8 +236,7 @@ name="status">
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="权限"
-name="permissions">
+        <a-form-item label="权限" name="permissions">
           <a-tree
             v-model:checked-keys="userForm.permissions"
             :tree-data="permissionTree"
@@ -286,15 +267,13 @@ name="permissions">
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="新密码"
-name="newPassword">
+        <a-form-item label="新密码" name="newPassword">
           <a-input-password
             v-model:value="passwordForm.newPassword"
             placeholder="请输入新密码"
           />
         </a-form-item>
-        <a-form-item label="确认密码"
-name="confirmPassword">
+        <a-form-item label="确认密码" name="confirmPassword">
           <a-input-password
             v-model:value="passwordForm.confirmPassword"
             placeholder="请再次输入新密码"

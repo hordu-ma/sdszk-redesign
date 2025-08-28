@@ -6,8 +6,7 @@
           <i class="fas fa-university header-icon" />
           <span class="title-text">一体化共同体</span>
         </div>
-        <router-link to="/community"
-class="more-link">
+        <router-link to="/community" class="more-link">
           更多<i class="fas fa-angle-right" />
         </router-link>
       </h3>
@@ -20,8 +19,7 @@ class="more-link">
         target="_blank"
         class="school-logo"
       >
-        <img
-:src="school.logo" :alt="school.name" />
+        <img :src="school.logo" :alt="school.name">
         <p class="school-name">{{ school.name }}</p>
       </a>
     </div>

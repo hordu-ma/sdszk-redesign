@@ -4,8 +4,7 @@
       <div class="login-card">
         <div class="login-header">
           <div class="logo-section">
-            <img
-src="@/assets/images/logo.png" alt="Logo" class="logo" />
+            <img src="@/assets/images/logo.png" alt="Logo" class="logo">
             <div class="title-section">
               <h1 class="main-title">管理后台</h1>
               <p class="sub-title">山东省大中小学思政课一体化中心平台</p>
@@ -21,8 +20,7 @@ src="@/assets/images/logo.png" alt="Logo" class="logo" />
             layout="vertical"
             @finish="handleLogin"
           >
-            <a-form-item label="用户名"
-name="username">
+            <a-form-item label="用户名" name="username">
               <a-input
                 v-model:value="formData.username"
                 size="large"
@@ -31,8 +29,7 @@ name="username">
               />
             </a-form-item>
 
-            <a-form-item label="密码"
-name="password">
+            <a-form-item label="密码" name="password">
               <a-input-password
                 v-model:value="formData.password"
                 size="large"
@@ -46,8 +43,7 @@ name="password">
                 <a-checkbox v-model:checked="formData.rememberMe">
                   记住我
                 </a-checkbox>
-                <a href="#"
-class="forgot-password">忘记密码？</a>
+                <a href="#" class="forgot-password">忘记密码？</a>
               </div>
             </a-form-item>
 

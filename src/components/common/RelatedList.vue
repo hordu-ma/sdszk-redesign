@@ -2,16 +2,13 @@
   <div class="related-list">
     <div class="block-header">
       <h3>
-        <i
-:class="icon" class="header-icon" />
+        <i :class="icon" class="header-icon" />
         <span class="title-text">{{ title }}</span>
       </h3>
     </div>
     <ul class="styled-list">
-      <li v-for="item in items"
-:key="item.id">
-        <router-link :to="getItemLink(item)"
-class="info-link">
+      <li v-for="item in items" :key="item.id">
+        <router-link :to="getItemLink(item)" class="info-link">
           <div class="info-content">
             <div class="info-header">
               <span class="info-title">{{ item.title }}</span>
@@ -20,8 +17,7 @@ class="info-link">
               <span v-if="item.date" class="info-date">
                 发布日期：{{ formatDate(item.date) }}
               </span>
-              <slot
-name="footer" :item="item" />
+              <slot name="footer" :item="item" />
             </div>
           </div>
         </router-link>

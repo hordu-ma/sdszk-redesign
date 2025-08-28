@@ -63,7 +63,10 @@ describe("Pinia状态持久化测试", () => {
       // 验证数据恢复
       expect(newUserStore.token).toBe(token);
       expect(newUserStore.userInfo?.username).toBe("testuser");
-      expect(newUserStore.userInfo?.permissions).toEqual(["read:news", "create:news"]);
+      expect(newUserStore.userInfo?.permissions).toEqual([
+        "read:news",
+        "create:news",
+      ]);
     });
 
     it("应该正确处理token的设置和清除", () => {
@@ -72,12 +75,18 @@ describe("Pinia状态持久化测试", () => {
       // 设置初始token
       const initialToken = "initial-token";
       userStore.setToken(initialToken);
-      localStorageMock.setItem("user", JSON.stringify({ token: initialToken, userInfo: null }));
+      localStorageMock.setItem(
+        "user",
+        JSON.stringify({ token: initialToken, userInfo: null }),
+      );
 
       // 更新token
       const newToken = "new-token";
       userStore.setToken(newToken);
-      localStorageMock.setItem("user", JSON.stringify({ token: newToken, userInfo: null }));
+      localStorageMock.setItem(
+        "user",
+        JSON.stringify({ token: newToken, userInfo: null }),
+      );
       localStorageMock.setItem("token", newToken);
 
       // 模拟页面刷新

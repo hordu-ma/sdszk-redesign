@@ -10,14 +10,10 @@
           style="width: 120px; margin-right: 10px"
           @change="loadHistory"
         >
-          <el-option label="全部"
-value="" />
-          <el-option label="新闻资讯"
-value="news" />
-          <el-option label="资源文件"
-value="resource" />
-          <el-option label="活动"
-value="activity" />
+          <el-option label="全部" value="" />
+          <el-option label="新闻资讯" value="news" />
+          <el-option label="资源文件" value="resource" />
+          <el-option label="活动" value="activity" />
         </el-select>
 
         <el-date-picker
@@ -39,7 +35,7 @@ value="activity" />
         >
           <template #suffix>
             <el-icon style="cursor: pointer" @click="loadHistory">
-              <Search />
+              <search />
             </el-icon>
           </template>
         </el-input>
@@ -60,7 +56,7 @@ value="activity" />
           <el-button type="primary">
             导出记录
             <el-icon class="el-icon--right">
-              <ArrowDown />
+              <arrow-down />
             </el-icon>
           </el-button>
           <template #dropdown>
@@ -72,8 +68,7 @@ value="activity" />
           </template>
         </el-dropdown>
 
-        <el-button type="danger"
-plain @click="clearAllHistory">
+        <el-button type="danger" plain @click="clearAllHistory">
           清空历史
         </el-button>
       </div>
@@ -132,8 +127,7 @@ plain @click="clearAllHistory">
     </div>
 
     <!-- 推荐内容 -->
-    <el-card v-if="recommendations.length > 0"
-class="recommendations-card">
+    <el-card v-if="recommendations.length > 0" class="recommendations-card">
       <template #header>
         <div class="card-header">
           <i class="fas fa-lightbulb" />
@@ -153,14 +147,11 @@ class="recommendations-card">
               {{ item.title }}
             </h4>
             <div class="rec-meta">
-              <el-tag :type="getTypeColor(item.type)"
-size="small">
+              <el-tag :type="getTypeColor(item.type)" size="small">
                 {{ getTypeText(item.type) }}
               </el-tag>
               <span class="rec-reason">{{ item.reason }}</span>
-              <span class="rec-score"
-                >推荐度: {{ Math.round(item.score * 100) }}%</span
-              >
+              <span class="rec-score">推荐度: {{ Math.round(item.score * 100) }}%</span>
             </div>
           </div>
         </div>
@@ -179,8 +170,7 @@ size="small">
         </el-checkbox>
 
         <div class="view-mode">
-          <el-radio-group v-model="viewMode"
-@change="loadHistory">
+          <el-radio-group v-model="viewMode" @change="loadHistory">
             <el-radio-button label="list"> 列表视图 </el-radio-button>
             <el-radio-button label="card"> 卡片视图 </el-radio-button>
             <el-radio-button label="timeline"> 时间轴 </el-radio-button>
@@ -188,17 +178,13 @@ size="small">
         </div>
       </div>
 
-      <div v-if="loading && !history.length"
-class="loading-wrapper">
-        <el-skeleton :rows="5"
-animated />
+      <div v-if="loading && !history.length" class="loading-wrapper">
+        <el-skeleton :rows="5" animated />
       </div>
 
-      <div v-else-if="!history.length"
-class="empty-state">
+      <div v-else-if="!history.length" class="empty-state">
         <el-empty description="暂无浏览记录">
-          <el-button type="primary"
-@click="$router.push('/')">
+          <el-button type="primary" @click="$router.push('/')">
             去首页逛逛
           </el-button>
         </el-empty>
@@ -211,11 +197,9 @@ class="empty-state">
         style="width: 100%"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection"
-width="55" />
+        <el-table-column type="selection" width="55" />
 
-        <el-table-column label="内容标题"
-min-width="200">
+        <el-table-column label="内容标题" min-width="200">
           <template #default="scope">
             <div class="title-cell">
               <i
@@ -233,25 +217,21 @@ min-width="200">
           </template>
         </el-table-column>
 
-        <el-table-column label="类型"
-width="100">
+        <el-table-column label="类型" width="100">
           <template #default="scope">
-            <el-tag :type="getTypeColor(scope.row.resourceType)"
-size="small">
+            <el-tag :type="getTypeColor(scope.row.resourceType)" size="small">
               {{ getTypeText(scope.row.resourceType) }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column label="浏览时长"
-width="100">
+        <el-table-column label="浏览时长" width="100">
           <template #default="scope">
             {{ formatDuration(scope.row.viewDuration) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="设备信息"
-width="150">
+        <el-table-column label="设备信息" width="150">
           <template #default="scope">
             <div class="device-info">
               <div>{{ scope.row.device?.type || "-" }}</div>
@@ -260,15 +240,13 @@ width="150">
           </template>
         </el-table-column>
 
-        <el-table-column label="浏览时间"
-width="180">
+        <el-table-column label="浏览时间" width="180">
           <template #default="scope">
             {{ formatDateTime(scope.row.createdAt) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作"
-width="120">
+        <el-table-column label="操作" width="120">
           <template #default="scope">
             <el-button
               type="text"
@@ -290,8 +268,7 @@ width="120">
       </el-table>
 
       <!-- 卡片视图 -->
-      <div v-else-if="viewMode === 'card'"
-class="history-cards">
+      <div v-else-if="viewMode === 'card'" class="history-cards">
         <div
           v-for="item in history"
           :key="item._id"
@@ -304,19 +281,16 @@ class="history-cards">
             @change="(checked) => handleItemSelect(item._id, checked)"
           />
 
-          <div class="card-content"
-@click="openResource(item)">
+          <div class="card-content" @click="openResource(item)">
             <div class="card-header">
-              <i
-:class="getTypeIcon(item.resourceType)" class="type-icon" />
+              <i :class="getTypeIcon(item.resourceType)" class="type-icon" />
               <h3 class="card-title">
                 {{ item.resourceTitle }}
               </h3>
             </div>
 
             <div class="card-meta">
-              <el-tag :type="getTypeColor(item.resourceType)"
-size="small">
+              <el-tag :type="getTypeColor(item.resourceType)" size="small">
                 {{ getTypeText(item.resourceType) }}
               </el-tag>
               <span class="view-time">{{
@@ -337,8 +311,7 @@ size="small">
           </div>
 
           <div class="card-actions">
-            <el-button type="text"
-size="small" @click="addToFavorites(item)">
+            <el-button type="text" size="small" @click="addToFavorites(item)">
               <i class="fas fa-heart" />
             </el-button>
             <el-button
@@ -354,8 +327,7 @@ size="small" @click="addToFavorites(item)">
       </div>
 
       <!-- 时间轴视图 -->
-      <el-timeline v-else-if="viewMode === 'timeline'"
-class="history-timeline">
+      <el-timeline v-else-if="viewMode === 'timeline'" class="history-timeline">
         <el-timeline-item
           v-for="item in history"
           :key="item._id"
@@ -364,8 +336,7 @@ class="history-timeline">
         >
           <div class="timeline-content">
             <div class="timeline-header">
-              <i
-:class="getTypeIcon(item.resourceType)" class="type-icon" />
+              <i :class="getTypeIcon(item.resourceType)" class="type-icon" />
               <a
                 :href="item.resourceUrl"
                 target="_blank"
@@ -373,8 +344,7 @@ class="history-timeline">
               >
                 {{ item.resourceTitle }}
               </a>
-              <el-tag :type="getTypeColor(item.resourceType)"
-size="small">
+              <el-tag :type="getTypeColor(item.resourceType)" size="small">
                 {{ getTypeText(item.resourceType) }}
               </el-tag>
             </div>
@@ -389,8 +359,7 @@ size="small">
             </div>
 
             <div class="timeline-actions">
-              <el-button type="text"
-size="small" @click="addToFavorites(item)">
+              <el-button type="text" size="small" @click="addToFavorites(item)">
                 收藏
               </el-button>
               <el-button
@@ -407,8 +376,7 @@ size="small" @click="addToFavorites(item)">
       </el-timeline>
 
       <!-- 分页 -->
-      <div v-if="total > 0"
-class="pagination-wrapper">
+      <div v-if="total > 0" class="pagination-wrapper">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"

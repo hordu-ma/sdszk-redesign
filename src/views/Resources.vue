@@ -1,6 +1,5 @@
 <template>
-  <page-layout title="资源中心"
-description="大中小学思政课一体化教育资源库">
+  <page-layout title="资源中心" description="大中小学思政课一体化教育资源库">
     <div class="resources-content">
       <!-- 分类导航 -->
       <div class="category-nav">
@@ -8,8 +7,7 @@ description="大中小学思政课一体化教育资源库">
           v-model:active-key="activeCategory"
           @change="handleCategoryChange"
         >
-          <a-tab-pane
-key="all" tab="全部资源" />
+          <a-tab-pane key="all" tab="全部资源" />
           <a-tab-pane
             v-for="category in categories"
             :key="category.key"
@@ -34,26 +32,25 @@ key="all" tab="全部资源" />
                       v-if="resource.thumbnail"
                       :src="resource.thumbnail"
                       :alt="resource.title"
-                    />
-                    <div v-else
-class="resource-icon">
-                      <FileOutlined
+                    >
+                    <div v-else class="resource-icon">
+                      <file-outlined
                         v-if="
                           resource.fileType?.includes('document') ||
-                          resource.fileType?.includes('pdf') ||
-                          resource.fileType?.includes('word')
+                            resource.fileType?.includes('pdf') ||
+                            resource.fileType?.includes('word')
                         "
                       />
-                      <VideoCameraOutlined
+                      <video-camera-outlined
                         v-else-if="resource.fileType?.includes('video')"
                       />
-                      <PictureOutlined
+                      <picture-outlined
                         v-else-if="resource.fileType?.includes('image')"
                       />
-                      <SoundOutlined
+                      <sound-outlined
                         v-else-if="resource.fileType?.includes('audio')"
                       />
-                      <FileOutlined v-else />
+                      <file-outlined v-else />
                     </div>
                   </div>
                 </template>
@@ -65,27 +62,19 @@ class="resource-icon">
                         v-html="truncateHtml(resource.description || '')"
                       />
                       <div class="resource-info">
-                        <span
-                          ><UserOutlined />
+                        <span><user-outlined />
                           {{
                             typeof resource.author === "string"
                               ? resource.author
                               : resource.author?.name ||
                                 resource.createdBy?.name ||
                                 "Unknown"
-                          }}</span
-                        >
-                        <span
-                          ><CalendarOutlined />
-                          {{ formatDate(resource.publishDate) }}</span
-                        >
-                        <span
-                          ><EyeOutlined /> {{ resource.viewCount || 0 }}</span
-                        >
-                        <span
-                          ><DownloadOutlined />
-                          {{ resource.downloadCount || 0 }}</span
-                        >
+                          }}</span>
+                        <span><calendar-outlined />
+                          {{ formatDate(resource.publishDate) }}</span>
+                        <span><eye-outlined /> {{ resource.viewCount || 0 }}</span>
+                        <span><download-outlined />
+                          {{ resource.downloadCount || 0 }}</span>
                       </div>
                     </div>
                   </template>
@@ -106,8 +95,7 @@ class="resource-icon">
           </div>
 
           <!-- 无数据提示 -->
-          <a-empty v-if="resources.length === 0"
-description="暂无相关资源" />
+          <a-empty v-if="resources.length === 0" description="暂无相关资源" />
         </a-spin>
       </div>
     </div>

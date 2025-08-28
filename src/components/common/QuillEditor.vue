@@ -6,19 +6,25 @@
         <a-button-group>
           <a-button size="small" @click="insertTable">
             <template #icon>
-              <TableOutlined />
+              <table-outlined />
             </template>
             插入表格
           </a-button>
           <a-button size="small" @click="insertCodeBlock">
             <template #icon>
-              <CodeOutlined />
+              <code-outlined />
             </template>
             代码块
           </a-button>
+          <a-button size="small" @click="insertImage">
+            <template #icon>
+              <upload-outlined />
+            </template>
+            插入图片
+          </a-button>
           <a-button size="small" @click="insertLink">
             <template #icon>
-              <LinkOutlined />
+              <link-outlined />
             </template>
             插入链接
           </a-button>
@@ -26,8 +32,8 @@
         <a-divider type="vertical" />
         <a-button size="small" @click="toggleFullscreen">
           <template #icon>
-            <FullscreenOutlined v-if="!isFullscreen" />
-            <FullscreenExitOutlined v-else />
+            <fullscreen-outlined v-if="!isFullscreen" />
+            <fullscreen-exit-outlined v-else />
           </template>
           {{ isFullscreen ? "退出全屏" : "全屏编辑" }}
         </a-button>
@@ -61,10 +67,10 @@
         :rows="rows"
         :maxlength="maxLength"
         :auto-size="autoSize"
+        class="simple-textarea"
         @change="handleChange"
         @blur="handleBlur"
         @focus="handleFocus"
-        class="simple-textarea"
       />
     </div>
 
@@ -81,7 +87,11 @@
             <a-input
               v-model:value="imageUrl"
               placeholder="请输入图片URL或上传图片"
+              :status="imageUrlError ? 'error' : ''"
             />
+            <div v-if="imageUrlError" class="error-text">
+              {{ imageUrlError }}
+            </div>
           </a-form-item>
           <a-form-item label="或者上传图片">
             <a-upload
@@ -90,7 +100,7 @@
               accept="image/*"
             >
               <a-button>
-                <UploadOutlined />
+                <upload-outlined />
                 选择图片
               </a-button>
             </a-upload>
@@ -111,7 +121,14 @@
     >
       <a-form layout="vertical">
         <a-form-item label="链接地址" required>
-          <a-input v-model:value="linkUrl" placeholder="https://example.com" />
+          <a-input
+            v-model:value="linkUrl"
+            placeholder="https://example.com"
+            :status="linkUrlError ? 'error' : ''"
+          />
+          <div v-if="linkUrlError" class="error-text">
+            {{ linkUrlError }}
+          </div>
         </a-form-item>
         <a-form-item label="链接文本">
           <a-input v-model:value="linkText" placeholder="链接描述" />
@@ -122,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from "vue";
+import { ref, computed, watch, nextTick, onUnmounted } from "vue";
 import {
   TableOutlined,
   CodeOutlined,
@@ -159,6 +176,7 @@ const emit = defineEmits<{
   change: [value: string];
   blur: [value: string];
   focus: [value: string];
+  error: [message: string];
 }>();
 
 // 响应式数据
@@ -174,6 +192,10 @@ const imageUrl = ref("");
 const imageAlt = ref("");
 const linkUrl = ref("");
 const linkText = ref("");
+
+// 验证状态
+const imageUrlError = ref("");
+const linkUrlError = ref("");
 
 // 计算属性
 const wordCount = computed(() => {
@@ -230,12 +252,14 @@ const insertCodeBlock = () => {
 const insertLink = () => {
   linkUrl.value = "";
   linkText.value = "";
+  linkUrlError.value = "";
   linkModalVisible.value = true;
 };
 
 const insertImage = () => {
   imageUrl.value = "";
   imageAlt.value = "";
+  imageUrlError.value = "";
   imageModalVisible.value = true;
 };
 
@@ -250,58 +274,125 @@ const toggleFullscreen = () => {
 
 // 插入文本
 const insertText = (text: string) => {
-  const textarea = editorContainer.value?.querySelector("textarea");
-  if (textarea) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = content.value.substring(0, start);
-    const after = content.value.substring(end);
-    content.value = before + text + after;
+  try {
+    const textarea = editorContainer.value?.querySelector(
+      "textarea",
+    ) as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      const before = content.value.substring(0, start);
+      const after = content.value.substring(end);
+      content.value = before + text + after;
 
-    nextTick(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + text.length, start + text.length);
-    });
+      nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + text.length, start + text.length);
+      });
+    }
+  } catch (error) {
+    console.error("插入文本时发生错误:", error);
+    emit("error", "插入文本失败");
+  }
+};
+
+// URL验证函数
+const isValidUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+  } catch {
+    return false;
   }
 };
 
 // 处理图片插入
 const handleImageInsert = () => {
-  if (imageUrl.value) {
-    const imageMarkdown = `![${imageAlt.value || "图片"}](${imageUrl.value})`;
-    insertText(imageMarkdown);
-    imageModalVisible.value = false;
+  imageUrlError.value = "";
+
+  if (!imageUrl.value.trim()) {
+    imageUrlError.value = "请输入图片链接";
+    return;
   }
+
+  if (!imageUrl.value.startsWith("blob:") && !isValidUrl(imageUrl.value)) {
+    imageUrlError.value = "请输入有效的图片链接";
+    return;
+  }
+
+  const altText = imageAlt.value.trim() || "图片";
+  const imageMarkdown = `![${altText}](${imageUrl.value})`;
+  insertText(imageMarkdown);
+  imageModalVisible.value = false;
+  // 重置表单
+  imageUrl.value = "";
+  imageAlt.value = "";
+  imageUrlError.value = "";
 };
 
 // 处理链接插入
 const handleLinkInsert = () => {
-  if (linkUrl.value) {
-    const linkMarkdown = `[${linkText.value || linkUrl.value}](${linkUrl.value})`;
-    insertText(linkMarkdown);
-    linkModalVisible.value = false;
+  linkUrlError.value = "";
+
+  if (!linkUrl.value.trim()) {
+    linkUrlError.value = "请输入链接地址";
+    return;
   }
+
+  if (!isValidUrl(linkUrl.value)) {
+    linkUrlError.value = "请输入有效的链接地址";
+    return;
+  }
+
+  const text = linkText.value.trim() || linkUrl.value;
+  const linkMarkdown = `[${text}](${linkUrl.value})`;
+  insertText(linkMarkdown);
+  linkModalVisible.value = false;
+  // 重置表单
+  linkUrl.value = "";
+  linkText.value = "";
+  linkUrlError.value = "";
 };
 
 // 图片上传前处理
 const beforeImageUpload = (file: File) => {
-  const isImage = file.type.startsWith("image/");
-  if (!isImage) {
-    console.error("只能上传图片文件!");
+  try {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      const errorMsg = "只能上传图片文件!";
+      console.error(errorMsg);
+      emit("error", errorMsg);
+      hasError.value = true;
+      return false;
+    }
+
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      const errorMsg = "图片大小不能超过 2MB!";
+      console.error(errorMsg);
+      emit("error", errorMsg);
+      hasError.value = true;
+      return false;
+    }
+
+    // 清理之前的URL
+    if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
+      URL.revokeObjectURL(imageUrl.value);
+    }
+
+    // 创建临时URL用于预览
+    const url = URL.createObjectURL(file);
+    imageUrl.value = url;
+    hasError.value = false;
+
+    return false; // 阻止自动上传
+  } catch (error) {
+    const errorMsg = "处理图片时发生错误";
+    console.error(errorMsg, error);
+    emit("error", errorMsg);
+    hasError.value = true;
     return false;
   }
-
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    console.error("图片大小不能超过 2MB!");
-    return false;
-  }
-
-  // 创建临时URL用于预览
-  const url = URL.createObjectURL(file);
-  imageUrl.value = url;
-
-  return false; // 阻止自动上传
 };
 
 // 清理函数
@@ -309,11 +400,22 @@ const cleanup = () => {
   if (isFullscreen.value) {
     document.body.style.overflow = "auto";
   }
+
+  // 清理图片URL
+  if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
+    URL.revokeObjectURL(imageUrl.value);
+  }
 };
+
+// 组件卸载时清理
+onUnmounted(() => {
+  cleanup();
+});
 
 // 暴露方法
 defineExpose({
   insertText,
+  insertImage,
   toggleFullscreen,
   cleanup,
 });
@@ -393,6 +495,12 @@ defineExpose({
 
 .image-upload-form {
   margin-top: 16px;
+}
+
+.error-text {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 /* 响应式设计 */

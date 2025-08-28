@@ -7,16 +7,14 @@
         @click="emit('toggle-sidebar')"
       >
         <template #icon>
-          <MenuFoldOutlined v-if="!collapsed" />
-          <MenuUnfoldOutlined v-else />
+          <menu-fold-outlined v-if="!collapsed" />
+          <menu-unfold-outlined v-else />
         </template>
       </a-button>
 
       <a-breadcrumb class="breadcrumb">
-        <a-breadcrumb-item v-for="item in breadcrumbItems"
-:key="item.path">
-          <router-link v-if="item.path"
-:to="item.path">
+        <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
+          <router-link v-if="item.path" :to="item.path">
             {{ item.title }}
           </router-link>
           <span v-else>{{ item.title }}</span>
@@ -26,12 +24,10 @@
 
     <div class="header-right">
       <!-- 通知 -->
-      <a-badge :count="notificationCount"
-class="header-item">
-        <a-button type="text"
-shape="circle">
+      <a-badge :count="notificationCount" class="header-item">
+        <a-button type="text" shape="circle">
           <template #icon>
-            <BellOutlined />
+            <bell-outlined />
           </template>
         </a-button>
       </a-badge>
@@ -39,26 +35,25 @@ shape="circle">
       <!-- 用户菜单 -->
       <a-dropdown placement="bottomRight">
         <div class="user-info">
-          <a-avatar :src="userInfo.avatar"
-:size="32">
+          <a-avatar :src="userInfo.avatar" :size="32">
             {{ userInfo.username?.charAt(0)?.toUpperCase() }}
           </a-avatar>
           <span class="username">{{ userInfo.username }}</span>
-          <DownOutlined class="dropdown-icon" />
+          <down-outlined class="dropdown-icon" />
         </div>
         <template #overlay>
           <a-menu @click="handleMenuClick">
             <a-menu-item key="profile">
-              <UserOutlined />
+              <user-outlined />
               个人资料
             </a-menu-item>
             <a-menu-item key="settings">
-              <SettingOutlined />
+              <setting-outlined />
               个人设置
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="logout">
-              <LogoutOutlined />
+              <logout-outlined />
               退出登录
             </a-menu-item>
           </a-menu>

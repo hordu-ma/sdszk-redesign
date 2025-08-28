@@ -2,12 +2,10 @@
   <div class="block-header">
     <h3>
       <div class="title-container">
-        <i
-:class="icon" class="header-icon" />
+        <i :class="icon" class="header-icon" />
         <span class="title-text">{{ title }}</span>
       </div>
-      <router-link v-if="moreLink"
-:to="moreLink" class="more-link">
+      <router-link v-if="moreLink" :to="moreLink" class="more-link">
         更多<i class="fas fa-angle-right" />
       </router-link>
     </h3>

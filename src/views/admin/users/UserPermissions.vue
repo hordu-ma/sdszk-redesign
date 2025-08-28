@@ -7,16 +7,15 @@
         <p>管理系统权限点和访问控制</p>
       </div>
       <div class="action-section">
-        <a-button type="primary"
-@click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新增权限
         </a-button>
         <a-button @click="refreshPermissions">
           <template #icon>
-            <ReloadOutlined />
+            <reload-outlined />
           </template>
           刷新权限
         </a-button>
@@ -88,8 +87,7 @@
       </div>
 
       <!-- 树形视图 -->
-      <div v-if="viewMode === 'tree'"
-class="tree-view">
+      <div v-if="viewMode === 'tree'" class="tree-view">
         <a-tree
           :tree-data="permissionTreeData"
           :default-expand-all="true"
@@ -112,18 +110,15 @@ class="tree-view">
                   >
                     {{ nodeData.module }}
                   </a-tag>
-                  <a-tag v-if="nodeData.action"
-color="blue" size="small">
+                  <a-tag v-if="nodeData.action" color="blue" size="small">
                     {{ nodeData.action }}
                   </a-tag>
                 </div>
-                <div v-if="nodeData.description"
-class="node-description">
+                <div v-if="nodeData.description" class="node-description">
                   {{ nodeData.description }}
                 </div>
               </div>
-              <div v-if="nodeData.id"
-class="node-actions">
+              <div v-if="nodeData.id" class="node-actions">
                 <a-button
                   type="link"
                   size="small"
@@ -146,8 +141,7 @@ class="node-actions">
       </div>
 
       <!-- 表格视图 -->
-      <div v-else
-class="table-view">
+      <div v-else class="table-view">
         <a-table
           :columns="columns"
           :data-source="filteredPermissions"
@@ -241,8 +235,7 @@ class="table-view">
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="权限名称"
-name="name">
+        <a-form-item label="权限名称" name="name">
           <a-input
             v-model:value="permissionForm.name"
             placeholder="请输入权限名称（英文标识）"
@@ -253,16 +246,14 @@ name="name">
           </div>
         </a-form-item>
 
-        <a-form-item label="显示名称"
-name="displayName">
+        <a-form-item label="显示名称" name="displayName">
           <a-input
             v-model:value="permissionForm.displayName"
             placeholder="请输入显示名称（中文）"
           />
         </a-form-item>
 
-        <a-form-item label="所属模块"
-name="module">
+        <a-form-item label="所属模块" name="module">
           <a-select
             v-model:value="permissionForm.module"
             placeholder="请选择模块"
@@ -272,8 +263,7 @@ name="module">
           />
         </a-form-item>
 
-        <a-form-item label="操作类型"
-name="action">
+        <a-form-item label="操作类型" name="action">
           <a-select
             v-model:value="permissionForm.action"
             placeholder="请选择操作类型"
@@ -283,16 +273,14 @@ name="action">
           />
         </a-form-item>
 
-        <a-form-item label="资源对象"
-name="resource">
+        <a-form-item label="资源对象" name="resource">
           <a-input
             v-model:value="permissionForm.resource"
             placeholder="请输入资源对象"
           />
         </a-form-item>
 
-        <a-form-item label="权限描述"
-name="description">
+        <a-form-item label="权限描述" name="description">
           <a-textarea
             v-model:value="permissionForm.description"
             placeholder="请输入权限描述"
@@ -309,10 +297,8 @@ name="description">
       :footer="null"
       width="700px"
     >
-      <div v-if="currentPermission"
-class="permission-usage">
-        <a-descriptions :column="2"
-bordered class="permission-info">
+      <div v-if="currentPermission" class="permission-usage">
+        <a-descriptions :column="2" bordered class="permission-info">
           <a-descriptions-item label="权限名称">
             {{ currentPermission.name }}
           </a-descriptions-item>
@@ -329,8 +315,7 @@ bordered class="permission-info">
 
         <div class="usage-section">
           <h4>使用此权限的角色</h4>
-          <div v-if="permissionUsage.roles.length > 0"
-class="roles-list">
+          <div v-if="permissionUsage.roles.length > 0" class="roles-list">
             <a-tag
               v-for="role in permissionUsage.roles"
               :key="role.id"
@@ -349,10 +334,8 @@ class="roles-list">
 
         <div class="usage-section">
           <h4>拥有此权限的用户</h4>
-          <div v-if="permissionUsage.users.length > 0"
-class="users-list">
-            <a-list :data-source="permissionUsage.users"
-size="small">
+          <div v-if="permissionUsage.users.length > 0" class="users-list">
+            <a-list :data-source="permissionUsage.users" size="small">
               <template #renderItem="{ item }">
                 <a-list-item>
                   <a-list-item-meta>

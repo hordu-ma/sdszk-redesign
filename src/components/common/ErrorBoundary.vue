@@ -1,11 +1,8 @@
 <template>
-  <div v-if="error"
-class="error-boundary">
-    <a-result status="error"
-:title="error.title" :sub-title="error.message">
+  <div v-if="error" class="error-boundary">
+    <a-result status="error" :title="error.title" :sub-title="error.message">
       <template #extra>
-        <a-button
-type="primary" @click="handleRetry"> 重试 </a-button>
+        <a-button type="primary" @click="handleRetry"> 重试 </a-button>
         <a-button @click="handleBack"> 返回首页 </a-button>
       </template>
     </a-result>

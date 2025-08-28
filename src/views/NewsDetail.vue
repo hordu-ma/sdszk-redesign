@@ -1,8 +1,7 @@
 <!-- NewsDetail.vue - 用于显示单个新闻文章详情 -->
 <template>
   <div class="news-detail-container">
-    <a-spin :spinning="loading"
-tip="加载中...">
+    <a-spin :spinning="loading" tip="加载中...">
       <div v-if="newsData && newsData.id">
         <!-- 面包屑导航 -->
         <breadcrumb-nav :items="breadcrumbItems" />
@@ -34,8 +33,7 @@ tip="加载中...">
           </div>
 
           <!-- 主要内容 -->
-          <div
-class="article-body" v-html="newsData.content" />
+          <div class="article-body" v-html="newsData.content" />
         </div>
 
         <!-- 相关文章 -->
@@ -49,16 +47,14 @@ class="article-body" v-html="newsData.content" />
       </div>
 
       <!-- 文章不存在的提示 -->
-      <div v-else-if="!loading"
-class="not-found">
+      <div v-else-if="!loading" class="not-found">
         <a-result
           status="404"
           title="文章未找到"
           sub-title="抱歉，您访问的文章不存在或已被删除。"
         >
           <template #extra>
-            <a-button type="primary"
-@click="$router.push('/news')">
+            <a-button type="primary" @click="$router.push('/news')">
               返回新闻列表
             </a-button>
           </template>

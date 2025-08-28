@@ -76,8 +76,7 @@
                 rows="1"
                 disabled
               />
-              <button class="send-button"
-disabled>
+              <button class="send-button" disabled>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

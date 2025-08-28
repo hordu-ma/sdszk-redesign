@@ -7,8 +7,7 @@
       <!-- 分类导航 -->
       <div class="category-nav">
         <a-tabs v-model:active-key="activeCategory">
-          <a-tab-pane
-key="all" tab="全部资讯" />
+          <a-tab-pane key="all" tab="全部资讯" />
           <a-tab-pane
             v-for="category in categories"
             :key="category.key"

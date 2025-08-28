@@ -11,8 +11,7 @@
       <el-row :gutter="20">
         <!-- 用户状态演示 -->
         <el-col :span="12">
-          <el-card shadow="never"
-class="inner-card">
+          <el-card shadow="never" class="inner-card">
             <template #header>
               <h3>👤 用户状态 (user store)</h3>
             </template>
@@ -70,8 +69,7 @@ class="inner-card">
 
         <!-- 状态对比演示 -->
         <el-col :span="12">
-          <el-card shadow="never"
-class="inner-card">
+          <el-card shadow="never" class="inner-card">
             <template #header>
               <h3>📊 状态对比演示</h3>
             </template>
@@ -159,8 +157,7 @@ class="inner-card">
           </template>
         </el-alert>
 
-        <div class="current-state"
-style="margin-top: 15px">
+        <div class="current-state" style="margin-top: 15px">
           <h4>🔍 当前持久化数据预览:</h4>
           <el-row :gutter="10">
             <el-col :span="24">
@@ -172,8 +169,7 @@ style="margin-top: 15px">
           </el-row>
         </div>
 
-        <div class="refresh-reminder"
-style="margin-top: 15px">
+        <div class="refresh-reminder" style="margin-top: 15px">
           <el-button
             type="warning"
             size="large"

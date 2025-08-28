@@ -12,7 +12,7 @@
           @click="$router.push('/admin/resources/create')"
         >
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新建资源
         </a-button>
@@ -30,7 +30,7 @@
             @change="handleSearch"
           >
             <template #prefix>
-              <SearchOutlined />
+              <search-outlined />
             </template>
           </a-input>
         </a-col>
@@ -87,20 +87,16 @@
     </div>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedRowKeys.length > 0"
-class="batch-actions">
+    <div v-if="selectedRowKeys.length > 0" class="batch-actions">
       <a-space>
         <span>已选择 {{ selectedRowKeys.length }} 项</span>
-        <a-button
-size="small" @click="handleBatchPublish"> 批量发布 </a-button>
-        <a-button
-size="small" @click="handleBatchArchive"> 批量归档 </a-button>
+        <a-button size="small" @click="handleBatchPublish"> 批量发布 </a-button>
+        <a-button size="small" @click="handleBatchArchive"> 批量归档 </a-button>
         <a-popconfirm
           title="确定要删除选中的资源吗？"
           @confirm="handleBatchDelete"
         >
-          <a-button
-size="small" danger> 批量删除 </a-button>
+          <a-button size="small" danger> 批量删除 </a-button>
         </a-popconfirm>
       </a-space>
     </div>
@@ -121,8 +117,7 @@ size="small" danger> 批量删除 </a-button>
             <div class="resource-title">
               <a @click="handlePreview(record)">{{ record.title }}</a>
               <div class="resource-meta">
-                <a-tag size="small"
-:color="getTypeColor(record.type)">
+                <a-tag size="small" :color="getTypeColor(record.type)">
                   {{ getTypeText(record.type) }}
                 </a-tag>
                 <span class="author">{{ record.author?.name }}</span>
@@ -131,8 +126,7 @@ size="small" danger> 批量删除 </a-button>
           </template>
 
           <template v-if="column.key === 'category'">
-            <a-tag v-if="record.category"
-:color="record.category.color">
+            <a-tag v-if="record.category" :color="record.category.color">
               {{ record.category.name }}
             </a-tag>
             <span v-else>-</span>
@@ -147,11 +141,11 @@ size="small" danger> 批量删除 </a-button>
           <template v-if="column.key === 'stats'">
             <div class="stats-cell">
               <span class="stat-item">
-                <EyeOutlined />
+                <eye-outlined />
                 {{ record.viewCount || 0 }}
               </span>
               <span class="stat-item">
-                <DownloadOutlined />
+                <download-outlined />
                 {{ record.downloadCount || 0 }}
               </span>
             </div>
@@ -163,44 +157,41 @@ size="small" danger> 批量删除 </a-button>
 
           <template v-if="column.key === 'actions'">
             <a-space>
-              <a-button type="link"
-size="small" @click="handleEdit(record)">
+              <a-button type="link" size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
               <a-dropdown>
-                <a-button type="link"
-size="small">
+                <a-button type="link" size="small">
                   更多
-                  <DownOutlined />
+                  <down-outlined />
                 </a-button>
                 <template #overlay>
                   <a-menu @click="handleMenuClick($event, record)">
                     <a-menu-item key="preview">
-                      <EyeOutlined />
+                      <eye-outlined />
                       预览
                     </a-menu-item>
                     <a-menu-item key="download">
-                      <DownloadOutlined />
+                      <download-outlined />
                       下载
                     </a-menu-item>
                     <a-menu-item
                       v-if="record.status !== 'published'"
                       key="publish"
                     >
-                      <CheckOutlined />
+                      <check-outlined />
                       发布
                     </a-menu-item>
                     <a-menu-item
                       v-if="record.status === 'published'"
                       key="archive"
                     >
-                      <InboxOutlined />
+                      <inbox-outlined />
                       归档
                     </a-menu-item>
                     <a-menu-divider />
-                    <a-menu-item key="delete"
-class="danger-action">
-                      <DeleteOutlined />
+                    <a-menu-item key="delete" class="danger-action">
+                      <delete-outlined />
                       删除
                     </a-menu-item>
                   </a-menu>
@@ -219,27 +210,21 @@ class="danger-action">
       :footer="null"
       width="800px"
     >
-      <div v-if="previewResource"
-class="resource-preview">
+      <div v-if="previewResource" class="resource-preview">
         <div class="preview-meta">
           <a-space>
             <a-tag :color="getTypeColor(previewResource.type || 'other')">
               {{ getTypeText(previewResource.type || "other") }}
             </a-tag>
             <span>作者：{{ previewResource.author?.name }}</span>
-            <span
-              >发布时间：{{
-                formatDate(previewResource.publishDate || "")
-              }}</span
-            >
+            <span>发布时间：{{
+              formatDate(previewResource.publishDate || "")
+            }}</span>
           </a-space>
         </div>
-        <div
-class="preview-content" v-html="previewResource.description" />
-        <div v-if="previewResource.tags?.length"
-class="preview-tags">
-          <a-tag v-for="tag in previewResource.tags"
-:key="tag">
+        <div class="preview-content" v-html="previewResource.description" />
+        <div v-if="previewResource.tags?.length" class="preview-tags">
+          <a-tag v-for="tag in previewResource.tags" :key="tag">
             {{ tag }}
           </a-tag>
         </div>

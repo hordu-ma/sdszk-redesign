@@ -1,6 +1,6 @@
 <template>
   <div class="admin-layout">
-    <AdminSidebar
+    <admin-sidebar
       ref="sidebarRef"
       :collapsed="sidebarCollapsed"
       @toggle="toggleSidebar"
@@ -10,8 +10,7 @@
       class="admin-main"
       :class="{ 'admin-main--collapsed': sidebarCollapsed }"
     >
-      <AdminHeader @toggle-sidebar="toggleSidebar"
-@logout="handleLogout" />
+      <admin-header @toggle-sidebar="toggleSidebar" @logout="handleLogout" />
       <div class="admin-content">
         <router-view v-slot="{ Component, route }">
           <keep-alive>

@@ -7,10 +7,9 @@
         <p>管理资源分类，包括创建、编辑、删除等操作</p>
       </div>
       <div class="header-right">
-        <a-button type="primary"
-@click="showCreateModal">
+        <a-button type="primary" @click="showCreateModal">
           <template #icon>
-            <PlusOutlined />
+            <plus-outlined />
           </template>
           新建分类
         </a-button>
@@ -30,8 +29,7 @@
           <template v-if="column.key === 'name'">
             <div class="category-name">
               <span class="name-text">{{ record.name }}</span>
-              <a-tag v-if="record.isDefault"
-color="gold" size="small">
+              <a-tag v-if="record.isDefault" color="gold" size="small">
                 默认
               </a-tag>
             </div>
@@ -112,8 +110,7 @@ color="gold" size="small">
         :rules="modalRules"
         layout="vertical"
       >
-        <a-form-item label="分类标识"
-name="key">
+        <a-form-item label="分类标识" name="key">
           <a-input
             v-model:value="modalForm.key"
             placeholder="请输入分类标识"
@@ -122,8 +119,7 @@ name="key">
           />
         </a-form-item>
 
-        <a-form-item label="分类名称"
-name="name">
+        <a-form-item label="分类名称" name="name">
           <a-input
             v-model:value="modalForm.name"
             placeholder="请输入分类名称"
@@ -132,8 +128,7 @@ name="name">
           />
         </a-form-item>
 
-        <a-form-item label="分类描述"
-name="description">
+        <a-form-item label="分类描述" name="description">
           <a-textarea
             v-model:value="modalForm.description"
             placeholder="请输入分类描述（可选）"
@@ -143,22 +138,18 @@ name="description">
           />
         </a-form-item>
 
-        <a-form-item label="分类颜色"
-name="color">
+        <a-form-item label="分类颜色" name="color">
           <div class="color-picker">
             <a-input
               v-model:value="modalForm.color"
               placeholder="请选择或输入颜色值"
               style="flex: 1"
             />
-            <input v-model="modalForm.color"
-type="color" class="color-input"
-/>
+            <input v-model="modalForm.color" type="color" class="color-input">
           </div>
         </a-form-item>
 
-        <a-form-item label="排序"
-name="sort">
+        <a-form-item label="排序" name="sort">
           <a-input-number
             v-model:value="modalForm.sort"
             placeholder="数字越小排序越靠前"
