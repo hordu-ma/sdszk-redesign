@@ -193,6 +193,11 @@ check_mongo() {
   elif command -v mongo >/dev/null 2>&1; then
     cmd=(mongo --quiet --host "${host}:${port}" --eval 'db.runCommand({ping:1})')
   else
+    # 无 mongo CLI 时尝试纯 TCP 探测作为降级
+    if check_tcp "$host" "$port"; then
+      debug "Mongo CLI 不存在，使用 TCP 探测判定端口开启: ${host}:${port}"
+      return 0
+    fi
     return 2
   fi
   "${cmd[@]}" >/dev/null 2>&1
@@ -203,6 +208,11 @@ check_redis() {
   if command -v redis-cli >/dev/null 2>&1; then
     redis-cli -h "$host" -p "$port" ping 2>/dev/null | grep -q PONG
   else
+    # 无 redis-cli 时使用 TCP 降级判定
+    if check_tcp "$host" "$port"; then
+      debug "Redis CLI 不存在，使用 TCP 探测判定端口开启: ${host}:${port}"
+      return 0
+    fi
     return 2
   fi
 }
