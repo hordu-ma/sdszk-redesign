@@ -103,14 +103,13 @@ jobs:
           echo "📋 Redis容器日志 (最后10行):"
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "无法获取Redis日志"
 
-          # 等待服务容器健康检查通过
-          echo "⏳ 等待服务容器启动..."
-          sleep 15
+          # 使用wait-on等待服务就绪
+          echo "⏳ 等待服务就绪..."
+          npm run wait-on -- -t 120000 tcp:localhost:27017 tcp:localhost:6379
+          echo "✅ MongoDB和Redis端口已开放"
 
-          # 使用专用脚本检查MongoDB
+          # 验证服务连接
           ./scripts/test-mongodb.sh
-
-          # 使用专用脚本检查Redis
           ./scripts/test-redis.sh
 
       - name: 代码风格检查
@@ -360,38 +359,24 @@ jobs:
           # 使用专用脚本检查Redis
           ./scripts/test-redis.sh
 
-      - name: 启动应用服务
+      - name: 启动并验证服务
         run: |
           echo "🚀 启动应用服务..."
-
-          # 最终确认数据库服务
-          ./scripts/test-mongodb.sh
-
           # 启动后端服务器
           cd server
           npm start &
           echo $! > /tmp/backend.pid
           cd ..
-          echo "✅ 后端服务已启动"
-
           # 启动前端服务器
           npm run dev &
           echo $! > /tmp/frontend.pid
-          echo "✅ 前端服务已启动"
-
-          # 等待服务启动
-          echo "⏳ 等待服务就绪..."
-          timeout 180 bash -c 'until curl -sf http://localhost:3000 >/dev/null 2>&1 || curl -sf http://localhost:3000/api/health >/dev/null 2>&1; do
-            echo "等待后端服务..."
-            sleep 3
-          done'
-          echo "✅ 后端服务就绪"
-
-          timeout 180 bash -c 'until curl -sf http://localhost:5173 >/dev/null 2>&1; do
-            echo "等待前端服务..."
-            sleep 3
-          done'
-          echo "✅ 前端服务就绪"
+          echo "🔍 验证服务状态..."
+          # 使用wait-on等待所有服务就绪
+          npm run wait-on -- -t 180000 http://localhost:5173 http://localhost:3000/api/health
+          echo "✅ 前端和后端服务已就绪"
+          # 再次确认数据库服务
+          ./scripts/test-mongodb.sh
+          ./scripts/test-redis.sh
 
       - name: 运行E2E测试
         run: |
