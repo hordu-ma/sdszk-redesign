@@ -1,11 +1,20 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import SiteSetting from "@server/models/SiteSetting";
-import NewsCategory from "@server/models/NewsCategory";
-import { getPublicSettings } from "@server/controllers/siteSettingController";
-import { getCategories } from "@server/controllers/newsCategoryController";
-import redisClient from "@server/config/redis";
+import SiteSetting from "../../server/models/SiteSetting.js";
+import NewsCategory from "../../server/models/NewsCategory.js";
+import { getPublicSettings } from "../../server/controllers/siteSettingController.js";
+import { getCategories } from "../../server/controllers/newsCategoryController.js";
+
+// Mock redis client
+vi.mock("../../server/config/redis.js", () => ({
+  default: {
+    get: vi.fn(),
+    set: vi.fn(),
+    del: vi.fn(),
+    flushall: vi.fn(),
+  },
+}));
 
 // Mock Express request and response objects
 const mockRequest = (params = {}, query = {}, body = {}, user = {}) => ({

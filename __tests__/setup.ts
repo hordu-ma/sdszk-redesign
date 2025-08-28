@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi, beforeEach, afterEach } from "vitest";
 import { createPinia } from "pinia";
 import { createPersistedState } from "pinia-plugin-persistedstate";
 
@@ -99,7 +99,6 @@ export function createTestPinia() {
       storage: {
         getItem: (key: string) => localStorageMock.getItem(key),
         setItem: (key: string, value: string) => localStorageMock.setItem(key, value),
-        removeItem: (key: string) => localStorageMock.removeItem(key),
       },
     })
   );
@@ -128,7 +127,7 @@ export function cleanupTestEnvironment() {
 // ========== API Mock ==========
 
 // Mock axios/api模块
-vi.mock("@/utils/api", () => ({
+vi.mock("../src/utils/api", () => ({
   default: {
     defaults: {
       headers: {
@@ -164,7 +163,7 @@ const routerMock = {
   },
 };
 
-vi.mock("@/router", () => ({
+vi.mock("../src/router", () => ({
   default: routerMock,
 }));
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia } from "pinia";
-import { useUserStore, type UserInfo } from "@/stores/user";
-import api from "@/utils/api";
+import { useUserStore, type UserInfo } from "../../../src/stores/user";
+import api from "../../../src/utils/api";
 import { createTestPinia, localStorageMock, messageMock, routerMock } from "../../setup";
 
 describe("useUserStore", () => {
