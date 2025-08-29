@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import News from "../models/News.js";
 import NewsCategory from "../models/NewsCategory.js";
 import Resource from "../models/Resource.js";
+import ResourceCategory from "../models/ResourceCategory.js";
 import Activity from "../models/Activity.js";
 import SiteSetting from "../models/SiteSetting.js";
 
@@ -129,6 +130,172 @@ const createNewsCategories = async () => {
   }
 };
 
+// 创建资源分类
+const createResourceCategories = async () => {
+  try {
+    // 获取管理员用户
+    const admin = await User.findOne({ role: "admin" });
+    if (!admin) {
+      console.log("未找到管理员用户，跳过创建资源分类");
+      return null;
+    }
+    console.log("找到管理员用户:", admin._id);
+
+    // 创建基础资源分类
+    const categoryData = [
+      {
+        name: "理论前沿",
+        key: "theory",
+        description: "思政课理论研究和学术前沿",
+        order: 1,
+        isActive: true,
+        createdBy: admin._id,
+        updatedBy: admin._id,
+      },
+      {
+        name: "教学研究",
+        key: "teaching",
+        description: "思政课教学方法和教学研究",
+        order: 2,
+        isActive: true,
+        createdBy: admin._id,
+        updatedBy: admin._id,
+      },
+      {
+        name: "影像思政",
+        key: "video",
+        description: "思政教育相关视频资源",
+        order: 3,
+        isActive: true,
+        createdBy: admin._id,
+        updatedBy: admin._id,
+      },
+    ];
+
+    console.log(
+      "准备创建的资源分类数据:",
+      JSON.stringify(categoryData, null, 2),
+    );
+
+    // 创建资源分类
+    const createdCategories = await ResourceCategory.insertMany(categoryData, {
+      ordered: true,
+    });
+    console.log(
+      "资源分类创建成功:",
+      createdCategories.map((cat) => ({
+        name: cat.name,
+        key: cat.key,
+        _id: cat._id,
+      })),
+    );
+    return createdCategories;
+  } catch (err) {
+    console.error("创建资源分类失败:", err);
+    throw err;
+  }
+};
+
+// 创建示例资源
+const createSampleResources = async () => {
+  try {
+    // 获取管理员用户
+    const admin = await User.findOne({ role: "admin" });
+    if (!admin) {
+      console.log("未找到管理员用户，跳过创建示例资源");
+      return null;
+    }
+
+    // 获取所有资源分类
+    const categories = await ResourceCategory.find();
+    if (!categories || categories.length === 0) {
+      console.log("未找到资源分类，跳过创建示例资源");
+      return null;
+    }
+
+    // 创建分类映射
+    const categoryMap = {};
+    categories.forEach((category) => {
+      categoryMap[category.key] = category._id;
+    });
+    console.log("资源分类映射:", categoryMap);
+
+    // 示例资源数据
+    const now = new Date();
+    const sampleResources = [
+      {
+        title: "习近平新时代中国特色社会主义思想概论",
+        content: "<p>习近平新时代中国特色社会主义思想是当代中国马克思主义、21世纪马克思主义，是中华文化和中国精神的时代精华。</p>",
+        summary: "深入学习习近平新时代中国特色社会主义思想的核心要义和精神实质。",
+        category: categoryMap["theory"],
+        author: "系统管理员",
+        isPublished: true,
+        fileUrl: "/uploads/documents/theory-1.pdf",
+        fileName: "习近平新时代中国特色社会主义思想概论.pdf",
+        fileSize: 2048000,
+        mimeType: "application/pdf",
+        createdBy: admin._id,
+        updatedBy: admin._id,
+        tags: ["习近平思想", "理论学习", "马克思主义"],
+        downloadCount: 0,
+        publishDate: now,
+      },
+      {
+        title: "思政课教学方法创新研究",
+        content: "<p>探索新时代思政课教学方法创新，提升思政课教学实效性和吸引力。</p>",
+        summary: "介绍思政课教学方法创新的理论与实践。",
+        category: categoryMap["teaching"],
+        author: "教学研究组",
+        isPublished: true,
+        fileUrl: "/uploads/documents/teaching-1.pdf",
+        fileName: "思政课教学方法创新研究.pdf",
+        fileSize: 1536000,
+        mimeType: "application/pdf",
+        createdBy: admin._id,
+        updatedBy: admin._id,
+        tags: ["教学方法", "课程创新", "教学研究"],
+        downloadCount: 0,
+        publishDate: now,
+      },
+      {
+        title: "《觉醒年代》经典片段赏析",
+        content: "<p>通过《觉醒年代》的经典片段，深入理解五四精神和爱国主义教育。</p>",
+        summary: "利用影视作品进行思政教育的典型案例。",
+        category: categoryMap["video"],
+        author: "影视教育组",
+        isPublished: true,
+        fileUrl: "/uploads/videos/juexing-1.mp4",
+        fileName: "觉醒年代经典片段.mp4",
+        fileSize: 52428800,
+        mimeType: "video/mp4",
+        videoUrl: "/uploads/videos/juexing-1.mp4",
+        videoDuration: 1200,
+        createdBy: admin._id,
+        updatedBy: admin._id,
+        tags: ["影视教育", "觉醒年代", "爱国主义"],
+        downloadCount: 0,
+        publishDate: now,
+      },
+    ];
+
+    console.log("准备创建的资源数据:", JSON.stringify(sampleResources, null, 2));
+
+    // 创建资源
+    const createdResources = await Resource.insertMany(sampleResources, { ordered: true });
+    console.log(
+      "成功创建示例资源:",
+      createdResources.map((resource) => ({
+        title: resource.title,
+        category: resource.category,
+      })),
+    );
+    return createdResources;
+  } catch (err) {
+    console.error("创建示例资源失败:", err);
+    throw err;
+  }
+};
+
 // 创建示例新闻
 const createSampleNews = async () => {
   try {
@@ -163,10 +330,10 @@ const createSampleNews = async () => {
         summary:
           "山东省大中小学思政课一体化指导中心正式成立，将致力于推动思政课程与课程思政有机结合。",
         category: categoryMap["center"],
-        author: "管理员",
+        author: admin._id,
         importance: 5,
         tags: ["成立", "思政课", "一体化"],
-        isPublished: true,
+        status: "published",
         publishDate: now,
         createdBy: admin._id,
         updatedBy: admin._id,
@@ -181,10 +348,10 @@ const createSampleNews = async () => {
         summary:
           "山东省思政课教师教学技能大赛将于2025年6月举行，欢迎各校教师积极参与。",
         category: categoryMap["notice"],
-        author: "管理员",
+        author: admin._id,
         importance: 4,
         tags: ["比赛", "教学技能", "通知"],
-        isPublished: true,
+        status: "published",
         publishDate: now,
         createdBy: admin._id,
         updatedBy: admin._id,
@@ -199,14 +366,14 @@ const createSampleNews = async () => {
         summary:
           "本文件提出了加强山东省大中小学思政课一体化建设的具体措施和实施路径。",
         category: categoryMap["policy"],
-        author: "省教育厅",
+        author: admin._id,
         source: {
           name: "山东省教育厅",
           url: "http://edu.shandong.gov.cn",
         },
         importance: 5,
         tags: ["政策", "实施意见", "思政课建设"],
-        isPublished: true,
+        status: "published",
         publishDate: now,
         createdBy: admin._id,
         updatedBy: admin._id,
@@ -252,6 +419,8 @@ const seedDB = async () => {
       User.deleteMany({}),
       NewsCategory.deleteMany({}),
       News.deleteMany({}),
+      ResourceCategory.deleteMany({}),
+      Resource.deleteMany({}),
     ]);
     console.log("已清空现有数据");
 
@@ -276,6 +445,20 @@ const seedDB = async () => {
       throw new Error("创建示例新闻失败");
     }
     console.log("示例新闻创建成功");
+
+    console.log("开始创建资源分类...");
+    const resourceCategories = await createResourceCategories();
+    if (!resourceCategories) {
+      throw new Error("创建资源分类失败");
+    }
+    console.log("资源分类创建成功");
+
+    console.log("开始创建示例资源...");
+    const resources = await createSampleResources();
+    if (!resources) {
+      throw new Error("创建示例资源失败");
+    }
+    console.log("示例资源创建成功");
 
     console.log("种子数据添加完成");
   } catch (err) {

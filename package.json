@@ -29,7 +29,11 @@
     "audit:fix": "npm audit fix --force",
     "test:api": "node scripts/test-api-connectivity.mjs",
     "build:aliyun": "vue-tsc && vite build --config vite.config.aliyun.ts --mode aliyun",
-    "deploy:aliyun": "bash scripts/deploy-frontend.sh"
+    "deploy:aliyun": "bash scripts/deploy-frontend.sh",
+    "db:sync": "bash scripts/quick-sync.sh",
+    "db:sync-full": "bash scripts/sync-database.sh",
+    "db:tunnel": "bash scripts/mongodb-tunnel.sh",
+    "db:verify": "bash scripts/verify-database.sh"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
