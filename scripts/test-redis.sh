@@ -19,6 +19,25 @@ echo "   端口: $REDIS_PORT"
 echo "   最大重试次数: $MAX_ATTEMPTS"
 echo "   重试间隔: ${WAIT_INTERVAL}s"
 
+# 环境诊断信息
+echo ""
+echo "🔍 环境诊断信息:"
+echo "   当前时间: $(date)"
+echo "   用户: $(whoami)"
+echo "   工作目录: $(pwd)"
+
+# 网络诊断
+if command -v netstat >/dev/null 2>&1; then
+    echo "   监听的端口:"
+    netstat -ln | grep ":$REDIS_PORT " | head -3 || echo "     未找到端口 $REDIS_PORT"
+fi
+
+# Docker 容器信息（如果在 CI 环境中）
+if command -v docker >/dev/null 2>&1 && [ "${CI:-}" = "true" ]; then
+    echo "   Docker 容器状态:"
+    docker ps --filter "expose=$REDIS_PORT" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "     无法获取容器信息"
+fi
+
 # 函数：检查端口是否开放
 check_port() {
     local host=$1
@@ -48,6 +67,30 @@ while [ $attempt -le $MAX_ATTEMPTS ]; do
 
     if [ $attempt -eq $MAX_ATTEMPTS ]; then
         echo "   ❌ 端口检查失败：$MAX_ATTEMPTS 次尝试后端口仍未开放"
+        echo ""
+        echo "🔍 调试信息:"
+        echo "   检查命令失败，可能的原因："
+        echo "   1. Redis 服务未启动"
+        echo "   2. 主机名 '$REDIS_HOST' 无法解析"
+        echo "   3. 端口 '$REDIS_PORT' 未开放"
+        echo "   4. 网络连接问题"
+
+        # 尝试解析主机名
+        if command -v nslookup >/dev/null 2>&1; then
+            echo "   主机名解析测试:"
+            nslookup "$REDIS_HOST" 2>&1 | head -5 || echo "     主机名解析失败"
+        fi
+
+        # 检查其他常用Redis端口
+        echo "   检查其他常用端口:"
+        for test_port in 6380 6381; do
+            if check_port "$REDIS_HOST" "$test_port"; then
+                echo "     端口 $test_port: 开放"
+            else
+                echo "     端口 $test_port: 关闭"
+            fi
+        done
+
         exit 1
     fi
 
@@ -80,8 +123,19 @@ while [ $attempt -le $MAX_ATTEMPTS ]; do
         echo ""
         echo "🔍 调试信息："
         echo "   执行的命令: redis-cli -h $REDIS_HOST -p $REDIS_PORT ping"
+        echo "   Redis CLI 版本:"
+        redis-cli --version 2>&1 || echo "     无法获取版本信息"
         echo "   最后一次错误输出:"
         redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping 2>&1 || true
+        echo "   尝试连接详细信息:"
+        redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" --latency-history -i 1 2>&1 | head -3 || true
+
+        # 如果在CI环境，显示容器日志
+        if [ "${CI:-}" = "true" ] && command -v docker >/dev/null 2>&1; then
+            echo "   Redis 容器日志 (最后10行):"
+            docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "     无法获取容器日志"
+        fi
+
         exit 1
     fi
 
