@@ -69,7 +69,21 @@ export default defineConfig({
 
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
+      use: {
+        ...devices["Desktop Firefox"],
+        // Firefox 特定配置
+        actionTimeout: process.env.CI ? 20 * 1000 : 15 * 1000,
+        navigationTimeout: process.env.CI ? 90 * 1000 : 45 * 1000,
+        launchOptions: {
+          args: process.env.CI ? [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--width=1280',
+            '--height=720'
+          ] : []
+        }
+      },
     },
 
     {

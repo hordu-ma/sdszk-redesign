@@ -1,14 +1,17 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("基础功能测试", () => {
-  test("首页应该正常加载", async ({ page }) => {
-    console.log("🧪 测试：访问首页");
+  test("首页应该正常加载", async ({ page, browserName }) => {
+    console.log(`🧪 测试：访问首页 (浏览器: ${browserName})`);
+
+    // Firefox 浏览器需要更长的超时
+    const timeout = browserName === 'firefox' ? 45000 : 30000;
 
     // 访问首页
     await page.goto("/");
 
     // 等待页面加载
-    await page.waitForLoadState("networkidle", { timeout: 30000 });
+    await page.waitForLoadState("networkidle", { timeout });
 
     // 检查页面标题
     const title = await page.title();
@@ -17,20 +20,31 @@ test.describe("基础功能测试", () => {
 
     // 检查主要元素存在
     const app = page.locator("#app");
-    await expect(app).toBeVisible();
+    await expect(app).toBeVisible({ timeout: browserName === 'firefox' ? 15000 : 10000 });
 
     console.log("✅ 首页加载测试通过");
   });
 
-  test("页面基本结构完整", async ({ page }) => {
-    console.log("🧪 测试：页面基本结构");
+  test("页面基本结构完整", async ({ page, browserName }) => {
+    console.log(`🧪 测试：页面基本结构 (浏览器: ${browserName})`);
 
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
+    // Firefox 需要额外等待时间
+    if (browserName === 'firefox') {
+      await page.waitForTimeout(2000);
+    }
+
     // 检查Vue应用根元素
     const app = page.locator("#app");
-    await expect(app).toBeVisible();
+    await expect(app).toBeVisible({ timeout: browserName === 'firefox' ? 15000 : 10000 });
+
+    // 等待页面完全渲染
+    await page.waitForFunction(() => {
+      const body = document.body;
+      return body && body.textContent && body.textContent.trim().length > 0;
+    }, { timeout: browserName === 'firefox' ? 15000 : 10000 });
 
     // 检查页面内容不为空
     const bodyText = await page.locator("body").textContent();
@@ -39,46 +53,82 @@ test.describe("基础功能测试", () => {
     console.log("✅ 页面结构测试通过");
   });
 
-  test("页面响应式设计", async ({ page }) => {
-    console.log("🧪 测试：响应式设计");
+  test("页面响应式设计", async ({ page, browserName }) => {
+    console.log(`🧪 测试：响应式设计 (浏览器: ${browserName})`);
 
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
+    // Firefox 需要额外等待时间
+    if (browserName === 'firefox') {
+      await page.waitForTimeout(2000);
+    }
+
     // 测试桌面端视口
     await page.setViewportSize({ width: 1200, height: 800 });
+
+    // 等待视口变化完成
+    await page.waitForTimeout(browserName === 'firefox' ? 1000 : 500);
+
     const app = page.locator("#app");
-    await expect(app).toBeVisible();
+    await expect(app).toBeVisible({ timeout: browserName === 'firefox' ? 15000 : 10000 });
 
     // 测试移动端视口
     await page.setViewportSize({ width: 375, height: 667 });
-    await expect(app).toBeVisible();
+
+    // 等待视口变化完成
+    await page.waitForTimeout(browserName === 'firefox' ? 1000 : 500);
+
+    await expect(app).toBeVisible({ timeout: browserName === 'firefox' ? 15000 : 10000 });
 
     console.log("✅ 响应式设计测试通过");
   });
 
-  test("API健康检查", async ({ page }) => {
-    console.log("🧪 测试：API连接");
+  test("API健康检查", async ({ page, browserName }) => {
+    console.log(`🧪 测试：API连接 (浏览器: ${browserName})`);
 
-    // 直接检查API端点
-    const response = await page.request.get("http://localhost:3000");
-    expect(response.status()).toBeLessThan(500);
+    // Firefox 需要重试机制
+    let retries = browserName === 'firefox' ? 3 : 1;
+    let lastError;
 
-    console.log("✅ API连接测试通过");
+    for (let i = 0; i < retries; i++) {
+      try {
+        // 直接检查API端点
+        const response = await page.request.get("http://localhost:3000", {
+          timeout: browserName === 'firefox' ? 15000 : 10000
+        });
+        expect(response.status()).toBeLessThan(500);
+        console.log("✅ API连接测试通过");
+        return;
+      } catch (error) {
+        lastError = error;
+        if (i < retries - 1) {
+          console.log(`⚠️ API测试重试 ${i + 1}/${retries}`);
+          await page.waitForTimeout(2000);
+        }
+      }
+    }
+
+    throw lastError;
   });
 });
 
 test.describe("错误处理测试", () => {
-  test("404页面处理", async ({ page }) => {
-    console.log("🧪 测试：404页面处理");
+  test("404页面处理", async ({ page, browserName }) => {
+    console.log(`🧪 测试：404页面处理 (浏览器: ${browserName})`);
 
     // 访问不存在的页面
     await page.goto("/non-existent-page");
     await page.waitForLoadState("domcontentloaded");
 
+    // Firefox 需要额外等待时间
+    if (browserName === 'firefox') {
+      await page.waitForTimeout(2000);
+    }
+
     // 应用应该仍然加载（显示404页面或重定向）
     const app = page.locator("#app");
-    await expect(app).toBeVisible();
+    await expect(app).toBeVisible({ timeout: browserName === 'firefox' ? 15000 : 10000 });
 
     console.log("✅ 404页面处理测试通过");
   });

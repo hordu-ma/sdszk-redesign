@@ -193,6 +193,9 @@ jobs:
         env:
           CI: true
           NODE_ENV: test
+          MOZ_HEADLESS: 1
+          MOZ_DISABLE_CONTENT_SANDBOX: 1
+          FIREFOX_BROWSER_TIMEOUT: 60000
 
       - name: 运行性能测试 (允许失败)
         continue-on-error: true
@@ -202,6 +205,9 @@ jobs:
         env:
           CI: true
           NODE_ENV: test
+          MOZ_HEADLESS: 1
+          MOZ_DISABLE_CONTENT_SANDBOX: 1
+          FIREFOX_BROWSER_TIMEOUT: 90000
 
       # 停止服务
       - name: 停止应用服务

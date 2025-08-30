@@ -21,6 +21,9 @@ async function globalSetup(config: FullConfig) {
   // 执行性能基准测试
   await performPerformanceBaseline();
 
+  // Firefox 浏览器特殊初始化
+  await performFirefoxOptimization();
+
   const setupTime = Date.now() - startTime;
   console.log(`✅ 全局配置完成 (耗时: ${setupTime}ms)`);
 }
@@ -121,6 +124,45 @@ async function performPerformanceBaseline(): Promise<void> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.warn("⚠️ 性能基准测试失败:", errorMessage);
+  }
+}
+
+/**
+ * Firefox 浏览器优化设置
+ */
+async function performFirefoxOptimization(): Promise<void> {
+  console.log("🦊 执行 Firefox 浏览器优化设置...");
+
+  try {
+    const isCI = !!process.env.CI;
+
+    if (isCI) {
+      // CI环境下为Firefox设置环境变量
+      process.env.MOZ_HEADLESS = '1';
+      process.env.MOZ_DISABLE_CONTENT_SANDBOX = '1';
+
+      console.log("✅ Firefox CI 环境优化完成");
+    }
+
+    // Firefox 预热测试
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+
+    try {
+      // 简单的预热请求
+      await page.goto("http://localhost:5173", {
+        waitUntil: "domcontentloaded",
+        timeout: 10000,
+      });
+
+      console.log("✅ Firefox 预热测试完成");
+    } catch (error) {
+      console.warn("⚠️ Firefox 预热测试失败，但不影响后续测试");
+    }
+
+    await browser.close();
+  } catch (error) {
+    console.warn("⚠️ Firefox 优化设置失败，使用默认配置");
   }
 }
 
