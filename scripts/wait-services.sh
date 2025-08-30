@@ -37,7 +37,9 @@
 #     run: bash scripts/wait-services.sh --timeout 180 tcp://localhost:27017 redis://localhost:6379 http://localhost:3000/api/health
 #
 
-set -euo pipefail
+set -Eeuo pipefail
+# 全局错误捕获（调试用，确认问题后可移除或置为可选）
+trap 'ec=$?; echo ">>> DEBUG ERR: command \"$BASH_COMMAND\" exited with code $ec at line $LINENO" >&2' ERR
 
 # -----------------------------
 # 配置默认值
@@ -168,6 +170,7 @@ if [[ $SHOW_ENV_INFO -eq 1 && $QUIET -eq 0 ]]; then
   info "Node 版本 (若已安装): $(command -v node >/dev/null 2>&1 && node -v || echo 'N/A')"
   info "可用命令: $(for c in nc curl wget mongo mongosh redis-cli; do command -v "$c" >/dev/null 2>&1 && printf "%s " "$c"; done; echo)"
 fi
+echo "DEBUG: reached after environment info block (GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}', TARGETS=${#TARGETS[@]})"
 
 # -----------------------------
 # 工具函数
@@ -252,6 +255,7 @@ check_cmd() {
 # -----------------------------
 wait_target() {
   local target="$1"
+  echo "DEBUG: enter wait_target target='${target}'" >&2
   local start_ts=$(_now)
   local attempt=0
   local soft_warned=0
@@ -322,6 +326,7 @@ wait_target() {
 # -----------------------------
 GLOBAL_START=$(_now)
 RESULTS_FILE=$(mktemp -t wait-results-XXXX)
+echo "DEBUG: after init GLOBAL_START=${GLOBAL_START} RESULTS_FILE=${RESULTS_FILE}" >&2
 pids=()
 active=0
 # 使用简单数组而不是关联数组，避免bash版本兼容性问题
@@ -329,6 +334,7 @@ pid_targets=""
 
 launch_wait() {
   local t="$1"
+  echo "DEBUG: launch_wait about to start background waiter for '$t'" >&2
   wait_target "$t" >>"$RESULTS_FILE" &
   local pid=$!
   pids+=("$pid")
