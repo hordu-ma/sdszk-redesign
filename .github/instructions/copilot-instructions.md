@@ -11,7 +11,7 @@ applyTo: "**"
 - **项目名称**: 山东省思政课一体化中心
 - **域名**: https://horsduroot.com
 - **服务器**: 阿里云ECS (60.205.124.67)
-- **管理员登录**: https://horsduroot.com/login/admin
+- **管理员登录**: https://horsduroot.com/admin
 
 ### 架构特点
 
@@ -104,7 +104,7 @@ server/
 - **任务分解**: 超过三步的任务要拆解步骤，分步执行
 - **删除确认**: 每次执行代码删除工作，务必获得确认许可后执行
 - **Git提醒**: 每隔10分钟，提醒进行 `git add` 和 `git commit` 操作
-- **上下文保持**: 每隔十分钟，重新回顾"docs/dev-guides/辅助开发上下文指南.md"文档
+- **上下文保持**: 始终以项目根目录的 `DEV_GUIDE.md` 作为核心开发指南。
 
 ### Git工作流和版本管理
 
@@ -115,7 +115,8 @@ server/
 
 ### 开发服务器启动顺序
 
-- **前端开发**: 务必先启动后端服务器 (`cd server && npm run start`)，再启动前端 (`npm run dev`)
+- **推荐方式**: 使用一键启动脚本 `./scripts/development/dev-start.sh`
+- **手动方式**: 先启动后端 (`npm run server:dev`)，再启动前端 (`npm run dev`)
 
 ## 🗂️ 核心业务模块
 
