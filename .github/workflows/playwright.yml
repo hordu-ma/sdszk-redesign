@@ -132,8 +132,8 @@ jobs:
           echo "📋 Redis容器日志(最后10行):"
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "无法获取Redis日志"
 
-          # 统一等待脚本（并行等待 + 指数退避 + 汇总）
-          bash scripts/wait-services.sh --timeout 180 \
+          # 使用简化的服务等待脚本
+          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
 
@@ -159,7 +159,7 @@ jobs:
           echo $! > /tmp/frontend.pid
 
           echo "⏳ 等待应用层服务 (HTTP) 就绪..."
-          bash scripts/wait-services.sh --timeout 180 \
+          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
             http://localhost:3000/api/health \
             http://localhost:5173
 

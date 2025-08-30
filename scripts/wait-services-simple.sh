@@ -85,6 +85,8 @@ check_http() {
   local url="$1"
   if command -v curl >/dev/null 2>&1; then
     curl -fsS --max-time 5 "$url" >/dev/null 2>&1
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q --timeout=5 -O /dev/null "$url" >/dev/null 2>&1
   else
     return 1
   fi
@@ -141,15 +143,18 @@ wait_resource() {
 
     local result=1
     case "$type" in
-      tcp)   check_tcp "$host" "$port" && result=0 ;;
-      http)  check_http "$target" && result=0 ;;
-      mongo) check_mongo "$host" "$port" && result=0 ;;
-      redis) check_redis "$host" "$port" && result=0 ;;
+      tcp)   check_tcp "$host" "$port" && result=0 || result=$? ;;
+      http)  check_http "$target" && result=0 || result=$? ;;
+      mongo) check_mongo "$host" "$port" && result=0 || result=$? ;;
+      redis) check_redis "$host" "$port" && result=0 || result=$? ;;
     esac
 
     if [[ $result -eq 0 ]]; then
       success "${desc} 就绪 (${elapsed}s)"
       return 0
+    elif [[ $result -eq 2 ]]; then
+      error "${desc} 检查工具不可用"
+      return 1
     fi
 
     # 警告长时间等待
