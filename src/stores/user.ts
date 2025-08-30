@@ -61,10 +61,9 @@ export const useUserStore = defineStore(
       const hasToken = !!token.value;
       const hasUserInfo = !!userInfo.value;
 
-      // 同时检查localStorage中的token作为备份验证
-      const hasStoredToken = !!localStorage.getItem("token");
-
-      return hasToken && hasUserInfo && hasStoredToken;
+      // 只要内存中有token和用户信息就认为已认证
+      // localStorage token 只用于页面刷新时的状态恢复
+      return hasToken && hasUserInfo;
     });
     const isAdmin = computed(() => userInfo.value?.role === "admin");
     const isEditor = computed(
@@ -239,8 +238,8 @@ export const useUserStore = defineStore(
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message ||
-            error.message ||
-            "登录失败，请检查网络连接",
+          error.message ||
+          "登录失败，请检查网络连接",
         );
       } finally {
         loading.value = false;
@@ -285,10 +284,9 @@ export const useUserStore = defineStore(
     function isAuthenticationValid(): boolean {
       const hasToken = !!token.value;
       const hasUserInfo = !!userInfo.value;
-      const hasStoredToken = !!localStorage.getItem("token");
 
-      // 所有条件都必须满足
-      return hasToken && hasUserInfo && hasStoredToken;
+      // 只检查内存中的状态，localStorage token 仅用于持久化
+      return hasToken && hasUserInfo;
     }
 
     /**
@@ -298,7 +296,7 @@ export const useUserStore = defineStore(
       try {
         // 首先检查基本状态
         if (!isAuthenticationValid()) {
-          // 尝试从localStorage恢复
+          // 尝试从localStorage恢复（仅在页面刷新等情况下）
           const savedToken = localStorage.getItem("token");
           if (savedToken && !token.value) {
             // 静默恢复token，但不触发用户信息获取
@@ -348,10 +346,10 @@ export const useUserStore = defineStore(
 
           // 检查认证状态
           if (!checkAuthenticationSafely()) {
-            // 尝试自动恢复
+            // 尝试自动恢复（仅当内存中没有token但localStorage中有时）
             const savedToken = localStorage.getItem("token");
-            if (savedToken && savedToken === token.value) {
-              // token一致，可能只是用户信息丢失，尝试重新获取
+            if (savedToken && !token.value) {
+              // 从localStorage恢复token，可能只是用户信息丢失，尝试重新获取
               try {
                 await initUserInfo();
                 if (isAuthenticated.value) {

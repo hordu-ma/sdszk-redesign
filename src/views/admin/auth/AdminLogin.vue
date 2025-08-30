@@ -117,8 +117,10 @@ const handleLogin = async () => {
     // 获取重定向路径或默认跳转到仪表板
     const redirectPath = (route.query.redirect as string) || "/admin/dashboard";
     router.push(redirectPath);
-  } catch (error: any) {
-    message.error(error.message || "登录失败，请检查用户名和密码");
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "登录失败，请检查用户名和密码";
+    message.error(errorMessage);
   } finally {
     loading.value = false;
   }

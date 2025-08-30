@@ -58,9 +58,13 @@ console.log("- API_CONFIG:", API_CONFIG);
 // 请求拦截器：添加 token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    // 优先使用已设置的Authorization header（来自store的_setAuthToken方法）
+    // 只有在没有Authorization header时才从localStorage读取
+    if (!config.headers["Authorization"]) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
     }
     return config;
   },
