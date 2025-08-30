@@ -37,9 +37,8 @@
 #     run: bash scripts/wait-services.sh --timeout 180 tcp://localhost:27017 redis://localhost:6379 http://localhost:3000/api/health
 #
 
-set -Eeuo pipefail
-# 全局错误捕获（调试用，确认问题后可移除或置为可选）
-trap 'ec=$?; echo ">>> DEBUG ERR: command \"$BASH_COMMAND\" exited with code $ec at line $LINENO" >&2' ERR
+set -euo pipefail
+# 已移除临时错误捕获 trap（避免对正常非零测试造成中断）
 
 # -----------------------------
 # 配置默认值
@@ -73,7 +72,8 @@ info()   { printf "%b[INFO]%b %s\n" "$BLUE" "$RESET" "$*"; }
 warn()   { printf "%b[WARN]%b %s\n" "$YELLOW" "$RESET" "$*"; }
 error()  { printf "%b[ERROR]%b %s\n" "$RED" "$RESET" "$*"; }
 success(){ printf "%b[DONE]%b %s\n" "$GREEN" "$RESET" "$*"; }
-debug()  { [[ $VERBOSE -eq 1 ]] && printf "%b[DBG]%b %s\n" "$DIM" "$RESET" "$*"; }
+# debug: 保证在 VERBOSE!=1 时返回码仍为0，避免 set -e 提前退出
+debug()  { if [[ "${VERBOSE:-0}" -eq 1 ]]; then printf "%b[DBG]%b %s\n" "$DIM" "$RESET" "$*"; fi; }
 
 usage() {
   cat <<EOF
@@ -137,30 +137,7 @@ if [[ ${#TARGETS[@]} -eq 0 ]]; then
   exit 1
 fi
 
-# === DEBUG BLOCK (CI parameter inspection, will be removed later) ===
-if [[ -n "${CI:-}" ]]; then
-  echo "=== DEBUG(wait-services) ==="
-  echo "RAW INVOCATION: $0 $*"
-  echo "GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}'"
-  echo "PER_TARGET_SOFT_TIMEOUT='${PER_TARGET_SOFT_TIMEOUT}'"
-  echo "PARALLELISM='${PARALLELISM}'"
-  echo "SHOW_ENV_INFO='${SHOW_ENV_INFO}' QUIET='${QUIET}' VERBOSE='${VERBOSE}'"
-  echo "TARGET_COUNT=${#TARGETS[@]}"
-  idx=0
-  for tgt in "${TARGETS[@]}"; do
-    echo "TARGET[$idx]=$tgt"
-    idx=$((idx+1))
-  done
-  echo "SHELL=$(command -v bash) BASH_VERSION=${BASH_VERSION:-N/A}"
-  # 预校验 GLOBAL_TIMEOUT
-  if [[ -z "${GLOBAL_TIMEOUT}" ]]; then
-    echo "!!! GLOBAL_TIMEOUT 为空 (可能 --timeout 值丢失)"
-  elif ! [[ "${GLOBAL_TIMEOUT}" =~ ^[0-9]+$ ]]; then
-    echo "!!! GLOBAL_TIMEOUT 非纯数字='${GLOBAL_TIMEOUT}'"
-  fi
-  echo "============================"
-fi
-# === END DEBUG BLOCK ===
+# (临时 DEBUG BLOCK 已移除)
 
 # -----------------------------
 # 环境信息 (可选)
@@ -170,7 +147,7 @@ if [[ $SHOW_ENV_INFO -eq 1 && $QUIET -eq 0 ]]; then
   info "Node 版本 (若已安装): $(command -v node >/dev/null 2>&1 && node -v || echo 'N/A')"
   info "可用命令: $(for c in nc curl wget mongo mongosh redis-cli; do command -v "$c" >/dev/null 2>&1 && printf "%s " "$c"; done; echo)"
 fi
-echo "DEBUG: reached after environment info block (GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}', TARGETS=${#TARGETS[@]})"
+# (移除临时执行路径调试输出)
 
 # -----------------------------
 # 工具函数
@@ -255,7 +232,7 @@ check_cmd() {
 # -----------------------------
 wait_target() {
   local target="$1"
-  echo "DEBUG: enter wait_target target='${target}'" >&2
+  # (移除临时 wait_target 入口调试)
   local start_ts=$(_now)
   local attempt=0
   local soft_warned=0
@@ -326,7 +303,7 @@ wait_target() {
 # -----------------------------
 GLOBAL_START=$(_now)
 RESULTS_FILE=$(mktemp -t wait-results-XXXX)
-echo "DEBUG: after init GLOBAL_START=${GLOBAL_START} RESULTS_FILE=${RESULTS_FILE}" >&2
+# (移除临时 GLOBAL_START / RESULTS_FILE 调试)
 pids=()
 active=0
 # 使用简单数组而不是关联数组，避免bash版本兼容性问题
@@ -334,7 +311,7 @@ pid_targets=""
 
 launch_wait() {
   local t="$1"
-  echo "DEBUG: launch_wait about to start background waiter for '$t'" >&2
+  # (移除临时 launch_wait 调试)
   wait_target "$t" >>"$RESULTS_FILE" &
   local pid=$!
   pids+=("$pid")
