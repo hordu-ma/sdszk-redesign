@@ -103,9 +103,9 @@ jobs:
           echo "📋 Redis容器日志 (最后10行):"
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 10 2>/dev/null || echo "无法获取Redis日志"
 
-          # 使用统一脚本等待服务就绪（替换原 wait-on + 单独测试）
-          echo "⏳ 使用统一脚本等待依赖服务..."
-          bash scripts/wait-services.sh --timeout 180 \
+          # 使用简化的服务等待脚本
+          echo "⏳ 等待依赖服务就绪..."
+          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
           echo "✅ 基础依赖服务全部就绪"
@@ -353,9 +353,9 @@ jobs:
           echo "📋 MongoDB容器日志 (最后20行):"
           docker logs $(docker ps -q --filter "ancestor=mongo:5.0") --tail 20 2>/dev/null || echo "无法获取MongoDB日志"
 
-          # 使用统一脚本等待依赖服务
-          echo "⏳ 使用统一脚本等待依赖服务..."
-          bash scripts/wait-services.sh --timeout 180 \
+          # 使用简化的服务等待脚本
+          echo "⏳ 等待依赖服务就绪..."
+          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
           echo "✅ 基础依赖服务全部就绪"
