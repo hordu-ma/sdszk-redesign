@@ -135,6 +135,31 @@ if [[ ${#TARGETS[@]} -eq 0 ]]; then
   exit 1
 fi
 
+# === DEBUG BLOCK (CI parameter inspection, will be removed later) ===
+if [[ -n "${CI:-}" ]]; then
+  echo "=== DEBUG(wait-services) ==="
+  echo "RAW INVOCATION: $0 $*"
+  echo "GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}'"
+  echo "PER_TARGET_SOFT_TIMEOUT='${PER_TARGET_SOFT_TIMEOUT}'"
+  echo "PARALLELISM='${PARALLELISM}'"
+  echo "SHOW_ENV_INFO='${SHOW_ENV_INFO}' QUIET='${QUIET}' VERBOSE='${VERBOSE}'"
+  echo "TARGET_COUNT=${#TARGETS[@]}"
+  idx=0
+  for tgt in "${TARGETS[@]}"; do
+    echo "TARGET[$idx]=$tgt"
+    idx=$((idx+1))
+  done
+  echo "SHELL=$(command -v bash) BASH_VERSION=${BASH_VERSION:-N/A}"
+  # 预校验 GLOBAL_TIMEOUT
+  if [[ -z "${GLOBAL_TIMEOUT}" ]]; then
+    echo "!!! GLOBAL_TIMEOUT 为空 (可能 --timeout 值丢失)"
+  elif ! [[ "${GLOBAL_TIMEOUT}" =~ ^[0-9]+$ ]]; then
+    echo "!!! GLOBAL_TIMEOUT 非纯数字='${GLOBAL_TIMEOUT}'"
+  fi
+  echo "============================"
+fi
+# === END DEBUG BLOCK ===
+
 # -----------------------------
 # 环境信息 (可选)
 # -----------------------------
