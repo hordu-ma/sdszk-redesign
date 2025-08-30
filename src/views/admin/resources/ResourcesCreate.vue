@@ -101,7 +101,7 @@
                 <div class="file-preview">
                   <!-- 图片预览 -->
                   <div v-if="isImageFile" class="image-preview">
-                    <img :src="formData.fileUrl" alt="预览图片">
+                    <img :src="formData.fileUrl" alt="预览图片" />
                   </div>
 
                   <!-- 视频预览 -->
@@ -225,7 +225,7 @@
                       @change="handleThumbnailChange"
                     >
                       <div v-if="formData.thumbnail" class="thumbnail-preview">
-                        <img :src="formData.thumbnail" alt="缩略图">
+                        <img :src="formData.thumbnail" alt="缩略图" />
                         <div class="thumbnail-actions">
                           <a-button
                             type="text"

@@ -84,6 +84,15 @@ export default [
       'vue/max-attributes-per-line': 'off', // 允许一行多个属性
       'vue/singleline-html-element-content-newline': 'off', // 允许单行元素内容
       'vue/attributes-order': 'off', // 放宽属性顺序要求
+      'vue/html-self-closing': ['error', {
+        'html': {
+          'void': 'always', // 允许void元素(如img)使用自闭合格式
+          'normal': 'always',
+          'component': 'always'
+        },
+        'svg': 'always',
+        'math': 'always'
+      }], // 配置自闭合标签规则
     }
   },
 

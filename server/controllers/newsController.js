@@ -339,7 +339,7 @@ export const updateNews = async (req, res) => {
       return response.notFound(res, "新闻不存在");
     }
     return response.success(res, news, "更新新闻成功");
-  } catch (err) {
+  } catch {
     return response.error(res, "更新新闻失败", 400);
   }
 };

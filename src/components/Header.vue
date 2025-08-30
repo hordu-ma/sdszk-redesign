@@ -11,7 +11,7 @@
       </button>
 
       <div class="logo-container">
-        <img src="../assets/images/logo.png" alt="中心logo" class="logo">
+        <img src="../assets/images/logo.png" alt="中心logo" class="logo" />
         <h1 class="center-name">
           <span class="full-name">山东省大中小学思政课一体化中心</span>
           <span class="short-name">山东省大中小学思政课一体化中心</span>

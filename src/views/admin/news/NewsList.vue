@@ -407,7 +407,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { message } from "ant-design-vue";
@@ -600,7 +600,7 @@ const fetchNewsList = async () => {
 
     // 处理数据，确保ID字段正确映射
     const rawData = response.data.data || response.data || [];
-    tableData.value = rawData.map((item: any) => ({
+    tableData.value = rawData.map((item: NewsItem) => ({
       ...item,
       _id: item._id || item.id, // 确保_id字段存在
       id: item._id || item.id, // 保持兼容性
@@ -611,9 +611,11 @@ const fetchNewsList = async () => {
     if (tableData.value.length > 0) {
       console.log("📋 数据示例:", tableData.value[0]);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("获取新闻列表失败:", error);
-    message.error(error.message || "获取新闻列表失败");
+    const errorMessage =
+      error instanceof Error ? error.message : "获取新闻列表失败";
+    message.error(errorMessage);
     tableData.value = [];
     pagination.total = 0;
   } finally {
@@ -636,21 +638,35 @@ const fetchCategories = async () => {
     console.log("分类响应:", response);
 
     // 处理不同的响应格式
-    if ((response as any).status === "success") {
+    const responseAny = response as {
+      status?: string;
+      data?: NewsCategory[] | { status: string; data: NewsCategory[] };
+      success?: boolean;
+    };
+    if (responseAny.status === "success") {
       // 处理 { status: 'success', data: [...] } 格式
-      categories.value = (response as any).data || [];
-    } else if ((response as any).data?.status === "success") {
+      categories.value = (responseAny.data as NewsCategory[]) || [];
+    } else if (
+      typeof responseAny.data === "object" &&
+      responseAny.data &&
+      "status" in responseAny.data &&
+      responseAny.data.status === "success"
+    ) {
       // 处理嵌套格式 { data: { status: 'success', data: [...] } }
-      categories.value = (response as any).data.data || [];
+      categories.value =
+        (responseAny.data as { status: string; data: NewsCategory[] }).data ||
+        [];
     } else {
       // 处理标准 ApiResponse 格式 { success: true, data: [...] }
       categories.value = response.data || [];
     }
 
     console.log("成功获取分类:", categories.value.length, "个");
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("获取分类列表失败:", error);
-    message.error(error.message || "获取分类列表失败");
+    const errorMessage =
+      error instanceof Error ? error.message : "获取分类列表失败";
+    message.error(errorMessage);
   }
 };
 
@@ -681,7 +697,7 @@ const handleReset = () => {
 };
 
 // 处理表格变化
-const handleTableChange: TableProps["onChange"] = (pag, filters, sorter) => {
+const handleTableChange: TableProps["onChange"] = (pag) => {
   pagination.current = pag.current || 1;
   pagination.pageSize = pag.pageSize || 20;
   fetchNewsList();
@@ -715,9 +731,10 @@ const handleDelete = async (record: NewsItem) => {
     await adminNewsApi.deleteNews(id);
     message.success("删除成功");
     fetchNewsList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("删除失败:", error);
-    message.error(error.message || "删除失败");
+    const errorMessage = error instanceof Error ? error.message : "删除失败";
+    message.error(errorMessage);
   }
 };
 
@@ -728,8 +745,10 @@ const handleBatchDelete = async () => {
     message.success("批量删除成功");
     selectedRowKeys.value = [];
     fetchNewsList();
-  } catch (error: any) {
-    message.error(error.message || "批量删除失败");
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "批量删除失败";
+    message.error(errorMessage);
   }
 };
 
@@ -744,9 +763,10 @@ const handleToggleTop = async (record: NewsItem) => {
     await adminNewsApi.toggleTop(id);
     message.success(record.isTop ? "取消置顶成功" : "置顶成功");
     fetchNewsList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("置顶操作失败:", error);
-    message.error(error.message || "操作失败");
+    const errorMessage = error instanceof Error ? error.message : "操作失败";
+    message.error(errorMessage);
   }
 };
 
@@ -761,9 +781,10 @@ const handleTogglePublish = async (record: NewsItem) => {
     await adminNewsApi.togglePublish(id);
     message.success(record.status === "published" ? "下线成功" : "发布成功");
     fetchNewsList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("发布状态切换失败:", error);
-    message.error(error.message || "操作失败");
+    const errorMessage = error instanceof Error ? error.message : "操作失败";
+    message.error(errorMessage);
   }
 };
 
@@ -818,10 +839,11 @@ const clearSearchHistory = () => {
   message.success("搜索历史已清空");
 };
 
-const handleSearchHistory = (query: NewsQueryParams) => {
-  // 实现保存搜索历史逻辑
-  message.info("功能开发中...");
-};
+// 注释掉未使用的函数，避免警告
+// const handleSearchHistory = (query: NewsQueryParams) => {
+//   // 实现保存搜索历史逻辑
+//   message.info("功能开发中...");
+// };
 
 const removeSearchHistory = (index: number) => {
   searchHistory.value.splice(index, 1);
@@ -866,8 +888,10 @@ const handleBatchModalOk = async () => {
     batchModalVisible.value = false;
     selectedRowKeys.value = [];
     fetchNewsList();
-  } catch (error: any) {
-    message.error(error.message || "批量操作失败");
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "批量操作失败";
+    message.error(errorMessage);
   } finally {
     batchLoading.value = false;
   }

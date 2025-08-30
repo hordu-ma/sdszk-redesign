@@ -19,7 +19,7 @@
         target="_blank"
         class="school-logo"
       >
-        <img :src="school.logo" :alt="school.name">
+        <img :src="school.logo" :alt="school.name" />
         <p class="school-name">{{ school.name }}</p>
       </a>
     </div>

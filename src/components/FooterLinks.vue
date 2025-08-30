@@ -31,7 +31,7 @@
           src="../assets/qrcode.jpg"
           alt="微信公众号二维码"
           class="qrcode-img"
-        >
+        />
         <p>扫码关注公众号</p>
       </div>
     </div>

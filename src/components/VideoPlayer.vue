@@ -28,7 +28,7 @@
           min="0"
           max="100"
           @input="onProgressChange"
-        >
+        />
       </div>
 
       <div class="controls-buttons">
@@ -54,7 +54,7 @@
             max="1"
             step="0.1"
             @input="onVolumeChange"
-          >
+          />
         </div>
 
         <!-- 时间显示 -->

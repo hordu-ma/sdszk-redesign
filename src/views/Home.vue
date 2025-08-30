@@ -40,7 +40,7 @@
             :src="teacher.avatar"
             :alt="teacher.name"
             class="teacher-avatar"
-          >
+          />
           <h4>{{ teacher.name }}</h4>
           <p>{{ teacher.title }}</p>
           <p class="teacher-institution">
@@ -67,7 +67,7 @@
           target="_blank"
           class="school-logo"
         >
-          <img :src="school.logo" :alt="school.name">
+          <img :src="school.logo" :alt="school.name" />
           <p class="school-name">{{ school.name }}</p>
         </a>
       </div>
@@ -77,14 +77,14 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { resourceApi } from "@/api";
+// import { useRouter } from "vue-router";
+// import { resourceApi } from "@/api";
 import { debouncedGetResources } from "@/utils/homeApiHandler";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import NewsSection from "../components/home/NewsSection.vue";
 import InfoSection from "../components/home/InfoSection.vue";
 import BannerSection from "../components/home/BannerSection.vue";
-import SectionHeader from "../components/common/SectionHeader.vue";
+// import SectionHeader from "../components/common/SectionHeader.vue";
 
 const theories = ref([]);
 const researches = ref([]);
@@ -125,7 +125,7 @@ import school4Logo from "../assets/images/schools/school4.png";
 import school5Logo from "../assets/images/schools/school5.png";
 import school6Logo from "../assets/images/schools/school6.png";
 
-const router = useRouter();
+// const router = useRouter();
 
 // 模拟数据
 
@@ -213,24 +213,24 @@ const schools = ref([
   },
 ]);
 
-const relatedLinks = ref([
-  { id: 1, name: "教育部", url: "http://www.moe.gov.cn" },
-  { id: 2, name: "山东省教育厅", url: "http://edu.shandong.gov.cn" },
-  {
-    id: 3,
-    name: "北京高校思想政治理论课高精尖创新中心",
-    url: "http://www.bjcipt.org/",
-  },
-  {
-    id: 4,
-    name: "山东师范大学马克思主义学院",
-    url: "http://www.marx.sdnu.edu.cn/index.htm",
-  },
-]);
+// const relatedLinks = ref([
+//   { id: 1, name: "教育部", url: "http://www.moe.gov.cn" },
+//   { id: 2, name: "山东省教育厅", url: "http://edu.shandong.gov.cn" },
+//   {
+//     id: 3,
+//     name: "北京高校思想政治理论课高精尖创新中心",
+//     url: "http://www.bjcipt.org/",
+//   },
+//   {
+//     id: 4,
+//     name: "山东师范大学马克思主义学院",
+//     url: "http://www.marx.sdnu.edu.cn/index.htm",
+//   },
+// ]);
 
-const handleLogin = () => {
-  router.push("/login");
-};
+// const handleLogin = () => {
+//   router.push("/login");
+// };
 </script>
 
 <style scoped>

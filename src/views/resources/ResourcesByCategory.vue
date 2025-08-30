@@ -17,7 +17,7 @@
                     :src="resource.thumbnail"
                     :alt="resource.title"
                     class="resource-thumbnail"
-                  >
+                  />
                   <div v-else class="resource-placeholder">
                     <file-outlined />
                   </div>

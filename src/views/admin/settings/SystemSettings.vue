@@ -480,7 +480,7 @@
 
     <!-- 图片预览模态框 -->
     <a-modal v-model:open="previewVisible" :footer="null" :width="800">
-      <img alt="preview" style="width: 100%" :src="previewImage">
+      <img alt="preview" style="width: 100%" :src="previewImage" />
     </a-modal>
   </div>
 </template>

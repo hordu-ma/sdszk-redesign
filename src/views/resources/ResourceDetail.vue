@@ -73,7 +73,7 @@
                 :alt="resource.title"
                 class="media-player"
                 @error="handleMediaError"
-              >
+              />
             </div>
 
             <!-- PDF预览 -->

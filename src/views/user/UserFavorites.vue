@@ -142,7 +142,7 @@
                 :src="item.itemId.image"
                 :alt="item.itemId.title"
                 @error="handleImageError"
-              >
+              />
               <div v-else class="default-image">
                 <i :class="getTypeIcon(item.itemType)" />
               </div>

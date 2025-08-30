@@ -9,7 +9,7 @@
     <!-- 顶部Logo区域 -->
     <div class="sidebar-header">
       <div class="logo-container">
-        <img src="@/assets/images/logo.png" alt="Logo" class="logo">
+        <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
         <span v-if="!collapsed" class="logo-text">管理后台</span>
       </div>
     </div>

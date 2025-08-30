@@ -2,7 +2,7 @@
   <div class="auth-container">
     <el-card class="auth-card">
       <div class="auth-header">
-        <img src="@/assets/images/logo.png" alt="中心logo" class="auth-logo">
+        <img src="@/assets/images/logo.png" alt="中心logo" class="auth-logo" />
         <h2>{{ isLogin ? "用户登录" : "用户注册" }}</h2>
       </div>
 

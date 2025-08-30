@@ -9,7 +9,7 @@
     </h3>
     <div class="teachers-grid">
       <div v-for="teacher in teachers" :key="teacher.id" class="teacher-card">
-        <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar">
+        <img :src="teacher.avatar" :alt="teacher.name" class="teacher-avatar" />
         <h4>{{ teacher.name }}</h4>
         <p>{{ teacher.title }}</p>
         <p class="teacher-institution">

@@ -4,7 +4,7 @@
       <el-carousel height="400px">
         <el-carousel-item v-for="item in carouselItems" :key="item.id">
           <div class="carousel-item-wrapper" @click="handleCarouselClick(item)">
-            <img :src="item.image" :alt="item.title" class="carousel-img">
+            <img :src="item.image" :alt="item.title" class="carousel-img" />
             <div class="carousel-overlay">
               <div class="carousel-title">
                 {{ item.title }}
@@ -97,7 +97,7 @@ const fetchCenterNews = async () => {
 
     // 查找中心动态分类
     const centerCategory = categoryRes.data.find(
-      (cat: any) => cat.key === "center",
+      (cat: { key: string; _id: string }) => cat.key === "center",
     );
     if (!centerCategory) return;
 
@@ -111,24 +111,42 @@ const fetchCenterNews = async () => {
       console.log("获取到的新闻数据:", newsRes.data);
 
       // 更新中心动态新闻列表
-      centerNews.value = newsRes.data.map((item: any) => ({
-        id: item._id || item.id,
-        title: item.title,
-        date: item.publishDate
-          ? item.publishDate.slice(0, 10)
-          : item.createdAt
-            ? item.createdAt.slice(0, 10)
-            : "",
-      }));
+      centerNews.value = newsRes.data.map(
+        (item: {
+          _id?: string;
+          id?: string;
+          title: string;
+          publishDate?: string;
+          createdAt?: string;
+        }) => ({
+          id: item._id || item.id || "",
+          title: item.title,
+          date: item.publishDate
+            ? item.publishDate.slice(0, 10)
+            : item.createdAt
+              ? item.createdAt.slice(0, 10)
+              : "",
+        }),
+      );
 
       // 更新轮播图数据 - 使用获取到的新闻数据
-      carouselItems.value = newsRes.data.map((item: any, index: number) => ({
-        id: index + 1,
-        image:
-          item.thumbnail || defaultCarouselItems[index]?.image || carousel1,
-        title: item.title,
-        newsId: item._id || item.id, // 添加新闻ID用于跳转
-      }));
+      carouselItems.value = newsRes.data.map(
+        (
+          item: {
+            _id?: string;
+            id?: string;
+            title: string;
+            thumbnail?: string;
+          },
+          index: number,
+        ) => ({
+          id: index + 1,
+          image:
+            item.thumbnail || defaultCarouselItems[index]?.image || carousel1,
+          title: item.title,
+          newsId: item._id || item.id || "", // 添加新闻ID用于跳转
+        }),
+      );
 
       console.log("更新后的轮播图数据:", carouselItems.value);
       console.log("处理后的新闻数据:", centerNews.value);

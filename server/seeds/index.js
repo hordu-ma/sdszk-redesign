@@ -6,8 +6,8 @@ import News from "../models/News.js";
 import NewsCategory from "../models/NewsCategory.js";
 import Resource from "../models/Resource.js";
 import ResourceCategory from "../models/ResourceCategory.js";
-import Activity from "../models/Activity.js";
-import SiteSetting from "../models/SiteSetting.js";
+// import Activity from "../models/Activity.js";
+// import SiteSetting from "../models/SiteSetting.js";
 
 // 加载环境变量
 dotenv.config();
@@ -412,7 +412,7 @@ const createSampleNews = async () => {
 const seedDB = async () => {
   try {
     // 连接数据库
-    const conn = await connectDB();
+    await connectDB();
 
     // 删除所有现有数据
     await Promise.all([

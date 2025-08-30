@@ -118,7 +118,7 @@
               <a-card title="特色图片" size="small" class="setting-card">
                 <div class="image-upload">
                   <div v-if="formData.featuredImage" class="image-preview">
-                    <img :src="formData.featuredImage" alt="特色图片">
+                    <img :src="formData.featuredImage" alt="特色图片" />
                     <div class="image-actions">
                       <a-button
                         type="text"

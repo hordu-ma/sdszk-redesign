@@ -32,7 +32,7 @@
                       v-if="resource.thumbnail"
                       :src="resource.thumbnail"
                       :alt="resource.title"
-                    >
+                    />
                     <div v-else class="resource-icon">
                       <file-outlined
                         v-if="

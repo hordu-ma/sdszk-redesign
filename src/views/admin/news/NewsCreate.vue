@@ -122,7 +122,7 @@
                     :show-upload-list="false"
                   >
                     <div v-if="formData.featuredImage" class="image-preview">
-                      <img :src="formData.featuredImage" alt="特色图片">
+                      <img :src="formData.featuredImage" alt="特色图片" />
                       <div class="image-actions">
                         <a-button
                           type="text"

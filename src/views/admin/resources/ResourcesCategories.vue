@@ -145,7 +145,7 @@
               placeholder="请选择或输入颜色值"
               style="flex: 1"
             />
-            <input v-model="modalForm.color" type="color" class="color-input">
+            <input v-model="modalForm.color" type="color" class="color-input" />
           </div>
         </a-form-item>
 

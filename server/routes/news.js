@@ -4,7 +4,7 @@ import { checkPermission } from "../middleware/permissionMiddleware.js";
 import {
   validate,
   validateQuery,
-  validateParams,
+  // validateParams,
   schemas,
 } from "../middleware/validation.js";
 import {

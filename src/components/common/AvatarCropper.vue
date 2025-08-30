@@ -40,7 +40,7 @@
           }"
         >
           <div :style="previews.div" class="preview-content">
-            <img :src="imgSrc" :style="previews.img" class="preview-img">
+            <img :src="imgSrc" :style="previews.img" class="preview-img" />
           </div>
         </div>
       </div>
