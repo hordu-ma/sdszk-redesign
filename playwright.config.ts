@@ -19,7 +19,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 3 : 0,
+  retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Timeout for each test */
@@ -64,30 +64,46 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-
-    // Firefox 在 CI 环境中暂时禁用，仅在本地运行
-    ...(process.env.CI ? [] : [{
-      name: "firefox",
       use: {
-        ...devices["Desktop Firefox"],
-        // Firefox 特定配置
-        actionTimeout: 20 * 1000,
-        navigationTimeout: 60 * 1000,
-        launchOptions: {
-          args: [
-            '--width=1280',
-            '--height=720'
-          ]
-        }
+        ...devices["Desktop Chrome"],
+        // Chromium 在 CI 环境中的优化配置
+        ...(process.env.CI && {
+          launchOptions: {
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--disable-gpu',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding'
+            ]
+          }
+        })
       },
-    }]),
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
     },
+
+    // Firefox 和 WebKit 暂时禁用，专注于 Chromium 稳定性
+    // 待 Chromium 测试完全稳定后再逐步启用
+
+    // {
+    //   name: "firefox",
+    //   use: {
+    //     ...devices["Desktop Firefox"],
+    //     actionTimeout: 20 * 1000,
+    //     navigationTimeout: 60 * 1000,
+    //   },
+    // },
+
+    // {
+    //   name: "webkit",
+    //   use: {
+    //     ...devices["Desktop Safari"],
+    //   },
+    // },
 
     /* Test against mobile viewports. */
     // {

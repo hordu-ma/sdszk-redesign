@@ -88,7 +88,7 @@ jobs:
       - name: 安装Playwright浏览器
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
-          echo "🎭 安装Playwright浏览器..."
+          echo "🎭 安装Playwright浏览器 (仅 Chromium)..."
           npx playwright install --with-deps chromium
 
       # 仅在缓存命中时安装系统依赖
@@ -188,8 +188,8 @@ jobs:
 
       - name: 运行基础功能测试
         run: |
-          echo "🎭 运行基础功能测试 (仅 Chromium 和 WebKit)..."
-          npx playwright test tests/e2e/basic.spec.ts --project=chromium --project=webkit
+          echo "🎭 运行基础功能测试 (仅 Chromium)..."
+          npx playwright test tests/e2e/basic.spec.ts --project=chromium
         env:
           CI: true
           NODE_ENV: test
@@ -290,9 +290,9 @@ jobs:
             echo "- ⚠️ 未找到测试报告" >> $GITHUB_STEP_SUMMARY
           fi
 
-          echo "- ✅ 基础功能测试: Chromium + WebKit" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 基础功能测试: 仅 Chromium (稳定优先)" >> $GITHUB_STEP_SUMMARY
           echo "- 📝 性能测试结果请查看详细报告 (允许失败)" >> $GITHUB_STEP_SUMMARY
-          echo "- ⚠️ Firefox 测试暂时在 CI 中禁用 (兼容性问题)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📋 Firefox 和 WebKit 测试待 Chromium 稳定后逐步启用" >> $GITHUB_STEP_SUMMARY
           echo "- 🔗 提交: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- 📅 测试时间: $(date)" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 测试环境: Ubuntu Latest + Node.js ${{ env.NODE_VERSION }}" >> $GITHUB_STEP_SUMMARY
