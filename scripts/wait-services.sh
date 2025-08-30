@@ -157,7 +157,18 @@ _now() { date +%s; }
 
 elapsed() {
   local start="$1"
-  echo $(( $(_now) - start ))
+  local now
+  now=$(_now)
+  # 输入校验：确保 start 和 now 都是数字
+  if [[ -z "$start" ]] || ! [[ "$start" =~ ^[0-9]+$ ]]; then
+    echo "0"
+    return
+  fi
+  if [[ -z "$now" ]] || ! [[ "$now" =~ ^[0-9]+$ ]]; then
+    echo "0"
+    return
+  fi
+  echo $(( now - start ))
 }
 
 sleep_backoff() {
@@ -235,7 +246,14 @@ wait_target() {
   echo "[DEBUG] enter wait_target raw='$1' GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}'" >&2
   local target="$1"
   # (移除临时 wait_target 入口调试)
-  local start_ts=$(_now)
+  local start_ts
+  start_ts=$(_now)
+  # 校验 start_ts 是否为有效数字
+  if [[ -z "$start_ts" ]] || ! [[ "$start_ts" =~ ^[0-9]+$ ]]; then
+    echo "[ERROR] start_ts 无效: '$start_ts'" >&2
+    printf "%s|UNKNOWN|FAIL|Invalid timestamp\n" "$target"
+    return
+  fi
   local attempt=0
   local soft_warned=0
   local type desc host port raw_cmd
@@ -278,9 +296,9 @@ wait_target() {
     esac
 
     if [[ $res -eq 0 ]]; then
-      echo "[DEBUG] success target='${target}' attempt='${attempt}' elapsed='$(elapsed \"$start_ts\")'" >&2
       local took
       took=$(elapsed "$start_ts")
+      echo "[DEBUG] success target='${target}' attempt='${attempt}' elapsed='${took}'" >&2
       [[ $QUIET -eq 0 ]] && success "就绪: ${desc} (耗时 ${took}s)"
       printf "%s|%s|OK|%ss\n" "$target" "$type" "$took"
       return
@@ -307,6 +325,11 @@ wait_target() {
 # 并行调度
 # -----------------------------
 GLOBAL_START=$(_now)
+# 校验 GLOBAL_START 是否为有效数字
+if [[ -z "$GLOBAL_START" ]] || ! [[ "$GLOBAL_START" =~ ^[0-9]+$ ]]; then
+  error "GLOBAL_START 时间戳无效: '$GLOBAL_START'"
+  exit 1
+fi
 echo "[DEBUG] dispatcher start GLOBAL_START='${GLOBAL_START}' TARGETS='${TARGETS[*]}'" >&2
 RESULTS_FILE=$(mktemp -t wait-results-XXXX)
 # (移除临时 GLOBAL_START / RESULTS_FILE 调试)
