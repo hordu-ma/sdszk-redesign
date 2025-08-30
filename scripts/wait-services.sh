@@ -47,7 +47,7 @@ GLOBAL_TIMEOUT=180            # 全局超时时间（秒）
 PER_TARGET_SOFT_TIMEOUT=60    # 单个目标超过该时间提示警告（不立即失败）
 SLEEP_BASE=1                  # 退避起始秒
 SLEEP_MAX=5                   # 最大退避间隔
-PARALLELISM=4                 # 最大并行等待数量
+PARALLELISM=1                 # 最大并行等待数量 (调试阶段临时设为1，便于按顺序观察)
 VERBOSE=0                     # 详细日志
 SHOW_ENV_INFO=1               # 是否展示诊断环境信息
 
@@ -231,6 +231,8 @@ check_cmd() {
 # 单资源等待函数
 # -----------------------------
 wait_target() {
+  # 调试：进入 wait_target
+  echo "[DEBUG] enter wait_target raw='$1' GLOBAL_TIMEOUT='${GLOBAL_TIMEOUT}'" >&2
   local target="$1"
   # (移除临时 wait_target 入口调试)
   local start_ts=$(_now)
@@ -256,6 +258,7 @@ wait_target() {
   fi
 
   [[ $QUIET -eq 0 ]] && info "开始等待: ${desc}"
+  echo "[DEBUG] parsed target='${target}' type='${type}' host='${host:-}' port='${port:-}' max_deadline='${max_deadline}' start_ts='${start_ts}'" >&2
 
   while true; do
     local now=$(_now)
@@ -275,6 +278,7 @@ wait_target() {
     esac
 
     if [[ $res -eq 0 ]]; then
+      echo "[DEBUG] success target='${target}' attempt='${attempt}' elapsed='$(elapsed \"$start_ts\")'" >&2
       local took
       took=$(elapsed "$start_ts")
       [[ $QUIET -eq 0 ]] && success "就绪: ${desc} (耗时 ${took}s)"
@@ -289,6 +293,7 @@ wait_target() {
     local e
     e=$(elapsed "$start_ts")
     if (( e > PER_TARGET_SOFT_TIMEOUT && soft_warned == 0 )); then
+      echo "[DEBUG] soft-timeout warn target='${target}' elapsed='${e}'" >&2
       warn "资源仍未就绪: ${desc} (> ${PER_TARGET_SOFT_TIMEOUT}s)"
       soft_warned=1
     fi
@@ -302,6 +307,7 @@ wait_target() {
 # 并行调度
 # -----------------------------
 GLOBAL_START=$(_now)
+echo "[DEBUG] dispatcher start GLOBAL_START='${GLOBAL_START}' TARGETS='${TARGETS[*]}'" >&2
 RESULTS_FILE=$(mktemp -t wait-results-XXXX)
 # (移除临时 GLOBAL_START / RESULTS_FILE 调试)
 pids=()
@@ -312,6 +318,7 @@ pid_targets=""
 launch_wait() {
   local t="$1"
   # (移除临时 launch_wait 调试)
+  echo "[DEBUG] launch_wait t='$t'" >&2
   wait_target "$t" >>"$RESULTS_FILE" &
   local pid=$!
   pids+=("$pid")
@@ -350,6 +357,8 @@ echo -e "${BOLD}等待结果汇总:${RESET}"
 printf "%-40s | %-8s | %-6s | %s\n" "Resource" "Type" "Status" "Info"
 printf "%-40s-+-%-8s-+-%-6s-+-%s\n" "----------------------------------------" "--------" "------" "------------------------------"
 
+echo "[DEBUG] dumping RESULTS_FILE at end (path='${RESULTS_FILE}')" >&2
+cat "$RESULTS_FILE" >&2 || echo "[DEBUG] unable to cat results file" >&2
 while IFS='|' read -r raw type status info; do
   [[ -z "$raw" ]] && continue
   pad_raw="$raw"
