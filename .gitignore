@@ -204,3 +204,6 @@ ehthumbs.db
 .env.production
 pm2.config.js
 ecosystem.config.js
+
+# Runtime artifacts
+.pids/

@@ -137,50 +137,67 @@ const mapBackendToFrontend = (data) => {
 
 // 获取资源列表
 export const getResourceList = async (req, res) => {
+  console.log("--- [getResourceList] Invoked ---");
   try {
     const { category, page = 1, limit = 10 } = req.query;
-    let query = {};
+    let query = { isPublished: true };
+
+    console.log(
+      `[getResourceList] Initial query: ${JSON.stringify(query)}, Category param: ${category}`,
+    );
 
     if (category) {
       if (mongoose.Types.ObjectId.isValid(category)) {
-        // 如果是有效的ObjectId，直接使用
         query.category = new mongoose.Types.ObjectId(category);
       } else {
-        // 如果不是ObjectId，尝试通过key查找分类
+        console.log(
+          `[getResourceList] Category '${category}' is not an ObjectId, searching by key...`,
+        );
         const categoryDoc = await ResourceCategory.findOne({ key: category });
         if (categoryDoc) {
           query.category = categoryDoc._id;
+          console.log(
+            `[getResourceList] Found category '${category}' with ID: ${categoryDoc._id}`,
+          );
         } else {
-          // 如果找不到分类，返回空结果而不是错误
+          console.log(
+            `[getResourceList] Category key '${category}' not found. Returning empty array.`,
+          );
           return response.paginated(
             res,
             [],
-            {
-              page: parseInt(page),
-              limit: parseInt(limit),
-              total: 0,
-            },
+            { page: parseInt(page), limit: parseInt(limit), total: 0 },
             "获取资源列表成功",
           );
         }
       }
     }
 
+    console.log(
+      `[getResourceList] Final query before DB find: ${JSON.stringify(query)}`,
+    );
+
     const resources = await Resource.find(query)
       .select(
-        "title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType",
+        "title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType publishDate",
       ) // 限制返回字段
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
       .lean(); // 使用 lean() 提高性能
 
+    console.log(
+      `[getResourceList] DB find returned ${resources.length} documents.`,
+    );
+
     const total = await Resource.countDocuments(query);
+    console.log(`[getResourceList] DB countDocuments returned ${total}.`);
 
     // 应用字段映射：后端 -> 前端
     const mappedResources = resources.map((resource) =>
       mapBackendToFrontend(resource),
     );
+    console.log("[getResourceList] Backend to frontend mapping completed.");
 
     return response.paginated(
       res,
@@ -193,6 +210,7 @@ export const getResourceList = async (req, res) => {
       "获取资源列表成功",
     );
   } catch (err) {
+    console.error("--- [getResourceList] UNHANDLED ERROR ---", err);
     return response.serverError(res, "获取资源列表失败", err);
   }
 };
