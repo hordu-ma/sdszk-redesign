@@ -105,14 +105,14 @@ jobs:
 
           # 使用简化的服务等待脚本
           echo "⏳ 等待依赖服务就绪..."
-          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
+          bash scripts/ci/wait-services-simple.sh --timeout 120 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
           echo "✅ 基础依赖服务全部就绪"
 
           # 深度验证（保留原有详细检测，便于诊断）
-          ./scripts/test-mongodb.sh
-          ./scripts/test-redis.sh
+          ./scripts/testing/test-mongodb.sh
+          ./scripts/testing/test-redis.sh
 
       - name: 代码风格检查
         run: |
@@ -355,14 +355,14 @@ jobs:
 
           # 使用简化的服务等待脚本
           echo "⏳ 等待依赖服务就绪..."
-          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
+          bash scripts/ci/wait-services-simple.sh --timeout 120 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
           echo "✅ 基础依赖服务全部就绪"
 
           # 深度验证（保持详细诊断）
-          ./scripts/test-mongodb.sh
-          ./scripts/test-redis.sh
+          ./scripts/testing/test-mongodb.sh
+          ./scripts/testing/test-redis.sh
 
       - name: 启动并验证服务
         run: |
@@ -380,8 +380,8 @@ jobs:
           npm run wait-on -- -t 180000 http://localhost:5173 http://localhost:3000/api/health
           echo "✅ 前端和后端服务已就绪"
           # 再次确认数据库服务
-          ./scripts/test-mongodb.sh
-          ./scripts/test-redis.sh
+          ./scripts/testing/test-mongodb.sh
+          ./scripts/testing/test-redis.sh
 
       - name: 运行E2E测试
         run: |

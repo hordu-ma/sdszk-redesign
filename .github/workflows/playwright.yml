@@ -147,15 +147,15 @@ jobs:
           docker logs $(docker ps -q --filter "ancestor=redis:7.2-alpine") --tail 15 2>/dev/null || echo "无法获取Redis日志"
 
           # 使用简化的服务等待脚本
-          bash scripts/wait-services-simple.sh --timeout 180 --verbose \
+          bash scripts/ci/wait-services-simple.sh --timeout 180 --verbose \
             mongo://localhost:27017 \
             redis://localhost:6379
 
           echo "✅ 基础依赖服务全部就绪，开始验证深度连接..."
 
           # 深度探活（脚本包含读写/命令验证）
-          ./scripts/test-mongodb.sh
-          REDIS_HOST=localhost VERBOSE=1 ./scripts/test-redis-enhanced.sh
+          ./scripts/testing/test-mongodb.sh
+          REDIS_HOST=localhost VERBOSE=1 ./scripts/testing/test-redis-enhanced.sh
 
       # 启动并验证服务
       - name: 启动并验证应用服务
@@ -173,13 +173,13 @@ jobs:
           echo $! > /tmp/frontend.pid
 
           echo "⏳ 等待应用层服务 (HTTP) 就绪..."
-          bash scripts/wait-services-simple.sh --timeout 120 --verbose \
+          bash scripts/ci/wait-services-simple.sh --timeout 120 --verbose \
             http://localhost:3000/api/health \
             http://localhost:5173
 
           echo "✅ 应用服务可访问，执行二次依赖校验..."
-          ./scripts/test-mongodb.sh
-          REDIS_HOST=localhost ./scripts/test-redis-enhanced.sh
+          ./scripts/testing/test-mongodb.sh
+          REDIS_HOST=localhost ./scripts/testing/test-redis-enhanced.sh
 
           echo "📄 后端最近日志 (20行):"
           tail -20 backend.log || true
