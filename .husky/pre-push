@@ -1,15 +1,5 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Pre-push hook: 避免重复测试，CI/CD 中已包含完整测试
 echo "🚀 执行 pre-push 检查..."
-
-# 快速语法检查（可选）
 echo "📝 执行 TypeScript 类型检查..."
 npx vue-tsc --noEmit
-
-# 不运行 E2E 测试 - 由 CI/CD 负责
-# 原因：避免重复测试，节省本地开发时间
 echo "⏭️  跳过 E2E 测试 (将在 CI/CD 中执行)"
-
 echo "✅ Pre-push 检查完成 (仅类型检查，E2E 测试交给 CI/CD)"
