@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-commit hook: 只做快速检查，不运行耗时的 E2E 测试
+echo "🔍 执行 pre-commit 检查..."
+
+# 运行 lint-staged (lint + format)
+npx lint-staged
+
+echo "✅ Pre-commit 检查完成 (仅 lint/format，不包含 E2E 测试)"
