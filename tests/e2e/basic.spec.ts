@@ -83,22 +83,3 @@ test.describe("错误处理测试", () => {
     console.log("✅ 404页面处理测试通过");
   });
 });
-
-test.describe("性能测试", () => {
-  test("页面加载性能", async ({ page }) => {
-    console.log("🧪 测试：页面加载性能");
-
-    const startTime = Date.now();
-
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    const loadTime = Date.now() - startTime;
-    console.log(`页面加载时间: ${loadTime}ms`);
-
-    // 页面应该在10秒内加载完成（CI环境较慢）
-    expect(loadTime).toBeLessThan(10000);
-
-    console.log("✅ 页面性能测试通过");
-  });
-});

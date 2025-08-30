@@ -3,13 +3,13 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
-// 生产环境性能优化配置
+// 性能优化配置 - 适用于开发和生产环境
 export default defineConfig({
   plugins: [
     vue({
       template: {
         compilerOptions: {
-          // 生产环境优化
+          // 开发和生产环境优化
           hoistStatic: true,
           cacheHandlers: true,
         },
@@ -79,7 +79,10 @@ export default defineConfig({
 
   // 开发服务器优化
   server: {
-    open: true,
+    open: false, // 测试环境不自动打开浏览器
+    host: true, // 监听所有地址
+    port: 5173,
+    strictPort: true, // 端口被占用时直接失败
     // 热更新优化
     hmr: {
       overlay: false,
@@ -90,6 +93,7 @@ export default defineConfig({
         target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
+        timeout: 10000, // 10秒超时
       },
     },
   },
@@ -117,6 +121,23 @@ export default defineConfig({
       "axios",
       "element-plus",
       "ant-design-vue",
+      "dayjs",
+      "echarts",
     ],
+    // 强制重新构建依赖
+    force: false,
+  },
+
+  // 环境变量配置
+  define: {
+    __VUE_OPTIONS_API__: true,
+    __VUE_PROD_DEVTOOLS__: false,
+    __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+  },
+
+  // 开发模式下的性能优化
+  esbuild: {
+    // 开发模式下保留调试信息，但优化性能
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
 });

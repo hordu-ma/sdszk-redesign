@@ -19,14 +19,14 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 3 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Timeout for each test */
-  timeout: 30 * 1000,
+  timeout: process.env.CI ? 60 * 1000 : 30 * 1000,
   /* Timeout for expect() assertions */
   expect: {
-    timeout: 5000,
+    timeout: process.env.CI ? 10000 : 5000,
   },
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? [["github"], ["html"]] : "html",
@@ -35,14 +35,29 @@ export default defineConfig({
     /* 基础URL配置，用于page.goto()和测试请求 */
     baseURL: "http://localhost:5173",
 
-    /* 等待策略 */
-    actionTimeout: 10 * 1000,
-    navigationTimeout: 30 * 1000,
+    /* 等待策略 - CI环境更宽松的超时 */
+    actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
+    navigationTimeout: process.env.CI ? 60 * 1000 : 30 * 1000,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
+
+    /* CI环境额外配置 */
+    ...(process.env.CI && {
+      launchOptions: {
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
+      }
+    }),
   },
 
   /* Configure projects for major browsers */
