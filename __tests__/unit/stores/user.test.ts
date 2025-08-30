@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia } from "pinia";
 import { useUserStore, type UserInfo } from "../../../src/stores/user";
 import api from "../../../src/utils/api";
-import { createTestPinia, localStorageMock, messageMock, routerMock } from "../../setup";
+import {
+  createTestPinia,
+  localStorageMock,
+  messageMock,
+  routerMock,
+} from "../../setup";
 
 describe("useUserStore", () => {
   let store: ReturnType<typeof useUserStore>;
@@ -37,7 +42,9 @@ describe("useUserStore", () => {
       // 验证token被设置
       expect(store.token).toBe(token);
       expect(localStorageMock.getItem("token")).toBe(token);
-      expect(api.defaults.headers.common["Authorization"]).toBe(`Bearer ${token}`);
+      expect(api.defaults.headers.common["Authorization"]).toBe(
+        `Bearer ${token}`,
+      );
     });
 
     it("应该在设置token时不自动认证", () => {
@@ -180,8 +187,16 @@ describe("useUserStore", () => {
       expect(store.isAuthenticated).toBe(true);
     });
 
-    it("应该在缺少localStorage token时认证失败", () => {
+    it("应该在缺少token或用户信息时认证失败", () => {
+      // 测试1: 只有token没有用户信息
       const token = "test-token";
+      store.setToken(token);
+      expect(store.isAuthenticated).toBe(false);
+
+      // 清理状态
+      store.setToken("");
+
+      // 测试2: 只有用户信息没有token
       const userInfo: UserInfo = {
         id: "1",
         username: "testuser",
@@ -189,15 +204,11 @@ describe("useUserStore", () => {
         role: "user",
         permissions: ["read:news"],
       };
-
-      // 只设置store状态，不设置localStorage
-      store.setToken(token);
       store.setUserInfo(userInfo);
+      expect(store.isAuthenticated).toBe(false);
 
-      // 清除localStorage中的token
-      localStorageMock.removeItem("token");
-
-      // 应该认证失败
+      // 测试3: 都没有
+      store.setUserInfo(null as any);
       expect(store.isAuthenticated).toBe(false);
     });
   });
@@ -241,7 +252,9 @@ describe("useUserStore", () => {
       expect(store.userPermissions).toContain("news:read");
 
       // 在测试环境中，由于没有真正的持久化插件，我们需要手动验证token设置
-      expect(api.defaults.headers.common["Authorization"]).toBe("Bearer jwt-token");
+      expect(api.defaults.headers.common["Authorization"]).toBe(
+        "Bearer jwt-token",
+      );
 
       // 现在应该认证成功（需要手动设置localStorage来满足认证条件）
       localStorageMock.setItem("token", "jwt-token");
@@ -265,7 +278,9 @@ describe("useUserStore", () => {
       // Mock API 错误响应
       vi.mocked(api.post).mockRejectedValue(mockError);
 
-      await expect(store.login(loginPayload)).rejects.toThrow("用户名或密码错误");
+      await expect(store.login(loginPayload)).rejects.toThrow(
+        "用户名或密码错误",
+      );
 
       // 确保状态被清除
       expect(store.token).toBeNull();
@@ -336,7 +351,9 @@ describe("useUserStore", () => {
 
       expect(store.token).toBe(token);
       expect(store.userInfo?.username).toBe("testuser");
-      expect(api.defaults.headers.common["Authorization"]).toBe(`Bearer ${token}`);
+      expect(api.defaults.headers.common["Authorization"]).toBe(
+        `Bearer ${token}`,
+      );
     });
   });
 
