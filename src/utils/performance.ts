@@ -79,19 +79,21 @@ class PerformanceMonitor {
         this.metrics.largestContentfulPaint = entry.startTime;
         break;
 
-      case "first-input":
+      case "first-input": {
         const fidEntry = entry as PerformanceEventTiming;
         this.metrics.firstInputDelay =
           fidEntry.processingStart - fidEntry.startTime;
         break;
+      }
 
-      case "layout-shift":
+      case "layout-shift": {
         const clsEntry = entry as any;
         if (!clsEntry.hadRecentInput) {
           this.metrics.cumulativeLayoutShift =
             (this.metrics.cumulativeLayoutShift || 0) + clsEntry.value;
         }
         break;
+      }
     }
   }
 

@@ -4,7 +4,7 @@
       <a-button
         type="text"
         class="sidebar-toggle"
-        @click="emit('toggle-sidebar')"
+        @click="emit('toggleSidebar')"
       >
         <template #icon>
           <menu-fold-outlined v-if="!collapsed" />
@@ -82,7 +82,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: "toggle-sidebar"): void;
+  (e: "toggleSidebar"): void;
   (e: "logout"): void;
 }
 

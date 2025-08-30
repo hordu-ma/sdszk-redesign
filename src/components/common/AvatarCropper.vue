@@ -89,7 +89,7 @@ interface Props {
 
 interface Emits {
   (e: "update:visible", value: boolean): void;
-  (e: "crop-success", blob: Blob, dataUrl: string): void;
+  (e: "cropSuccess", blob: Blob, dataUrl: string): void;
 }
 
 const props = defineProps<Props>();
@@ -183,7 +183,7 @@ const handleCrop = () => {
 
   cropperRef.value.getCropBlob((blob: Blob) => {
     const dataUrl = URL.createObjectURL(blob);
-    emit("crop-success", blob, dataUrl);
+    emit("cropSuccess", blob, dataUrl);
     handleClose();
   });
 };
