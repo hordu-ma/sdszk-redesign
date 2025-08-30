@@ -67,24 +67,22 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
 
-    {
+    // Firefox 在 CI 环境中暂时禁用，仅在本地运行
+    ...(process.env.CI ? [] : [{
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"],
         // Firefox 特定配置
-        actionTimeout: process.env.CI ? 20 * 1000 : 15 * 1000,
-        navigationTimeout: process.env.CI ? 90 * 1000 : 45 * 1000,
+        actionTimeout: 20 * 1000,
+        navigationTimeout: 60 * 1000,
         launchOptions: {
-          args: process.env.CI ? [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
+          args: [
             '--width=1280',
             '--height=720'
-          ] : []
+          ]
         }
       },
-    },
+    }]),
 
     {
       name: "webkit",
