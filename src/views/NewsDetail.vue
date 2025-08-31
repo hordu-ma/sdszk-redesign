@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { message } from "ant-design-vue";
 import { newsApi } from "@/api";
@@ -166,6 +166,18 @@ onMounted(() => {
     fetchNewsData(newsId.value);
   }
 });
+
+// 监听路由参数的变化
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      fetchNewsData(newId as string);
+      // 切换文章后滚动到页面顶部
+      window.scrollTo(0, 0);
+    }
+  },
+);
 </script>
 
 <style scoped>
