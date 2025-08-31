@@ -72,7 +72,7 @@ import { newsApi } from "@/api";
 import BreadcrumbNav from "../components/common/BreadcrumbNav.vue";
 import ArticleMeta from "../components/common/ArticleMeta.vue";
 import RelatedList from "../components/common/RelatedList.vue";
-import type { News, NewsResponse, NewsListResponse } from "@/types/news";
+import type { News } from "@/types/news";
 
 const route = useRoute();
 const newsId = computed(() => route.params.id as string);
