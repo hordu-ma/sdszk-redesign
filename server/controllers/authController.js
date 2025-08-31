@@ -342,7 +342,7 @@ export const protect = async (req, res, next) => {
     // 5) 将用户信息添加到请求对象中
     req.user = currentUser;
     next();
-  } catch (error) {
+  } catch {
     return next(new UnauthorizedError("Token无效或已过期"));
   }
 };

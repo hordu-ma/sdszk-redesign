@@ -39,9 +39,12 @@
         </a-card>
         <a-card v-else-if="resource">
           <!-- 媒体预览区域 -->
-          <div v-if="getMediaUrl(resource)" class="media-preview">
-            <!-- 视频播放器 -->
-            <div v-if="isVideoFile(resource)" class="video-container">
+          <div class="media-preview">
+            <!-- 视频文件优先显示播放器 -->
+            <div
+              v-if="getMediaUrl(resource) && isVideoFile(resource)"
+              class="video-container"
+            >
               <video
                 :src="getMediaUrl(resource)"
                 controls
@@ -53,8 +56,11 @@
               </video>
             </div>
 
-            <!-- 音频播放器 -->
-            <div v-else-if="isAudioFile(resource)" class="audio-container">
+            <!-- 音频文件显示播放器 -->
+            <div
+              v-else-if="getMediaUrl(resource) && isAudioFile(resource)"
+              class="audio-container"
+            >
               <audio
                 :src="getMediaUrl(resource)"
                 controls
@@ -66,8 +72,11 @@
               </audio>
             </div>
 
-            <!-- 图片预览 -->
-            <div v-else-if="isImageFile(resource)" class="image-container">
+            <!-- 图片文件显示图片 -->
+            <div
+              v-else-if="getMediaUrl(resource) && isImageFile(resource)"
+              class="image-container"
+            >
               <img
                 :src="getMediaUrl(resource)"
                 :alt="resource.title"
@@ -76,35 +85,52 @@
               />
             </div>
 
-            <!-- PDF预览 -->
-            <div v-else-if="isPdfFile(resource)" class="pdf-container">
-              <iframe
-                :src="getMediaUrl(resource)"
-                class="media-player pdf-viewer"
-                @error="handleMediaError"
-              >
-                您的浏览器不支持PDF预览，请点击下载按钮下载文件
-              </iframe>
+            <!-- 其他文件类型（如PDF、文档等）优先显示缩略图 -->
+            <div v-else-if="resource.thumbnail" class="thumbnail-container">
+              <img
+                :src="resource.thumbnail"
+                :alt="resource.title"
+                class="resource-thumbnail"
+                @error="handleThumbnailError"
+              />
+            </div>
+
+            <!-- 没有缩略图时显示默认图标 -->
+            <div v-else class="default-thumbnail">
+              <div class="file-type-icon">
+                <file-pdf-outlined v-if="isPdfFile(resource)" />
+                <video-camera-outlined v-else-if="isVideoFile(resource)" />
+                <audio-outlined v-else-if="isAudioFile(resource)" />
+                <picture-outlined v-else-if="isImageFile(resource)" />
+                <file-text-outlined v-else />
+              </div>
+              <span class="file-type-text">{{
+                getFileTypeText(resource)
+              }}</span>
             </div>
           </div>
 
           <div class="resource-info">
             <div class="resource-meta">
-              <span><user-outlined />
+              <span>
+                <user-outlined />
                 {{
                   typeof resource?.author === "string"
                     ? resource.author
                     : resource?.author?.name ||
                       resource?.createdBy?.name ||
                       "未知作者"
-                }}</span>
-              <span><calendar-outlined />
-                {{
-                  formatDate(resource?.publishDate || resource?.createdAt)
-                }}</span>
+                }}
+              </span>
+              <span>
+                <calendar-outlined />
+                {{ formatDate(resource?.publishDate || resource?.createdAt) }}
+              </span>
               <span><eye-outlined /> {{ resource?.viewCount || 0 }} 查看</span>
-              <span><download-outlined />
-                {{ resource?.downloadCount || 0 }} 下载</span>
+              <span>
+                <download-outlined />
+                {{ resource?.downloadCount || 0 }} 下载
+              </span>
             </div>
             <div
               v-if="resource?.description"
@@ -145,9 +171,12 @@
             <a-list :data-source="relatedResources" size="small">
               <template #renderItem="{ item }">
                 <a-list-item>
-                  <a @click="() => router.push(`/resources/detail/${item.id}`)">
+                  <router-link
+                    :to="`/resources/detail/${item.id}`"
+                    class="related-resource-link"
+                  >
                     {{ item.title }}
-                  </a>
+                  </router-link>
                 </a-list-item>
               </template>
             </a-list>
@@ -163,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { resourceApi } from "@/api";
 import type { Resource } from "@/api/modules/resources/index";
@@ -174,6 +203,11 @@ import {
   UserOutlined,
   CalendarOutlined,
   EyeOutlined,
+  FilePdfOutlined,
+  VideoCameraOutlined,
+  AudioOutlined,
+  PictureOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons-vue";
 
 const router = useRouter();
@@ -449,9 +483,38 @@ const handleMediaError = (event: Event) => {
   message.warning("媒体文件加载失败，请尝试下载查看");
 };
 
+// 缩略图相关函数
+const handleThumbnailError = (event: Event) => {
+  console.error("缩略图加载失败:", event);
+  // 缩略图加载失败时，用默认图标替换
+  const img = event.target as HTMLImageElement;
+  if (img && resource.value) {
+    // 清空 thumbnail 字段，让 v-else 显示默认图标
+    resource.value.thumbnail = "";
+  }
+};
+
+const getFileTypeText = (resource: Resource): string => {
+  if (isPdfFile(resource)) return "PDF文档";
+  if (isVideoFile(resource)) return "视频文件";
+  if (isAudioFile(resource)) return "音频文件";
+  if (isImageFile(resource)) return "图片文件";
+  return "文档资源";
+};
+
 onMounted(() => {
   fetchResource();
 });
+
+// 监听路由参数变化，实现页面内跳转更新
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      fetchResource();
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>
@@ -537,6 +600,55 @@ onMounted(() => {
 
     .comment-list {
       margin-top: 24px;
+    }
+  }
+
+  .related-resource-link {
+    color: #1890ff;
+    text-decoration: none;
+
+    &:hover {
+      color: #40a9ff;
+      text-decoration: underline;
+    }
+  }
+
+  .thumbnail-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 200px;
+  }
+
+  .resource-thumbnail {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+  }
+
+  .default-thumbnail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #8c8c8c;
+    text-align: center;
+
+    .file-type-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      color: #d9d9d9;
+    }
+
+    .file-type-text {
+      font-size: 14px;
+      color: #595959;
     }
   }
 }

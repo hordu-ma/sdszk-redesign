@@ -4,12 +4,7 @@ import ActivityLog from "../models/ActivityLog.js";
 import ResourceCategory from "../models/ResourceCategory.js";
 import response from "../utils/responseHelper.js";
 import mongoose from "mongoose";
-import {
-  AppError,
-  BadRequestError,
-  UnauthorizedError,
-  NotFoundError,
-} from "../utils/appError.js";
+import { BadRequestError, NotFoundError } from "../utils/appError.js";
 
 // 字段映射函数：前端字段名 -> 后端字段名
 const mapFrontendToBackend = (data) => {
@@ -62,10 +57,13 @@ const mapBackendToFrontend = (data) => {
     // 如果序列化失败，返回简化的对象
     mapped = {};
     for (const key in data) {
-      if (data.hasOwnProperty(key) && typeof data[key] !== "function") {
+      if (
+        Object.prototype.hasOwnProperty.call(data, key) &&
+        typeof data[key] !== "function"
+      ) {
         try {
           mapped[key] = JSON.parse(JSON.stringify(data[key]));
-        } catch (e) {
+        } catch {
           mapped[key] = data[key]?.toString() || data[key];
         }
       }
@@ -75,7 +73,6 @@ const mapBackendToFrontend = (data) => {
   // 首先处理_id到id的转换
   if (mapped._id !== undefined) {
     mapped.id = mapped._id.toString();
-    // 删除_id字段以避免冗余
     delete mapped._id;
   }
 
@@ -137,32 +134,18 @@ const mapBackendToFrontend = (data) => {
 
 // 获取资源列表
 export const getResourceList = async (req, res) => {
-  console.log("--- [getResourceList] Invoked ---");
   try {
     const { category, page = 1, limit = 10 } = req.query;
     let query = { isPublished: true };
-
-    console.log(
-      `[getResourceList] Initial query: ${JSON.stringify(query)}, Category param: ${category}`,
-    );
 
     if (category) {
       if (mongoose.Types.ObjectId.isValid(category)) {
         query.category = new mongoose.Types.ObjectId(category);
       } else {
-        console.log(
-          `[getResourceList] Category '${category}' is not an ObjectId, searching by key...`,
-        );
         const categoryDoc = await ResourceCategory.findOne({ key: category });
         if (categoryDoc) {
           query.category = categoryDoc._id;
-          console.log(
-            `[getResourceList] Found category '${category}' with ID: ${categoryDoc._id}`,
-          );
         } else {
-          console.log(
-            `[getResourceList] Category key '${category}' not found. Returning empty array.`,
-          );
           return response.paginated(
             res,
             [],
@@ -173,31 +156,21 @@ export const getResourceList = async (req, res) => {
       }
     }
 
-    console.log(
-      `[getResourceList] Final query before DB find: ${JSON.stringify(query)}`,
-    );
-
     const resources = await Resource.find(query)
       .select(
         "title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType publishDate",
-      ) // 限制返回字段
+      )
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .lean(); // 使用 lean() 提高性能
-
-    console.log(
-      `[getResourceList] DB find returned ${resources.length} documents.`,
-    );
+      .lean();
 
     const total = await Resource.countDocuments(query);
-    console.log(`[getResourceList] DB countDocuments returned ${total}.`);
 
     // 应用字段映射：后端 -> 前端
     const mappedResources = resources.map((resource) =>
       mapBackendToFrontend(resource),
     );
-    console.log("[getResourceList] Backend to frontend mapping completed.");
 
     return response.paginated(
       res,
@@ -210,7 +183,6 @@ export const getResourceList = async (req, res) => {
       "获取资源列表成功",
     );
   } catch (err) {
-    console.error("--- [getResourceList] UNHANDLED ERROR ---", err);
     return response.serverError(res, "获取资源列表失败", err);
   }
 };
@@ -222,6 +194,7 @@ export const getResourceById = async (req, res) => {
     if (!resource) {
       return response.notFound(res, "资源不存在");
     }
+
     // 更新浏览量
     resource.viewCount += 1;
     await resource.save();
@@ -243,7 +216,7 @@ export const createResource = async (req, res, next) => {
 
     // 设置创建者和作者信息
     mappedData.createdBy = req.user._id;
-    mappedData.author = req.user.name || req.user.username; // 使用用户名作为作者
+    mappedData.author = req.user.name || req.user.username;
 
     const resource = new Resource(mappedData);
     const savedResource = await resource.save();
@@ -376,13 +349,13 @@ export const togglePublishStatus = async (req, res, next) => {
     // 记录活动
     await ActivityLog.logActivity({
       user: req.user._id,
-      action: resource.isPublished ? "unpublish" : "publish",
+      action: resource.isPublished ? "publish" : "unpublish",
       entityType: "resource",
       entityId: resource._id,
       entityName: resource.title,
       details: {
         title: resource.title,
-        isPublished: !resource.isPublished,
+        isPublished: resource.isPublished,
       },
       ip: req.ip,
       userAgent: req.headers["user-agent"],
@@ -399,7 +372,6 @@ export const togglePublishStatus = async (req, res, next) => {
 };
 
 // 设置/取消设置为精选资源
-// 置顶/取消置顶资源
 export const toggleFeaturedStatus = async (req, res, next) => {
   try {
     const resource = await Resource.findById(req.params.id);

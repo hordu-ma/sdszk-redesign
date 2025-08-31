@@ -2,9 +2,7 @@
 import Activity from "../models/Activity.js";
 import ActivityLog from "../models/ActivityLog.js";
 import {
-  AppError,
   BadRequestError,
-  UnauthorizedError,
   NotFoundError,
   ForbiddenError,
 } from "../utils/appError.js";
