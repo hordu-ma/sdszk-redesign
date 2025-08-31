@@ -38,15 +38,12 @@ export const getAllSettings = async (req, res, next) => {
       data: groupedSettings,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };
 
 // 获取按组分类的设置
-export const getSettingsByGroup = async (req, res) => {
+export const getSettingsByGroup = async (req, res, next) => {
   try {
     const { group } = req.params;
     const cacheKey = `settings:group:${group}`;
@@ -65,10 +62,7 @@ export const getSettingsByGroup = async (req, res) => {
       data: settings,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };
 
@@ -88,16 +82,18 @@ export const getSetting = async (req, res, next) => {
       data: setting,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };
 
 // 更新设置
 export const updateSetting = async (req, res, next) => {
   try {
+    // 检查用户身份验证
+    if (!req.user) {
+      return next(new UnauthorizedError("请先登录"));
+    }
+
     const { key } = req.params;
     const { value, description, group, type } = req.body;
 
@@ -108,10 +104,7 @@ export const updateSetting = async (req, res, next) => {
       existingSetting.isProtected &&
       req.user.role !== "admin"
     ) {
-      return res.status(403).json({
-        status: "fail",
-        message: "此设置受保护，只有管理员可以修改",
-      });
+      return next(new ForbiddenError("此设置受保护，只有管理员可以修改"));
     }
 
     const setting = await SiteSetting.findOneAndUpdate(
@@ -153,23 +146,22 @@ export const updateSetting = async (req, res, next) => {
       data: setting,
     });
   } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
+    return next(new BadRequestError(err.message));
   }
 };
 
 // 批量更新设置
-export const bulkUpdateSettings = async (req, res) => {
+export const bulkUpdateSettings = async (req, res, next) => {
   try {
+    // 检查用户身份验证
+    if (!req.user) {
+      return next(new UnauthorizedError("请先登录"));
+    }
+
     const { settings } = req.body;
 
     if (!Array.isArray(settings)) {
-      return res.status(400).json({
-        status: "fail",
-        message: "请提供设置数组",
-      });
+      return next(new BadRequestError("请提供设置数组"));
     }
 
     const results = [];
@@ -238,32 +230,28 @@ export const bulkUpdateSettings = async (req, res) => {
       results,
     });
   } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
+    return next(new BadRequestError(err.message));
   }
 };
 
 // 删除设置
-export const deleteSetting = async (req, res) => {
+export const deleteSetting = async (req, res, next) => {
   try {
+    // 检查用户身份验证
+    if (!req.user) {
+      return next(new UnauthorizedError("请先登录"));
+    }
+
     const { key } = req.params;
 
     // 检查受保护的设置
     const existingSetting = await SiteSetting.findOne({ key });
     if (!existingSetting) {
-      return res.status(404).json({
-        status: "fail",
-        message: "设置不存在",
-      });
+      return next(new NotFoundError("设置不存在"));
     }
 
     if (existingSetting.isProtected) {
-      return res.status(403).json({
-        status: "fail",
-        message: "此设置受保护，不可删除",
-      });
+      return next(new ForbiddenError("此设置受保护，不可删除"));
     }
 
     await SiteSetting.deleteOne({ key });
@@ -293,16 +281,18 @@ export const deleteSetting = async (req, res) => {
       message: "设置已删除",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };
 
 // 重置为默认设置
-export const resetToDefault = async (req, res) => {
+export const resetToDefault = async (req, res, next) => {
   try {
+    // 检查用户身份验证
+    if (!req.user) {
+      return next(new UnauthorizedError("请先登录"));
+    }
+
     await SiteSetting.initializeDefaultSettings();
 
     // 记录活动
@@ -328,10 +318,7 @@ export const resetToDefault = async (req, res) => {
       message: "设置已重置为默认值",
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };
 
@@ -442,9 +429,6 @@ export const getPublicSettings = async (req, res, next) => {
       data: publicSettings,
     });
   } catch (err) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return next(new AppError(err.message, 500));
   }
 };

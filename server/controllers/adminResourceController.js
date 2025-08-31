@@ -67,6 +67,11 @@ export const getAdminResourceList = async (req, res) => {
       }
     }
 
+    // 处理资源类型筛选
+    if (type) {
+      query.resourceType = type;
+    }
+
     // 处理日期范围筛选
     if (dateRange && Array.isArray(dateRange) && dateRange.length === 2) {
       query.createdAt = {

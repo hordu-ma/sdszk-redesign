@@ -1,9 +1,7 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
 import { checkPermission } from "../middleware/permissionMiddleware.js";
-import News from "../models/News.js";
 import { catchAsync } from "../utils/catchAsync.js";
-import { NotFoundError } from "../utils/appError.js";
 import {
   getNewsList,
   getNewsById,

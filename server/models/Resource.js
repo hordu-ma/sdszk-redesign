@@ -27,6 +27,12 @@ const resourceSchema = new mongoose.Schema(
       ref: "ResourceCategory",
       required: true,
     },
+    resourceType: {
+      type: String,
+      enum: ["document", "video", "image", "audio", "other"],
+      default: "document",
+      index: true,
+    },
     videoUrl: {
       type: String,
       trim: true,

@@ -225,8 +225,10 @@ const createSampleResources = async () => {
     const sampleResources = [
       {
         title: "习近平新时代中国特色社会主义思想概论",
-        content: "<p>习近平新时代中国特色社会主义思想是当代中国马克思主义、21世纪马克思主义，是中华文化和中国精神的时代精华。</p>",
-        summary: "深入学习习近平新时代中国特色社会主义思想的核心要义和精神实质。",
+        content:
+          "<p>习近平新时代中国特色社会主义思想是当代中国马克思主义、21世纪马克思主义，是中华文化和中国精神的时代精华。</p>",
+        summary:
+          "深入学习习近平新时代中国特色社会主义思想的核心要义和精神实质。",
         category: categoryMap["theory"],
         author: "系统管理员",
         isPublished: true,
@@ -234,6 +236,7 @@ const createSampleResources = async () => {
         fileName: "习近平新时代中国特色社会主义思想概论.pdf",
         fileSize: 2048000,
         mimeType: "application/pdf",
+        resourceType: "document",
         createdBy: admin._id,
         updatedBy: admin._id,
         tags: ["习近平思想", "理论学习", "马克思主义"],
@@ -242,7 +245,8 @@ const createSampleResources = async () => {
       },
       {
         title: "思政课教学方法创新研究",
-        content: "<p>探索新时代思政课教学方法创新，提升思政课教学实效性和吸引力。</p>",
+        content:
+          "<p>探索新时代思政课教学方法创新，提升思政课教学实效性和吸引力。</p>",
         summary: "介绍思政课教学方法创新的理论与实践。",
         category: categoryMap["teaching"],
         author: "教学研究组",
@@ -251,6 +255,7 @@ const createSampleResources = async () => {
         fileName: "思政课教学方法创新研究.pdf",
         fileSize: 1536000,
         mimeType: "application/pdf",
+        resourceType: "document",
         createdBy: admin._id,
         updatedBy: admin._id,
         tags: ["教学方法", "课程创新", "教学研究"],
@@ -259,7 +264,8 @@ const createSampleResources = async () => {
       },
       {
         title: "《觉醒年代》经典片段赏析",
-        content: "<p>通过《觉醒年代》的经典片段，深入理解五四精神和爱国主义教育。</p>",
+        content:
+          "<p>通过《觉醒年代》的经典片段，深入理解五四精神和爱国主义教育。</p>",
         summary: "利用影视作品进行思政教育的典型案例。",
         category: categoryMap["video"],
         author: "影视教育组",
@@ -268,6 +274,7 @@ const createSampleResources = async () => {
         fileName: "觉醒年代经典片段.mp4",
         fileSize: 52428800,
         mimeType: "video/mp4",
+        resourceType: "video",
         videoUrl: "/uploads/videos/juexing-1.mp4",
         videoDuration: 1200,
         createdBy: admin._id,
@@ -278,10 +285,15 @@ const createSampleResources = async () => {
       },
     ];
 
-    console.log("准备创建的资源数据:", JSON.stringify(sampleResources, null, 2));
+    console.log(
+      "准备创建的资源数据:",
+      JSON.stringify(sampleResources, null, 2),
+    );
 
     // 创建资源
-    const createdResources = await Resource.insertMany(sampleResources, { ordered: true });
+    const createdResources = await Resource.insertMany(sampleResources, {
+      ordered: true,
+    });
     console.log(
       "成功创建示例资源:",
       createdResources.map((resource) => ({
