@@ -33,7 +33,7 @@
 
     <a-row :gutter="[24, 24]" class="resource-content">
       <!-- 资源详情 -->
-      <a-col :span="16">
+      <a-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
         <a-card v-if="loading">
           <a-skeleton active />
         </a-card>
@@ -165,7 +165,7 @@
       </a-col>
 
       <!-- 相关资源 -->
-      <a-col :span="8">
+      <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
         <a-card title="相关资源">
           <template v-if="relatedResources.length">
             <a-list :data-source="relatedResources" size="small">
@@ -649,6 +649,196 @@ watch(
     .file-type-text {
       font-size: 14px;
       color: #595959;
+    }
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .resource-detail {
+    padding: 12px;
+
+    .resource-content {
+      margin-top: 16px;
+    }
+
+    .media-preview {
+      margin-bottom: 16px;
+
+      .video-container,
+      .audio-container,
+      .image-container,
+      .pdf-container {
+        padding: 12px;
+      }
+
+      .media-player {
+        max-height: 300px;
+      }
+
+      .pdf-viewer {
+        height: 400px;
+      }
+    }
+
+    .resource-info {
+      .resource-meta {
+        margin-bottom: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        span {
+          margin-right: 0;
+          font-size: 12px;
+        }
+      }
+
+      .content {
+        margin: 12px 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .tags {
+        margin-top: 12px;
+      }
+    }
+
+    .comment-section {
+      margin-top: 16px;
+    }
+
+    .related-resource-link {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .resource-detail {
+    padding: 8px;
+
+    :deep(.ant-page-header) {
+      padding: 12px 0;
+
+      .ant-page-header-heading-title {
+        font-size: 16px;
+        line-height: 1.3;
+      }
+
+      .ant-page-header-heading-extra {
+        margin-top: 8px;
+      }
+
+      .ant-space {
+        flex-direction: column;
+        width: 100%;
+
+        .ant-space-item {
+          width: 100%;
+
+          .ant-btn {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .resource-content {
+      margin-top: 12px;
+    }
+
+    .media-preview {
+      margin-bottom: 12px;
+
+      .video-container,
+      .audio-container,
+      .image-container,
+      .pdf-container {
+        padding: 8px;
+      }
+
+      .media-player {
+        max-height: 250px;
+      }
+
+      .pdf-viewer {
+        height: 300px;
+      }
+    }
+
+    .resource-info {
+      .resource-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+
+        span {
+          font-size: 11px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+
+      .content {
+        margin: 10px 0;
+        font-size: 13px;
+      }
+
+      .tags {
+        margin-top: 10px;
+
+        .ant-tag {
+          font-size: 11px;
+          margin-bottom: 4px;
+        }
+      }
+    }
+
+    .thumbnail-container {
+      min-height: 150px;
+      padding: 12px;
+    }
+
+    .resource-thumbnail {
+      max-height: 200px;
+    }
+
+    .default-thumbnail {
+      .file-type-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+      }
+
+      .file-type-text {
+        font-size: 12px;
+      }
+    }
+
+    :deep(.ant-card) {
+      .ant-card-head {
+        padding: 12px 16px;
+
+        .ant-card-head-title {
+          font-size: 14px;
+        }
+      }
+
+      .ant-card-body {
+        padding: 12px 16px;
+      }
+    }
+
+    :deep(.ant-list-item) {
+      padding: 8px 0;
+    }
+
+    .related-resource-link {
+      font-size: 13px;
+      line-height: 1.3;
     }
   }
 }

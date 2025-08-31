@@ -4,7 +4,15 @@
       <h2>{{ categoryTitle }}</h2>
       <a-spin :spinning="loading">
         <a-row :gutter="[24, 24]">
-          <a-col v-for="resource in resources" :span="8" :key="resource.id">
+          <a-col
+            v-for="resource in resources"
+            :xs="24"
+            :sm="12"
+            :md="8"
+            :lg="8"
+            :xl="8"
+            :key="resource.id"
+          >
             <a-card
               hoverable
               class="resource-card"
@@ -96,6 +104,58 @@ onMounted(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .resources-by-category {
+    padding: 12px;
+  }
+
+  .resources-by-category h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .resource-card {
+    margin-bottom: 16px;
+  }
+
+  .resource-cover {
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .resources-by-category {
+    padding: 8px;
+  }
+
+  .resources-by-category h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .resource-cover {
+    height: 140px;
+  }
+
+  .resource-placeholder .anticon {
+    font-size: 36px;
+  }
+
+  .resource-card :deep(.ant-card-meta-title) {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .resource-description {
+    font-size: 12px;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
 }
 
 .resource-card {

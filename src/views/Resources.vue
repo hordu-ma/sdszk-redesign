@@ -20,7 +20,15 @@
       <div class="resources-list">
         <a-spin :spinning="loading">
           <a-row :gutter="[24, 24]">
-            <a-col v-for="resource in resources" :span="8" :key="resource.id">
+            <a-col
+              v-for="resource in resources"
+              :xs="24"
+              :sm="12"
+              :md="8"
+              :lg="8"
+              :xl="8"
+              :key="resource.id"
+            >
               <a-card
                 hoverable
                 class="resource-card"
@@ -62,19 +70,27 @@
                         v-html="truncateHtml(resource.description || '')"
                       />
                       <div class="resource-info">
-                        <span><user-outlined />
+                        <span>
+                          <user-outlined />
                           {{
                             typeof resource.author === "string"
                               ? resource.author
                               : resource.author?.name ||
                                 resource.createdBy?.name ||
                                 "Unknown"
-                          }}</span>
-                        <span><calendar-outlined />
-                          {{ formatDate(resource.publishDate) }}</span>
-                        <span><eye-outlined /> {{ resource.viewCount || 0 }}</span>
-                        <span><download-outlined />
-                          {{ resource.downloadCount || 0 }}</span>
+                          }}
+                        </span>
+                        <span>
+                          <calendar-outlined />
+                          {{ formatDate(resource.publishDate) }}
+                        </span>
+                        <span>
+                          <eye-outlined /> {{ resource.viewCount || 0 }}
+                        </span>
+                        <span>
+                          <download-outlined />
+                          {{ resource.downloadCount || 0 }}
+                        </span>
                       </div>
                     </div>
                   </template>
@@ -249,6 +265,92 @@ const truncateHtml = (html: string, maxLength: number = 100): string => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .resources-content {
+    padding: 12px;
+  }
+
+  .category-nav {
+    margin-bottom: 16px;
+    padding: 12px;
+  }
+
+  .resources-list {
+    margin-top: 16px;
+  }
+
+  .resource-card {
+    margin-bottom: 16px;
+  }
+
+  .resource-cover {
+    height: 160px;
+  }
+
+  .resource-info {
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .pagination-container {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .resources-content {
+    padding: 8px;
+  }
+
+  .category-nav {
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  .category-nav :deep(.ant-tabs-nav) {
+    margin-bottom: 8px;
+  }
+
+  .category-nav :deep(.ant-tabs-tab) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .resource-cover {
+    height: 140px;
+  }
+
+  .resource-icon {
+    font-size: 36px;
+  }
+
+  .resource-card :deep(.ant-card-meta-title) {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .resource-summary {
+    font-size: 12px;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .resource-info {
+    gap: 6px;
+    font-size: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resource-info span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 
 .category-nav {
