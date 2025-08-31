@@ -77,6 +77,19 @@
           </template>
         </el-dropdown>
         <router-link to="/ai" class="nav-item"> AI思政 </router-link>
+        <a
+          href="https://www.sdszk.cn/"
+          target="_blank"
+          class="nav-item"
+          style="
+            font-size: 14px;
+            color: #e0e0e0;
+            opacity: 0.8;
+            text-decoration: none;
+          "
+        >
+          旧版入口
+        </a>
       </nav>
 
       <!-- 搜索和登录区域 -->
@@ -255,6 +268,7 @@ const menuItems: MenuItem[] = [
     ],
   },
   { path: "/ai", name: "AI思政" },
+  { path: "https://www.sdszk.cn/", name: "旧版入口", external: true },
 ];
 
 // 处理登录相关
