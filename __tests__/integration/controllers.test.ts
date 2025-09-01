@@ -34,7 +34,7 @@ const mockResponse = () => {
 };
 
 describe("SiteSettingController", () => {
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
     // 启动内存中的MongoDB服务器
@@ -86,7 +86,7 @@ describe("SiteSettingController", () => {
 });
 
 describe("NewsCategoryController", () => {
-  let mongoServer;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
     // 启动内存中的MongoDB服务器
