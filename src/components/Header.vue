@@ -44,9 +44,6 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">
-          活动中心
-        </a>
         <el-dropdown trigger="hover" class="nav-dropdown">
           <router-link to="/resources" class="nav-item"> 资源中心 </router-link>
           <template #dropdown>
@@ -78,6 +75,9 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">
+          萌新磨课
+        </a>
         <router-link to="/ai" class="nav-item"> AI思政 </router-link>
         <a
           href="https://www.sdszk.cn/"
@@ -259,7 +259,6 @@ const menuItems: MenuItem[] = [
       { path: "/news?category=policy", name: "政策文件" },
     ],
   },
-  { path: "http://show.sdszk.cn/#/", name: "活动中心", external: true },
   {
     path: "/resources",
     name: "资源中心",
@@ -269,6 +268,7 @@ const menuItems: MenuItem[] = [
       { path: "/resources?category=video", name: "优课视窗" },
     ],
   },
+  { path: "http://show.sdszk.cn/#/", name: "萌新磨课", external: true },
   { path: "/ai", name: "AI思政" },
   { path: "https://www.sdszk.cn/", name: "旧版入口", external: true },
 ];

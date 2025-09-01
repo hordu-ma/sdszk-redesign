@@ -135,7 +135,7 @@ const routes: RouteRecordRaw[] = [
     name: "activities",
     component: () => import("../views/Activities.vue"),
     meta: {
-      title: "活动中心",
+      title: "萌新磨课",
       keepAlive: true,
     },
   },
