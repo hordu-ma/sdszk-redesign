@@ -2,7 +2,7 @@
   <div class="video-section">
     <h3>
       <i class="fas fa-video header-icon" />
-      <span class="title-text">影像思政</span>
+      <span class="title-text">优课视窗</span>
       <router-link to="/resources/video" class="more-link">
         更多<i class="fas fa-angle-right" />
       </router-link>
@@ -20,13 +20,6 @@
 
 <script setup lang="ts">
 import VideoPlayer from "../VideoPlayer.vue";
-
-interface Video {
-  id: number;
-  title: string;
-  url: string;
-  poster: string;
-}
 
 // 测试数据
 const videos = [

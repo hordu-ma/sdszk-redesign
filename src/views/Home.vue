@@ -6,11 +6,11 @@
 
     <info-section :theories="theories" :researches="researches" />
 
-    <!-- 影像思政组件 -->
+    <!-- 优课视窗组件 -->
     <div class="video-section">
       <h3>
         <i class="fas fa-video header-icon" />
-        <span class="title-text">影像思政</span>
+        <span class="title-text">优课视窗</span>
         <router-link to="/resources?category=video" class="more-link">
           更多<i class="fas fa-angle-right" />
         </router-link>
@@ -100,7 +100,7 @@ const fetchResourceBlock = async () => {
     const researchRes = await debouncedGetResources("teaching", 5);
     if (researchRes.success) researches.value = researchRes.data;
 
-    // 影像思政 - 使用防抖和缓存
+    // 优课视窗 - 使用防抖和缓存
     const videoRes = await debouncedGetResources("video", 6);
     if (videoRes.success) videos.value = videoRes.data;
   } catch (error) {

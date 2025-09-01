@@ -64,7 +64,7 @@ export const NEWS_CATEGORIES = [
 export const RESOURCE_CATEGORIES = [
   { key: "theory", name: "理论前沿" },
   { key: "teaching", name: "教学研究" },
-  { key: "video", name: "影像思政" },
+  { key: "video", name: "优课视窗" },
 ] as const;
 
 // 文件类型

@@ -44,7 +44,9 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">活动中心</a>
+        <a href="http://show.sdszk.cn/#/" target="_blank" class="nav-item">
+          活动中心
+        </a>
         <el-dropdown trigger="hover" class="nav-dropdown">
           <router-link to="/resources" class="nav-item"> 资源中心 </router-link>
           <template #dropdown>
@@ -70,7 +72,7 @@
                   to="/resources?category=video"
                   class="dropdown-link"
                 >
-                  影像思政
+                  优课视窗
                 </router-link>
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -264,7 +266,7 @@ const menuItems: MenuItem[] = [
     children: [
       { path: "/resources?category=theory", name: "理论前沿" },
       { path: "/resources?category=teaching", name: "教学研究" },
-      { path: "/resources?category=video", name: "影像思政" },
+      { path: "/resources?category=video", name: "优课视窗" },
     ],
   },
   { path: "/ai", name: "AI思政" },

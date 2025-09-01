@@ -74,7 +74,7 @@ const category = computed(
 const categoryTitle = computed(() => {
   if (category.value === "theory") return "理论前沿";
   if (category.value === "teaching") return "教学研究";
-  if (category.value === "video") return "影像思政";
+  if (category.value === "video") return "优课视窗";
   return "资源分类";
 });
 
