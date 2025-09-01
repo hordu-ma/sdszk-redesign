@@ -24,7 +24,13 @@
       "@/*": ["./src/*"]
     },
     "baseUrl": ".",
-    "types": ["vite/client", "vue", "element-plus/global", "node"]
+    "types": [
+      "vite/client",
+      "vue",
+      "element-plus/global",
+      "node",
+      "vitest/globals"
+    ]
   },
   "include": [
     "src/**/*.ts",
@@ -32,16 +38,10 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/env.d.ts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.spec.tsx",
-    "**/*.test.tsx",
-    "**/fixed-*.vue"
-  ],
+  "exclude": ["node_modules", "dist", "**/fixed-*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
