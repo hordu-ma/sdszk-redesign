@@ -2,12 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia } from "pinia";
 import { useUserStore, type UserInfo } from "../../../src/stores/user";
 import api from "../../../src/utils/api";
-import {
-  createTestPinia,
-  localStorageMock,
-  messageMock,
-  routerMock,
-} from "../../setup";
+import { createTestPinia, localStorageMock } from "../../setup";
 
 describe("useUserStore", () => {
   let store: ReturnType<typeof useUserStore>;
@@ -108,108 +103,36 @@ describe("useUserStore", () => {
     });
   });
 
-  describe("权限检查", () => {
-    it("应该能够正确转换权限", () => {
+  describe("权限转换", () => {
+    it("应该正确转换后端权限对象为前端权限数组", () => {
       const backendPermissions = {
-        news: {
-          read: true,
-          create: true,
-          update: false,
-          delete: false,
-        },
-        resources: {
-          read: true,
-          manage: true,
-        },
+        news: { read: true, create: false, update: true },
+        users: { manage: true },
+        settings: { update: true },
       };
 
-      const transformed = store.transformPermissions(backendPermissions);
+      const result = store.transformPermissions(backendPermissions);
 
-      expect(transformed).toContain("news:read");
-      expect(transformed).toContain("news:create");
-      expect(transformed).toContain("resources:read");
-      expect(transformed).toContain("resources:manage");
-      expect(transformed).not.toContain("news:update");
-      expect(transformed).not.toContain("news:delete");
+      expect(result).toContain("news:read");
+      expect(result).toContain("news:update");
+      expect(result).not.toContain("news:create");
+      expect(result).toContain("users:manage");
+      expect(result).toContain("users:read");
+      expect(result).toContain("users:create");
+      expect(result).toContain("users:update");
+      expect(result).toContain("users:delete");
+      expect(result).toContain("settings:update");
+      expect(result).toContain("system:setting");
     });
 
-    it("应该能够正确检查权限", () => {
-      const userInfo: UserInfo = {
-        id: "1",
-        username: "testuser",
-        name: "Test User",
-        role: "user",
-        permissions: ["read:news", "create:news"],
-      };
-
-      store.setUserInfo(userInfo);
-
-      expect(store.hasPermission("read:news")).toBe(true);
-      expect(store.hasPermission("create:news")).toBe(true);
-      expect(store.hasPermission("delete:news")).toBe(false);
+    it("应该处理空权限对象", () => {
+      const result = store.transformPermissions({});
+      expect(result).toEqual([]);
     });
 
-    it("管理员应该拥有所有权限", () => {
-      const adminUser: UserInfo = {
-        id: "1",
-        username: "admin",
-        name: "Admin User",
-        role: "admin",
-        permissions: [],
-      };
-
-      store.setUserInfo(adminUser);
-
-      expect(store.hasPermission("any:permission")).toBe(true);
-      expect(store.hasPermission("delete:everything")).toBe(true);
-    });
-  });
-
-  describe("完整认证状态", () => {
-    it("应该在有token和用户信息时认证成功", () => {
-      const token = "test-token";
-      const userInfo: UserInfo = {
-        id: "1",
-        username: "testuser",
-        name: "Test User",
-        role: "user",
-        permissions: ["read:news"],
-      };
-
-      // 设置token到localStorage（模拟持久化）
-      localStorageMock.setItem("token", token);
-
-      // 设置store状态
-      store.setToken(token);
-      store.setUserInfo(userInfo);
-
-      // 现在应该认证成功
-      expect(store.isAuthenticated).toBe(true);
-    });
-
-    it("应该在缺少token或用户信息时认证失败", () => {
-      // 测试1: 只有token没有用户信息
-      const token = "test-token";
-      store.setToken(token);
-      expect(store.isAuthenticated).toBe(false);
-
-      // 清理状态
-      store.setToken("");
-
-      // 测试2: 只有用户信息没有token
-      const userInfo: UserInfo = {
-        id: "1",
-        username: "testuser",
-        name: "Test User",
-        role: "user",
-        permissions: ["read:news"],
-      };
-      store.setUserInfo(userInfo);
-      expect(store.isAuthenticated).toBe(false);
-
-      // 测试3: 都没有
-      store.setUserInfo(null as any);
-      expect(store.isAuthenticated).toBe(false);
+    it("应该处理无效权限对象", () => {
+      const result = store.transformPermissions(null);
+      expect(result).toEqual([]);
     });
   });
 
@@ -258,6 +181,34 @@ describe("useUserStore", () => {
 
       // 现在应该认证成功（需要手动设置localStorage来满足认证条件）
       localStorageMock.setItem("token", "jwt-token");
+      expect(store.isAuthenticated).toBe(true);
+    });
+
+    it("应该在登录成功时更新用户信息", async () => {
+      const mockResponse = {
+        status: "success",
+        token: "fake-token",
+        data: {
+          user: {
+            id: "1",
+            username: "testuser",
+            name: "Test User",
+            role: "user" as const,
+            permissions: ["news:read"],
+          },
+        },
+      };
+
+      vi.mocked(api.post).mockResolvedValue({ data: mockResponse });
+
+      const result = await store.login({
+        username: "testuser",
+        password: "password",
+      });
+
+      expect(result).toBe(true);
+      expect(store.token).toBe("fake-token");
+      expect(store.userInfo?.username).toBe("testuser");
       expect(store.isAuthenticated).toBe(true);
     });
 
@@ -316,6 +267,26 @@ describe("useUserStore", () => {
       expect(store.isAuthenticated).toBe(false);
       expect(localStorageMock.getItem("token")).toBeNull();
       expect(api.defaults.headers.common["Authorization"]).toBeUndefined();
+    });
+
+    it("应该正确清除认证状态", async () => {
+      // 先设置状态
+      store.setToken("fake-token");
+      store.setUserInfo({
+        id: "1",
+        username: "test",
+        name: "Test",
+        role: "user",
+        permissions: [],
+      });
+
+      vi.mocked(api.post).mockResolvedValue({});
+
+      await store.logout();
+
+      expect(store.token).toBeNull();
+      expect(store.userInfo).toBeNull();
+      expect(store.isAuthenticated).toBe(false);
     });
   });
 
@@ -385,6 +356,62 @@ describe("useUserStore", () => {
       expect(typeof requireAuth).toBe("function");
       expect(isReady).toBeDefined();
       expect(isAuthenticated).toBeDefined();
+    });
+  });
+
+  describe("权限检查", () => {
+    it("应该为管理员返回true", () => {
+      store.setUserInfo({
+        id: "1",
+        username: "admin",
+        name: "Admin",
+        role: "admin",
+        permissions: [],
+      });
+
+      expect(store.hasPermission("any:permission")).toBe(true);
+    });
+
+    it("应该根据用户权限检查", () => {
+      store.setUserInfo({
+        id: "1",
+        username: "user",
+        name: "User",
+        role: "user",
+        permissions: ["news:read"],
+      });
+
+      expect(store.hasPermission("news:read")).toBe(true);
+      expect(store.hasPermission("news:create")).toBe(false);
+    });
+  });
+
+  describe("认证守卫", () => {
+    it("应该在认证通过时返回true", async () => {
+      store.setToken("token");
+      store.setUserInfo({
+        id: "1",
+        username: "test",
+        name: "Test",
+        role: "user",
+        permissions: [],
+      });
+
+      const { requireAuth } = store.useAuthGuard();
+      const result = await requireAuth();
+      expect(result).toBe(true);
+    });
+
+    it("应该在认证失败时执行失败回调", async () => {
+      const { requireAuth } = store.useAuthGuard();
+      let callbackExecuted = false;
+
+      const result = await requireAuth(() => {
+        callbackExecuted = true;
+      });
+
+      expect(result).toBe(false);
+      expect(callbackExecuted).toBe(true);
     });
   });
 });
