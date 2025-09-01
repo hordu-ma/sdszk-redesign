@@ -35,92 +35,79 @@ const shouldRetry = (error: AxiosError): boolean => {
   );
 };
 
-// 创建axios实例
-const api = axios.create({
-  baseURL: API_CONFIG.baseURL || (import.meta.env.DEV ? "" : "/"),
-  timeout: API_CONFIG.timeout,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true, // 允许跨域携带 cookie
-});
+export function createApi() {
+  const api = axios.create({
+    baseURL: API_CONFIG.baseURL || (import.meta.env.DEV ? "" : "/"),
+    timeout: API_CONFIG.timeout,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true, // 允许跨域携带 cookie
+  });
 
-// 调试信息
-console.log("🚀 API Configuration:");
-console.log(
-  "- baseURL:",
-  API_CONFIG.baseURL || (import.meta.env.DEV ? "(使用代理)" : "/"),
-);
-console.log("- timeout:", API_CONFIG.timeout);
-console.log("- Environment:", import.meta.env.MODE);
-console.log("- API_CONFIG:", API_CONFIG);
-
-// 请求拦截器：添加 token
-api.interceptors.request.use(
-  (config) => {
-    // 优先使用已设置的Authorization header（来自store的_setAuthToken方法）
-    // 只有在没有Authorization header时才从localStorage读取
-    if (!config.headers["Authorization"]) {
-      const token = localStorage.getItem("token");
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
+  // 请求拦截器：添加 token
+  api.interceptors.request.use(
+    (config) => {
+      if (!config.headers["Authorization"]) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          config.headers["Authorization"] = `Bearer ${token}`;
+        }
       }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
+
+  // 响应拦截器：处理错误和重试
+  api.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+      const config = error.config as RetryConfig;
+
+      if (shouldRetry(error)) {
+        config._retryCount = (config._retryCount || 0) + 1;
+
+        const delayTime = ERROR_CONFIG.retryDelay * config._retryCount;
+        await new Promise((resolve) => setTimeout(resolve, delayTime));
+
+        return api(config);
+      }
+
+      return Promise.reject(error);
+    },
+  );
+
+  // 添加响应转换器
+  api.interceptors.response.use((response) => {
+    if (response.config.responseType === "blob") {
+      return response.data;
     }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
 
-// 响应拦截器：处理错误和重试
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const config = error.config as RetryConfig;
+    const responseData = response.data;
 
-    if (shouldRetry(error)) {
-      config._retryCount = (config._retryCount || 0) + 1;
-
-      // 等待延迟时间
-      const delayTime = ERROR_CONFIG.retryDelay * config._retryCount;
-      await new Promise((resolve) => setTimeout(resolve, delayTime));
-
-      // 重试请求
-      return api(config);
+    if (responseData?.status === "error" && responseData?.message) {
+      const error = new Error(responseData.message);
+      (error as any).response = {
+        status: response.status,
+        data: {
+          message: responseData.message,
+          status: responseData.status,
+          code: responseData.code || "API_ERROR",
+        },
+      };
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
-  },
-);
+    return response;
+  });
 
-// 添加响应转换器
-api.interceptors.response.use((response) => {
-  // 如果响应是blob类型（文件下载），直接返回
-  if (response.config.responseType === "blob") {
-    return response.data;
-  }
+  setupInterceptors(api);
 
-  const responseData = response.data;
+  return api;
+}
 
-  // 如果响应包含status='error'且有message，则抛出错误
-  if (responseData?.status === "error" && responseData?.message) {
-    const error = new Error(responseData.message);
-    (error as any).response = {
-      status: response.status,
-      data: {
-        message: responseData.message,
-        status: responseData.status,
-        code: responseData.code || "API_ERROR",
-      },
-    };
-    return Promise.reject(error);
-  }
-
-  // 返回原始响应数据
-  return response;
-});
-
-// 设置其他拦截器
-setupInterceptors(api);
+const api = createApi();
 
 export default api;
 export { ApiResponse };

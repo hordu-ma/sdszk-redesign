@@ -29,9 +29,8 @@ interface ResourceQuery extends ResourceQueryParams {
 import type { Resource as ResourceType } from "@/api/modules/resources/index";
 import { ResourceService } from "@/services/resource.service";
 
-const resourceService = new ResourceService();
-
 export const useResourceStore = defineStore("resource", () => {
+  const resourceService = new ResourceService();
   // 状态
   const loading = ref(false);
   const items = ref<Resource[]>([]);
@@ -64,6 +63,11 @@ export const useResourceStore = defineStore("resource", () => {
   }));
 
   const hasSelected = computed(() => selectedResources.value.length > 0);
+
+  // 新增的计算属性
+  const totalPages = computed(() => Math.ceil(total.value / limit.value));
+  const hasMore = computed(() => page.value * limit.value < total.value);
+  const isEmpty = computed(() => items.value.length === 0);
 
   // 方法
   const fetchList = async (query?: Partial<ResourceQuery>) => {
@@ -244,6 +248,9 @@ export const useResourceStore = defineStore("resource", () => {
     recentlyDownloaded,
     pagination,
     hasSelected,
+    totalPages,
+    hasMore,
+    isEmpty,
 
     // 方法
     fetchList,

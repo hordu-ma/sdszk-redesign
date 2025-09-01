@@ -347,12 +347,14 @@ class PerformanceMonitor {
   }
 }
 
+// 导出性能监控相关功能
+export { PerformanceMonitor };
+
 // 创建全局性能监控实例 - 只在浏览器环境中创建
 const performanceMonitor =
   typeof window !== "undefined" ? new PerformanceMonitor() : null;
 
-// 导出性能监控相关功能
-export { performanceMonitor, PerformanceMonitor };
+export { performanceMonitor };
 
 // 便捷方法
 export const startRouteTimer = () => performanceMonitor?.startRouteChange();

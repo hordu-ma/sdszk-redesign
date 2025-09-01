@@ -18,7 +18,7 @@ const LOG_LEVELS: LogLevel = {
   ERROR: 3,
 };
 
-class Logger {
+export class Logger {
   private level: number;
   private isDevelopment: boolean;
 

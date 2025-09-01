@@ -9,9 +9,8 @@ import type {
 import { NewsService } from "@/services/news.service";
 import { useRecentlyViewed } from "@/composables/useRecentlyViewed";
 
-const newsService = new NewsService();
-
 export const useNewsStore = defineStore("news", () => {
+  const newsService = new NewsService();
   // 状态
   const loading = ref(false);
   const items = ref<News[]>([]);
