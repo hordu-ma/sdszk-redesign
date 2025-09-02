@@ -6,6 +6,7 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { createHtmlPlugin } from "vite-plugin-html";
 import viteCompression from "vite-plugin-compression";
+// 移除代理配置导入，在server配置中直接定义
 // import viteImagemin from "vite-plugin-imagemin";
 
 // https://vitejs.dev/config/
@@ -136,7 +137,33 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: "http://localhost:3000",
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
+          secure: false,
+          timeout: 10000,
+          configure: (proxy, _options) => {
+            proxy.on("error", (err, req, _res) => {
+              console.error("🚨 代理错误:", {
+                url: req.url,
+                method: req.method,
+                error: err.message,
+              });
+            });
+
+            proxy.on("proxyReq", (proxyReq, req, _res) => {
+              console.log("🔄 代理请求:", {
+                from: req.url,
+                to: `http://localhost:3000${req.url}`,
+                method: req.method,
+              });
+            });
+
+            proxy.on("proxyRes", (proxyRes, req, _res) => {
+              console.log("✅ 代理响应:", {
+                url: req.url,
+                status: proxyRes.statusCode,
+                statusMessage: proxyRes.statusMessage,
+              });
+            });
+          },
         },
       },
     },

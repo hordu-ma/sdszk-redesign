@@ -2,6 +2,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
+// 移除代理配置导入，在server配置中直接定义
 
 // 性能优化配置 - 适用于开发和生产环境
 export default defineConfig({
@@ -87,13 +88,38 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
-    // API代理配置
+    // API代理配置 - 直接定义避免环境变量加载问题
     proxy: {
       "/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
-        timeout: 10000, // 10秒超时
+        timeout: 10000,
+        configure: (proxy, _options) => {
+          proxy.on("error", (err, req, _res) => {
+            console.error("🚨 代理错误:", {
+              url: req.url,
+              method: req.method,
+              error: err.message,
+            });
+          });
+
+          proxy.on("proxyReq", (proxyReq, req, _res) => {
+            console.log("🔄 代理请求:", {
+              from: req.url,
+              to: `http://localhost:3000${req.url}`,
+              method: req.method,
+            });
+          });
+
+          proxy.on("proxyRes", (proxyRes, req, _res) => {
+            console.log("✅ 代理响应:", {
+              url: req.url,
+              status: proxyRes.statusCode,
+              statusMessage: proxyRes.statusMessage,
+            });
+          });
+        },
       },
     },
   },
@@ -138,6 +164,6 @@ export default defineConfig({
   // 开发模式下的性能优化
   esbuild: {
     // 开发模式下保留调试信息，但优化性能
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
   },
 });
