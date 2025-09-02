@@ -102,6 +102,7 @@ export const getAdminResourceList = async (req, res) => {
         categoryName: resourceObj.category?.name, // 添加分类名称
         isFeatured: resourceObj.featured, // 统一字段名
         fileType: resourceObj.mimeType, // 统一字段名
+        thumbnail: resourceObj.thumbnail, // 添加缩略图字段
       };
     });
 
@@ -143,6 +144,7 @@ export const getAdminResourceDetail = async (req, res) => {
       categoryName: resourceObj.category?.name,
       isFeatured: resourceObj.featured,
       fileType: resourceObj.mimeType,
+      thumbnail: resourceObj.thumbnail,
     };
 
     return response.success(res, transformedResource, "获取资源详情成功");
@@ -189,6 +191,7 @@ export const updateAdminResourceStatus = async (req, res) => {
       categoryName: resourceObj.category?.name,
       isFeatured: resourceObj.featured,
       fileType: resourceObj.mimeType,
+      thumbnail: resourceObj.thumbnail,
     };
 
     return response.success(res, transformedResource, "状态更新成功");
@@ -329,6 +332,7 @@ export const createAdminResource = async (req, res) => {
       categoryName: resourceObj.category?.name,
       isFeatured: resourceObj.featured,
       fileType: resourceObj.mimeType,
+      thumbnail: resourceObj.thumbnail,
     };
 
     return response.success(res, transformedResource, "资源创建成功", 201);
@@ -426,6 +430,7 @@ export const updateAdminResource = async (req, res) => {
       categoryName: resourceObj.category?.name,
       isFeatured: resourceObj.featured,
       fileType: resourceObj.mimeType,
+      thumbnail: resourceObj.thumbnail,
     };
 
     return response.success(res, transformedResource, "资源更新成功");

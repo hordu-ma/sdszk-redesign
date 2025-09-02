@@ -37,6 +37,7 @@ export interface ResourceItem {
   fileName: string;
   fileSize: number;
   fileType: string;
+  thumbnail?: string;
   type?: "document" | "video" | "image" | "audio" | "other";
   publishDate?: string;
   accessLevel?: "public" | "login" | "vip";
