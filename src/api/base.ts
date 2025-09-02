@@ -3,6 +3,7 @@ import type { ApiModuleConfig, ApiResponse } from "./types";
 import api from "@/utils/api"; // 使用默认API配置
 import type { ApiErrorResponse } from "@/types/error.types";
 import { handleApiError } from "@/utils/apiErrorHandler";
+import { getApiPrefix } from "@/config";
 
 export abstract class BaseApi {
   protected api: AxiosInstance;
@@ -21,11 +22,11 @@ export abstract class BaseApi {
   }
 
   protected getUrl(path: string): string {
-    return `${this.prefix}${path}`;
+    return `${getApiPrefix()}${this.prefix}${path}`;
   }
 
   protected async request<T>(
-    config: AxiosRequestConfig
+    config: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
       const fullUrl = this.getUrl(config.url || "");
@@ -67,7 +68,7 @@ export abstract class BaseApi {
 
   protected async get<T, P = unknown>(
     path: string,
-    config?: { params?: P }
+    config?: { params?: P },
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "GET",
@@ -78,7 +79,7 @@ export abstract class BaseApi {
 
   protected async post<T, D = unknown>(
     path: string,
-    data?: D
+    data?: D,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "POST",
@@ -89,7 +90,7 @@ export abstract class BaseApi {
 
   protected async put<T, D = unknown>(
     path: string,
-    data?: D
+    data?: D,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "PUT",
@@ -107,7 +108,7 @@ export abstract class BaseApi {
 
   protected async patch<T, D = unknown>(
     path: string,
-    data?: D
+    data?: D,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: "PATCH",

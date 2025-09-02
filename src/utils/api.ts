@@ -37,7 +37,7 @@ const shouldRetry = (error: AxiosError): boolean => {
 
 export function createApi() {
   const api = axios.create({
-    baseURL: API_CONFIG.baseURL || (import.meta.env.DEV ? "" : "/"),
+    baseURL: "", // 始终为空，让前端完全控制路径
     timeout: API_CONFIG.timeout,
     headers: {
       "Content-Type": "application/json",

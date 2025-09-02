@@ -1,27 +1,3 @@
-interface ImportMetaEnv {
-  VITE_APP_TITLE: string;
-  VITE_APP_DESC: string;
-  VITE_API_BASE_URL: string;
-  VITE_API_TIMEOUT: string;
-  VITE_UPLOAD_MAX_SIZE: string;
-  VITE_UPLOAD_ACCEPT_TYPES: string;
-  VITE_CACHE_ENABLED: string;
-  VITE_CACHE_TTL: string;
-  VITE_CACHE_MAX_SIZE: string;
-  VITE_PAGE_SIZE: string;
-  VITE_PAGE_SIZES: string;
-  VITE_APP_DEBUG: string;
-  VITE_ENABLE_LOGGER: string;
-  VITE_API_MOCK: string;
-  VITE_ENABLE_COMPRESSION?: string;
-  VITE_COMPRESSION_THRESHOLD?: string;
-}
-
-// 环境变量类型声明
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
 // 应用配置
 export const APP_CONFIG = {
   title: import.meta.env.VITE_APP_TITLE,
@@ -33,11 +9,19 @@ export const APP_CONFIG = {
 
 // API配置
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || "",
+  prefix: import.meta.env.VITE_API_PREFIX || "/api",
+  version: import.meta.env.VITE_API_VERSION || "",
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
+  baseURL: "", // 始终为空，让前端完全控制路径
   mock: import.meta.env.VITE_API_MOCK === "true",
   logger: import.meta.env.VITE_ENABLE_LOGGER === "true",
 } as const;
+
+// 计算完整的API前缀
+export const getApiPrefix = () => {
+  const { prefix, version } = API_CONFIG;
+  return version ? `${prefix}/${version}` : prefix;
+};
 
 // 缓存配置
 export const CACHE_CONFIG = {

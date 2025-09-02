@@ -11,15 +11,8 @@ declare module "*.vue" {
 }
 
 // 环境变量类型
-interface ImportMetaEnv {
-  readonly VITE_APP_TITLE: string;
-  readonly VITE_APP_API_URL: string;
-  readonly BASE_URL: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+// ImportMeta 类型定义已移至 src/env.d.ts 统一管理
+// 移除重复定义以避免类型冲突
 
 // Element Plus组件属性类型
 export type ElDropdownInstance = InstanceType<typeof ElDropdown>;

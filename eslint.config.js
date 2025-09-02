@@ -179,6 +179,15 @@ export default [
     },
   },
 
+  // 类型定义文件配置
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+    },
+  },
+
   // 忽略文件和目录
   {
     ignores: [
