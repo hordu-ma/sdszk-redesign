@@ -3,7 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { AppError, BadRequestError, NotFoundError } from "../utils/appError.js";
+import { BadRequestError, NotFoundError } from "../utils/appError.js";
 
 // 获取当前文件的目录路径
 const __filename = fileURLToPath(import.meta.url);
@@ -20,7 +20,7 @@ if (!fs.existsSync(absoluteUploadPath)) {
 
 // 配置存储
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function (_req, file, cb) {
     let targetPath = absoluteUploadPath;
 
     // 根据不同类型存放到不同子目录
@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
 
     cb(null, targetPath);
   },
-  filename: function (req, file, cb) {
+  filename: function (_req, file, cb) {
     // 获取文件扩展名
     const ext = path.extname(file.originalname);
     // 创建唯一的文件名: 时间戳-随机数-原始文件名
@@ -49,7 +49,7 @@ const storage = multer.diskStorage({
 });
 
 // 文件过滤器
-const fileFilter = (req, file, cb) => {
+const fileFilter = (_req, file, cb) => {
   // 接受的文件类型
   const allowedTypes = [
     "image/jpeg",
