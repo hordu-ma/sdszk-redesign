@@ -14,7 +14,7 @@
  */
 
 const fs = require('fs');
-const path = require('path');
+// path module not used - removed to fix warning
 const glob = require('glob');
 
 // 配置
@@ -181,7 +181,7 @@ function checkFileApiCalls(filePath) {
 /**
  * 检查是否使用了端点常量
  */
-function isUsingEndpointConstant(line, path) {
+function isUsingEndpointConstant(line) {
   // 检查是否包含端点常量的模式
   const constantPatterns = [
     /_ENDPOINTS\./,
@@ -231,7 +231,7 @@ function checkEndpointUsage(apiEndpoints, allFiles) {
           }
         });
       });
-    } catch (err) {
+    } catch {
       // 忽略读取错误，已在其他地方处理
     }
   });
@@ -369,7 +369,7 @@ function generateFixSuggestions() {
 
     const pathFixes = new Map();
     results.missingPrefix.forEach(item => {
-      const fixedPath = CONFIG.apiPrefix + item.path;
+      // Generate fixed path for tracking
       if (!pathFixes.has(item.path)) {
         pathFixes.set(item.path, []);
       }
@@ -397,7 +397,7 @@ function main() {
   console.log('🔍 API路径一致性验证工具\n');
 
   try {
-    const success = validateApiPaths();
+    validateApiPaths();
     const reportSuccess = generateReport();
 
     if (!reportSuccess) {
