@@ -53,16 +53,42 @@
               />
             </div>
 
-            <!-- PDF文件优先显示缩略图，点击查看完整PDF -->
+            <!-- 理论前沿和教学研究模块PDF文件：优先显示首页缩略图 -->
+            <div
+              v-else-if="
+                isPdfFile(resource) && isTheoryOrTeaching && resource.thumbnail
+              "
+              class="pdf-main-preview"
+              @contextmenu.prevent
+            >
+              <div class="pdf-thumbnail-main" @click="viewPdfResource">
+                <img
+                  :src="resource.thumbnail"
+                  :alt="resource.title + ' - PDF首页预览'"
+                  class="pdf-thumbnail-large"
+                  @error="handleThumbnailError"
+                />
+                <div class="pdf-read-overlay">
+                  <div class="read-prompt">
+                    <file-pdf-outlined class="pdf-large-icon" />
+                    <span class="read-text">点击阅读完整PDF</span>
+                    <div class="read-hint">在新窗口中打开</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 其他PDF文件显示缩略图 -->
             <div
               v-else-if="isPdfFile(resource) && resource.thumbnail"
               class="pdf-preview-container"
             >
-              <div class="pdf-thumbnail-wrapper" @click="viewResource">
+              <div class="pdf-thumbnail-wrapper" @click="viewPdfResource">
                 <img
                   :src="resource.thumbnail"
                   :alt="resource.title + ' - PDF首页'"
                   class="pdf-thumbnail"
+                  @error="handleThumbnailError"
                 />
                 <div class="pdf-overlay">
                   <file-pdf-outlined class="pdf-icon" />
@@ -71,20 +97,19 @@
               </div>
             </div>
 
-            <!-- PDF文件无缩略图时显示查看器 -->
+            <!-- PDF文件无缩略图时显示默认图标 -->
             <div
-              v-else-if="getMediaUrl(resource) && isPdfFile(resource)"
-              class="pdf-container"
+              v-else-if="isPdfFile(resource)"
+              class="pdf-no-thumbnail"
               @contextmenu.prevent
             >
-              <iframe
-                :src="getMediaUrl(resource)"
-                class="pdf-viewer"
-                frameborder="0"
-                @error="handleMediaError"
-              >
-                您的浏览器不支持PDF查看，请点击查看按钮打开PDF
-              </iframe>
+              <div class="pdf-default-view" @click="viewPdfResource">
+                <file-pdf-outlined class="pdf-default-icon" />
+                <div class="pdf-info">
+                  <h3>{{ resource.title }}</h3>
+                  <p>点击在新窗口中阅读PDF文档</p>
+                </div>
+              </div>
             </div>
 
             <!-- 音频文件显示播放器 -->
@@ -514,6 +539,30 @@ const isPdfFile = (resource: Resource): boolean => {
   );
 };
 
+// 判断是否为理论前沿或教学研究模块
+const isTheoryOrTeaching = computed(() => {
+  if (!resource.value) return false;
+
+  // 检查路由参数中的category
+  const categoryFromRoute = route.query.category;
+  if (["theory", "teaching"].includes(categoryFromRoute as string)) {
+    return true;
+  }
+
+  // 检查资源对象的category
+  if (resource.value.category) {
+    const categoryKey =
+      typeof resource.value.category === "string"
+        ? resource.value.category
+        : resource.value.category.key;
+    if (["theory", "teaching"].includes(categoryKey)) {
+      return true;
+    }
+  }
+
+  return false;
+});
+
 // 判断是否为禁用下载的资源（包括理论前沿和教学研究）
 const isDownloadDisabled = computed(() => {
   if (!resource.value) return false;
@@ -549,7 +598,11 @@ const isDownloadDisabled = computed(() => {
 
 const handleMediaError = (event: Event) => {
   console.error("媒体加载失败:", event);
-  message.warning("媒体文件加载失败，请尝试下载查看");
+  if (isDownloadDisabled.value) {
+    message.warning("媒体文件加载失败，请稍后重试");
+  } else {
+    message.warning("媒体文件加载失败，请尝试下载查看");
+  }
 };
 
 // 查看资源（点击缩略图时）
@@ -564,6 +617,35 @@ const viewResource = () => {
 
   // 在新窗口打开文件进行查看
   window.open(url, "_blank");
+};
+
+// 专门用于PDF资源的查看函数
+const viewPdfResource = () => {
+  if (!resource.value) return;
+
+  const url = getMediaUrl(resource.value);
+  if (!url) {
+    message.warning("PDF文件不可用");
+    return;
+  }
+
+  // 更新查看次数
+  if (resource.value.viewCount !== undefined) {
+    resource.value.viewCount += 1;
+  }
+
+  // 在新窗口打开PDF进行阅读，禁用下载功能
+  const newWindow = window.open(url, "_blank");
+  if (newWindow) {
+    // 尝试禁用右键菜单（部分浏览器支持）
+    newWindow.onload = () => {
+      try {
+        newWindow.document.oncontextmenu = () => false;
+      } catch {
+        // 跨域限制，忽略错误
+      }
+    };
+  }
 };
 
 // 缩略图相关函数
@@ -761,6 +843,90 @@ watch(
     }
   }
 
+  // 理论前沿和教学研究模块的PDF主要展示区域
+  .pdf-main-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 400px;
+  }
+
+  .pdf-thumbnail-main {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    width: 100%;
+
+    &:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+
+      .pdf-read-overlay {
+        opacity: 1;
+      }
+    }
+  }
+
+  .pdf-thumbnail-large {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .pdf-read-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 77, 79, 0.9),
+      rgba(255, 107, 107, 0.9)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .read-prompt {
+    text-align: center;
+
+    .pdf-large-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .read-text {
+      font-size: 20px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .read-hint {
+      font-size: 14px;
+      opacity: 0.9;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  // 其他PDF文件的预览容器
   .pdf-preview-container {
     display: flex;
     justify-content: center;
@@ -821,6 +987,50 @@ watch(
       font-size: 16px;
       font-weight: 500;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  // 无缩略图时的PDF默认展示
+  .pdf-no-thumbnail {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 32px;
+    min-height: 300px;
+  }
+
+  .pdf-default-view {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 24px;
+    border-radius: 8px;
+
+    &:hover {
+      background: rgba(255, 77, 79, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .pdf-default-icon {
+      font-size: 72px;
+      color: #ff4d4f;
+      margin-bottom: 16px;
+    }
+
+    .pdf-info {
+      h3 {
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      p {
+        color: #666;
+        margin: 0;
+        font-size: 14px;
+      }
     }
   }
 
