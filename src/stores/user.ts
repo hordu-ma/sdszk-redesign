@@ -5,6 +5,7 @@ import { debounce } from "../utils/debounce";
 import type { BackendPermissions, PermissionList } from "../types/permissions";
 import router from "@/router";
 import { message } from "ant-design-vue";
+import { AUTH_ENDPOINTS } from "../constants/api-endpoints";
 
 export interface UserInfo {
   id: string;
@@ -206,7 +207,7 @@ export const useUserStore = defineStore(
     async function _performLogin(
       payload: LoginPayload,
     ): Promise<LoginResponse> {
-      const response = await api.post("/auth/login", payload);
+      const response = await api.post(AUTH_ENDPOINTS.LOGIN, payload);
 
       if (typeof response.data !== "object" || response.data === null) {
         throw new Error("登录响应格式错误");
@@ -238,8 +239,8 @@ export const useUserStore = defineStore(
         // 重新抛出错误，让组件能够捕获
         throw new Error(
           error.response?.data?.message ||
-          error.message ||
-          "登录失败，请检查网络连接",
+            error.message ||
+            "登录失败，请检查网络连接",
         );
       } finally {
         loading.value = false;
@@ -252,7 +253,7 @@ export const useUserStore = defineStore(
     async function logout(): Promise<void> {
       try {
         // 调用后端登出接口
-        await api.post("/auth/logout");
+        await api.post(AUTH_ENDPOINTS.LOGOUT);
       } catch (error) {
         // 即使后端登出失败，也要清除前端状态
         console.error("后端登出错误:", error);
@@ -268,7 +269,7 @@ export const useUserStore = defineStore(
      * @private
      */
     async function _fetchCurrentUser(): Promise<void> {
-      const { data } = await api.get("/auth/me");
+      const { data } = await api.get(AUTH_ENDPOINTS.ME);
 
       if (data.status !== "success") {
         throw new Error("获取用户信息失败");
@@ -425,7 +426,7 @@ export const useUserStore = defineStore(
     async function register(payload: RegisterPayload): Promise<boolean> {
       try {
         loading.value = true;
-        const response = await api.post("/auth/register", payload);
+        const response = await api.post(AUTH_ENDPOINTS.REGISTER, payload);
         return response.data?.status === "success";
       } catch (error) {
         console.error("注册失败:", error);
@@ -437,7 +438,7 @@ export const useUserStore = defineStore(
 
     async function sendVerificationCode(phone: string): Promise<boolean> {
       try {
-        const response = await api.post("/auth/send-code", { phone });
+        const response = await api.post(AUTH_ENDPOINTS.SEND_CODE, { phone });
         return response.data?.status === "success";
       } catch (error) {
         console.error("发送验证码失败:", error);

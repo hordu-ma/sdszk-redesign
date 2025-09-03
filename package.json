@@ -28,6 +28,7 @@
     "lint:vue": "eslint 'src/**/*.vue' --fix",
     "lint:server": "eslint 'server/**/*.js' --ignore-pattern 'server/scripts/mongo-init.js' --ignore-pattern 'server/tests/**' --fix",
     "format": "prettier --write src/",
+    "verify:api-paths": "node scripts/verify-api-paths.cjs",
     "wait-on": "wait-on",
     "server": "node server/app.js",
     "server:dev": "nodemon server/app.js",

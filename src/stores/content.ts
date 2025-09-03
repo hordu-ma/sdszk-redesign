@@ -1,6 +1,7 @@
 // content.ts - 内容状态管理
 import { defineStore } from "pinia";
 import api, { ApiResponse } from "../utils/api";
+import { NEWS_ENDPOINTS, RESOURCE_ENDPOINTS } from "../constants/api-endpoints";
 
 interface NewsState {
   loading: boolean;
@@ -179,7 +180,7 @@ export const useContentStore = defineStore("content", {
 
     async createNews(newsData: Record<string, any>): Promise<any> {
       try {
-        const response = await api.post("/news", newsData);
+        const response = await api.post(NEWS_ENDPOINTS.CREATE, newsData);
         return response.data;
       } catch (error) {
         console.error("创建新闻失败:", error);
@@ -192,7 +193,10 @@ export const useContentStore = defineStore("content", {
       newsData: Record<string, any>,
     ): Promise<any> {
       try {
-        const response = await api.put(`/news/${id}`, newsData);
+        const response = await api.put(
+          NEWS_ENDPOINTS.UPDATE(id.toString()),
+          newsData,
+        );
         return response.data;
       } catch (error) {
         console.error("更新新闻失败:", error);
@@ -202,7 +206,7 @@ export const useContentStore = defineStore("content", {
 
     async deleteNews(id: string | number): Promise<boolean> {
       try {
-        await api.delete(`/news/${id}`);
+        await api.delete(NEWS_ENDPOINTS.DELETE(id.toString()));
         return true;
       } catch (error) {
         console.error("删除新闻失败:", error);
@@ -214,9 +218,12 @@ export const useContentStore = defineStore("content", {
     async fetchResources(params: Record<string, any> = {}): Promise<void> {
       this.setLoading("resources", true);
       try {
-        const response = await api.get<any, ApiResponse<any[]>>("/resources", {
-          params,
-        });
+        const response = await api.get<any, ApiResponse<any[]>>(
+          RESOURCE_ENDPOINTS.LIST,
+          {
+            params,
+          },
+        );
         this.resources.items = response.data;
         this.resources.total = response.total || 0;
       } catch (error) {
@@ -228,7 +235,10 @@ export const useContentStore = defineStore("content", {
 
     async createResource(resourceData: Record<string, any>): Promise<any> {
       try {
-        const response = await api.post("/resources", resourceData);
+        const response = await api.post(
+          RESOURCE_ENDPOINTS.CREATE,
+          resourceData,
+        );
         return response.data;
       } catch (error) {
         console.error("创建资源失败:", error);
@@ -241,7 +251,10 @@ export const useContentStore = defineStore("content", {
       resourceData: Record<string, any>,
     ): Promise<any> {
       try {
-        const response = await api.put(`/resources/${id}`, resourceData);
+        const response = await api.put(
+          RESOURCE_ENDPOINTS.UPDATE(id.toString()),
+          resourceData,
+        );
         return response.data;
       } catch (error) {
         console.error("更新资源失败:", error);
@@ -251,7 +264,7 @@ export const useContentStore = defineStore("content", {
 
     async deleteResource(id: string | number): Promise<boolean> {
       try {
-        await api.delete(`/resources/${id}`);
+        await api.delete(RESOURCE_ENDPOINTS.DELETE(id.toString()));
         return true;
       } catch (error) {
         console.error("删除资源失败:", error);

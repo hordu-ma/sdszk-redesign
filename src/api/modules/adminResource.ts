@@ -1,5 +1,6 @@
 import { BaseApi } from "../base";
 import type { ApiResponse, QueryParams, PaginatedResponse } from "../types";
+import { UPLOAD_ENDPOINTS } from "../../constants/api-endpoints";
 
 // 资源表单数据接口
 export interface ResourceFormData {
@@ -166,7 +167,7 @@ export class AdminResourceApi extends BaseApi {
     console.log("🔄 Upload request: /api/uploads/resource");
 
     // 使用正确的API路径
-    const response = await this.api.post("/api/uploads/resource", formData, {
+    const response = await this.api.post(UPLOAD_ENDPOINTS.RESOURCE, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

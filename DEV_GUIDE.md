@@ -70,15 +70,23 @@ npm run dev:db
 ### 自动化脚本
 
 ```bash
-# 一键启动开发环境
+# 一键启动开发环境（推荐使用）
 ./scripts/development/dev-start.sh
 
-# 一键停止开发环境
+# 一键停止开发环境（推荐使用）
 ./scripts/development/dev-stop.sh
 
 # 环境诊断
 ./scripts/development/dev-health.sh
+
+# API路径验证工具
+node scripts/verify-api-paths.cjs
 ```
+
+**⚠️ 重要提醒**:
+
+- 请始终使用 `dev-start.sh` 和 `dev-stop.sh` 脚本启动和停止开发服务器
+- 避免直接使用 `npm run dev` 或 `Ctrl+C` 停止，脚本能确保所有服务正确清理
 
 ## 💾 数据库管理
 
@@ -116,6 +124,49 @@ npm run dev:db
 # 启动交互式菜单
 ./scripts/database/database-sync.sh
 ./scripts/database/file-sync.sh
+```
+
+## 🔧 API路径管理
+
+### API端点常量系统
+
+项目使用统一的API端点常量管理系统，确保前后端API调用的一致性：
+
+```bash
+# API端点常量定义文件
+src/constants/api-endpoints.ts
+```
+
+**核心特性**：
+
+- ✅ 所有API路径统一以 `/api` 前缀开头
+- ✅ 按功能模块分组管理（认证、新闻、资源等）
+- ✅ 支持参数化路径（如 `/api/news/${id}`）
+- ✅ 类型安全的常量定义
+
+### API路径验证工具
+
+```bash
+# 验证所有API调用路径一致性
+node scripts/verify-api-paths.cjs
+```
+
+**验证功能**：
+
+- 🔍 检查缺少 `/api` 前缀的路径
+- 🔍 发现硬编码API路径（建议使用常量）
+- 🔍 验证API端点常量的使用情况
+- 🔍 生成详细的修复建议
+
+**最佳实践**：
+
+```typescript
+// ❌ 错误：硬编码路径
+await api.post("/auth/login", payload);
+
+// ✅ 正确：使用端点常量
+import { AUTH_ENDPOINTS } from "@/constants/api-endpoints";
+await api.post(AUTH_ENDPOINTS.LOGIN, payload);
 ```
 
 ### 数据库配置
@@ -212,6 +263,8 @@ ssh $SERVER_USER@$SERVER_IP "mv $BACKUP_DIR $DEPLOY_PATH"
 
 ### 部署问题
 
+### 故障排查
+
 ```bash
 # 检查部署锁
 ls /tmp/*-deploy.lock
@@ -221,6 +274,9 @@ ssh root@60.205.124.67 "pm2 logs sdszk-backend --lines 50"
 
 # 检查Nginx状态
 ssh root@60.205.124.67 "nginx -t && systemctl status nginx"
+
+# API路径问题排查
+node scripts/verify-api-paths.cjs
 ```
 
 ### 服务状态检查
@@ -238,12 +294,14 @@ curl -I https://horsduroot.com
 
 ### 常见错误解决
 
-| 错误类型       | 检查方法            | 解决方案                    |
-| -------------- | ------------------- | --------------------------- |
-| 部署失败       | 查看部署日志        | 使用自动回滚或手动恢复备份  |
-| 服务无响应     | `pm2 status`        | `pm2 restart sdszk-backend` |
-| Nginx错误      | `nginx -t`          | 检查配置文件语法            |
-| 数据库连接失败 | 检查.env.production | 验证MONGODB_URI配置         |
+| 错误类型       | 检查方法            | 解决方案                            |
+| -------------- | ------------------- | ----------------------------------- |
+| 部署失败       | 查看部署日志        | 使用自动回滚或手动恢复备份          |
+| 服务无响应     | `pm2 status`        | `pm2 restart sdszk-backend`         |
+| Nginx错误      | `nginx -t`          | 检查配置文件语法                    |
+| 数据库连接失败 | 检查.env.production | 验证MONGODB_URI配置                 |
+| API调用失败    | 验证API路径         | `node scripts/verify-api-paths.cjs` |
+| 登录405错误    | 检查API前缀         | 确保所有API调用使用 `/api` 前缀     |
 
 ## 📊 NPM脚本速查
 
@@ -277,6 +335,13 @@ npm run test:e2e        # 运行E2E测试
 npm run lint            # 代码检查
 ```
 
+### 验证脚本
+
+```bash
+npm run verify:config   # 验证配置一致性（Phase 4）
+node scripts/verify-api-paths.cjs  # 验证API路径一致性
+```
+
 ## 🎊 快速验证
 
 ### 验证开发环境
@@ -304,10 +369,12 @@ curl -I https://horsduroot.com/admin
 
 ## 📚 重要提醒
 
-1. **部署前** - 确保代码已提交，测试通过
-2. **部署中** - 观察日志输出，注意错误信息
-3. **部署后** - 验证网站功能，检查服务状态
-4. **紧急情况** - 使用自动生成的回滚信息快速恢复
+1. **开发环境** - 始终使用 `dev-start.sh` 和 `dev-stop.sh` 脚本管理服务器
+2. **API开发** - 使用端点常量替代硬编码路径，运行验证工具检查一致性
+3. **部署前** - 确保代码已提交，API路径验证通过，测试通过
+4. **部署中** - 观察日志输出，注意错误信息
+5. **部署后** - 验证网站功能，检查服务状态
+6. **紧急情况** - 使用自动生成的回滚信息快速恢复
 
 ---
 

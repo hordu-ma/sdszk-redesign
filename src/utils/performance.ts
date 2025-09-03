@@ -328,7 +328,7 @@ class PerformanceMonitor {
     ) {
       try {
         // 这里可以调用实际的上报 API
-        // await api.post('/performance/report', metrics);
+        // await api.post('/api/performance/report', metrics);
         console.log("Performance metrics would be reported:", metrics);
       } catch (error) {
         console.warn("Failed to report performance metrics:", error);

@@ -181,6 +181,7 @@ import { EditOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "@/stores/user";
 import type { UserInfo } from "@/stores/user";
 import api from "@/utils/api";
+import { AUTH_ENDPOINTS } from "@/constants/api-endpoints";
 
 const userStore = useUserStore();
 const isEditing = ref(false);
@@ -270,7 +271,7 @@ const saveProfile = async () => {
       avatar: formData.avatar,
     };
 
-    const response = await api.put("/api/auth/profile", updateData);
+    const response = await api.put(AUTH_ENDPOINTS.PROFILE, updateData);
 
     if (response.data && response.status === 200) {
       message.success("个人资料更新成功");
@@ -292,7 +293,7 @@ const changePassword = async () => {
     await passwordFormRef.value.validate();
     changingPassword.value = true;
 
-    const response = await api.put("/api/auth/change-password", {
+    const response = await api.put(AUTH_ENDPOINTS.CHANGE_PASSWORD, {
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword,
     });
