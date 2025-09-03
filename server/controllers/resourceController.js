@@ -160,6 +160,7 @@ export const getResourceList = async (req, res) => {
       .select(
         "title content thumbnail category isPublished featured isTop viewCount createdAt fileUrl fileName fileSize mimeType publishDate",
       )
+      .populate("category", "name key color description")
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
@@ -190,7 +191,10 @@ export const getResourceList = async (req, res) => {
 // 获取单个资源详情
 export const getResourceById = async (req, res) => {
   try {
-    const resource = await Resource.findById(req.params.id);
+    const resource = await Resource.findById(req.params.id).populate(
+      "category",
+      "name key color description",
+    );
     if (!resource) {
       return response.notFound(res, "资源不存在");
     }

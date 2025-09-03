@@ -496,9 +496,38 @@ const shareResource = async () => {
 // 媒体相关工具函数
 const getMediaUrl = (resource: Resource): string => {
   const resourceData = resource as any;
-  return (
-    resourceData.url || resourceData.fileUrl || resourceData.downloadUrl || ""
-  );
+
+  // 优先级：fileUrl(模型主字段) > url > downloadUrl > attachmentUrl > videoUrl
+  const url =
+    resourceData.fileUrl ||
+    resourceData.url ||
+    resourceData.downloadUrl ||
+    resourceData.attachmentUrl ||
+    resourceData.videoUrl ||
+    (resourceData.attachments && resourceData.attachments[0]?.url) ||
+    "";
+
+  // 开发环境输出调试信息
+  if (import.meta.env.DEV) {
+    console.log("Resource URL fields:", {
+      fileUrl: resourceData.fileUrl,
+      url: resourceData.url,
+      downloadUrl: resourceData.downloadUrl,
+      attachmentUrl: resourceData.attachmentUrl,
+      videoUrl: resourceData.videoUrl,
+      attachments: resourceData.attachments,
+      finalUrl: url,
+    });
+  }
+
+  // 如果URL是相对路径，添加服务器地址前缀
+  if (url && !url.startsWith("http")) {
+    // 开发环境使用localhost:3000，生产环境使用相对路径
+    const baseUrl = import.meta.env.DEV ? "http://localhost:3000" : "";
+    return `${baseUrl}${url.startsWith("/") ? url : "/" + url}`;
+  }
+
+  return url;
 };
 
 const isVideoFile = (resource: Resource): boolean => {
@@ -543,21 +572,56 @@ const isPdfFile = (resource: Resource): boolean => {
 const isTheoryOrTeaching = computed(() => {
   if (!resource.value) return false;
 
-  // 检查路由参数中的category
-  const categoryFromRoute = route.query.category;
+  // 检查路由参数中的category（最高优先级）
+  const categoryFromRoute = route.query.category || route.params.category;
   if (["theory", "teaching"].includes(categoryFromRoute as string)) {
     return true;
   }
 
-  // 检查资源对象的category
+  // 强化分类检查：支持多种分类表示方式
   if (resource.value.category) {
-    const categoryKey =
-      typeof resource.value.category === "string"
-        ? resource.value.category
-        : resource.value.category.key;
-    if (["theory", "teaching"].includes(categoryKey)) {
+    const category = resource.value.category;
+    let categoryKey = "";
+
+    if (typeof category === "string") {
+      categoryKey = category;
+    } else if (category && typeof category === "object") {
+      categoryKey = category.key || category.name || category.id || "";
+    }
+
+    // 理论前沿和教学研究（支持中英文）
+    const targetCategories = [
+      "theory",
+      "teaching",
+      "理论前沿",
+      "教学研究",
+      "Theory",
+      "Teaching",
+    ];
+
+    if (targetCategories.includes(categoryKey)) {
       return true;
     }
+  }
+
+  // 检查资源类型字段
+  const resourceType =
+    (resource.value as any).resourceType || (resource.value as any).type;
+  if (["theory", "teaching"].includes(resourceType)) {
+    return true;
+  }
+
+  // 检查URL路径中的分类信息
+  const currentPath = route.path;
+  if (currentPath.includes("theory") || currentPath.includes("teaching")) {
+    return true;
+  }
+
+  // 检查标题中是否包含关键词（作为后备判断）
+  const title = (resource.value.title || "").toLowerCase();
+  const keywords = ["理论前沿", "教学研究", "theory", "teaching"];
+  if (keywords.some((keyword) => title.includes(keyword))) {
+    return true;
   }
 
   return false;
@@ -567,30 +631,86 @@ const isTheoryOrTeaching = computed(() => {
 const isDownloadDisabled = computed(() => {
   if (!resource.value) return false;
 
-  // 检查路由参数中的category
-  const categoryFromRoute = route.query.category;
+  // 检查路由参数中的category（最高优先级）
+  const categoryFromRoute = route.query.category || route.params.category;
   if (["video", "theory", "teaching"].includes(categoryFromRoute as string)) {
     return true;
   }
-
-  // 检查资源对象的categoryId（需要与分类key对应）
-  // 这里需要根据实际的categoryId来判断，通常是MongoDB的ObjectId
-  // 我们可以通过资源对象的其他字段来判断分类
 
   // 检查视频文件类型
   if (isVideoFile(resource.value)) {
     return true;
   }
 
-  // 如果有分类信息且是理论前沿或教学研究，禁用下载
+  // 强化分类检查：支持多种分类表示方式
   if (resource.value.category) {
-    const categoryKey =
-      typeof resource.value.category === "string"
-        ? resource.value.category
-        : resource.value.category.key;
-    if (["theory", "teaching"].includes(categoryKey)) {
+    const category = resource.value.category;
+    let categoryKey = "";
+
+    if (typeof category === "string") {
+      categoryKey = category;
+    } else if (category && typeof category === "object") {
+      categoryKey = category.key || category.name || category.id || "";
+    }
+
+    // 理论前沿和教学研究禁用下载（支持中英文）
+    const disabledCategories = [
+      "theory",
+      "teaching",
+      "video",
+      "理论前沿",
+      "教学研究",
+      "优课视窗",
+      "Theory",
+      "Teaching",
+      "Video",
+    ];
+
+    if (disabledCategories.includes(categoryKey)) {
       return true;
     }
+  }
+
+  // 检查资源类型字段
+  const resourceType =
+    (resource.value as any).resourceType || (resource.value as any).type;
+  if (["theory", "teaching", "video", "document"].includes(resourceType)) {
+    return true;
+  }
+
+  // 检查URL路径中的分类信息
+  const currentPath = route.path;
+  if (currentPath.includes("theory") || currentPath.includes("teaching")) {
+    return true;
+  }
+
+  // 检查标题或内容中是否包含关键词（作为后备判断）
+  const title = (resource.value.title || "").toLowerCase();
+  const content = (
+    (resource.value as any).content ||
+    (resource.value as any).description ||
+    ""
+  ).toLowerCase();
+
+  const keywords = ["理论前沿", "教学研究", "优课视窗", "theory", "teaching"];
+  if (
+    keywords.some(
+      (keyword) => title.includes(keyword) || content.includes(keyword),
+    )
+  ) {
+    return true;
+  }
+
+  // 开发环境输出调试信息
+  if (import.meta.env.DEV) {
+    console.log("下载状态检查:", {
+      categoryFromRoute,
+      resourceCategory: resource.value.category,
+      resourceType: (resource.value as any).resourceType,
+      currentPath,
+      title: resource.value.title,
+      isDisabled: false,
+    });
   }
 
   return false;
@@ -621,30 +741,63 @@ const viewResource = () => {
 
 // 专门用于PDF资源的查看函数
 const viewPdfResource = () => {
-  if (!resource.value) return;
-
-  const url = getMediaUrl(resource.value);
-  if (!url) {
-    message.warning("PDF文件不可用");
+  if (!resource.value) {
+    message.warning("资源数据不可用");
     return;
   }
 
-  // 更新查看次数
-  if (resource.value.viewCount !== undefined) {
-    resource.value.viewCount += 1;
+  const url = getMediaUrl(resource.value);
+  if (!url) {
+    // 开发环境输出更详细的错误信息
+    if (import.meta.env.DEV) {
+      console.error("PDF URL获取失败，资源数据：", resource.value);
+    }
+    message.error("PDF文件链接不可用，请联系管理员检查资源配置");
+    return;
   }
 
-  // 在新窗口打开PDF进行阅读，禁用下载功能
-  const newWindow = window.open(url, "_blank");
-  if (newWindow) {
+  try {
+    // 更新查看次数
+    if (resource.value.viewCount !== undefined) {
+      resource.value.viewCount += 1;
+    }
+
+    // 在新窗口打开PDF进行阅读
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (!newWindow) {
+      message.warning("无法打开新窗口，请检查浏览器弹窗拦截设置");
+      return;
+    }
+
     // 尝试禁用右键菜单（部分浏览器支持）
     newWindow.onload = () => {
       try {
         newWindow.document.oncontextmenu = () => false;
-      } catch {
-        // 跨域限制，忽略错误
+        // 添加CSS样式隐藏打印按钮等
+        const style = newWindow.document.createElement("style");
+        style.textContent = `
+          @media print {
+            body { display: none !important; }
+          }
+          /* 隐藏PDF查看器的下载按钮 */
+          button[title*="下载"],
+          button[title*="Download"],
+          .download,
+          .toolbarButton.download {
+            display: none !important;
+          }
+        `;
+        newWindow.document.head?.appendChild(style);
+      } catch (error) {
+        // 跨域限制或其他错误，静默处理
+        console.warn("无法设置PDF查看器样式:", error);
       }
     };
+
+    message.success("正在新窗口中打开PDF文档");
+  } catch (error) {
+    console.error("打开PDF失败:", error);
+    message.error("打开PDF文档失败，请稍后重试");
   }
 };
 
