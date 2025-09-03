@@ -232,6 +232,29 @@ export const batchUpdateAdminResourceStatus = async (req, res) => {
   }
 };
 
+// 删除单个资源
+export const deleteAdminResource = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return response.badRequest(res, "资源ID不能为空");
+    }
+
+    const resource = await Resource.findById(id);
+    if (!resource) {
+      return response.notFound(res, "资源不存在");
+    }
+
+    await Resource.findByIdAndDelete(id);
+
+    return response.success(res, null, "删除成功");
+  } catch (err) {
+    console.error("删除资源失败:", err);
+    return response.serverError(res, "删除失败", err);
+  }
+};
+
 // 批量删除资源
 export const batchDeleteAdminResources = async (req, res) => {
   try {

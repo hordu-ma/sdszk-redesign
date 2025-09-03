@@ -7,6 +7,7 @@ import {
   updateAdminResource,
   updateAdminResourceStatus,
   batchUpdateAdminResourceStatus,
+  deleteAdminResource,
   batchDeleteAdminResources,
 } from "../controllers/adminResourceController.js";
 import { authenticateToken } from "../middleware/auth.js";
@@ -33,6 +34,9 @@ router.patch("/:id/status", updateAdminResourceStatus);
 
 // 批量更新资源状态
 router.post("/batch-status", batchUpdateAdminResourceStatus);
+
+// 删除单个资源
+router.delete("/:id", deleteAdminResource);
 
 // 批量删除资源
 router.post("/batch-delete", batchDeleteAdminResources);
