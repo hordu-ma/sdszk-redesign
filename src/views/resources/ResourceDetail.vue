@@ -7,6 +7,7 @@
       <template #extra>
         <a-space>
           <a-button
+            v-if="!isVideoResource"
             type="primary"
             :loading="downloading"
             :disabled="!resource"
@@ -44,16 +45,12 @@
             <div
               v-if="getMediaUrl(resource) && isVideoFile(resource)"
               class="video-container"
+              @contextmenu.prevent
             >
-              <video
+              <video-player
                 :src="getMediaUrl(resource)"
-                controls
-                preload="metadata"
-                class="media-player"
-                @error="handleMediaError"
-              >
-                您的浏览器不支持视频播放
-              </video>
+                :poster="resource.thumbnail || ''"
+              />
             </div>
 
             <!-- 音频文件显示播放器 -->
@@ -127,7 +124,7 @@
                 {{ formatDate(resource?.publishDate || resource?.createdAt) }}
               </span>
               <span><eye-outlined /> {{ resource?.viewCount || 0 }} 查看</span>
-              <span>
+              <span v-if="!isVideoResource">
                 <download-outlined />
                 {{ resource?.downloadCount || 0 }} 下载
               </span>
@@ -192,11 +189,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { resourceApi } from "@/api";
 import type { Resource } from "@/api/modules/resources/index";
 import { message, Modal } from "ant-design-vue";
+import VideoPlayer from "@/components/VideoPlayer.vue";
 import {
   DownloadOutlined,
   ShareAltOutlined,
@@ -473,10 +471,21 @@ const isPdfFile = (resource: Resource): boolean => {
   const url = getMediaUrl(resource);
   return (
     url.toLowerCase().includes(".pdf") ||
-    resource.mimeType === "application/pdf" ||
-    (resource.fileType?.includes("pdf") ?? false)
+    (resource.mimeType?.includes("pdf") ?? false)
   );
 };
+
+// 判断是否为视频资源（用于禁用下载）
+const isVideoResource = computed(() => {
+  if (!resource.value) return false;
+
+  // 检查category是否为video
+  const categoryFromRoute = route.query.category;
+  if (categoryFromRoute === "video") return true;
+
+  // 检查资源类型
+  return isVideoFile(resource.value);
+});
 
 const handleMediaError = (event: Event) => {
   console.error("媒体加载失败:", event);

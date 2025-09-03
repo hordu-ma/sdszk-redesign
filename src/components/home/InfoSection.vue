@@ -128,7 +128,7 @@
 import { ref, onMounted, nextTick } from "vue";
 import { newsApi, newsCategoryApi } from "@/api";
 
-const props = defineProps({
+defineProps({
   theories: {
     type: Array,
     required: true,

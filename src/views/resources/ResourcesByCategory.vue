@@ -21,12 +21,17 @@
               <template #cover>
                 <div class="resource-cover">
                   <!-- 视频资源显示视频播放器 -->
-                  <div v-if="isVideoResource(resource)" class="video-preview">
+                  <div
+                    v-if="isVideoResource(resource)"
+                    class="video-preview"
+                    @contextmenu.prevent
+                  >
                     <video
                       :src="resource.fileUrl"
                       :poster="resource.thumbnail"
                       class="resource-video"
                       preload="metadata"
+                      controlslist="nodownload"
                     >
                       您的浏览器不支持视频播放
                     </video>

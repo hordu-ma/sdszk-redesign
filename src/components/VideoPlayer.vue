@@ -2,12 +2,14 @@
   <div
     class="video-player-container"
     :class="{ 'is-fullscreen': isFullscreen }"
+    @contextmenu.prevent
   >
     <video
       ref="videoRef"
       class="video-element"
       :src="src"
       :poster="poster"
+      controlslist="nodownload"
       @timeupdate="onTimeUpdate"
       @loadedmetadata="onLoadedMetadata"
       @play="onPlay"
