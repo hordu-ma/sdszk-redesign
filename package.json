@@ -38,7 +38,9 @@
     "db:sync": "bash scripts/database/quick-sync.sh",
     "db:sync-full": "bash scripts/database/sync-database.sh",
     "db:tunnel": "bash scripts/database/mongodb-tunnel.sh",
-    "db:verify": "bash scripts/database/verify-database.sh"
+    "db:verify": "bash scripts/database/verify-database.sh",
+    "fix:urls:prod": "bash scripts/database/fix-production-urls.sh",
+    "fix:urls:dev": "bash scripts/database/fix-development-urls.sh"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",

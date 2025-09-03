@@ -133,39 +133,43 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       host: "0.0.0.0",
-      proxy: {
-        "/api": {
-          target: "http://localhost:3000",
-          changeOrigin: true,
-          secure: false,
-          timeout: 10000,
-          configure: (proxy, _options) => {
-            proxy.on("error", (err, req, _res) => {
-              console.error("🚨 代理错误:", {
-                url: req.url,
-                method: req.method,
-                error: err.message,
-              });
-            });
+      // 生产构建时不需要代理，因为前后端部署在同一域名下
+      proxy:
+        mode === "development"
+          ? {
+              "/api": {
+                target: "http://localhost:3000",
+                changeOrigin: true,
+                secure: false,
+                timeout: 10000,
+                configure: (proxy) => {
+                  proxy.on("error", (err, req) => {
+                    console.error("🚨 代理错误:", {
+                      url: req.url,
+                      method: req.method,
+                      error: err.message,
+                    });
+                  });
 
-            proxy.on("proxyReq", (proxyReq, req, _res) => {
-              console.log("🔄 代理请求:", {
-                from: req.url,
-                to: `http://localhost:3000${req.url}`,
-                method: req.method,
-              });
-            });
+                  proxy.on("proxyReq", (proxyReq, req) => {
+                    console.log("🔄 代理请求:", {
+                      from: req.url,
+                      to: `http://localhost:3000${req.url}`,
+                      method: req.method,
+                    });
+                  });
 
-            proxy.on("proxyRes", (proxyRes, req, _res) => {
-              console.log("✅ 代理响应:", {
-                url: req.url,
-                status: proxyRes.statusCode,
-                statusMessage: proxyRes.statusMessage,
-              });
-            });
-          },
-        },
-      },
+                  proxy.on("proxyRes", (proxyRes, req) => {
+                    console.log("✅ 代理响应:", {
+                      url: req.url,
+                      status: proxyRes.statusCode,
+                      statusMessage: proxyRes.statusMessage,
+                    });
+                  });
+                },
+              },
+            }
+          : undefined,
     },
   };
 });
