@@ -843,7 +843,7 @@ const sendTestEmail = async () => {
     // })
 
     message.success("测试邮件发送成功，请检查邮箱");
-  } catch (error) {
+  } catch {
     message.error("测试邮件发送失败");
   } finally {
     testEmailLoading.value = false;
@@ -859,7 +859,7 @@ const createBackup = async () => {
 
     message.success("备份创建成功");
     // 更新备份统计信息
-  } catch (error) {
+  } catch {
     message.error("备份创建失败");
   } finally {
     backupLoading.value = false;
@@ -892,7 +892,7 @@ const restoreData = () => {
 
         message.success("数据恢复成功");
         restoreFileList.value = [];
-      } catch (error) {
+      } catch {
         message.error("数据恢复失败");
       } finally {
         restoreLoading.value = false;

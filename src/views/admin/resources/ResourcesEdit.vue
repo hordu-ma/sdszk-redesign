@@ -356,7 +356,6 @@ import {
 import {
   adminResourceApi,
   type ResourceFormData,
-  type ResourceItem,
 } from "@/api/modules/adminResource";
 import {
   ResourceCategoryApi,
