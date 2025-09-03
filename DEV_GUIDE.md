@@ -85,17 +85,37 @@ npm run dev:db
 ### 核心脚本
 
 ```bash
-# 快速同步生产数据到本地
-./scripts/database/quick-sync.sh
+# 双向数据库同步工具（主要工具）
+./scripts/database/database-sync.sh
 
-# 完整数据库同步工具
-./scripts/database/sync-database.sh
+# 双向文件同步工具
+./scripts/database/file-sync.sh
 
 # 数据库验证
 ./scripts/database/verify-database.sh
 
 # SSH隧道连接（只读）
 ./scripts/database/mongodb-tunnel.sh
+```
+
+### 快速使用
+
+```bash
+# 从生产环境同步数据到本地
+./scripts/database/database-sync.sh prod-to-dev
+
+# 从生产环境同步文件到本地
+./scripts/database/file-sync.sh prod-to-dev
+
+# 查看数据库统计对比
+./scripts/database/database-sync.sh stats
+
+# 查看文件统计信息
+./scripts/database/file-sync.sh stats
+
+# 启动交互式菜单
+./scripts/database/database-sync.sh
+./scripts/database/file-sync.sh
 ```
 
 ### 数据库配置

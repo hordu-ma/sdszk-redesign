@@ -75,6 +75,72 @@ handle_error() {
     exit $exit_code
 }
 
+# PM2维护和清理函数
+pm2_maintenance() {
+    echo_info "执行PM2维护检查..."
+    ssh "$SERVER_USER@$SERVER_IP" << 'EOF'
+        echo "🔍 PM2维护检查开始..."
+
+        # 显示当前PM2状态
+        echo "当前PM2进程列表:"
+        pm2 list
+
+        # 检查是否有僵尸进程
+        zombie_count=$(pm2 list | grep -c 'stopped\|errored' || echo 0)
+        if [ $zombie_count -gt 0 ]; then
+            echo "⚠️ 发现 $zombie_count 个异常进程，正在清理..."
+            pm2 delete all 2>/dev/null || true
+            pm2 kill 2>/dev/null || true
+            sleep 2
+            echo "✅ 异常进程已清理"
+        else
+            echo "✅ 未发现异常进程"
+        fi
+
+        # 重启PM2守护进程以确保稳定性
+        echo "🔄 重启PM2守护进程..."
+        pm2 kill 2>/dev/null || true
+        sleep 1
+
+        echo "✅ PM2维护检查完成"
+EOF
+}
+
+# 强制清理指定PM2应用的所有实例
+force_clean_pm2_app() {
+    local app_name=$1
+    echo_info "强制清理PM2应用: $app_name"
+
+    ssh "$SERVER_USER@$SERVER_IP" << EOF
+        echo "🧹 强制清理应用实例: $app_name"
+
+        # 检查是否存在该应用的实例
+        if pm2 list | grep -q '$app_name'; then
+            echo "发现现有实例，正在清理..."
+
+            # 强制停止所有实例
+            pm2 stop '$app_name' 2>/dev/null || true
+            sleep 1
+
+            # 强制删除所有实例
+            pm2 delete '$app_name' 2>/dev/null || true
+            sleep 1
+
+            # 验证清理结果
+            remaining_count=\$(pm2 list | grep -c '$app_name' || echo 0)
+            if [ \$remaining_count -eq 0 ]; then
+                echo "✅ 应用实例已完全清理"
+            else
+                echo "⚠️ 仍有 \$remaining_count 个实例残留，执行深度清理..."
+                pm2 kill 2>/dev/null || true
+                sleep 2
+            fi
+        else
+            echo "✅ 未发现现有实例，无需清理"
+        fi
+EOF
+}
+
 # 设置错误处理
 set -e
 trap 'handle_error $? $LINENO' ERR
@@ -264,9 +330,18 @@ create_server_backup() {
         return 0
     fi
 
-    # 停止服务（但不退出如果服务未运行）
-    echo_info "停止后端服务..."
-    ssh "$SERVER_USER@$SERVER_IP" "pm2 stop '$PM2_APP_NAME' || echo '服务未运行或停止失败，继续备份'"
+    # 安全停止服务（避免残留实例）
+    echo_info "安全停止后端服务..."
+    ssh "$SERVER_USER@$SERVER_IP" << EOF
+        # 检查并停止所有同名实例
+        if pm2 list | grep -q '$PM2_APP_NAME'; then
+            echo "发现运行中的实例，正在停止..."
+            pm2 stop '$PM2_APP_NAME' 2>/dev/null || true
+            echo "服务已停止"
+        else
+            echo "未发现运行中的实例"
+        fi
+EOF
 
     # 创建备份
     if ssh "$SERVER_USER@$SERVER_IP" "cp -r '$DEPLOY_PATH' '$BACKUP_DIR'"; then
@@ -337,25 +412,45 @@ EOF
 start_service() {
     echo_step "启动后端服务..."
 
-    # 检查并启动PM2服务
+    # 执行PM2维护检查
+    pm2_maintenance
+
+    # 强制清理旧实例
+    force_clean_pm2_app "$PM2_APP_NAME"
+
+    # 优化的PM2服务管理
     ssh "$SERVER_USER@$SERVER_IP" << EOF
         set -e
         cd '$DEPLOY_PATH'
 
-        # 尝试重启现有服务
-        if pm2 restart '$PM2_APP_NAME' 2>/dev/null; then
-            echo "服务重启成功"
+        # 等待一秒确保进程完全停止
+        sleep 2
+
+        # 启动新的单一实例
+        echo "🚀 启动新服务实例..."
+        pm2 start app.js --name '$PM2_APP_NAME' --env production \
+            --max-restarts 10 \
+            --restart-delay 3000 \
+            --max-memory-restart 500M \
+            --watch false \
+            --merge-logs true \
+            --log-date-format "YYYY-MM-DD HH:mm:ss Z"
+
+        # 验证只有一个实例在运行
+        local instance_count=\$(pm2 list | grep '$PM2_APP_NAME' | grep 'online' | wc -l)
+        if [ \$instance_count -eq 1 ]; then
+            echo "✅ 确认只有一个实例在运行"
         else
-            echo "重启失败，尝试启动新服务..."
-            # 如果重启失败，启动新服务
-            pm2 start app.js --name '$PM2_APP_NAME' --env production
-            echo "新服务启动成功"
+            echo "⚠️ 警告: 检测到 \$instance_count 个实例，这不正常"
+            pm2 list | grep '$PM2_APP_NAME'
+            exit 1
         fi
 
         # 保存PM2配置
         pm2 save
 
         # 显示服务状态
+        echo "📊 当前服务状态:"
         pm2 status '$PM2_APP_NAME'
 EOF
 
@@ -370,17 +465,55 @@ health_check() {
     echo_info "等待服务启动..."
     sleep 5
 
-    # 检查PM2服务状态
-    echo_info "检查PM2服务状态..."
-    local pm2_status=$(ssh "$SERVER_USER@$SERVER_IP" "pm2 jlist | jq '.[] | select(.name==\"$PM2_APP_NAME\") | .pm2_env.status' 2>/dev/null || echo '\"unknown\"'")
-    if [[ "$pm2_status" == "\"online\"" ]]; then
-        echo_success "PM2服务状态正常: online"
-    else
-        echo_error "PM2服务状态异常: $pm2_status"
-        # 显示详细错误信息
+    # 严格检查PM2实例数量和状态
+    echo_info "检查PM2实例数量和状态..."
+    local pm2_check=$(ssh "$SERVER_USER@$SERVER_IP" << 'EOF'
+        # 获取实例信息
+        instance_count=$(pm2 list | grep "$PM2_APP_NAME" | wc -l)
+        online_count=$(pm2 list | grep "$PM2_APP_NAME" | grep "online" | wc -l)
+
+        # 输出检查结果
+        echo "total_instances:$instance_count"
+        echo "online_instances:$online_count"
+
+        # 获取状态详情
+        if [ $instance_count -gt 0 ]; then
+            pm2 jlist | jq -r ".[] | select(.name==\"$PM2_APP_NAME\") | \"status:\(.pm2_env.status) restart_count:\(.pm2_env.restart_time)\""
+        fi
+EOF
+)
+
+    # 解析检查结果
+    local total_instances=$(echo "$pm2_check" | grep "total_instances:" | cut -d: -f2)
+    local online_instances=$(echo "$pm2_check" | grep "online_instances:" | cut -d: -f2)
+
+    echo_info "实例统计: 总数=$total_instances, 在线=$online_instances"
+
+    # 验证实例数量
+    if [[ "$total_instances" -ne 1 ]]; then
+        echo_error "❌ PM2实例数量异常: 期望1个，实际$total_instances个"
+        ssh "$SERVER_USER@$SERVER_IP" "pm2 list | grep '$PM2_APP_NAME'"
+        return 1
+    fi
+
+    if [[ "$online_instances" -ne 1 ]]; then
+        echo_error "❌ 在线实例数量异常: 期望1个，实际$online_instances个"
         ssh "$SERVER_USER@$SERVER_IP" "pm2 logs '$PM2_APP_NAME' --lines 20"
         return 1
     fi
+
+    # 检查重启次数
+    local restart_info=$(echo "$pm2_check" | grep "status:online")
+    if [[ -n "$restart_info" ]]; then
+        local restart_count=$(echo "$restart_info" | grep -o "restart_count:[0-9]*" | cut -d: -f2)
+        if [[ "$restart_count" -gt 5 ]]; then
+            echo_warning "⚠️ 服务重启次数较高: $restart_count 次，请关注服务稳定性"
+        else
+            echo_success "✅ 服务重启次数正常: $restart_count 次"
+        fi
+    fi
+
+    echo_success "✅ PM2实例检查通过: 1个实例在线运行"
 
     # 检查HTTP接口
     local api_urls=(
@@ -451,13 +584,41 @@ rollback_deployment() {
     fi
 
     echo_info "从备份恢复: $BACKUP_DIR -> $DEPLOY_PATH"
-    if ssh "$SERVER_USER@$SERVER_IP" "
-        pm2 stop '$PM2_APP_NAME' || true &&
-        rm -rf '$DEPLOY_PATH' &&
-        mv '$BACKUP_DIR' '$DEPLOY_PATH' &&
-        cd '$DEPLOY_PATH' &&
-        pm2 restart '$PM2_APP_NAME' || pm2 start app.js --name '$PM2_APP_NAME'
-    "; then
+
+    # 使用强制清理函数
+    force_clean_pm2_app "$PM2_APP_NAME"
+
+    if ssh "$SERVER_USER@$SERVER_IP" << EOF
+        set -e
+        echo "🔄 开始回滚操作..."
+
+        # 恢复备份
+        echo "恢复备份文件..."
+        rm -rf '$DEPLOY_PATH'
+        mv '$BACKUP_DIR' '$DEPLOY_PATH'
+        cd '$DEPLOY_PATH'
+
+        # 启动单一实例
+        echo "启动回滚后的服务..."
+        pm2 start app.js --name '$PM2_APP_NAME' --env production \
+            --max-restarts 10 \
+            --restart-delay 3000 \
+            --max-memory-restart 500M \
+            --watch false \
+            --merge-logs true
+
+        # 验证实例数量
+        instance_count=\$(pm2 list | grep '$PM2_APP_NAME' | grep 'online' | wc -l)
+        if [ \$instance_count -eq 1 ]; then
+            echo "✅ 回滚后确认只有一个实例在运行"
+        else
+            echo "⚠️ 警告: 回滚后检测到 \$instance_count 个实例"
+            exit 1
+        fi
+
+        pm2 save
+EOF
+    then
         echo_success "回滚完成"
 
         # 验证回滚结果
