@@ -7,7 +7,7 @@
       <template #extra>
         <a-space>
           <a-button
-            v-if="!isVideoResource"
+            v-if="!isDownloadDisabled"
             type="primary"
             :loading="downloading"
             :disabled="!resource"
@@ -53,6 +53,40 @@
               />
             </div>
 
+            <!-- PDF文件优先显示缩略图，点击查看完整PDF -->
+            <div
+              v-else-if="isPdfFile(resource) && resource.thumbnail"
+              class="pdf-preview-container"
+            >
+              <div class="pdf-thumbnail-wrapper" @click="viewResource">
+                <img
+                  :src="resource.thumbnail"
+                  :alt="resource.title + ' - PDF首页'"
+                  class="pdf-thumbnail"
+                />
+                <div class="pdf-overlay">
+                  <file-pdf-outlined class="pdf-icon" />
+                  <span>点击阅读PDF</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- PDF文件无缩略图时显示查看器 -->
+            <div
+              v-else-if="getMediaUrl(resource) && isPdfFile(resource)"
+              class="pdf-container"
+              @contextmenu.prevent
+            >
+              <iframe
+                :src="getMediaUrl(resource)"
+                class="pdf-viewer"
+                frameborder="0"
+                @error="handleMediaError"
+              >
+                您的浏览器不支持PDF查看，请点击查看按钮打开PDF
+              </iframe>
+            </div>
+
             <!-- 音频文件显示播放器 -->
             <div
               v-else-if="getMediaUrl(resource) && isAudioFile(resource)"
@@ -82,14 +116,19 @@
               />
             </div>
 
-            <!-- 其他文件类型（如PDF、文档等）优先显示缩略图 -->
+            <!-- 其他文件类型优先显示缩略图，点击可查看 -->
             <div v-else-if="resource.thumbnail" class="thumbnail-container">
               <img
                 :src="resource.thumbnail"
                 :alt="resource.title"
-                class="resource-thumbnail"
+                class="resource-thumbnail clickable-thumbnail"
                 @error="handleThumbnailError"
+                @click="viewResource"
               />
+              <div class="thumbnail-overlay">
+                <eye-outlined class="view-icon" />
+                <span>点击查看</span>
+              </div>
             </div>
 
             <!-- 没有缩略图时显示默认图标 -->
@@ -124,7 +163,7 @@
                 {{ formatDate(resource?.publishDate || resource?.createdAt) }}
               </span>
               <span><eye-outlined /> {{ resource?.viewCount || 0 }} 查看</span>
-              <span v-if="!isVideoResource">
+              <span v-if="!isDownloadDisabled">
                 <download-outlined />
                 {{ resource?.downloadCount || 0 }} 下载
               </span>
@@ -475,21 +514,56 @@ const isPdfFile = (resource: Resource): boolean => {
   );
 };
 
-// 判断是否为视频资源（用于禁用下载）
-const isVideoResource = computed(() => {
+// 判断是否为禁用下载的资源（包括理论前沿和教学研究）
+const isDownloadDisabled = computed(() => {
   if (!resource.value) return false;
 
-  // 检查category是否为video
+  // 检查路由参数中的category
   const categoryFromRoute = route.query.category;
-  if (categoryFromRoute === "video") return true;
+  if (["video", "theory", "teaching"].includes(categoryFromRoute as string)) {
+    return true;
+  }
 
-  // 检查资源类型
-  return isVideoFile(resource.value);
+  // 检查资源对象的categoryId（需要与分类key对应）
+  // 这里需要根据实际的categoryId来判断，通常是MongoDB的ObjectId
+  // 我们可以通过资源对象的其他字段来判断分类
+
+  // 检查视频文件类型
+  if (isVideoFile(resource.value)) {
+    return true;
+  }
+
+  // 如果有分类信息且是理论前沿或教学研究，禁用下载
+  if (resource.value.category) {
+    const categoryKey =
+      typeof resource.value.category === "string"
+        ? resource.value.category
+        : resource.value.category.key;
+    if (["theory", "teaching"].includes(categoryKey)) {
+      return true;
+    }
+  }
+
+  return false;
 });
 
 const handleMediaError = (event: Event) => {
   console.error("媒体加载失败:", event);
   message.warning("媒体文件加载失败，请尝试下载查看");
+};
+
+// 查看资源（点击缩略图时）
+const viewResource = () => {
+  if (!resource.value) return;
+
+  const url = getMediaUrl(resource.value);
+  if (!url) {
+    message.warning("资源文件不可用");
+    return;
+  }
+
+  // 在新窗口打开文件进行查看
+  window.open(url, "_blank");
 };
 
 // 缩略图相关函数
@@ -639,6 +713,115 @@ watch(
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     object-fit: cover;
+  }
+
+  .thumbnail-container {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+
+      .thumbnail-overlay {
+        opacity: 1;
+      }
+    }
+  }
+
+  .clickable-thumbnail {
+    display: block;
+    width: 100%;
+  }
+
+  .thumbnail-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 4px;
+
+    .view-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .pdf-preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .pdf-thumbnail-wrapper {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: scale(1.02);
+
+      .pdf-overlay {
+        opacity: 1;
+      }
+    }
+  }
+
+  .pdf-thumbnail {
+    display: block;
+    max-width: 100%;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .pdf-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    .pdf-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      color: #ff4d4f;
+    }
+
+    span {
+      font-size: 16px;
+      font-weight: 500;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
   }
 
   .default-thumbnail {

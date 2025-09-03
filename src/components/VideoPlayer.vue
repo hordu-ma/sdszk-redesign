@@ -90,7 +90,7 @@ defineOptions({
   name: "VideoPlayer",
 });
 
-const props = defineProps<{
+defineProps<{
   src: string;
   poster?: string;
 }>();

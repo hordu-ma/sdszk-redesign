@@ -458,7 +458,7 @@ const handleSearch = () => {
 };
 
 // 表格变化处理
-const handleTableChange = (pag: any, filters: any, sorter: any) => {
+const handleTableChange = (pag: any) => {
   console.log("🔄 分页变化:", {
     current: pag.current,
     pageSize: pag.pageSize,
@@ -508,7 +508,7 @@ const handleDownload = (record: ResourceItem) => {
       // 下载统计失败不影响用户体验，只是静默处理
       console.warn("Failed to update download count");
     });
-  } catch (error) {
+  } catch {
     message.error("下载失败，请重试");
   }
 };
