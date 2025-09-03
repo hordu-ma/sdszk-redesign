@@ -17,7 +17,7 @@
       </h3>
       <div class="video-grid">
         <div v-for="video in videos" :key="video.id" class="video-card">
-          <video-player :src="video.fileUrl" :poster="video.poster || ''" />
+          <video-player :src="video.fileUrl" :poster="video.thumbnail || ''" />
           <p class="video-title">
             {{ video.title }}
           </p>
@@ -79,7 +79,7 @@
 import { ref, onMounted } from "vue";
 // import { useRouter } from "vue-router";
 // import { resourceApi } from "@/api";
-import { debouncedGetResources } from "@/utils/homeApiHandler";
+import { debouncedGetResources } from "@/utils/homeApiHandler.js";
 import VideoPlayer from "../components/VideoPlayer.vue";
 import NewsSection from "../components/home/NewsSection.vue";
 import InfoSection from "../components/home/InfoSection.vue";

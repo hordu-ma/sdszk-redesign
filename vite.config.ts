@@ -96,6 +96,7 @@ export default defineConfig({
         secure: false,
         timeout: 10000,
         configure: (proxy, _options) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           proxy.on("error", (err, req, _res) => {
             console.error("🚨 代理错误:", {
               url: req.url,
@@ -104,6 +105,7 @@ export default defineConfig({
             });
           });
 
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           proxy.on("proxyReq", (proxyReq, req, _res) => {
             console.log("🔄 代理请求:", {
               from: req.url,
@@ -112,6 +114,7 @@ export default defineConfig({
             });
           });
 
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           proxy.on("proxyRes", (proxyRes, req, _res) => {
             console.log("✅ 代理响应:", {
               url: req.url,
@@ -120,6 +123,13 @@ export default defineConfig({
             });
           });
         },
+      },
+      // 代理静态文件请求
+      "/uploads": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+        timeout: 10000,
       },
     },
   },

@@ -20,8 +20,23 @@
             >
               <template #cover>
                 <div class="resource-cover">
+                  <!-- 视频资源显示视频播放器 -->
+                  <div v-if="isVideoResource(resource)" class="video-preview">
+                    <video
+                      :src="resource.fileUrl"
+                      :poster="resource.thumbnail"
+                      class="resource-video"
+                      preload="metadata"
+                    >
+                      您的浏览器不支持视频播放
+                    </video>
+                    <div class="video-overlay">
+                      <play-circle-outlined class="play-icon" />
+                    </div>
+                  </div>
+                  <!-- 其他资源显示缩略图 -->
                   <img
-                    v-if="resource.thumbnail"
+                    v-else-if="resource.thumbnail"
                     :src="resource.thumbnail"
                     :alt="resource.title"
                     class="resource-thumbnail"
@@ -53,7 +68,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { FileOutlined } from "@ant-design/icons-vue";
+import { FileOutlined, PlayCircleOutlined } from "@ant-design/icons-vue";
 import { resourceApi } from "@/api";
 import PageLayout from "@/components/common/PageLayout.vue";
 import type { Resource } from "@/api";
@@ -94,6 +109,16 @@ const goToDetail = (id: string) => {
   router.push(`/resources/detail/${id}`);
 };
 
+// 判断是否为视频资源
+const isVideoResource = (resource: Resource): boolean => {
+  return (
+    resource.fileType?.startsWith("video/") ||
+    resource.fileUrl?.includes("/videos/") ||
+    category.value === "video"
+  );
+};
+
+// 获取完整URL - 在开发环境中，vite代理会处理相对路径
 onMounted(() => {
   fetchResources();
 });
@@ -208,5 +233,46 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+}
+
+.video-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.resource-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+}
+
+.play-icon {
+  font-size: 48px;
+  color: white;
+  opacity: 0.8;
+  transition: all 0.3s;
+}
+
+.resource-card:hover .video-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.resource-card:hover .play-icon {
+  opacity: 1;
+  transform: scale(1.1);
 }
 </style>

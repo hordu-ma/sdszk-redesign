@@ -132,14 +132,10 @@ export const handleFileUpload = (req, res, next) => {
 
     // 单文件上传的情况
     if (req.file) {
-      const baseUrl =
-        process.env.BASE_URL || process.env.NODE_ENV === "production"
-          ? "https://horsduroot.com"
-          : `http://localhost:${process.env.PORT || 3000}`;
       const relativePath = path
         .relative(path.join(__dirname, ".."), req.file.path)
         .replace(/\\/g, "/");
-      const fileUrl = `${baseUrl}/${relativePath}`;
+      const fileUrl = `/${relativePath}`;
 
       return res.status(200).json({
         status: "success",
@@ -153,15 +149,11 @@ export const handleFileUpload = (req, res, next) => {
 
     // 多文件上传的情况
     if (req.files && req.files.length > 0) {
-      const baseUrl =
-        process.env.BASE_URL || process.env.NODE_ENV === "production"
-          ? "https://horsduroot.com"
-          : `http://localhost:${process.env.PORT || 3000}`;
       const files = req.files.map((file) => {
         const relativePath = path
           .relative(path.join(__dirname, ".."), file.path)
           .replace(/\\/g, "/");
-        const fileUrl = `${baseUrl}/${relativePath}`;
+        const fileUrl = `/${relativePath}`;
 
         return {
           filename: file.filename,

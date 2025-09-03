@@ -54,6 +54,7 @@ export interface Resource {
       };
   categoryId?: string;
   url?: string;
+  fileUrl?: string;
   fileSize?: number;
   fileType?: string;
   mimeType?: string;
