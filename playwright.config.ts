@@ -1,131 +1,108 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
- * See https://playwright.dev/docs/test-configuration.
+ * Playwright E2E 测试配置
+ *
+ * 注意：此配置期望开发服务器已通过 dev-start.sh 脚本手动启动
+ * 请在运行测试前确保：
+ * 1. 前端服务运行在 http://localhost:5173
+ * 2. 后端API服务运行在 http://localhost:3000
+ *
+ * 使用方法：
+ * - 启动服务：bash scripts/development/dev-start.sh
+ * - 运行测试：npm run test:e2e:basic
+ * - 停止服务：bash scripts/development/dev-stop.sh
  */
 export default defineConfig({
   testDir: "./tests/e2e",
-  globalSetup: "./tests/global-setup.ts",
-  /* Run tests in files in parallel */
+
+  /* 测试执行配置 */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Timeout for each test */
-  timeout: process.env.CI ? 60 * 1000 : 30 * 1000,
-  /* Timeout for expect() assertions */
+
+  /* 超时配置 */
+  timeout: 30 * 1000, // 30秒测试超时
   expect: {
-    timeout: process.env.CI ? 10000 : 5000,
+    timeout: 10 * 1000, // 10秒断言超时
   },
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? [["github"], ["html"]] : "html",
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+
+  /* 报告器配置 */
+  reporter: process.env.CI ? [["github"], ["html"]] : [["list"], ["html"]],
+
+  /* 测试输出目录 */
+  outputDir: "test-results/",
+
+  /* 全局测试配置 */
   use: {
-    /* 基础URL配置，用于page.goto()和测试请求 */
+    /* 基础URL - 指向本地开发服务器 */
     baseURL: "http://localhost:5173",
 
-    /* 等待策略 - CI环境更宽松的超时 */
-    actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
-    navigationTimeout: process.env.CI ? 60 * 1000 : 30 * 1000,
+    /* 超时配置 */
+    actionTimeout: 10 * 1000,
+    navigationTimeout: 30 * 1000,
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    /* 测试追踪和调试 */
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
 
-    /* CI环境额外配置 */
+    /* 浏览器配置 */
+    ignoreHTTPSErrors: true,
+
+    /* CI环境优化 */
     ...(process.env.CI && {
       launchOptions: {
         args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      }
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--disable-gpu",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+        ],
+      },
     }),
   },
 
-  /* Configure projects for major browsers */
+  /* 浏览器项目配置 */
   projects: [
     {
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        // Chromium 在 CI 环境中的优化配置
-        ...(process.env.CI && {
-          launchOptions: {
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--disable-gpu',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding'
-            ]
-          }
-        })
+        viewport: { width: 1280, height: 720 },
       },
     },
 
-    // Firefox 和 WebKit 暂时禁用，专注于 Chromium 稳定性
-    // 待 Chromium 测试完全稳定后再逐步启用
+    /* 移动端测试（可选启用） */
+    // {
+    //   name: "Mobile Chrome",
+    //   use: {
+    //     ...devices["Pixel 5"],
+    //   },
+    // },
 
+    /* 其他浏览器（可选启用） */
     // {
     //   name: "firefox",
     //   use: {
     //     ...devices["Desktop Firefox"],
-    //     actionTimeout: 20 * 1000,
-    //     navigationTimeout: 60 * 1000,
     //   },
     // },
-
     // {
     //   name: "webkit",
     //   use: {
     //     ...devices["Desktop Safari"],
     //   },
     // },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer configuration removed - services are started manually in CI
+  /* 服务健康检查 - 在测试开始前验证服务可用性 */
+  globalSetup: "./tests/health-check.ts",
 });
