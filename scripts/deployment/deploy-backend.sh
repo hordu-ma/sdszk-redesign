@@ -669,13 +669,31 @@ rollback_deployment() {
 cleanup_old_backups() {
     echo_step "清理旧备份文件..."
 
-    # 保留最近5个备份
+    # 保留最近5个备份 - 使用while循环避免参数过长问题
     local cleanup_script="
         cd /var/www 2>/dev/null || exit 0
-        ls -t sdszk-backend-backup-* 2>/dev/null | tail -n +6 | xargs rm -rf 2>/dev/null || true
+        backup_count=\$(ls -1d sdszk-backend-backup-* 2>/dev/null | wc -l)
+        echo \"当前备份数量: \$backup_count\"
+
+        if [ \$backup_count -le 5 ]; then
+            echo \"备份数量不超过5个，无需清理\"
+            exit 0
+        fi
+
+        # 使用while循环逐个删除，避免参数过长问题
+        ls -dt sdszk-backend-backup-* 2>/dev/null | tail -n +6 | while read dir; do
+            if [ -d \"\$dir\" ]; then
+                echo \"删除旧备份: \$dir\"
+                rm -rf \"\$dir\"
+            fi
+        done
+
+        # 验证清理结果
+        remaining=\$(ls -1d sdszk-backend-backup-* 2>/dev/null | wc -l)
+        echo \"清理后剩余备份数量: \$remaining\"
     "
 
-    if safe_ssh_script 30 "$cleanup_script"; then
+    if safe_ssh_script 60 "$cleanup_script"; then
         echo_success "旧备份清理完成"
     else
         echo_warning "旧备份清理失败，不影响部署"
