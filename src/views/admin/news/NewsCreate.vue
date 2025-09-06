@@ -65,6 +65,9 @@
                   :max-length="10000"
                   @word-count="handleWordCount"
                 />
+                <div class="editor-tip">
+                  支持Markdown格式，图片会自动插入到新行
+                </div>
               </a-form-item>
             </div>
           </a-col>
@@ -177,7 +180,9 @@ import {
 import { adminNewsApi, type NewsFormData } from "@/api/modules/adminNews";
 import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
 import QuillEditor from "@/components/common/QuillEditor.vue";
+// 确保QuillEditor组件能正确导入
 import { useUserStore } from "@/stores/user";
+import api from "@/utils/api";
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi();
@@ -258,7 +263,7 @@ const beforeUpload: UploadProps["beforeUpload"] = (file) => {
     message.error("只能上传 JPG/PNG 格式的图片!");
     return false;
   }
-  const isLt2M = file.size! / 1024 / 1024 < 2;
+  const isLt2M = (file.size || 0) / 1024 / 1024 < 2;
   if (!isLt2M) {
     message.error("图片大小不能超过 2MB!");
     return false;
@@ -273,19 +278,27 @@ const handleImageUpload = async ({ file }: any) => {
     uploadFormData.append("file", file);
 
     // 调用上传API
-    // 注意：这里需要替换为实际的上传API
-    // const { data } = await uploadApi.uploadImage(uploadFormData)
-    // formData.featuredImage = data.url
+    const response = await api.post("/api/upload/single", uploadFormData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-    // 临时使用本地预览（在API实现前使用）
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      formData.featuredImage = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-
-    message.success("图片上传成功");
+    if (response.data && response.data.status === "success") {
+      // 使用服务器返回的真实URL
+      formData.featuredImage = response.data.data.fileUrl;
+      message.success("图片上传成功");
+    } else {
+      // 临时使用本地预览（在API响应格式不符合预期时）
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        formData.featuredImage = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+      message.success("图片上传成功（本地预览）");
+    }
   } catch (error: any) {
+    console.error("图片上传失败:", error);
     message.error(error.message || "图片上传失败");
   }
 };
@@ -502,10 +515,17 @@ onMounted(() => {
 
     .upload-tip {
       margin-top: 8px;
-      font-size: 12px;
+      font-size: 14px;
       color: #999;
       text-align: center;
     }
+  }
+
+  .editor-tip {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
   }
 }
 

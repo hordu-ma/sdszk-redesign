@@ -63,7 +63,14 @@
                   v-model="formData.content"
                   placeholder="请输入新闻内容..."
                   height="400px"
+                  :show-toolbar="true"
+                  :show-word-count="true"
+                  :max-length="10000"
+                  @word-count="handleWordCount"
                 />
+                <div class="editor-tip">
+                  支持Markdown格式，图片会自动插入到新行
+                </div>
               </a-form-item>
             </div>
           </a-col>
@@ -183,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { message } from "ant-design-vue";
 import {
@@ -197,7 +204,7 @@ import {
   type NewsItem,
 } from "@/api/modules/adminNews";
 import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
-import QuillEditor from "@/components/common/QuillEditor.vue";
+import QuillEditor from "@/components/common/QuillEditor.vue"; // 导入编辑器组件
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi();
@@ -210,6 +217,7 @@ interface Props {
 const props = defineProps<Props>();
 const router = useRouter();
 const route = useRoute();
+const newsId = computed(() => route.params.id as string);
 const formRef = ref();
 const quillEditorRef = ref();
 
@@ -279,7 +287,7 @@ const formatDate = (dateString?: string) => {
 const fetchNewsDetail = async () => {
   try {
     loading.value = true;
-    const response = await adminNewsApi.getDetail(props.id);
+    const response = await adminNewsApi.getDetail(newsId.value);
     newsData.value = response.data;
 
     // 填充表单数据
@@ -334,6 +342,11 @@ const handleRemoveImage = () => {
 };
 
 // 保存修改
+// 处理字数统计
+const handleWordCount = (count: number) => {
+  console.log("当前字数：", count);
+};
+
 const handleSave = async () => {
   try {
     saving.value = true;
@@ -484,6 +497,13 @@ onMounted(async () => {
       font-size: 14px;
       font-weight: 500;
     }
+  }
+
+  .editor-tip {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
   }
 }
 </style>

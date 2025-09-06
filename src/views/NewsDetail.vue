@@ -33,7 +33,7 @@
           </div>
 
           <!-- 主要内容 -->
-          <div class="article-body" v-html="newsData.content" />
+          <div class="article-body" v-html="processedContent" />
         </div>
 
         <!-- 相关文章 -->
@@ -94,6 +94,27 @@ const newsData = ref<News>({
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
+
+// 处理内容，确保图片正确显示
+const processedContent = computed(() => {
+  const content = newsData.value.content || "";
+
+  // 对内容进行处理，确保图片显示在新行
+  return content
+    .replace(
+      /!\[(.*?)\]\((.*?)\)/g,
+      '</p><p><img src="$2" alt="$1" style="max-width: 100%; display: block; margin: 1em 0;"></p><p>',
+    )
+    .replace(/<img/g, "</p><p><img")
+    .replace(/\/><\/p>/g, "/></p>")
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/\n/g, "<br>")
+    .replace(/^/, "<p>")
+    .replace(/$/, "</p>")
+    .replace(/<p><\/p>/g, "");
+});
+
+// 相关文章
 
 // 相关文章
 const relatedNews = ref<Array<{ id: string; title: string; date: string }>>([]);
@@ -218,6 +239,29 @@ watch(
 
 .article-body p {
   margin-bottom: 20px;
+  min-height: 1em;
+}
+
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em 0;
+  border-radius: 4px;
+}
+
+/* 内容样式 */
+.article-body p {
+  margin-bottom: 1.5em;
+  min-height: 1em;
+}
+
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+  display: block;
+  border-radius: 4px;
 }
 
 .image-container {

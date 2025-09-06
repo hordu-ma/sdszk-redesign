@@ -330,8 +330,24 @@ const handleImageInsert = () => {
     return;
   }
 
+  // 检查光标位置是否需要添加换行
+  const textarea = editorContainer.value?.querySelector(
+    "textarea",
+  ) as HTMLTextAreaElement;
+  const cursorPosition = textarea?.selectionStart || 0;
+  const currentContent = content.value;
+
+  // 如果光标不在行首且前一个字符不是换行符，先添加换行符
+  const needsLineBreak =
+    cursorPosition > 0 &&
+    currentContent.charAt(cursorPosition - 1) !== "\n" &&
+    currentContent.charAt(cursorPosition - 1) !== "\r";
+
   const altText = imageAlt.value.trim() || "图片";
-  const imageMarkdown = `![${altText}](${imageUrl.value})`;
+  const imageMarkdown = needsLineBreak
+    ? `\n\n![${altText}](${imageUrl.value})`
+    : `![${altText}](${imageUrl.value})`;
+
   insertText(imageMarkdown);
   imageModalVisible.value = false;
   // 重置表单
@@ -364,7 +380,7 @@ const handleLinkInsert = () => {
   linkUrlError.value = "";
 };
 
-// 图片验证函数（不阻止上传）
+// 图片验证函数
 const validateImage = (file: File) => {
   console.log("开始验证图片:", file.name, file.type, file.size);
 
@@ -391,7 +407,7 @@ const validateImage = (file: File) => {
 
     hasError.value = false;
     console.log("图片验证通过");
-    return true; // 返回true允许继续上传
+    return true;
   } catch (error) {
     const errorMsg = "处理图片时发生错误";
     console.error(errorMsg, error);
@@ -409,13 +425,11 @@ const handleImageUpload = async ({ file }: any) => {
   try {
     uploading.value = true;
 
-    // 创建FormData
     const formData = new FormData();
     formData.append("file", file);
 
     console.log("发送上传请求到 /api/upload/single");
 
-    // 使用项目统一的API实例（会自动添加认证token）
     const response = await api.post("/api/upload/single", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -425,24 +439,34 @@ const handleImageUpload = async ({ file }: any) => {
     console.log("上传响应:", response.data);
 
     if (response.data && response.data.status === "success") {
-      // 使用服务器返回的真实URL
       imageUrl.value = response.data.data.fileUrl;
       console.log("设置图片URL:", imageUrl.value);
       message.success("图片上传成功");
 
-      // 上传成功后自动插入图片到编辑器
       nextTick(() => {
         console.log("自动插入图片到编辑器");
-
-        // 清除任何现有的错误状态
         imageUrlError.value = "";
 
-        // 直接插入图片到编辑器 - 使用HTML格式而非Markdown
-        const altText = imageAlt.value.trim() || "图片";
-        const imageHtml = `<img src="${imageUrl.value}" alt="${altText}" style="max-width: 100%;" />`;
-        insertText(imageHtml);
+        // 检查光标位置是否需要添加换行
+        const textarea = editorContainer.value?.querySelector(
+          "textarea",
+        ) as HTMLTextAreaElement;
+        const cursorPosition = textarea?.selectionStart || 0;
+        const currentContent = content.value;
 
-        // 关闭对话框并重置表单
+        // 如果光标不在行首且前一个字符不是换行符，先添加换行符
+        const needsLineBreak =
+          cursorPosition > 0 &&
+          currentContent.charAt(cursorPosition - 1) !== "\n" &&
+          currentContent.charAt(cursorPosition - 1) !== "\r";
+
+        const altText = imageAlt.value.trim() || "图片";
+        const imageMarkdown = needsLineBreak
+          ? `\n\n![${altText}](${imageUrl.value})`
+          : `![${altText}](${imageUrl.value})`;
+
+        insertText(imageMarkdown);
+
         imageModalVisible.value = false;
         imageUrl.value = "";
         imageAlt.value = "";
@@ -455,12 +479,6 @@ const handleImageUpload = async ({ file }: any) => {
     }
   } catch (error: any) {
     console.error("图片上传失败:", error);
-    console.error("错误详情:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-
     const errorMsg =
       error.response?.data?.message ||
       error.response?.data?.error ||
@@ -481,7 +499,6 @@ const cleanup = () => {
     document.body.style.overflow = "auto";
   }
 
-  // 清理图片URL
   if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
     URL.revokeObjectURL(imageUrl.value);
   }
@@ -583,7 +600,6 @@ defineExpose({
   margin-top: 4px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .editor-toolbar {
     padding: 6px 8px;
