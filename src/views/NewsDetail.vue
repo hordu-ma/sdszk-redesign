@@ -33,7 +33,7 @@
           </div>
 
           <!-- 主要内容 -->
-          <div class="article-body" v-html="newsData.content" />
+          <div class="article-body" v-html="processedContent" />
         </div>
 
         <!-- 相关文章 -->
@@ -93,6 +93,22 @@ const newsData = ref<News>({
   status: "draft",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+});
+
+// 处理内容中的blob URL
+const processedContent = computed(() => {
+  if (!newsData.value.content) return "";
+
+  // 将blob URL的图片标签替换为占位符
+  return newsData.value.content
+    .replace(
+      /!\[([^\]]*)\]\(blob:https?:\/\/[^)]+\)/g,
+      '<div class="image-placeholder">📷 图片暂不可用</div>',
+    )
+    .replace(
+      /<img[^>]*src=["']blob:https?:\/\/[^"']*["'][^>]*>/gi,
+      '<div class="image-placeholder">📷 图片暂不可用</div>',
+    );
 });
 
 // 相关文章
@@ -243,5 +259,18 @@ watch(
 
 .not-found .ant-result {
   background: #fff;
+}
+
+.image-placeholder {
+  display: inline-block;
+  padding: 20px 40px;
+  margin: 15px 0;
+  background-color: #f5f5f5;
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>
