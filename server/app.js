@@ -248,7 +248,7 @@ app.use("/api/news-categories", newsCategoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin/users", userRoutes);
-app.use("/api/uploads", uploadRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/admin/resources", adminResourceRoutes); // 使用专门的管理员资源路由
 app.use("/api/resource-categories", resourceCategoryRoutes);

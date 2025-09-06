@@ -437,10 +437,10 @@ const handleImageUpload = async ({ file }: any) => {
         // 清除任何现有的错误状态
         imageUrlError.value = "";
 
-        // 直接插入图片到编辑器
+        // 直接插入图片到编辑器 - 使用HTML格式而非Markdown
         const altText = imageAlt.value.trim() || "图片";
-        const imageMarkdown = `![${altText}](${imageUrl.value})`;
-        insertText(imageMarkdown);
+        const imageHtml = `<img src="${imageUrl.value}" alt="${altText}" style="max-width: 100%;" />`;
+        insertText(imageHtml);
 
         // 关闭对话框并重置表单
         imageModalVisible.value = false;
