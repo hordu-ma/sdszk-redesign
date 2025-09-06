@@ -96,12 +96,13 @@
           <a-form-item label="或者上传图片">
             <a-upload
               :before-upload="beforeImageUpload"
+              :custom-request="handleImageUpload"
               :show-upload-list="false"
               accept="image/*"
             >
-              <a-button>
+              <a-button :loading="uploading">
                 <upload-outlined />
-                选择图片
+                {{ uploading ? "上传中..." : "选择图片" }}
               </a-button>
             </a-upload>
           </a-form-item>
@@ -148,6 +149,8 @@ import {
   FullscreenExitOutlined,
   UploadOutlined,
 } from "@ant-design/icons-vue";
+import { message } from "ant-design-vue";
+import axios from "axios";
 
 interface Props {
   modelValue?: string;
@@ -196,6 +199,7 @@ const linkText = ref("");
 // 验证状态
 const imageUrlError = ref("");
 const linkUrlError = ref("");
+const uploading = ref(false);
 
 // 计算属性
 const wordCount = computed(() => {
@@ -363,6 +367,7 @@ const beforeImageUpload = (file: File) => {
       console.error(errorMsg);
       emit("error", errorMsg);
       hasError.value = true;
+      message.error(errorMsg);
       return false;
     }
 
@@ -372,26 +377,54 @@ const beforeImageUpload = (file: File) => {
       console.error(errorMsg);
       emit("error", errorMsg);
       hasError.value = true;
+      message.error(errorMsg);
       return false;
     }
 
-    // 清理之前的URL
-    if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
-      URL.revokeObjectURL(imageUrl.value);
-    }
-
-    // 创建临时URL用于预览
-    const url = URL.createObjectURL(file);
-    imageUrl.value = url;
     hasError.value = false;
-
-    return false; // 阻止自动上传
+    return false; // 阻止自动上传，使用自定义上传
   } catch (error) {
     const errorMsg = "处理图片时发生错误";
     console.error(errorMsg, error);
     emit("error", errorMsg);
     hasError.value = true;
+    message.error(errorMsg);
     return false;
+  }
+};
+
+// 处理图片上传
+const handleImageUpload = async ({ file }: any) => {
+  try {
+    uploading.value = true;
+
+    // 创建FormData
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // 上传到服务器
+    const response = await axios.post("/api/upload/single", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.data && response.data.status === "success") {
+      // 使用服务器返回的真实URL
+      imageUrl.value = response.data.data.fileUrl;
+      message.success("图片上传成功");
+    } else {
+      throw new Error("上传响应格式错误");
+    }
+  } catch (error: any) {
+    console.error("图片上传失败:", error);
+    const errorMsg =
+      error.response?.data?.message || error.message || "图片上传失败";
+    message.error(errorMsg);
+    emit("error", errorMsg);
+    hasError.value = true;
+  } finally {
+    uploading.value = false;
   }
 };
 
