@@ -10,7 +10,9 @@ import {
   toggleFeaturedStatus,
   getUpcomingActivities,
 } from "../controllers/activityController.js";
+import { getActivityRegistrations } from "../controllers/activityRegistrationController.js";
 import { authenticateToken } from "../middleware/auth.js";
+import { checkPermission } from "../middleware/permissionMiddleware.js";
 
 const router = express.Router();
 
@@ -19,6 +21,14 @@ router.get("/", getActivityList);
 
 // 获取单个活动
 router.get("/:id", getActivityById);
+
+// 获取指定活动的所有报名记录 (管理员/活动管理者)
+router.get(
+  "/:id/registrations",
+  authenticateToken,
+  checkPermission("activities", "manage"),
+  getActivityRegistrations,
+);
 
 // 创建新活动
 router.post("/", authenticateToken, createActivity);

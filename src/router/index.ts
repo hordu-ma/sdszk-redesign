@@ -140,6 +140,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: "/activity-signup",
+    name: "activity-signup",
+    component: () => import("../views/ActivitySignupView.vue"),
+    meta: {
+      title: "活动报名",
+    },
+  },
+  {
     path: "/resources",
     name: "resources",
     component: () => import("../views/Resources.vue"),

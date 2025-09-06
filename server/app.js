@@ -44,6 +44,7 @@ import uploadRoutes from "./routes/upload.js";
 import resourceRoutes from "./routes/resources.js";
 import resourceCategoryRoutes from "./routes/resourceCategories.js";
 import activityRoutes from "./routes/activities.js";
+import activityRegistrationRoutes from "./routes/activityRegistrationRoutes.js";
 import settingRoutes from "./routes/settings.js";
 import activityLogRoutes from "./routes/activityLogs.js";
 import dashboardRoutes from "./routes/dashboard.js";
@@ -252,6 +253,7 @@ app.use("/api/resources", resourceRoutes);
 app.use("/api/admin/resources", adminResourceRoutes); // 使用专门的管理员资源路由
 app.use("/api/resource-categories", resourceCategoryRoutes);
 app.use("/api/activities", activityRoutes);
+app.use("/api/registrations", activityRegistrationRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/logs", activityLogRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
