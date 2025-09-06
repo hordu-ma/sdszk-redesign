@@ -95,10 +95,10 @@
           </a-form-item>
           <a-form-item label="或者上传图片">
             <a-upload
-              :before-upload="beforeImageUpload"
               :custom-request="handleImageUpload"
               :show-upload-list="false"
               accept="image/*"
+              :before-upload="validateImage"
             >
               <a-button :loading="uploading">
                 <upload-outlined />
@@ -150,7 +150,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
-import axios from "axios";
+import api from "@/utils/api";
 
 interface Props {
   modelValue?: string;
@@ -364,8 +364,10 @@ const handleLinkInsert = () => {
   linkUrlError.value = "";
 };
 
-// 图片上传前处理
-const beforeImageUpload = (file: File) => {
+// 图片验证函数（不阻止上传）
+const validateImage = (file: File) => {
+  console.log("开始验证图片:", file.name, file.type, file.size);
+
   try {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
@@ -388,7 +390,8 @@ const beforeImageUpload = (file: File) => {
     }
 
     hasError.value = false;
-    return false; // 阻止自动上传，使用自定义上传
+    console.log("图片验证通过");
+    return true; // 返回true允许继续上传
   } catch (error) {
     const errorMsg = "处理图片时发生错误";
     console.error(errorMsg, error);
@@ -401,6 +404,8 @@ const beforeImageUpload = (file: File) => {
 
 // 处理图片上传
 const handleImageUpload = async ({ file }: any) => {
+  console.log("开始上传图片:", file.name);
+
   try {
     uploading.value = true;
 
@@ -408,25 +413,31 @@ const handleImageUpload = async ({ file }: any) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    // 上传到服务器
-    const response = await axios.post("/api/upload/single", formData, {
+    console.log("发送上传请求到 /api/upload/single");
+
+    // 使用项目统一的API实例（会自动添加认证token）
+    const response = await api.post("/api/upload/single", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
 
+    console.log("上传响应:", response.data);
+
     if (response.data && response.data.status === "success") {
       // 使用服务器返回的真实URL
       imageUrl.value = response.data.data.fileUrl;
+      console.log("设置图片URL:", imageUrl.value);
       message.success("图片上传成功");
 
       // 上传成功后自动插入图片到编辑器
-      // 确保URL设置完成后再插入
       nextTick(() => {
+        console.log("自动插入图片到编辑器");
+
         // 清除任何现有的错误状态
         imageUrlError.value = "";
 
-        // 直接插入图片到编辑器，跳过验证（因为是服务器返回的有效URL）
+        // 直接插入图片到编辑器
         const altText = imageAlt.value.trim() || "图片";
         const imageMarkdown = `![${altText}](${imageUrl.value})`;
         insertText(imageMarkdown);
@@ -436,19 +447,31 @@ const handleImageUpload = async ({ file }: any) => {
         imageUrl.value = "";
         imageAlt.value = "";
         imageUrlError.value = "";
+
+        console.log("图片插入完成，对话框已关闭");
       });
     } else {
-      throw new Error("上传响应格式错误");
+      throw new Error(`上传响应格式错误: ${JSON.stringify(response.data)}`);
     }
   } catch (error: any) {
     console.error("图片上传失败:", error);
+    console.error("错误详情:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+
     const errorMsg =
-      error.response?.data?.message || error.message || "图片上传失败";
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "图片上传失败";
     message.error(errorMsg);
     emit("error", errorMsg);
     hasError.value = true;
   } finally {
     uploading.value = false;
+    console.log("上传流程结束");
   }
 };
 
