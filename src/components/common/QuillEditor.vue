@@ -302,6 +302,12 @@ const insertText = (text: string) => {
 
 // URL验证函数
 const isValidUrl = (url: string): boolean => {
+  // 支持相对路径URL（如 /uploads/images/xxx.jpg）
+  if (url.startsWith("/")) {
+    return true;
+  }
+
+  // 支持完整HTTP/HTTPS URL
   try {
     const urlObj = new URL(url);
     return urlObj.protocol === "http:" || urlObj.protocol === "https:";
@@ -415,9 +421,22 @@ const handleImageUpload = async ({ file }: any) => {
       message.success("图片上传成功");
 
       // 上传成功后自动插入图片到编辑器
-      setTimeout(() => {
-        handleImageInsert();
-      }, 500);
+      // 确保URL设置完成后再插入
+      nextTick(() => {
+        // 清除任何现有的错误状态
+        imageUrlError.value = "";
+
+        // 直接插入图片到编辑器，跳过验证（因为是服务器返回的有效URL）
+        const altText = imageAlt.value.trim() || "图片";
+        const imageMarkdown = `![${altText}](${imageUrl.value})`;
+        insertText(imageMarkdown);
+
+        // 关闭对话框并重置表单
+        imageModalVisible.value = false;
+        imageUrl.value = "";
+        imageAlt.value = "";
+        imageUrlError.value = "";
+      });
     } else {
       throw new Error("上传响应格式错误");
     }
