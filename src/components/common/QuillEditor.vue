@@ -413,6 +413,11 @@ const handleImageUpload = async ({ file }: any) => {
       // 使用服务器返回的真实URL
       imageUrl.value = response.data.data.fileUrl;
       message.success("图片上传成功");
+
+      // 上传成功后自动插入图片到编辑器
+      setTimeout(() => {
+        handleImageInsert();
+      }, 500);
     } else {
       throw new Error("上传响应格式错误");
     }

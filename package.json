@@ -38,6 +38,8 @@
     "deploy:aliyun": "bash scripts/deployment/deploy.sh",
     "db:sync": "bash scripts/database/quick-sync.sh",
     "db:sync-full": "bash scripts/database/sync-database.sh",
+    "clean:blob-urls": "node scripts/maintenance/clean-blob-urls.js",
+    "clean:blob-urls:execute": "node scripts/maintenance/clean-blob-urls.js --execute",
     "db:tunnel": "bash scripts/database/mongodb-tunnel.sh",
     "db:verify": "bash scripts/database/verify-database.sh",
     "fix:urls:prod": "bash scripts/database/fix-production-urls.sh",
