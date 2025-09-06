@@ -304,26 +304,72 @@ export const getNewsById = async (req, res) => {
 // 创建新闻
 export const createNews = async (req, res) => {
   try {
-    // 自动设置创建者信息
+    // 验证用户认证状态
+    if (!req.user?._id && !req.user?.id) {
+      return response.error(res, "用户认证失败", 401);
+    }
+
+    // 验证必填字段
+    if (!req.body.title) {
+      return response.error(res, "新闻标题不能为空", 400);
+    }
+
+    if (!req.body.content) {
+      return response.error(res, "新闻内容不能为空", 400);
+    }
+
+    if (!req.body.category) {
+      return response.error(res, "新闻分类不能为空", 400);
+    }
+
+    // 自动设置创建者信息 - 修复数据类型问题
+    const userId = req.user._id || req.user.id;
     const newsData = {
       ...req.body,
-      createdBy: req.user?._id || req.user?.id,
-      author:
-        req.body.author || req.user?.name || req.user?.username || "管理员",
+      author: userId, // 使用 ObjectId 而不是字符串
+      createdBy: userId,
     };
 
-    console.log("创建新闻数据:", newsData);
+    console.log("创建新闻数据:", {
+      ...newsData,
+      content: newsData.content
+        ? newsData.content.substring(0, 100) + "..."
+        : "N/A",
+    });
     console.log("用户信息:", {
-      id: req.user?._id,
+      id: req.user?._id || req.user?.id,
       name: req.user?.name,
       username: req.user?.username,
     });
 
     const news = new News(newsData);
     const savedNews = await news.save();
-    return response.success(res, savedNews, "创建新闻成功", 201);
+
+    // 返回时填充关联数据
+    const populatedNews = await News.findById(savedNews._id)
+      .populate("category", "name key")
+      .populate("author", "username name")
+      .populate("createdBy", "username name");
+
+    return response.success(res, populatedNews, "创建新闻成功", 201);
   } catch (err) {
     console.error("创建新闻错误:", err);
+    console.error("错误详情:", {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    });
+
+    // 提供更具体的错误信息
+    if (err.name === "ValidationError") {
+      const errors = Object.values(err.errors).map((e) => e.message);
+      return response.error(res, `数据验证失败: ${errors.join(", ")}`, 400);
+    }
+
+    if (err.name === "CastError") {
+      return response.error(res, `数据格式错误: ${err.message}`, 400);
+    }
+
     return response.serverError(res, "创建新闻失败", err);
   }
 };
