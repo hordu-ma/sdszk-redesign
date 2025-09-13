@@ -25,9 +25,18 @@ const handleJWTExpiredError = () => new AppError("令牌已过期，请重新登
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
-    error: err,
+    error: {
+      statusCode: err.statusCode,
+      status: err.status,
+      isOperational: err.isOperational,
+      name: err.name,
+      code: err.code,
+    },
     message: err.message,
     stack: err.stack,
+    timestamp: new Date().toISOString(),
+    path: res.req?.originalUrl,
+    method: res.req?.method,
   });
 };
 
@@ -45,7 +54,13 @@ const sendErrorProd = (err, res) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
+      error: {
+        statusCode: err.statusCode,
+        status: err.status,
+        isOperational: err.isOperational,
+      },
       message: err.message,
+      timestamp: new Date().toISOString(),
     });
   }
   // 编程错误：不发送详细信息给客户端，但要记录
@@ -53,12 +68,19 @@ const sendErrorProd = (err, res) => {
     console.error("严重错误 💥", err);
     res.status(500).json({
       status: "error",
+      error: {
+        statusCode: 500,
+        status: "error",
+        isOperational: false,
+      },
       message: "服务器内部错误，请稍后重试",
+      timestamp: new Date().toISOString(),
     });
   }
 };
 
-export default (err, req, res, next) => {
+// eslint-disable-next-line no-unused-vars
+export default (err, req, res, _next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 

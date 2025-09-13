@@ -90,6 +90,7 @@
         :loading="loading"
         :pagination="pagination"
         :row-selection="rowSelection"
+        :scroll="{ y: 600 }"
         row-key="id"
         @change="handleTableChange"
       >
@@ -285,9 +286,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, watchEffect } from "vue";
 import { message } from "ant-design-vue";
 import dayjs from "dayjs";
+import { debounce } from "lodash-es";
 import {
   PlusOutlined,
   DownloadOutlined,
@@ -301,7 +303,6 @@ import type {
   AdminUserItem,
   UserFormData,
   RoleItem,
-  PermissionItem,
   UserQueryParams,
 } from "@/api/modules/adminUser";
 
@@ -316,7 +317,7 @@ const currentUserId = ref<number>();
 
 const users = ref<AdminUserItem[]>([]);
 const roles = ref<RoleItem[]>([]);
-const permissions = ref<PermissionItem[]>([]);
+
 const permissionTree = ref<any[]>([]);
 
 const selectedRowKeys = ref<number[]>([]);
@@ -490,7 +491,7 @@ const loadUsers = async () => {
     const response = await adminUserApi.getList(searchForm);
     users.value = response.data.data || response.data;
     pagination.total = response.pagination?.total || 0;
-  } catch (error) {
+  } catch {
     message.error("加载用户列表失败");
   } finally {
     loading.value = false;
@@ -540,6 +541,10 @@ const handleSearch = () => {
   loadUsers();
 };
 
+// 防抖搜索
+const debouncedSearch = debounce(handleSearch, 500);
+
+// 处理日期范围变化
 const handleDateChange = (dates: [dayjs.Dayjs, dayjs.Dayjs] | null) => {
   if (dates) {
     searchForm.startDate = dates[0].format("YYYY-MM-DD");
@@ -548,7 +553,7 @@ const handleDateChange = (dates: [dayjs.Dayjs, dayjs.Dayjs] | null) => {
     searchForm.startDate = undefined;
     searchForm.endDate = undefined;
   }
-  handleSearch();
+  debouncedSearch();
 };
 
 const handleTableChange = (pag: any) => {
@@ -567,7 +572,8 @@ const showCreateModal = () => {
   resetForm();
 };
 
-const viewUser = (user: AdminUserItem) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const viewUser = (_user: AdminUserItem) => {
   // 实现用户详情查看
   message.info("查看用户详情功能待实现");
 };
@@ -592,7 +598,7 @@ const quickToggleStatus = async (user: AdminUserItem) => {
     await adminUserApi.updateStatus(user.id, newStatus);
     message.success("状态更新成功");
     loadUsers();
-  } catch (error) {
+  } catch {
     message.error("状态更新失败");
   }
 };
@@ -617,19 +623,20 @@ const deleteUser = async (id: number) => {
     await adminUserApi.deleteUser(id);
     message.success("删除成功");
     loadUsers();
-  } catch (error) {
+  } catch {
     message.error("删除失败");
   }
 };
 
-const batchUpdateStatus = async (status: "active" | "inactive") => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const batchUpdateStatus = async (_status: "active" | "inactive") => {
   try {
     // 这里需要后端支持批量状态更新
     message.success("批量更新成功");
     clearSelection();
     loadUsers();
-  } catch (error) {
-    message.error("批量更新失败");
+  } catch {
+    message.error("重置密码失败");
   }
 };
 
@@ -639,7 +646,7 @@ const batchDelete = async () => {
     message.success("批量删除成功");
     clearSelection();
     loadUsers();
-  } catch (error) {
+  } catch {
     message.error("批量删除失败");
   }
 };
@@ -717,6 +724,13 @@ const resetForm = () => {
 };
 
 // 生命周期
+// 自动搜索响应
+watchEffect(() => {
+  if (searchForm.keyword || searchForm.status || searchForm.role) {
+    debouncedSearch();
+  }
+});
+
 onMounted(() => {
   loadUsers();
   loadRoles();

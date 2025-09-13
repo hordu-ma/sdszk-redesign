@@ -3,10 +3,6 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import {
-  getAllUsers,
-  getUser,
-  updateUser,
-  deleteUser,
   updatePassword,
   getMe,
   updateMyProfile,
@@ -14,12 +10,8 @@ import {
   getUserStats,
   getMyActivityLog,
   deleteMyAccount,
-  createUser,
-  updateUserStatus,
-  resetUserPassword,
-  batchDeleteUsers,
 } from "../controllers/userController.js";
-import { protect, restrictTo } from "../controllers/authController.js";
+import { protect } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -53,10 +45,10 @@ const upload = multer({
   },
 });
 
-// 保护所有用户路由
+// 保护所有用户路由 - 需要用户登录
 router.use(protect);
 
-// 当前用户路由
+// 当前用户自服务路由
 router.get("/me", getMe);
 router.patch("/me", updateMyProfile);
 router.patch("/update-password", updatePassword);
@@ -64,17 +56,5 @@ router.post("/upload-avatar", upload.single("avatar"), uploadAvatar);
 router.get("/stats", getUserStats);
 router.get("/activity-log", getMyActivityLog);
 router.delete("/delete-account", deleteMyAccount);
-
-// 限制以下路由只允许管理员访问
-router.use(restrictTo("admin"));
-
-router.route("/").get(getAllUsers).post(createUser);
-
-router.post("/batch-delete", batchDeleteUsers);
-
-router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
-
-router.patch("/:id/status", updateUserStatus);
-router.patch("/:id/reset-password", resetUserPassword);
 
 export default router;

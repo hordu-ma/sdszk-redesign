@@ -188,16 +188,30 @@
         </div>
         <div class="info-item">
           <span class="label">注册时间:</span>
-          <span>{{ formatDate(userInfo?.createdAt) }}</span>
+          <span>{{
+            formatDate(userStore.userInfo?.createdAt || userInfo?.createdAt)
+          }}</span>
         </div>
         <div class="info-item">
           <span class="label">最后登录:</span>
-          <span>{{ formatDate(userInfo?.lastLoginAt) }}</span>
+          <span>{{
+            formatDate(userStore.userInfo?.lastLogin || userInfo?.lastLoginAt)
+          }}</span>
         </div>
         <div class="info-item">
           <span class="label">账户状态:</span>
-          <el-tag :type="userInfo?.status === 'active' ? 'success' : 'danger'">
-            {{ userInfo?.status === "active" ? "正常" : "已禁用" }}
+          <el-tag
+            :type="
+              (userStore.userInfo?.status || userInfo?.status) === 'active'
+                ? 'success'
+                : 'danger'
+            "
+          >
+            {{
+              (userStore.userInfo?.status || userInfo?.status) === "active"
+                ? "正常"
+                : "已禁用"
+            }}
           </el-tag>
         </div>
       </div>
@@ -207,13 +221,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, defineAsyncComponent } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage } from "element-plus";
 import type {
   FormInstance,
   FormRules,
-  UploadRequestOptions,
   UploadInstance,
-  UploadFile,
   UploadRawFile,
 } from "element-plus";
 import { useUserStore } from "@/stores/user";
@@ -334,17 +346,17 @@ const rules: FormRules = {
 
 // 初始化数据
 const initData = () => {
-  if (userInfo.value) {
+  if (userStore.userInfo) {
     Object.assign(formData, {
-      username: userStore.userInfo?.username || "",
-      name: userStore.userInfo?.name || "",
-      email: userStore.userInfo?.email || "",
-      phone: userInfo.value.phone || "",
-      gender: userInfo.value.gender || "",
-      birthday: userInfo.value.birthday || "",
-      bio: userInfo.value.bio || "",
-      location: userInfo.value.location || "",
-      avatar: userStore.userInfo?.avatar || "",
+      username: userStore.userInfo.username || "",
+      name: userStore.userInfo.name || "",
+      email: userStore.userInfo.email || "",
+      phone: userStore.userInfo.phone || "",
+      gender: (userStore.userInfo as any).gender || "",
+      birthday: (userStore.userInfo as any).birthday || "",
+      bio: (userStore.userInfo as any).bio || "",
+      location: (userStore.userInfo as any).location || "",
+      avatar: userStore.userInfo.avatar || "",
     });
     // 备份原始数据
     originalData = { ...formData };
@@ -373,7 +385,7 @@ const saveProfile = async () => {
         const updateData = { ...formData };
         // TypeScript 会检查 delete 操作符的操作对象是否可选
         // 这里我们可以使用可选的方式构建一个新对象，而不是使用 delete
-        const { username, avatar, ...submitData } = updateData;
+        const { username, ...submitData } = updateData;
 
         // 使用 userApi 更新资料
         await userApi.updateProfile(submitData);
@@ -447,7 +459,8 @@ const beforeAvatarUpload = (rawFile: UploadRawFile) => {
 };
 
 // 裁剪成功后的处理
-const cropSuccess = async (blob: Blob, dataUrl: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const cropSuccess = async (blob: Blob, _dataUrl: string) => {
   loading.value = true;
   try {
     // 将Blob转换为File对象
@@ -539,7 +552,15 @@ const loadUserStats = async () => {
 };
 
 // 组件挂载时初始化
-onMounted(() => {
+onMounted(async () => {
+  // 确保用户信息已加载
+  if (!userStore.userInfo) {
+    try {
+      await userStore.initUserInfo();
+    } catch (error) {
+      console.error("初始化用户信息失败:", error);
+    }
+  }
   initData();
   loadUserStats();
 });

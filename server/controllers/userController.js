@@ -13,38 +13,84 @@ const normalizeUserOutput = (user) => {
   if (!user) return null;
   const userObject = user.toObject ? user.toObject() : user;
 
-  // 移除敏感或内部字段
-  const {
-    _id,
-    __v,
-    password,
-    passwordChangedAt,
-    passwordResetToken,
-    passwordResetExpires,
-    loginHistory,
-    ...rest
-  } = userObject;
+  // 移除敏感或内部字段，创建安全的用户对象
+  const safeUser = { ...userObject };
+
+  // 删除敏感字段
+  delete safeUser.__v;
+  delete safeUser.password;
+  delete safeUser.passwordChangedAt;
+  delete safeUser.passwordResetToken;
+  delete safeUser.passwordResetExpires;
+  delete safeUser.loginHistory;
+
+  // 转换 _id 为 id
+  const { _id, ...rest } = safeUser;
 
   return {
     id: _id.toString(),
     ...rest,
-    status: rest.status || (rest.active ? "active" : "inactive"),
-    lastLoginAt: rest.lastLogin || null,
-    loginCount: Array.isArray(loginHistory) ? loginHistory.length : 0,
   };
 };
 
 // 获取所有用户 (管理员)
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ deletedAt: null }).select("-__v").lean();
+    // 分页参数
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    // 搜索和筛选条件
+    const filter = { deletedAt: null };
+
+    if (req.query.keyword) {
+      const keyword = req.query.keyword.trim();
+      filter.$or = [
+        { username: { $regex: keyword, $options: "i" } },
+        { email: { $regex: keyword, $options: "i" } },
+        { phone: { $regex: keyword, $options: "i" } },
+      ];
+    }
+
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    if (req.query.role) {
+      filter.role = req.query.role;
+    }
+
+    if (req.query.startDate || req.query.endDate) {
+      filter.createdAt = {};
+      if (req.query.startDate)
+        filter.createdAt.$gte = new Date(req.query.startDate);
+      if (req.query.endDate)
+        filter.createdAt.$lte = new Date(req.query.endDate);
+    }
+
+    // 并行执行查询和计数
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("-__v -password")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(filter),
+    ]);
+
     const normalizedUsers = users.map(normalizeUserOutput);
 
     res.status(200).json({
       data: normalizedUsers,
       pagination: {
-        total: normalizedUsers.length,
-        // 在实际应用中，这里应该有更完整的分页逻辑
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+        hasNext: page < Math.ceil(total / limit),
+        hasPrev: page > 1,
       },
     });
   } catch (err) {

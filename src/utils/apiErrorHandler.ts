@@ -109,22 +109,49 @@ const logError = (error: ApiError) => {
 };
 
 // 错误通知函数
-const showErrorNotification = (error: ApiError) => {
-  notification.error({
+const showErrorNotification = (
+  error: ApiError,
+  options?: { showRetry?: boolean },
+) => {
+  const config: any = {
     message: "请求错误",
     description: error.getFormattedMessage(),
-    duration: 5,
-  });
+    duration: error.isNetworkError() ? 8 : 5,
+  };
+
+  // 对网络错误添加重试按钮
+  if (error.isNetworkError() && options?.showRetry) {
+    config.btn = (h: any) =>
+      h(
+        "button",
+        {
+          onClick: () => {
+            notification.close(config.key);
+            window.location.reload();
+          },
+        },
+        "重试",
+      );
+  }
+
+  notification.error(config);
 };
 
 // 处理验证错误
 const handleValidationError = (error: ApiError) => {
   if (error.errors) {
-    Object.values(error.errors).forEach((errors: string[]) => {
-      errors.forEach((errorMessage) => message.error(errorMessage));
-    });
+    // 显示第一个验证错误，避免消息泛滥
+    const firstFieldErrors = Object.values(error.errors)[0];
+    if (firstFieldErrors && firstFieldErrors.length > 0) {
+      message.error(firstFieldErrors[0]);
+    }
+
+    // 在开发环境显示所有错误
+    if (import.meta.env.DEV) {
+      console.warn("所有验证错误:", error.errors);
+    }
   } else {
-    message.error(error.message);
+    message.error(error.message || "输入数据格式不正确");
   }
 };
 
@@ -141,12 +168,21 @@ const handleAuthError = async (error: ApiError) => {
     try {
       await store.initUserInfo();
       // 如果重新初始化成功，显示警告而不是强制登出
-      message.warning("认证状态已刷新，请重试操作");
+      message.warning("登录状态已更新，请重新尝试");
       return;
     } catch (refreshError) {
       console.error("认证状态刷新失败:", refreshError);
     }
   }
+
+  // 显示友好的登录提示
+  message.error("登录已过期，请重新登录");
+
+  // 延迟跳转，让用户看到提示
+  setTimeout(() => {
+    store.logout();
+    router.push("/auth");
+  }, 1500);
 
   // 只有在真正需要时才登出
   await store.logout();

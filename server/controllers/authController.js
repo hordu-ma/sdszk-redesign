@@ -11,7 +11,10 @@ import { authLogger, logAuthEvent, logError } from "../utils/logger.js";
 
 // 生成JWT令牌
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "your-secret-key", {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required for security");
+  }
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "1d",
   });
 };
@@ -326,10 +329,13 @@ export const protect = async (req, res, next) => {
     }
 
     // 2) 验证token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your-secret-key",
-    );
+    // 验证JWT令牌
+    if (!process.env.JWT_SECRET) {
+      throw new Error(
+        "JWT_SECRET environment variable is required for security",
+      );
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3) 检查用户是否仍然存在
     const currentUser = await User.findById(decoded.id);

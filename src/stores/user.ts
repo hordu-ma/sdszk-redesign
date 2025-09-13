@@ -17,10 +17,22 @@ export interface UserInfo {
   role: "admin" | "editor" | "user";
   permissions: PermissionList;
   status?: "active" | "inactive" | "banned";
+  active?: boolean;
   createdAt?: string;
+  updatedAt?: string;
   lastLoginAt?: string;
+  lastLogin?: string;
   lastLoginIp?: string;
   loginCount?: number;
+  department?: string;
+  position?: string;
+  loginHistory?: Array<{
+    loginTime: string;
+    ip: string;
+    userAgent: string;
+    success: boolean;
+    _id: string;
+  }>;
 }
 
 interface LoginPayload {
@@ -110,15 +122,20 @@ export const useUserStore = defineStore(
     function _setUserData(
       userData: Omit<UserInfo, "permissions"> & {
         permissions: BackendPermissions | PermissionList;
-      },
+        lastLogin?: string;
+      } & Record<string, any>,
     ) {
       const transformedPermissions = Array.isArray(userData.permissions)
         ? userData.permissions
         : transformPermissions(userData.permissions);
 
+      // 处理字段映射：lastLogin -> lastLoginAt
+      const { lastLogin, ...restUserData } = userData;
+
       userInfo.value = {
-        ...userData,
+        ...restUserData,
         permissions: transformedPermissions,
+        lastLoginAt: lastLogin || userData.lastLoginAt,
       };
     }
 
