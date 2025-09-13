@@ -408,11 +408,13 @@ const loadPermissions = async () => {
         ([module, perms]) => ({
           name: module,
           displayName: module,
-          children: (perms as PermissionItem[]).map((p) => ({
-            name: p.name,
-            displayName: p.displayName,
-            description: p.description,
-          })),
+          children: Array.isArray(perms)
+            ? (perms as PermissionItem[]).map((p) => ({
+                name: p.name,
+                displayName: p.displayName,
+                description: p.description,
+              }))
+            : [],
         }),
       );
     }

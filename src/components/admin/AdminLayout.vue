@@ -39,7 +39,7 @@ import AdminSidebar from "./AdminSidebar.vue";
 import AdminHeader from "./AdminHeader.vue";
 
 const router = useRouter();
-const route = useRoute();
+const currentRoute = useRoute();
 const userStore = useUserStore();
 const sidebarRef = ref<InstanceType<typeof AdminSidebar> | null>(null);
 
@@ -48,8 +48,8 @@ const sidebarCollapsed = ref(false);
 
 // 监听路由变化
 watch(
-  () => route.path,
-  (newPath) => {
+  () => currentRoute.path,
+  () => {
     // 强制更新组件
     if (sidebarRef.value) {
       sidebarRef.value.$forceUpdate();
@@ -69,7 +69,7 @@ const toggleSidebar = () => {
 
 // 处理菜单点击
 const handleMenuClick = (path: string) => {
-  if (route.path !== path) {
+  if (currentRoute.path !== path) {
     router.push(path).catch((err) => {
       if (err.name !== "NavigationDuplicated") {
         console.error("Navigation error:", err);

@@ -93,8 +93,8 @@ interface Emits {
   (e: "menu-click", path: string): void;
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+defineProps<Props>();
+defineEmits<Emits>();
 
 const route = useRoute();
 const router = useRouter();
