@@ -64,6 +64,8 @@
 
 ### 2. 一键启动开发环境（推荐）
 
+> **⚠️ 重要提示**: 为确保开发环境的一致性并避免端口冲突、依赖问题，请**务必**使用以下脚本来启动和停止开发服务器。不要手动执行 `npm run dev` 或 `npm run server:dev`。
+
 ```bash
 # 克隆项目
 git clone <your-repository-url> sdszk-redesign

@@ -1,4 +1,6 @@
 import express from "express";
+import { protect, restrictTo } from "../controllers/authController.js";
+
 const router = express.Router();
 
 // 模拟权限数据
@@ -31,6 +33,9 @@ let permissions = [
     resource: "news",
   },
 ];
+
+// 保护所有权限路由
+router.use(protect, restrictTo("admin"));
 
 // 获取权限列表
 router.get("/", (req, res) => {

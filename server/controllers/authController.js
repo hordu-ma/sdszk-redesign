@@ -17,7 +17,7 @@ const signToken = (id) => {
 };
 
 // 创建并发送令牌
-const createSendToken = (user, statusCode, res) => {
+export const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
   // 设置cookie选项
@@ -157,6 +157,9 @@ export const login = async (req, res, next) => {
 
     // 4) 如果一切正常，发送令牌给客户端
     authLogger.debug("步骤5: 生成token并发送响应");
+
+    // 记录登录历史
+    await user.recordLogin(true, req.ip, req.get("User-Agent"));
 
     logAuthEvent("login_success", {
       username,

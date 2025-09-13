@@ -1,4 +1,6 @@
 import express from "express";
+import { protect, restrictTo } from "../controllers/authController.js";
+
 const router = express.Router();
 
 // 模拟角色数据
@@ -24,6 +26,9 @@ let roles = [
     updatedAt: new Date().toISOString(),
   },
 ];
+
+// 保护所有角色路由
+router.use(protect, restrictTo("admin"));
 
 // 获取角色列表
 router.get("/", (req, res) => {

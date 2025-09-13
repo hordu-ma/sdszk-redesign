@@ -34,8 +34,14 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "editor", "viewer"],
+      enum: ["admin", "editor", "user"], // 'viewer' -> 'user'
       default: "editor",
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive", "banned"],
+      default: "active",
+      index: true,
     },
     avatar: String,
     active: {
@@ -45,6 +51,7 @@ const userSchema = new mongoose.Schema(
     lastLogin: Date,
     permissions: {
       news: {
+        manage: { type: Boolean, default: false },
         create: { type: Boolean, default: false },
         read: { type: Boolean, default: true },
         update: { type: Boolean, default: false },
@@ -52,6 +59,7 @@ const userSchema = new mongoose.Schema(
         publish: { type: Boolean, default: false },
       },
       resources: {
+        manage: { type: Boolean, default: false },
         create: { type: Boolean, default: false },
         read: { type: Boolean, default: true },
         update: { type: Boolean, default: false },
@@ -59,6 +67,7 @@ const userSchema = new mongoose.Schema(
         publish: { type: Boolean, default: false },
       },
       activities: {
+        manage: { type: Boolean, default: false },
         create: { type: Boolean, default: false },
         read: { type: Boolean, default: true },
         update: { type: Boolean, default: false },
@@ -66,14 +75,20 @@ const userSchema = new mongoose.Schema(
         publish: { type: Boolean, default: false },
       },
       users: {
+        manage: { type: Boolean, default: false },
         create: { type: Boolean, default: false },
         read: { type: Boolean, default: false },
         update: { type: Boolean, default: false },
         delete: { type: Boolean, default: false },
       },
       settings: {
+        manage: { type: Boolean, default: false },
         read: { type: Boolean, default: false },
         update: { type: Boolean, default: false },
+      },
+      system: {
+        manage: { type: Boolean, default: false },
+        setting: { type: Boolean, default: false },
       },
     },
     phone: {
@@ -108,6 +123,7 @@ const userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    deletedAt: { type: Date, index: true }, // Ensure deletedAt is indexed
   },
   {
     timestamps: true,
@@ -223,107 +239,139 @@ userSchema.methods.recordLogin = async function (success, ip, userAgent) {
   }
 };
 
-// 在角色修改时自动设置权限
+// 在角色修改时自动设置权限，并同步用户状态
 userSchema.pre("save", function (next) {
-  if (!this.isModified("role")) return next();
+  // 同步 active 和 status 状态
+  if (this.isModified("status")) {
+    this.active = this.status === "active";
+  } else if (this.isModified("active")) {
+    this.status = this.active ? "active" : "inactive";
+  }
 
-  // 根据角色分配默认权限
-  if (this.role === "admin") {
-    this.permissions = {
-      news: {
-        manage: true,
-        create: true,
-        read: true,
-        update: true,
-        delete: true,
-        publish: true,
-      },
-      resources: {
-        manage: true,
-        create: true,
-        read: true,
-        update: true,
-        delete: true,
-        publish: true,
-      },
-      activities: {
-        manage: true,
-        create: true,
-        read: true,
-        update: true,
-        delete: true,
-        publish: true,
-      },
-      users: {
-        manage: true,
-        create: true,
-        read: true,
-        update: true,
-        delete: true,
-      },
-      settings: {
-        manage: true,
-        read: true,
-        update: true,
-      },
-      system: {
-        manage: true,
-        setting: true,
-      },
-    };
-  } else if (this.role === "editor") {
-    this.permissions = {
-      news: {
-        create: true,
-        read: true,
-        update: true,
-        delete: false,
-        publish: false,
-      },
-      resources: {
-        create: true,
-        read: true,
-        update: true,
-        delete: false,
-        publish: false,
-      },
-      activities: {
-        create: true,
-        read: true,
-        update: true,
-        delete: false,
-        publish: false,
-      },
-      users: {
-        read: true,
-      },
-      settings: {
-        read: true,
-      },
-    };
-  } else {
-    // 默认用户权限
-    this.permissions = {
-      news: {
-        read: true,
-      },
-      resources: {
-        create: false,
-        read: true,
-        update: false,
-        delete: false,
-        publish: false,
-      },
-      activities: {
-        create: false,
-        read: true,
-        update: false,
-        delete: false,
-        publish: false,
-      },
-      users: { create: false, read: false, update: false, delete: false },
-      settings: { read: false, update: false },
-    };
+  // 在角色修改时自动设置权限
+  if (this.isModified("role")) {
+    // 根据角色分配默认权限
+    if (this.role === "admin") {
+      this.permissions = {
+        news: {
+          manage: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          publish: true,
+        },
+        resources: {
+          manage: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          publish: true,
+        },
+        activities: {
+          manage: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          publish: true,
+        },
+        users: {
+          manage: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+        },
+        settings: {
+          manage: true,
+          read: true,
+          update: true,
+        },
+        system: {
+          manage: true,
+          setting: true,
+        },
+      };
+    } else if (this.role === "editor") {
+      this.permissions = {
+        news: {
+          create: true,
+          read: true,
+          update: true,
+          delete: false,
+          publish: false,
+        },
+        resources: {
+          create: true,
+          read: true,
+          update: true,
+          delete: false,
+          publish: false,
+        },
+        activities: {
+          create: true,
+          read: true,
+          update: true,
+          delete: false,
+          publish: false,
+        },
+        users: {
+          manage: false,
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+        settings: {
+          manage: false,
+          read: true,
+          update: false,
+        },
+        system: {
+          manage: false,
+          setting: false,
+        },
+      };
+    } else {
+      // 默认用户权限
+      this.permissions = {
+        news: {
+          read: true,
+        },
+        resources: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+          publish: false,
+        },
+        activities: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+          publish: false,
+        },
+        users: {
+          manage: false,
+          create: false,
+          read: false,
+          update: false,
+          delete: false,
+        },
+        settings: {
+          manage: false,
+          read: false,
+          update: false,
+        },
+        system: {
+          manage: false,
+          setting: false,
+        },
+      };
+    }
   }
 
   next();
@@ -335,9 +383,29 @@ userSchema.methods.hasPermission = function (module, operation) {
   return this.permissions[module][operation] === true;
 };
 
+// 软删除方法
+userSchema.methods.softDelete = function () {
+  this.deletedAt = new Date();
+  this.active = false;
+  this.status = "inactive";
+  return this.save({ validateBeforeSave: false });
+};
+
+// 检查是否已删除
+userSchema.methods.isDeleted = function () {
+  return this.deletedAt != null;
+};
+
 // 创建虚拟属性：全名
 userSchema.virtual("fullName").get(function () {
   return this.name || this.username;
+});
+
+// 虚拟属性：是否在线（最近5分钟内有登录）
+userSchema.virtual("isOnline").get(function () {
+  if (!this.lastLogin) return false;
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  return this.lastLogin > fiveMinutesAgo;
 });
 
 const User = mongoose.model("User", userSchema);
