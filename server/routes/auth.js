@@ -3,6 +3,8 @@ import express from "express";
 import {
   login,
   logout,
+  register,
+  sendVerificationCode,
   protect,
   getMe,
   updateProfile,
@@ -11,9 +13,25 @@ import {
 
 const router = express.Router();
 
-// 登录路由
+// ==============================================
+// 公开路由（不需要认证）
+// ==============================================
+
+// 用户登录
 router.post("/login", login);
+
+// 用户注册
+router.post("/register", register);
+
+// 发送手机验证码
+router.post("/send-code", sendVerificationCode);
+
+// 用户登出（通常也不需要认证，因为只是清除客户端状态）
 router.post("/logout", logout);
+
+// ==============================================
+// 需要认证的路由
+// ==============================================
 
 // 保护以下所有路由，需要登录才能访问
 router.use(protect);

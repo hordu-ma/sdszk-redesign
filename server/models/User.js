@@ -239,16 +239,8 @@ userSchema.methods.recordLogin = async function (success, ip, userAgent) {
   }
 };
 
-// 在角色修改时自动设置权限，并同步用户状态
+// 在角色修改时自动设置权限
 userSchema.pre("save", function (next) {
-  // 同步 active 和 status 状态
-  if (this.isModified("status")) {
-    this.active = this.status === "active";
-  } else if (this.isModified("active")) {
-    this.status = this.active ? "active" : "inactive";
-  }
-
-  // 在角色修改时自动设置权限
   if (this.isModified("role")) {
     // 根据角色分配默认权限
     if (this.role === "admin") {
@@ -318,20 +310,10 @@ userSchema.pre("save", function (next) {
           publish: false,
         },
         users: {
-          manage: false,
-          create: false,
           read: true,
-          update: false,
-          delete: false,
         },
         settings: {
-          manage: false,
           read: true,
-          update: false,
-        },
-        system: {
-          manage: false,
-          setting: false,
         },
       };
     } else {
@@ -354,24 +336,17 @@ userSchema.pre("save", function (next) {
           delete: false,
           publish: false,
         },
-        users: {
-          manage: false,
-          create: false,
-          read: false,
-          update: false,
-          delete: false,
-        },
-        settings: {
-          manage: false,
-          read: false,
-          update: false,
-        },
-        system: {
-          manage: false,
-          setting: false,
-        },
+        users: { create: false, read: false, update: false, delete: false },
+        settings: { read: false, update: false },
       };
     }
+  }
+
+  // 同步 active 和 status 状态
+  if (this.isModified("status")) {
+    this.active = this.status === "active";
+  } else if (this.isModified("active")) {
+    this.status = this.active ? "active" : "inactive";
   }
 
   next();
@@ -383,29 +358,9 @@ userSchema.methods.hasPermission = function (module, operation) {
   return this.permissions[module][operation] === true;
 };
 
-// 软删除方法
-userSchema.methods.softDelete = function () {
-  this.deletedAt = new Date();
-  this.active = false;
-  this.status = "inactive";
-  return this.save({ validateBeforeSave: false });
-};
-
-// 检查是否已删除
-userSchema.methods.isDeleted = function () {
-  return this.deletedAt != null;
-};
-
 // 创建虚拟属性：全名
 userSchema.virtual("fullName").get(function () {
   return this.name || this.username;
-});
-
-// 虚拟属性：是否在线（最近5分钟内有登录）
-userSchema.virtual("isOnline").get(function () {
-  if (!this.lastLogin) return false;
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  return this.lastLogin > fiveMinutesAgo;
 });
 
 const User = mongoose.model("User", userSchema);

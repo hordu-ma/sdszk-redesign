@@ -350,6 +350,189 @@ export const protect = async (req, res, next) => {
   }
 };
 
+// 用户注册
+export const register = async (req, res, next) => {
+  try {
+    const { username, email, phone, password, verificationCode } = req.body;
+
+    authLogger.debug(
+      {
+        username,
+        email,
+        phone: phone
+          ? phone.substring(0, 3) + "****" + phone.substring(7)
+          : undefined,
+        hasPassword: !!password,
+        hasVerificationCode: !!verificationCode,
+      },
+      "用户注册开始",
+    );
+
+    // 验证必填字段
+    if (!username || !password || !email) {
+      return next(new BadRequestError("用户名、密码和邮箱为必填项"));
+    }
+
+    // 验证密码长度
+    if (password.length < 6) {
+      return next(new BadRequestError("密码长度不能少于6位"));
+    }
+
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return next(new BadRequestError("邮箱格式不正确"));
+    }
+
+    // 验证手机号格式（如果提供）
+    if (phone) {
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return next(new BadRequestError("手机号格式不正确"));
+      }
+    }
+
+    // 检查用户名是否已存在
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return next(new BadRequestError("用户名已被使用"));
+    }
+
+    // 检查邮箱是否已存在
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return next(new BadRequestError("邮箱已被使用"));
+    }
+
+    // 检查手机号是否已存在（如果提供）
+    if (phone) {
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) {
+        return next(new BadRequestError("手机号已被使用"));
+      }
+    }
+
+    // TODO: 验证手机验证码
+    // 暂时跳过验证码验证，直接创建用户
+
+    // 创建用户
+    const newUser = await User.create({
+      username,
+      email,
+      phone,
+      password, // 密码会在pre-save钩子中自动加密
+      role: "user",
+      status: "active",
+      active: true,
+    });
+
+    authLogger.info(
+      {
+        userId: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+      },
+      "新用户注册成功",
+    );
+
+    // 记录注册事件
+    logAuthEvent("register_success", {
+      username: newUser.username,
+      userId: newUser._id,
+      email: newUser.email,
+      ip: req.ip,
+    });
+
+    // 生成token并发送响应
+    createSendToken(newUser, 201, res);
+  } catch (error) {
+    logError(error, {
+      context: "user_registration",
+      username: req.body.username,
+      email: req.body.email,
+      ip: req.ip,
+    });
+
+    logAuthEvent("register_failed", {
+      reason: error.message,
+      username: req.body.username,
+      email: req.body.email,
+      ip: req.ip,
+    });
+
+    next(error);
+  }
+};
+
+// 发送手机验证码
+export const sendVerificationCode = async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+
+    authLogger.debug(
+      {
+        phone: phone
+          ? phone.substring(0, 3) + "****" + phone.substring(7)
+          : undefined,
+      },
+      "发送验证码请求",
+    );
+
+    // 验证必填字段
+    if (!phone) {
+      return next(new BadRequestError("请提供手机号"));
+    }
+
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return next(new BadRequestError("手机号格式不正确"));
+    }
+
+    // 生成6位随机验证码
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+
+    // TODO: 集成短信服务发送验证码
+    // 这里需要集成阿里云短信、腾讯云短信或其他短信服务
+    // 暂时记录到日志中，实际部署时需要替换为真实的短信发送
+    authLogger.info(
+      {
+        phone: phone.substring(0, 3) + "****" + phone.substring(7),
+        verificationCode, // 生产环境中不应该记录验证码
+      },
+      "验证码生成（需要集成短信服务发送）",
+    );
+
+    // TODO: 将验证码存储到Redis或内存缓存中，设置5分钟过期时间
+    // 格式：verification_code:{phone} = {code}
+    // 过期时间：300秒（5分钟）
+
+    res.status(200).json({
+      status: "success",
+      message: "验证码已发送，请注意查收短信",
+    });
+
+    authLogger.info(
+      {
+        phone: phone.substring(0, 3) + "****" + phone.substring(7),
+      },
+      "验证码发送响应成功",
+    );
+  } catch (error) {
+    logError(error, {
+      context: "send_verification_code",
+      phone: req.body.phone
+        ? req.body.phone.substring(0, 3) + "****" + req.body.phone.substring(7)
+        : undefined,
+      ip: req.ip,
+    });
+
+    next(error);
+  }
+};
+
 // 基于角色的访问控制中间件
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
