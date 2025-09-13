@@ -584,9 +584,9 @@ const getModuleColor = (module: string) => {
     "orange",
     "purple",
     "cyan",
-    "magenta",
-    "red",
-    "volcano",
+    "geekblue",
+    "lime",
+    "gold",
   ];
   const index = module.charCodeAt(0) % colors.length;
   return colors[index];
@@ -635,7 +635,7 @@ const loadPermissionUsage = async (permission: PermissionItem) => {
 
     // 这里需要后端API支持，暂时模拟数据
     permissionUsage.users = [];
-  } catch (error) {
+  } catch {
     message.error("加载权限使用情况失败");
   }
 };
@@ -695,7 +695,7 @@ const deletePermission = (permission: PermissionItem) => {
         // 这里需要后端API支持
         message.success("删除成功");
         loadPermissions();
-      } catch (error) {
+      } catch {
         message.error("删除失败");
       }
     },

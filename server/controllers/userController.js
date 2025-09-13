@@ -24,11 +24,13 @@ const normalizeUserOutput = (user) => {
   delete safeUser.passwordResetExpires;
   delete safeUser.loginHistory;
 
-  // 转换 _id 为 id
-  const { _id, ...rest } = safeUser;
+  // 转换 _id 为 id，并统一字段映射
+  const { _id, lastLogin, ...rest } = safeUser;
 
   return {
     id: _id.toString(),
+    lastLogin: lastLogin ? lastLogin.toISOString() : undefined,
+    loginCount: safeUser.loginHistory?.length || 0,
     ...rest,
   };
 };

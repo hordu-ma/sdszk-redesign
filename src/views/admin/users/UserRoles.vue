@@ -478,7 +478,7 @@ const deleteRole = (role: RoleItem) => {
         await adminUserApi.deleteRole(role.id);
         message.success("删除成功");
         loadRoles();
-      } catch (error) {
+      } catch {
         message.error("删除失败");
       }
     },

@@ -1,71 +1,45 @@
+// roles.js - 角色管理路由
 import express from "express";
+import {
+  getAllRoles,
+  getRole,
+  createRole,
+  updateRole,
+  deleteRole,
+  batchDeleteRoles,
+  getRolePermissions,
+  updateRolePermissions,
+  initializeSystemRoles,
+  getRoleStats,
+} from "../controllers/roleController.js";
 import { protect, restrictTo } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// 模拟角色数据
-let roles = [
-  {
-    id: 1,
-    name: "admin",
-    displayName: "管理员",
-    description: "系统管理员",
-    permissions: ["user:create", "user:read", "user:update", "user:delete"],
-    userCount: 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    name: "editor",
-    displayName: "编辑",
-    description: "内容编辑",
-    permissions: ["news:create", "news:read", "news:update"],
-    userCount: 2,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+// 保护所有角色路由 - 需要登录且为管理员
+router.use(protect);
+router.use(restrictTo("admin"));
 
-// 保护所有角色路由
-router.use(protect, restrictTo("admin"));
+// 角色统计和初始化
+router.get("/stats", getRoleStats);
+router.post("/initialize", initializeSystemRoles);
 
-// 获取角色列表
-router.get("/", (req, res) => {
-  res.json(roles);
-});
+// 角色列表
+router.get("/", getAllRoles);
 
 // 创建角色
-router.post("/", (req, res) => {
-  const newRole = {
-    ...req.body,
-    id: Date.now(),
-    userCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  roles.push(newRole);
-  res.json({ data: newRole });
-});
+router.post("/", createRole);
 
-// 更新角色
-router.put("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const idx = roles.findIndex((r) => r.id === id);
-  if (idx === -1) return res.status(404).json({ message: "角色不存在" });
-  roles[idx] = {
-    ...roles[idx],
-    ...req.body,
-    updatedAt: new Date().toISOString(),
-  };
-  res.json({ data: roles[idx] });
-});
+// 批量操作
+router.post("/batch-delete", batchDeleteRoles);
 
-// 删除角色
-router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  roles = roles.filter((r) => r.id !== id);
-  res.json({ data: true });
-});
+// 单个角色操作
+router.route("/:id").get(getRole).put(updateRole).delete(deleteRole);
+
+// 角色权限管理
+router
+  .route("/:id/permissions")
+  .get(getRolePermissions)
+  .put(updateRolePermissions);
 
 export default router;

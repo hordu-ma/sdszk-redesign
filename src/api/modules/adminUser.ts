@@ -3,7 +3,7 @@ import type { ApiResponse, QueryParams, PaginatedResponse } from "../types";
 
 // 用户信息接口
 export interface AdminUserItem {
-  id: number;
+  id: string;
   username: string;
   email: string;
   phone?: string;
@@ -11,9 +11,9 @@ export interface AdminUserItem {
   status: "active" | "inactive" | "banned";
   role: string;
   permissions: string[];
-  lastLoginAt?: string;
+  lastLogin?: string;
   lastLoginIp?: string;
-  loginCount: number;
+  loginCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,7 +75,7 @@ export class AdminUserApi extends BaseApi {
   }
 
   // 获取用户详情
-  getDetail(id: number): Promise<ApiResponse<AdminUserItem>> {
+  getDetail(id: string): Promise<ApiResponse<AdminUserItem>> {
     return this.get(`/users/${id}`);
   }
 
@@ -86,32 +86,32 @@ export class AdminUserApi extends BaseApi {
 
   // 更新用户
   update(
-    id: number,
+    id: string,
     data: Partial<UserFormData>,
   ): Promise<ApiResponse<AdminUserItem>> {
     return this.put(`/users/${id}`, data);
   }
 
   // 删除用户
-  deleteUser(id: number): Promise<ApiResponse<void>> {
+  deleteUser(id: string): Promise<ApiResponse<void>> {
     return this.delete(`/users/${id}`);
   }
 
   // 批量删除用户
-  batchDelete(ids: number[]): Promise<ApiResponse<void>> {
-    return this.post("/users/batch-delete", { ids });
+  batchDelete(ids: string[]): Promise<ApiResponse<void>> {
+    return this.post("/users/batch-delete", { userIds: ids });
   }
 
   // 更新用户状态
   updateStatus(
-    id: number,
+    id: string,
     status: "active" | "inactive" | "banned",
   ): Promise<ApiResponse<AdminUserItem>> {
     return this.patch(`/users/${id}/status`, { status });
   }
 
   // 重置用户密码
-  resetPassword(id: number, newPassword: string): Promise<ApiResponse<void>> {
+  resetPassword(id: string, newPassword: string): Promise<ApiResponse<void>> {
     return this.patch(`/users/${id}/reset-password`, { newPassword });
   }
 

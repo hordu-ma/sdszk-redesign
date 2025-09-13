@@ -50,46 +50,8 @@ const userSchema = new mongoose.Schema(
     },
     lastLogin: Date,
     permissions: {
-      news: {
-        manage: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        read: { type: Boolean, default: true },
-        update: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-        publish: { type: Boolean, default: false },
-      },
-      resources: {
-        manage: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        read: { type: Boolean, default: true },
-        update: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-        publish: { type: Boolean, default: false },
-      },
-      activities: {
-        manage: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        read: { type: Boolean, default: true },
-        update: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-        publish: { type: Boolean, default: false },
-      },
-      users: {
-        manage: { type: Boolean, default: false },
-        create: { type: Boolean, default: false },
-        read: { type: Boolean, default: false },
-        update: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      settings: {
-        manage: { type: Boolean, default: false },
-        read: { type: Boolean, default: false },
-        update: { type: Boolean, default: false },
-      },
-      system: {
-        manage: { type: Boolean, default: false },
-        setting: { type: Boolean, default: false },
-      },
+      type: [String],
+      default: ["news:read", "resources:read", "activities:read"],
     },
     phone: {
       type: String,
@@ -244,101 +206,54 @@ userSchema.pre("save", function (next) {
   if (this.isModified("role")) {
     // 根据角色分配默认权限
     if (this.role === "admin") {
-      this.permissions = {
-        news: {
-          manage: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          publish: true,
-        },
-        resources: {
-          manage: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          publish: true,
-        },
-        activities: {
-          manage: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-          publish: true,
-        },
-        users: {
-          manage: true,
-          create: true,
-          read: true,
-          update: true,
-          delete: true,
-        },
-        settings: {
-          manage: true,
-          read: true,
-          update: true,
-        },
-        system: {
-          manage: true,
-          setting: true,
-        },
-      };
+      this.permissions = [
+        "news:manage",
+        "news:create",
+        "news:read",
+        "news:update",
+        "news:delete",
+        "news:publish",
+        "resources:manage",
+        "resources:create",
+        "resources:read",
+        "resources:update",
+        "resources:delete",
+        "resources:publish",
+        "activities:manage",
+        "activities:create",
+        "activities:read",
+        "activities:update",
+        "activities:delete",
+        "activities:publish",
+        "users:manage",
+        "users:create",
+        "users:read",
+        "users:update",
+        "users:delete",
+        "settings:manage",
+        "settings:read",
+        "settings:update",
+        "uploads:manage",
+        "uploads:create",
+        "uploads:delete",
+      ];
     } else if (this.role === "editor") {
-      this.permissions = {
-        news: {
-          create: true,
-          read: true,
-          update: true,
-          delete: false,
-          publish: false,
-        },
-        resources: {
-          create: true,
-          read: true,
-          update: true,
-          delete: false,
-          publish: false,
-        },
-        activities: {
-          create: true,
-          read: true,
-          update: true,
-          delete: false,
-          publish: false,
-        },
-        users: {
-          read: true,
-        },
-        settings: {
-          read: true,
-        },
-      };
+      this.permissions = [
+        "news:create",
+        "news:read",
+        "news:update",
+        "resources:create",
+        "resources:read",
+        "resources:update",
+        "activities:create",
+        "activities:read",
+        "activities:update",
+        "users:read",
+        "uploads:create",
+      ];
     } else {
       // 默认用户权限
-      this.permissions = {
-        news: {
-          read: true,
-        },
-        resources: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-          publish: false,
-        },
-        activities: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-          publish: false,
-        },
-        users: { create: false, read: false, update: false, delete: false },
-        settings: { read: false, update: false },
-      };
+      this.permissions = ["news:read", "resources:read", "activities:read"];
     }
   }
 
@@ -353,9 +268,9 @@ userSchema.pre("save", function (next) {
 });
 
 // 检查用户是否有特定权限
-userSchema.methods.hasPermission = function (module, operation) {
-  if (!this.permissions || !this.permissions[module]) return false;
-  return this.permissions[module][operation] === true;
+userSchema.methods.hasPermission = function (permission) {
+  if (!this.permissions || !Array.isArray(this.permissions)) return false;
+  return this.permissions.includes(permission);
 };
 
 // 创建虚拟属性：全名

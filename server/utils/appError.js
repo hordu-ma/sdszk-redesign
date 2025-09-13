@@ -34,10 +34,17 @@ class NotFoundError extends AppError {
   }
 }
 
+class ConflictError extends AppError {
+  constructor(message = "资源冲突") {
+    super(message, 409);
+  }
+}
+
 export {
   AppError,
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
+  ConflictError,
 };

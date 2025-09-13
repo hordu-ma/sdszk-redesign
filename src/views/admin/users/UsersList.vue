@@ -132,8 +132,8 @@
           </template>
 
           <template v-else-if="column.key === 'lastLogin'">
-            <div v-if="record.lastLoginAt">
-              <div>{{ formatDate(record.lastLoginAt) }}</div>
+            <div v-if="record.lastLogin">
+              <div>{{ formatDate(record.lastLogin) }}</div>
               <div class="text-gray-500 text-xs">
                 {{ record.lastLoginIp }}
               </div>
@@ -282,6 +282,79 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 用户详情模态框 -->
+    <a-modal
+      v-model:open="detailModalVisible"
+      title="用户详情"
+      width="800px"
+      :footer="null"
+    >
+      <div v-if="currentUser" class="user-detail">
+        <a-descriptions :column="2" bordered>
+          <a-descriptions-item label="头像" :span="2">
+            <a-avatar :src="currentUser.avatar" :size="64">
+              {{ currentUser.username?.charAt(0)?.toUpperCase() }}
+            </a-avatar>
+          </a-descriptions-item>
+          <a-descriptions-item label="用户名">
+            {{ currentUser.username }}
+          </a-descriptions-item>
+          <a-descriptions-item label="邮箱">
+            {{ currentUser.email || "未设置" }}
+          </a-descriptions-item>
+          <a-descriptions-item label="手机号">
+            {{ currentUser.phone || "未设置" }}
+          </a-descriptions-item>
+          <a-descriptions-item label="状态">
+            <a-tag :color="getStatusColor(currentUser.status)">
+              {{ getStatusText(currentUser.status) }}
+            </a-tag>
+          </a-descriptions-item>
+          <a-descriptions-item label="角色">
+            <a-tag color="blue">
+              {{ getRoleDisplayName(currentUser.role) }}
+            </a-tag>
+          </a-descriptions-item>
+          <a-descriptions-item label="登录次数">
+            {{ currentUser.loginCount || 0 }} 次
+          </a-descriptions-item>
+          <a-descriptions-item label="最后登录时间">
+            <div v-if="currentUser.lastLogin">
+              {{ formatDate(currentUser.lastLogin) }}
+            </div>
+            <span v-else class="text-gray-400">从未登录</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="最后登录IP">
+            {{ currentUser.lastLoginIp || "未知" }}
+          </a-descriptions-item>
+          <a-descriptions-item label="创建时间">
+            {{ formatDate(currentUser.createdAt) }}
+          </a-descriptions-item>
+          <a-descriptions-item label="更新时间">
+            {{ formatDate(currentUser.updatedAt) }}
+          </a-descriptions-item>
+          <a-descriptions-item label="用户权限" :span="2">
+            <div class="permissions-list">
+              <a-tag
+                v-for="permission in currentUser.permissions"
+                :key="permission"
+                color="green"
+                style="margin-bottom: 4px"
+              >
+                {{ permission }}
+              </a-tag>
+              <div
+                v-if="!currentUser.permissions?.length"
+                class="text-gray-400"
+              >
+                暂无权限
+              </div>
+            </div>
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -312,15 +385,17 @@ const modalVisible = ref(false);
 const modalLoading = ref(false);
 const passwordModalVisible = ref(false);
 const passwordModalLoading = ref(false);
+const detailModalVisible = ref(false);
 const isEditing = ref(false);
-const currentUserId = ref<number>();
+const currentUserId = ref<string>();
+const currentUser = ref<AdminUserItem | null>(null);
 
 const users = ref<AdminUserItem[]>([]);
 const roles = ref<RoleItem[]>([]);
 
 const permissionTree = ref<any[]>([]);
 
-const selectedRowKeys = ref<number[]>([]);
+const selectedRowKeys = ref<string[]>([]);
 const dateRange = ref<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
 
 // 搜索表单
@@ -416,7 +491,7 @@ const columns = [
 // 行选择配置
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
-  onChange: (keys: number[]) => {
+  onChange: (keys: string[]) => {
     selectedRowKeys.value = keys;
   },
 }));
@@ -572,10 +647,20 @@ const showCreateModal = () => {
   resetForm();
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const viewUser = (_user: AdminUserItem) => {
-  // 实现用户详情查看
-  message.info("查看用户详情功能待实现");
+const viewUser = async (user: AdminUserItem) => {
+  try {
+    loading.value = true;
+    const response = await adminUserApi.getDetail(user.id);
+    if (response.data) {
+      currentUser.value = response.data;
+      detailModalVisible.value = true;
+    }
+  } catch (error) {
+    console.error("获取用户详情失败:", error);
+    message.error("获取用户详情失败");
+  } finally {
+    loading.value = false;
+  }
 };
 
 const editUser = (user: AdminUserItem) => {
@@ -613,14 +698,14 @@ const handleMoreAction = (key: string, user: AdminUserItem) => {
       message.info("查看日志功能待实现");
       break;
     case "delete":
-      deleteUser(user.id);
+      deleteUser(user);
       break;
   }
 };
 
-const deleteUser = async (id: number) => {
+const deleteUser = async (user: AdminUserItem) => {
   try {
-    await adminUserApi.deleteUser(id);
+    await adminUserApi.deleteUser(user.id);
     message.success("删除成功");
     loadUsers();
   } catch {
@@ -822,5 +907,19 @@ const onMenuClick = (record: AdminUserItem) => (event: { key: string }) => {
 :deep(.ant-modal-body) {
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.user-detail .permissions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.user-detail .permissions-list .ant-tag {
+  margin-bottom: 4px;
+}
+
+.user-detail .ant-descriptions-item-label {
+  font-weight: 500;
 }
 </style>

@@ -1,79 +1,49 @@
+// permissions.js - 权限管理路由
 import express from "express";
+import {
+  getAllPermissions,
+  getPermission,
+  createPermission,
+  updatePermission,
+  deletePermission,
+  batchDeletePermissions,
+  getPermissionTree,
+  getPermissionsByModule,
+  getModules,
+  initializeSystemPermissions,
+  getPermissionStats,
+} from "../controllers/permissionController.js";
 import { protect, restrictTo } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// 模拟权限数据
-let permissions = [
-  {
-    id: 1,
-    name: "user:create",
-    displayName: "创建用户",
-    description: "允许创建用户",
-    module: "user",
-    action: "create",
-    resource: "user",
-  },
-  {
-    id: 2,
-    name: "user:read",
-    displayName: "查看用户",
-    description: "允许查看用户",
-    module: "user",
-    action: "read",
-    resource: "user",
-  },
-  {
-    id: 3,
-    name: "news:create",
-    displayName: "创建新闻",
-    description: "允许创建新闻",
-    module: "news",
-    action: "create",
-    resource: "news",
-  },
-];
+// 保护所有权限路由 - 需要登录且为管理员
+router.use(protect);
+router.use(restrictTo("admin"));
 
-// 保护所有权限路由
-router.use(protect, restrictTo("admin"));
+// 权限统计和初始化
+router.get("/stats", getPermissionStats);
+router.post("/initialize", initializeSystemPermissions);
 
-// 获取权限列表
-router.get("/", (req, res) => {
-  res.json(permissions);
-});
+// 权限树和模块
+router.get("/tree", getPermissionTree);
+router.get("/modules", getModules);
+router.get("/modules/:module", getPermissionsByModule);
+
+// 权限列表
+router.get("/", getAllPermissions);
 
 // 创建权限
-router.post("/", (req, res) => {
-  const newPerm = { ...req.body, id: Date.now() };
-  permissions.push(newPerm);
-  res.json({ data: newPerm });
-});
+router.post("/", createPermission);
 
-// 更新权限
-router.put("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const idx = permissions.findIndex((p) => p.id === id);
-  if (idx === -1) return res.status(404).json({ message: "权限不存在" });
-  permissions[idx] = { ...permissions[idx], ...req.body };
-  res.json({ data: permissions[idx] });
-});
+// 批量操作
+router.post("/batch-delete", batchDeletePermissions);
 
-// 删除权限
-router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  permissions = permissions.filter((p) => p.id !== id);
-  res.json({ data: true });
-});
-
-// 权限树接口
-router.get("/tree", (req, res) => {
-  // 简单分组为模块树
-  const tree = {};
-  permissions.forEach((p) => {
-    if (!tree[p.module]) tree[p.module] = [];
-    tree[p.module].push({ ...p });
-  });
-  res.json({ data: tree });
-});
+// 单个权限操作
+router
+  .route("/:id")
+  .get(getPermission)
+  .put(updatePermission)
+  .delete(deletePermission);
 
 export default router;
