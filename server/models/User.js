@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "editor", "user"], // 'viewer' -> 'user'
+      enum: ["admin", "editor", "user", "co_admin", "sys_admin", "users"], // 包含数据库中实际存在的角色
       default: "editor",
     },
     status: {
