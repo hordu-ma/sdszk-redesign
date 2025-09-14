@@ -31,7 +31,7 @@
             </svg>
           </div>
         </div>
-        <h1 class="main-title">AI思政助手</h1>
+        <h1 class="main-title">鲁韵思政问答大模型</h1>
         <p class="subtitle">智能化思想政治教育对话平台</p>
         <div class="feature-tags">
           <span class="tag">智能问答</span>

@@ -170,8 +170,6 @@
                   <a-menu @click="onMenuClick(record)">
                     <a-menu-item key="resetPassword"> 重置密码 </a-menu-item>
                     <a-menu-item key="viewLogs"> 查看日志 </a-menu-item>
-                    <a-menu-divider />
-                    <a-menu-item key="delete" danger> 删除用户 </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -752,19 +750,6 @@ const handleMoreAction = (key: string, user: AdminUserItem) => {
     case "viewLogs":
       message.info("查看日志功能待实现");
       break;
-    case "delete":
-      deleteUser(user);
-      break;
-  }
-};
-
-const deleteUser = async (user: AdminUserItem) => {
-  try {
-    await adminUserApi.deleteUser(user.id);
-    message.success("删除成功");
-    loadUsers();
-  } catch {
-    message.error("删除失败");
   }
 };
 
