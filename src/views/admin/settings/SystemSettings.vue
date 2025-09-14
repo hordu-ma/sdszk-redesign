@@ -206,276 +206,6 @@
           </a-form>
         </div>
       </a-tab-pane>
-
-      <!-- 邮件配置 -->
-      <a-tab-pane key="email" tab="邮件设置">
-        <div class="settings-form">
-          <a-form
-            ref="emailFormRef"
-            :model="emailSettings"
-            :label-col="{ span: 6 }"
-            :wrapper-col="{ span: 18 }"
-          >
-            <a-form-item label="邮件服务" name="enabled">
-              <a-switch v-model:checked="emailSettings.enabled" />
-              <span class="setting-tip">启用邮件发送功能</span>
-            </a-form-item>
-
-            <a-form-item label="SMTP服务器" name="smtpHost">
-              <a-input
-                v-model:value="emailSettings.smtpHost"
-                placeholder="如：smtp.qq.com"
-              />
-            </a-form-item>
-
-            <a-form-item label="SMTP端口" name="smtpPort">
-              <a-input-number
-                v-model:value="emailSettings.smtpPort"
-                :min="1"
-                :max="65535"
-              />
-            </a-form-item>
-
-            <a-form-item label="加密方式" name="encryption">
-              <a-radio-group v-model:value="emailSettings.encryption">
-                <a-radio value="none"> 无 </a-radio>
-                <a-radio value="ssl"> SSL </a-radio>
-                <a-radio value="tls"> TLS </a-radio>
-              </a-radio-group>
-            </a-form-item>
-
-            <a-form-item label="用户名" name="username">
-              <a-input
-                v-model:value="emailSettings.username"
-                placeholder="SMTP用户名"
-              />
-            </a-form-item>
-
-            <a-form-item label="密码" name="password">
-              <a-input-password
-                v-model:value="emailSettings.password"
-                placeholder="SMTP密码"
-              />
-            </a-form-item>
-
-            <a-form-item label="发件人名称" name="fromName">
-              <a-input
-                v-model:value="emailSettings.fromName"
-                placeholder="发件人显示名称"
-              />
-            </a-form-item>
-
-            <a-form-item label="发件人邮箱" name="fromEmail">
-              <a-input
-                v-model:value="emailSettings.fromEmail"
-                placeholder="发件人邮箱地址"
-              />
-            </a-form-item>
-
-            <a-form-item label="测试邮件" name="testEmail">
-              <a-input-group compact>
-                <a-input
-                  v-model:value="testEmailAddress"
-                  placeholder="输入测试邮箱地址"
-                  style="width: calc(100% - 100px)"
-                />
-                <a-button
-                  type="primary"
-                  :loading="testEmailLoading"
-                  @click="sendTestEmail"
-                >
-                  发送测试
-                </a-button>
-              </a-input-group>
-            </a-form-item>
-          </a-form>
-        </div>
-      </a-tab-pane>
-
-      <!-- 安全设置 -->
-      <a-tab-pane key="security" tab="安全设置">
-        <div class="settings-form">
-          <a-form
-            ref="securityFormRef"
-            :model="securitySettings"
-            :label-col="{ span: 6 }"
-            :wrapper-col="{ span: 18 }"
-          >
-            <a-form-item label="登录失败限制" name="maxLoginAttempts">
-              <a-input-number
-                v-model:value="securitySettings.maxLoginAttempts"
-                :min="3"
-                :max="10"
-                addon-after="次"
-              />
-              <div class="setting-tip">连续登录失败超过此次数将锁定账户</div>
-            </a-form-item>
-
-            <a-form-item label="账户锁定时间" name="lockoutDuration">
-              <a-input-number
-                v-model:value="securitySettings.lockoutDuration"
-                :min="5"
-                :max="1440"
-                addon-after="分钟"
-              />
-            </a-form-item>
-
-            <a-form-item label="密码复杂度" name="passwordComplexity">
-              <a-checkbox-group
-                v-model:value="securitySettings.passwordComplexity"
-              >
-                <a-checkbox value="uppercase"> 包含大写字母 </a-checkbox>
-                <a-checkbox value="lowercase"> 包含小写字母 </a-checkbox>
-                <a-checkbox value="numbers"> 包含数字 </a-checkbox>
-                <a-checkbox value="symbols"> 包含特殊字符 </a-checkbox>
-              </a-checkbox-group>
-            </a-form-item>
-
-            <a-form-item label="最小密码长度" name="minPasswordLength">
-              <a-input-number
-                v-model:value="securitySettings.minPasswordLength"
-                :min="6"
-                :max="20"
-                addon-after="字符"
-              />
-            </a-form-item>
-
-            <a-form-item label="密码过期时间" name="passwordExpiry">
-              <a-input-number
-                v-model:value="securitySettings.passwordExpiry"
-                :min="0"
-                :max="365"
-                addon-after="天"
-              />
-              <div class="setting-tip">0表示密码永不过期</div>
-            </a-form-item>
-
-            <a-form-item label="会话超时" name="sessionTimeout">
-              <a-input-number
-                v-model:value="securitySettings.sessionTimeout"
-                :min="30"
-                :max="480"
-                addon-after="分钟"
-              />
-            </a-form-item>
-
-            <a-form-item label="强制HTTPS" name="forceHttps">
-              <a-switch v-model:checked="securitySettings.forceHttps" />
-              <span class="setting-tip">强制使用HTTPS访问</span>
-            </a-form-item>
-
-            <a-form-item label="IP白名单" name="ipWhitelist">
-              <a-textarea
-                v-model:value="securitySettings.ipWhitelist"
-                placeholder="每行一个IP地址或IP段，支持CIDR格式"
-                :rows="4"
-              />
-              <div class="setting-tip">留空表示允许所有IP访问</div>
-            </a-form-item>
-          </a-form>
-        </div>
-      </a-tab-pane>
-
-      <!-- 备份与恢复 -->
-      <a-tab-pane key="backup" tab="备份恢复">
-        <div class="backup-section">
-          <a-card title="数据备份" class="backup-card">
-            <div class="backup-info">
-              <p>定期备份系统数据，确保数据安全。</p>
-              <div class="backup-stats">
-                <a-statistic title="上次备份时间" :value="lastBackupTime" />
-                <a-statistic
-                  title="备份文件大小"
-                  :value="backupSize"
-                  suffix="MB"
-                />
-                <a-statistic title="备份文件数量" :value="backupCount" />
-              </div>
-            </div>
-            <div class="backup-actions">
-              <a-space>
-                <a-button
-                  type="primary"
-                  :loading="backupLoading"
-                  @click="createBackup"
-                >
-                  立即备份
-                </a-button>
-                <a-button @click="downloadBackup"> 下载备份 </a-button>
-                <a-button @click="showBackupList"> 备份列表 </a-button>
-              </a-space>
-            </div>
-          </a-card>
-
-          <a-card title="自动备份设置" class="backup-card">
-            <a-form
-              :model="backupSettings"
-              :label-col="{ span: 6 }"
-              :wrapper-col="{ span: 18 }"
-            >
-              <a-form-item label="自动备份" name="autoBackup">
-                <a-switch v-model:checked="backupSettings.autoBackup" />
-                <span class="setting-tip">启用自动备份功能</span>
-              </a-form-item>
-
-              <a-form-item label="备份频率" name="backupFrequency">
-                <a-select v-model:value="backupSettings.backupFrequency">
-                  <a-select-option value="daily"> 每天 </a-select-option>
-                  <a-select-option value="weekly"> 每周 </a-select-option>
-                  <a-select-option value="monthly"> 每月 </a-select-option>
-                </a-select>
-              </a-form-item>
-
-              <a-form-item label="备份时间" name="backupTime">
-                <a-time-picker
-                  v-model:value="backupSettings.backupTime"
-                  format="HH:mm"
-                  placeholder="选择备份时间"
-                />
-              </a-form-item>
-
-              <a-form-item label="保留份数" name="backupRetention">
-                <a-input-number
-                  v-model:value="backupSettings.backupRetention"
-                  :min="1"
-                  :max="30"
-                  addon-after="份"
-                />
-                <div class="setting-tip">超过此数量的旧备份将被自动删除</div>
-              </a-form-item>
-            </a-form>
-          </a-card>
-
-          <a-card title="数据恢复" class="backup-card">
-            <div class="restore-section">
-              <p>
-                从备份文件恢复系统数据。<span style="color: #ff4d4f">警告：此操作将覆盖当前数据！</span>
-              </p>
-              <a-upload
-                :before-upload="beforeRestoreUpload"
-                :file-list="restoreFileList"
-                @remove="removeRestoreFile"
-              >
-                <a-button>
-                  <upload-outlined />
-                  选择备份文件
-                </a-button>
-              </a-upload>
-              <div class="restore-actions">
-                <a-button
-                  type="primary"
-                  danger
-                  :loading="restoreLoading"
-                  :disabled="restoreFileList.length === 0"
-                  @click="restoreData"
-                >
-                  恢复数据
-                </a-button>
-              </div>
-            </div>
-          </a-card>
-        </div>
-      </a-tab-pane>
     </a-tabs>
 
     <!-- 图片预览模态框 -->
@@ -487,9 +217,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
-import { message, Modal } from "ant-design-vue";
-import dayjs from "dayjs";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons-vue";
+import { message } from "ant-design-vue";
+import { PlusOutlined } from "@ant-design/icons-vue";
 import { settingsApi } from "@/api";
 
 // 设置类型定义
@@ -521,38 +250,6 @@ interface SystemSettings {
   cacheTime: number;
 }
 
-interface EmailSettings {
-  [key: string]: any;
-  enabled: boolean;
-  smtpHost: string;
-  smtpPort: number;
-  encryption: string;
-  username: string;
-  password: string;
-  fromName: string;
-  fromEmail: string;
-}
-
-interface SecuritySettings {
-  [key: string]: any;
-  maxLoginAttempts: number;
-  lockoutDuration: number;
-  passwordComplexity: string[];
-  minPasswordLength: number;
-  passwordExpiry: number;
-  sessionTimeout: number;
-  forceHttps: boolean;
-  ipWhitelist: string;
-}
-
-interface BackupSettings {
-  [key: string]: any;
-  autoBackup: boolean;
-  backupFrequency: string;
-  backupTime: any;
-  backupRetention: number;
-}
-
 interface SettingUpdateItem {
   key: string;
   value: any;
@@ -563,27 +260,17 @@ interface SettingUpdateItem {
 // 响应式数据
 const activeTab = ref("site");
 const saveLoading = ref(false);
-const testEmailLoading = ref(false);
-const backupLoading = ref(false);
-const restoreLoading = ref(false);
+
 const previewVisible = ref(false);
 const previewImage = ref("");
-
-const testEmailAddress = ref("");
-const lastBackupTime = ref("2024-05-20 03:00:00");
-const backupSize = ref(245);
-const backupCount = ref(15);
 
 // 文件列表
 const logoFileList = ref<any[]>([]);
 const faviconFileList = ref<any[]>([]);
-const restoreFileList = ref<any[]>([]);
 
 // 表单引用
 const siteFormRef = ref();
 const systemFormRef = ref();
-const emailFormRef = ref();
-const securityFormRef = ref();
 
 // 网站设置
 const siteSettings: SiteSettings = reactive({
@@ -623,38 +310,6 @@ const systemSettings: SystemSettings = reactive({
   enableComments: true,
   moderateComments: true,
   cacheTime: 300,
-});
-
-// 邮件设置
-const emailSettings: EmailSettings = reactive({
-  enabled: true,
-  smtpHost: "smtp.qq.com",
-  smtpPort: 587,
-  encryption: "tls",
-  username: "",
-  password: "",
-  fromName: "思政课一体化平台",
-  fromEmail: "noreply@sdszk.edu.cn",
-});
-
-// 安全设置
-const securitySettings: SecuritySettings = reactive({
-  maxLoginAttempts: 5,
-  lockoutDuration: 30,
-  passwordComplexity: ["lowercase", "numbers"],
-  minPasswordLength: 8,
-  passwordExpiry: 90,
-  sessionTimeout: 120,
-  forceHttps: false,
-  ipWhitelist: "",
-});
-
-// 备份设置
-const backupSettings: BackupSettings = reactive({
-  autoBackup: true,
-  backupFrequency: "daily",
-  backupTime: dayjs("03:00", "HH:mm"),
-  backupRetention: 7,
 });
 
 // 文件类型选项
@@ -705,15 +360,6 @@ const beforeFaviconUpload = (file: any) => {
   return false;
 };
 
-const beforeRestoreUpload = (file: any) => {
-  const isBackup = file.name.endsWith(".sql") || file.name.endsWith(".backup");
-  if (!isBackup) {
-    message.error("只能上传备份文件（.sql 或 .backup）！");
-    return false;
-  }
-  return false;
-};
-
 const removeLogo = () => {
   logoFileList.value = [];
   siteSettings.siteLogo = "";
@@ -722,10 +368,6 @@ const removeLogo = () => {
 const removeFavicon = () => {
   faviconFileList.value = [];
   siteSettings.siteFavicon = "";
-};
-
-const removeRestoreFile = () => {
-  restoreFileList.value = [];
 };
 
 const previewLogo = (file: any) => {
@@ -758,9 +400,9 @@ const saveAllSettings = async () => {
     // 网站基本信息设置
     Object.keys(siteSettings).forEach((key) => {
       settingsToUpdate.push({
-        key: `site.${key}`,
+        key: key,
         value: siteSettings[key],
-        group: "site",
+        group: "general",
         type: getSettingType(siteSettings[key]),
       });
     });
@@ -768,44 +410,10 @@ const saveAllSettings = async () => {
     // 系统设置
     Object.keys(systemSettings).forEach((key) => {
       settingsToUpdate.push({
-        key: `system.${key}`,
+        key: key,
         value: systemSettings[key],
         group: "system",
         type: getSettingType(systemSettings[key]),
-      });
-    });
-
-    // 邮件设置
-    Object.keys(emailSettings).forEach((key) => {
-      settingsToUpdate.push({
-        key: `email.${key}`,
-        value: emailSettings[key],
-        group: "email",
-        type: getSettingType(emailSettings[key]),
-      });
-    });
-
-    // 安全设置
-    Object.keys(securitySettings).forEach((key) => {
-      settingsToUpdate.push({
-        key: `security.${key}`,
-        value: securitySettings[key],
-        group: "security",
-        type: getSettingType(securitySettings[key]),
-      });
-    });
-
-    // 备份设置
-    Object.keys(backupSettings).forEach((key) => {
-      const value =
-        key === "backupTime"
-          ? backupSettings[key].format("HH:mm")
-          : backupSettings[key];
-      settingsToUpdate.push({
-        key: `backup.${key}`,
-        value: value,
-        group: "backup",
-        type: getSettingType(value),
       });
     });
 
@@ -827,80 +435,6 @@ const saveAllSettings = async () => {
   }
 };
 
-const sendTestEmail = async () => {
-  if (!testEmailAddress.value) {
-    message.error("请输入测试邮箱地址");
-    return;
-  }
-
-  try {
-    testEmailLoading.value = true;
-
-    // 这里需要调用后端API发送测试邮件
-    // await settingsApi.sendTestEmail({
-    //   to: testEmailAddress.value,
-    //   settings: emailSettings
-    // })
-
-    message.success("测试邮件发送成功，请检查邮箱");
-  } catch {
-    message.error("测试邮件发送失败");
-  } finally {
-    testEmailLoading.value = false;
-  }
-};
-
-const createBackup = async () => {
-  try {
-    backupLoading.value = true;
-
-    // 这里需要调用后端API创建备份
-    // await settingsApi.createBackup()
-
-    message.success("备份创建成功");
-    // 更新备份统计信息
-  } catch {
-    message.error("备份创建失败");
-  } finally {
-    backupLoading.value = false;
-  }
-};
-
-const downloadBackup = () => {
-  // 实现备份下载
-  message.info("备份下载功能待实现");
-};
-
-const showBackupList = () => {
-  // 显示备份文件列表
-  message.info("备份列表功能待实现");
-};
-
-const restoreData = () => {
-  Modal.confirm({
-    title: "确认恢复数据",
-    content: "此操作将覆盖当前所有数据，且不可恢复。确定要继续吗？",
-    okText: "确认恢复",
-    cancelText: "取消",
-    okType: "danger",
-    onOk: async () => {
-      try {
-        restoreLoading.value = true;
-
-        // 这里需要调用后端API恢复数据
-        // await settingsApi.restoreData(restoreFileList.value[0])
-
-        message.success("数据恢复成功");
-        restoreFileList.value = [];
-      } catch {
-        message.error("数据恢复失败");
-      } finally {
-        restoreLoading.value = false;
-      }
-    },
-  });
-};
-
 // 数据加载
 const loadSettings = async () => {
   try {
@@ -909,56 +443,56 @@ const loadSettings = async () => {
     if (response.success && response.data) {
       const settings = response.data;
 
-      // 更新网站设置
-      if (settings.site) {
-        settings.site.forEach((setting: any) => {
-          const key = setting.key.replace("site.", "");
-          if (key in siteSettings) {
-            siteSettings[key] = setting.value;
+      // 更新网站基本设置（general组）
+      if (settings.general) {
+        settings.general.forEach((setting: any) => {
+          if (setting.key in siteSettings) {
+            siteSettings[setting.key] = setting.value;
           }
         });
       }
 
-      // 更新系统设置
+      // 更新系统设置（system组）
       if (settings.system) {
         settings.system.forEach((setting: any) => {
-          const key = setting.key.replace("system.", "");
-          if (key in systemSettings) {
-            systemSettings[key] = setting.value;
+          if (setting.key in systemSettings) {
+            systemSettings[setting.key] = setting.value;
           }
         });
       }
 
-      // 更新邮件设置
-      if (settings.email) {
-        settings.email.forEach((setting: any) => {
-          const key = setting.key.replace("email.", "");
-          if (key in emailSettings) {
-            emailSettings[key] = setting.value;
+      // 更新联系信息设置（contact组）
+      if (settings.contact) {
+        settings.contact.forEach((setting: any) => {
+          if (setting.key in siteSettings) {
+            siteSettings[setting.key] = setting.value;
           }
         });
       }
 
-      // 更新安全设置
-      if (settings.security) {
-        settings.security.forEach((setting: any) => {
-          const key = setting.key.replace("security.", "");
-          if (key in securitySettings) {
-            securitySettings[key] = setting.value;
+      // 更新外观设置（appearance组）
+      if (settings.appearance) {
+        settings.appearance.forEach((setting: any) => {
+          if (setting.key in siteSettings) {
+            siteSettings[setting.key] = setting.value;
           }
         });
       }
 
-      // 更新备份设置
-      if (settings.backup) {
-        settings.backup.forEach((setting: any) => {
-          const key = setting.key.replace("backup.", "");
-          if (key in backupSettings) {
-            if (key === "backupTime") {
-              backupSettings[key] = dayjs(setting.value, "HH:mm");
-            } else {
-              backupSettings[key] = setting.value;
-            }
+      // 更新首页设置（homepage组）
+      if (settings.homepage) {
+        settings.homepage.forEach((setting: any) => {
+          if (setting.key in siteSettings) {
+            siteSettings[setting.key] = setting.value;
+          }
+        });
+      }
+
+      // 更新页脚设置（footer组）
+      if (settings.footer) {
+        settings.footer.forEach((setting: any) => {
+          if (setting.key in siteSettings) {
+            siteSettings[setting.key] = setting.value;
           }
         });
       }
