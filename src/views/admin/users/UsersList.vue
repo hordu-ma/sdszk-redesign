@@ -19,6 +19,12 @@
           </template>
           导出用户
         </a-button>
+        <a-button @click="initializePermissions" :loading="loading">
+          <template #icon>
+            <setting-outlined />
+          </template>
+          初始化权限
+        </a-button>
       </div>
     </div>
 
@@ -366,7 +372,7 @@ import { debounce } from "lodash-es";
 import {
   PlusOutlined,
   DownloadOutlined,
-  DownOutlined,
+  SettingOutlined,
 } from "@ant-design/icons-vue";
 import { AdminUserApi } from "@/api/modules/adminUser";
 
@@ -589,20 +595,57 @@ const loadPermissions = async () => {
     const response = await adminUserApi.getPermissionTree();
     // 获取实际的权限数据，处理嵌套的data结构
     const permissionData = response.data?.data || response.data;
-    // 转换权限树格式
-    permissionTree.value = Object.entries(permissionData).map(
-      ([module, perms]) => ({
-        name: module,
-        displayName: module,
-        children: (perms as any[]).map((p) => ({
+
+    // 检查数据格式
+    if (Array.isArray(permissionData)) {
+      // 如果是数组格式，直接转换
+      permissionTree.value = permissionData.map((item) => ({
+        name: item.module,
+        displayName: item.displayName || item.module,
+        children: (item.permissions || []).map((p: any) => ({
           name: p.name,
           displayName: p.displayName,
         })),
-      }),
-    );
+      }));
+    } else if (typeof permissionData === "object") {
+      // 如果是对象格式，转换为数组
+      permissionTree.value = Object.entries(permissionData).map(
+        ([module, perms]) => ({
+          name: module,
+          displayName: module,
+          children: (perms as any[]).map((p) => ({
+            name: p.name,
+            displayName: p.displayName,
+          })),
+        }),
+      );
+    } else {
+      permissionTree.value = [];
+      console.warn("权限数据格式异常:", permissionData);
+    }
   } catch (error) {
     console.error("权限加载错误:", error);
-    message.error("加载权限列表失败");
+    // 如果权限数据为空，提示初始化
+    if (permissionTree.value.length === 0) {
+      message.warning("权限数据为空，请先初始化系统权限", 5);
+    }
+    permissionTree.value = [];
+  }
+};
+
+// 初始化系统权限
+const initializePermissions = async () => {
+  try {
+    loading.value = true;
+    await adminUserApi.initializePermissions();
+    message.success("系统权限初始化成功");
+    // 重新加载权限数据
+    await loadPermissions();
+  } catch (error) {
+    console.error("权限初始化错误:", error);
+    message.error("权限初始化失败，请检查系统配置");
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -641,10 +684,15 @@ const handleTableChange = (pag: any) => {
   loadUsers();
 };
 
-const showCreateModal = () => {
+const showCreateModal = async () => {
+  resetForm();
   isEditing.value = false;
   modalVisible.value = true;
-  resetForm();
+
+  // 延迟加载权限数据
+  if (permissionTree.value.length === 0) {
+    await loadPermissions();
+  }
 };
 
 const viewUser = async (user: AdminUserItem) => {
@@ -663,9 +711,9 @@ const viewUser = async (user: AdminUserItem) => {
   }
 };
 
-const editUser = (user: AdminUserItem) => {
-  isEditing.value = true;
+const editUser = async (user: AdminUserItem) => {
   currentUserId.value = user.id;
+  // 填充表单数据
   Object.assign(userForm, {
     username: user.username,
     email: user.email,
@@ -674,7 +722,14 @@ const editUser = (user: AdminUserItem) => {
     role: user.role,
     permissions: user.permissions || [],
   });
+
+  isEditing.value = true;
   modalVisible.value = true;
+
+  // 延迟加载权限数据
+  if (permissionTree.value.length === 0) {
+    await loadPermissions();
+  }
 };
 
 const quickToggleStatus = async (user: AdminUserItem) => {
@@ -819,7 +874,7 @@ watchEffect(() => {
 onMounted(() => {
   loadUsers();
   loadRoles();
-  loadPermissions();
+  // 移除立即加载权限，改为按需加载
 });
 
 // 修正菜单点击处理函数

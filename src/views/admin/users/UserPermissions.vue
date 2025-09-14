@@ -580,12 +580,12 @@ const permissionFormRules = {
 const getModuleColor = (module: string) => {
   const colors = [
     "blue",
-    "green",
-    "orange",
-    "purple",
-    "cyan",
     "geekblue",
-    "lime",
+    "cyan",
+    "green",
+    "purple",
+    "volcano",
+    "orange",
     "gold",
   ];
   const index = module.charCodeAt(0) % colors.length;
@@ -800,12 +800,17 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%);
+  border: 1px solid #d9f2ff;
+  border-radius: 6px;
 }
 
 .section-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+  color: #1890ff;
 }
 
 .tree-view {
@@ -828,6 +833,9 @@ onMounted(() => {
   border-left: 3px solid #1890ff;
   padding-left: 8px;
   margin-left: -8px;
+  background: rgba(24, 144, 255, 0.03);
+  border-radius: 4px;
+  margin: 2px 0;
 }
 
 .node-content {
@@ -919,12 +927,14 @@ onMounted(() => {
 }
 
 :deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%);
   font-weight: 600;
+  color: #1890ff;
+  border-bottom: 2px solid #d9f2ff;
 }
 
 :deep(.ant-table-tbody > tr:hover) {
-  background: #f5f5f5;
+  background: #f0f7ff;
 }
 
 :deep(.ant-tree .ant-tree-node-content-wrapper) {

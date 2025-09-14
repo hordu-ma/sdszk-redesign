@@ -342,8 +342,8 @@ const isSystemRole = (roleName: string) => {
 };
 
 const getRoleColor = (roleName: string) => {
-  if (isSystemRole(roleName)) return "red";
-  const colors = ["blue", "green", "orange", "purple", "cyan", "magenta"];
+  if (isSystemRole(roleName)) return "geekblue";
+  const colors = ["blue", "geekblue", "cyan", "green", "purple", "volcano"];
   const index = roleName.charCodeAt(0) % colors.length;
   return colors[index];
 };

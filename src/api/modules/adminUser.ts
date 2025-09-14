@@ -151,4 +151,9 @@ export class AdminUserApi extends BaseApi {
   getPermissionTree(): Promise<ApiResponse<any>> {
     return this.get("/permissions/tree");
   }
+
+  // 初始化系统权限
+  initializePermissions(): Promise<ApiResponse<any>> {
+    return this.post("/permissions/initialize");
+  }
 }
