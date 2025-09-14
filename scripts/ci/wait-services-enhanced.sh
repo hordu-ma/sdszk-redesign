@@ -136,6 +136,38 @@ get_service_info() {
     fi
 }
 
+# 等待端口开放
+wait_for_port() {
+    local host="$1"
+    local port="$2"
+    local service_name="$3"
+    local timeout="$4"
+
+    log_step "等待 $service_name 端口 $port..."
+
+    local start_time=$(date +%s)
+    local end_time=$((start_time + timeout))
+
+    while [[ $(date +%s) -lt $end_time ]]; do
+        local elapsed=$(($(date +%s) - start_time))
+        local remaining=$((timeout - elapsed))
+
+        if check_port "$host" "$port"; then
+            log_success "$service_name 端口 $port 已开放 (用时: ${elapsed}秒)"
+            return 0
+        fi
+
+        if [[ $((elapsed % 5)) -eq 0 ]] || [[ $remaining -lt 10 ]]; then
+            log_progress "$service_name 端口等待中... (剩余: ${remaining}秒)"
+        fi
+
+        sleep "$DEFAULT_INTERVAL"
+    done
+
+    log_error "$service_name 端口 $port 等待超时 (${timeout}秒)"
+    return 1
+}
+
 # 等待单个服务
 wait_for_service() {
     local url="$1"
@@ -145,6 +177,29 @@ wait_for_service() {
 
     log_step "等待 $service_name..."
     log_info "检查URL: $url"
+
+    # 先检查端口是否开放
+    local host_port=$(echo "$url" | sed 's|http://||' | sed 's|/.*||')
+    local host="${host_port%:*}"
+    local port="${host_port#*:}"
+
+    if [[ "$host" == "$port" ]]; then
+        # 没有端口号，尝试从URL推断
+        if [[ "$url" == *":3000"* ]]; then
+            port="3000"
+        elif [[ "$url" == *":5173"* ]]; then
+            port="5173"
+        fi
+    fi
+
+    if [[ "$port" != "$host" ]]; then
+        log_info "首先检查端口连通性 $host:$port"
+        if ! check_port "$host" "$port"; then
+            log_error "$service_name 端口 $port 未开放，服务可能未启动"
+            return 1
+        fi
+        log_info "✓ 端口 $port 已开放，继续HTTP检查"
+    fi
 
     local start_time=$(date +%s)
     local end_time=$((start_time + timeout))
@@ -173,6 +228,18 @@ wait_for_service() {
     done
 
     log_error "$service_name 等待超时 (${timeout}秒)"
+
+    # 提供详细的错误诊断
+    log_info "错误诊断:"
+    if [[ "$port" != "$host" ]]; then
+        if check_port "$host" "$port"; then
+            log_info "✓ 端口 $port 仍然开放"
+            log_info "✗ HTTP服务无响应，可能是应用层问题"
+        else
+            log_info "✗ 端口 $port 已关闭，服务可能已停止"
+        fi
+    fi
+
     return 1
 }
 
@@ -186,36 +253,43 @@ perform_health_check() {
     echo "🔄 检查间隔: ${DEFAULT_INTERVAL}秒"
     echo ""
 
-    # 第一步：检查前端服务
-    log_step "第1步：检查前端服务基础可用性"
-    if ! wait_for_service "$FRONTEND_URL" "前端服务" 30; then
+    # 第一步：等待后端端口开放
+    log_step "第1步：等待后端端口开放"
+    if ! wait_for_port "localhost" "3000" "后端服务" 60; then
+        log_error "后端端口检查失败"
+        return 1
+    fi
+    echo ""
+
+    # 第二步：等待前端端口开放
+    log_step "第2步：等待前端端口开放"
+    if ! wait_for_port "localhost" "5173" "前端服务" 30; then
+        log_error "前端端口检查失败"
+        return 1
+    fi
+    echo ""
+
+    # 第三步：检查后端基础服务
+    log_step "第3步：检查后端服务基础启动"
+    if ! wait_for_service "$BACKEND_HEALTH_BASIC" "后端基础服务" 30; then
+        log_error "后端基础服务检查失败"
+        return 1
+    fi
+    echo ""
+
+    # 第四步：检查前端服务
+    log_step "第4步：检查前端服务基础可用性"
+    if ! wait_for_service "$FRONTEND_URL" "前端服务" 20; then
         log_error "前端服务检查失败"
         return 1
     fi
     echo ""
 
-    # 第二步：检查后端基础服务
-    log_step "第2步：检查后端服务基础启动"
-    if ! wait_for_service "$BACKEND_HEALTH_BASIC" "后端基础服务" 30; then
-        log_error "后端基础服务检查失败"
-
-        # 尝试检查后端端口是否开放
-        log_info "检查后端端口连通性..."
-        if check_port "localhost" "3000"; then
-            log_info "后端端口3000已开放，但健康检查失败"
-        else
-            log_info "后端端口3000未开放，服务可能未启动"
-        fi
-
-        return 1
-    fi
-    echo ""
-
-    # 第三步：检查后端就绪状态
-    log_step "第3步：检查后端服务完全就绪"
-    local ready_timeout=$((timeout - 60)) # 为前面的检查预留时间
-    if [[ $ready_timeout -lt 30 ]]; then
-        ready_timeout=30
+    # 第五步：检查后端就绪状态
+    log_step "第5步：检查后端服务完全就绪"
+    local ready_timeout=$((timeout - 120)) # 为前面的检查预留时间
+    if [[ $ready_timeout -lt 20 ]]; then
+        ready_timeout=20
     fi
 
     if ! wait_for_service "$BACKEND_HEALTH_READY" "后端就绪状态" "$ready_timeout"; then
@@ -225,11 +299,13 @@ perform_health_check() {
         echo ""
     fi
 
-    # 第四步：完整健康检查
-    log_step "第4步：完整健康检查"
+    # 第六步：完整健康检查
+    log_step "第6步：完整健康检查"
     if wait_for_service "$BACKEND_HEALTH_FULL" "完整健康检查" 30; then
         echo ""
         log_success "所有服务健康检查完成！"
+        echo "✅ 后端端口已开放"
+        echo "✅ 前端端口已开放"
         echo "✅ 前端服务已就绪"
         echo "✅ 后端服务已就绪"
         echo "✅ 数据库连接正常"
@@ -241,6 +317,8 @@ perform_health_check() {
         log_warning "完整健康检查失败，但基础服务可用"
         echo ""
         echo "⚠️  服务状态总结:"
+        echo "✅ 后端端口已开放"
+        echo "✅ 前端端口已开放"
         echo "✅ 前端服务已就绪"
         echo "✅ 后端基础服务已就绪"
         echo "⚠️  数据库连接可能有延迟"

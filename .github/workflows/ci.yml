@@ -338,8 +338,39 @@ jobs:
       - name: 设置CI环境
         run: |
           echo "📝 设置CI环境配置..."
-          cp .env.ci .env || echo "使用默认配置"
-          cp server/.env.ci server/.env || echo "使用默认后端配置"
+
+          # 设置前端环境变量
+          if [ -f .env.ci.template ]; then
+            cp .env.ci.template .env
+            echo "✅ 使用CI环境配置模板"
+          else
+            echo "⚠️ CI环境配置模板不存在，使用默认配置"
+            echo "NODE_ENV=test" > .env
+            echo "VITE_API_BASE_URL=http://localhost:3000" >> .env
+          fi
+
+          # 设置后端环境变量
+          cd server
+          echo "📝 设置后端环境变量..."
+          cat > .env << EOF
+          NODE_ENV=test
+          PORT=3000
+          HOST=0.0.0.0
+          MONGODB_URI=mongodb://localhost:27017/sdszk_test
+          REDIS_ENABLED=false
+          JWT_SECRET=ci_test_jwt_secret_key_12345
+          JWT_EXPIRES_IN=24h
+          UPLOAD_DIR=uploads
+          MAX_FILE_SIZE=10485760
+          LOG_LEVEL=info
+          BCRYPT_ROUNDS=10
+          CORS_ORIGIN=http://localhost:5173,http://localhost:3000
+          RATE_LIMIT_ENABLED=false
+          API_DOCS_ENABLED=true
+          HEALTH_CHECK_ENABLED=true
+          EOF
+          echo "✅ 后端环境配置完成"
+          cd ..
 
       - name: 验证服务状态
         run: |
@@ -375,23 +406,77 @@ jobs:
           echo "📦 启动后端服务..."
           cd server
           npm start > ../backend-startup.log 2>&1 &
-          echo $! > /tmp/backend.pid
+          BACKEND_PID=$!
+          echo $BACKEND_PID > /tmp/backend.pid
           cd ..
-          echo "✅ 后端服务已启动 (PID: $(cat /tmp/backend.pid))"
+          echo "✅ 后端服务已启动 (PID: $BACKEND_PID)"
+
+          # 验证后端进程是否启动成功
+          sleep 2
+          if kill -0 $BACKEND_PID 2>/dev/null; then
+            echo "✅ 后端进程运行正常"
+          else
+            echo "❌ 后端进程启动失败"
+            echo "📋 后端启动日志:"
+            cat backend-startup.log
+            exit 1
+          fi
 
           # 启动前端服务器
           echo "📦 启动前端服务..."
           npm run dev > frontend-startup.log 2>&1 &
-          echo $! > /tmp/frontend.pid
-          echo "✅ 前端服务已启动 (PID: $(cat /tmp/frontend.pid))"
+          FRONTEND_PID=$!
+          echo $FRONTEND_PID > /tmp/frontend.pid
+          echo "✅ 前端服务已启动 (PID: $FRONTEND_PID)"
 
-          # 等待服务启动（短暂延迟）
-          echo "⏳ 等待服务初始化..."
-          sleep 5
+          # 验证前端进程是否启动成功
+          sleep 2
+          if kill -0 $FRONTEND_PID 2>/dev/null; then
+            echo "✅ 前端进程运行正常"
+          else
+            echo "❌ 前端进程启动失败"
+            echo "📋 前端启动日志:"
+            cat frontend-startup.log
+            exit 1
+          fi
+
+          # 等待端口开放
+          echo "⏳ 等待端口开放..."
+          for i in {1..30}; do
+            if nc -z localhost 3000 2>/dev/null; then
+              echo "✅ 后端端口3000已开放"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ 后端端口3000未开放，检查服务状态"
+              echo "📋 后端进程状态:"
+              if kill -0 $BACKEND_PID 2>/dev/null; then
+                echo "进程仍在运行，但端口未监听"
+              else
+                echo "进程已退出"
+              fi
+              echo "📋 后端启动日志:"
+              cat backend-startup.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+          for i in {1..30}; do
+            if nc -z localhost 5173 2>/dev/null; then
+              echo "✅ 前端端口5173已开放"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ 前端端口5173未开放"
+              exit 1
+            fi
+            sleep 1
+          done
 
           # 使用增强的等待脚本验证服务状态
           echo "🔍 执行服务健康检查..."
-          ./scripts/ci/wait-services-enhanced.sh --timeout 180
+          ./scripts/ci/wait-services-enhanced.sh --timeout 120
 
           echo "✅ 所有服务已验证就绪"
 
