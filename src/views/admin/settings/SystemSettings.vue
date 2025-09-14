@@ -59,7 +59,7 @@
               />
             </a-form-item>
 
-            <a-form-item label="网站Logo" name="siteLogo">
+            <a-form-item label="网站图标" name="siteLogo">
               <div class="logo-upload">
                 <a-upload
                   :file-list="logoFileList"
@@ -67,29 +67,16 @@
                   :before-upload="beforeLogoUpload"
                   @remove="removeLogo"
                   @preview="previewLogo"
+                  @change="handleLogoChange"
                 >
                   <div v-if="logoFileList.length < 1">
-                    <plus-outlined />
-                    <div style="margin-top: 8px">上传Logo</div>
-                  </div>
-                </a-upload>
-              </div>
-            </a-form-item>
-
-            <a-form-item label="网站图标" name="siteFavicon">
-              <div class="favicon-upload">
-                <a-upload
-                  :file-list="faviconFileList"
-                  list-type="picture-card"
-                  :before-upload="beforeFaviconUpload"
-                  @remove="removeFavicon"
-                  @preview="previewFavicon"
-                >
-                  <div v-if="faviconFileList.length < 1">
                     <plus-outlined />
                     <div style="margin-top: 8px">上传图标</div>
                   </div>
                 </a-upload>
+                <div class="upload-tip">
+                  支持 JPG、PNG 格式，建议尺寸 200x200px，文件大小不超过 2MB
+                </div>
               </div>
             </a-form-item>
 
@@ -229,7 +216,6 @@ interface SiteSettings {
   siteDescription: string;
   siteKeywords: string[];
   siteLogo: string;
-  siteFavicon: string;
   contactEmail: string;
   contactPhone: string;
   siteUrl: string;
@@ -266,7 +252,6 @@ const previewImage = ref("");
 
 // 文件列表
 const logoFileList = ref<any[]>([]);
-const faviconFileList = ref<any[]>([]);
 
 // 表单引用
 const siteFormRef = ref();
@@ -280,7 +265,6 @@ const siteSettings: SiteSettings = reactive({
     "山东省大中小学思政课一体化建设中心平台，提供思政课程资源、教学案例、活动组织等服务",
   siteKeywords: ["思政课", "一体化", "教育", "山东省"],
   siteLogo: "",
-  siteFavicon: "",
   contactEmail: "contact@sdszk.edu.cn",
   contactPhone: "0531-12345678",
   siteUrl: "https://sdszk.edu.cn",
@@ -343,39 +327,41 @@ const beforeLogoUpload = (file: any) => {
     message.error("图片大小不能超过 2MB！");
     return false;
   }
-  return false; // 阻止自动上传
+  return false; // 阻止自动上传，改为手动处理
 };
 
-const beforeFaviconUpload = (file: any) => {
-  const isImage = file.type.startsWith("image/");
-  if (!isImage) {
-    message.error("只能上传图片文件！");
-    return false;
+const handleLogoChange = (info: any) => {
+  const { file, fileList } = info;
+
+  // 更新文件列表
+  logoFileList.value = fileList.slice(-1); // 只保留最新的一个文件
+
+  if (file.status === "done" || file.originFileObj) {
+    // 创建预览URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      siteSettings.siteLogo = result;
+
+      // 更新文件列表中的预览URL
+      if (logoFileList.value[0]) {
+        logoFileList.value[0].url = result;
+        logoFileList.value[0].preview = result;
+      }
+    };
+    reader.readAsDataURL(file.originFileObj || file);
+
+    message.success("图标上传成功！请点击「保存所有设置」来保存更改");
   }
-  const isLt1M = file.size / 1024 / 1024 < 1;
-  if (!isLt1M) {
-    message.error("图标大小不能超过 1MB！");
-    return false;
-  }
-  return false;
 };
 
 const removeLogo = () => {
   logoFileList.value = [];
   siteSettings.siteLogo = "";
-};
-
-const removeFavicon = () => {
-  faviconFileList.value = [];
-  siteSettings.siteFavicon = "";
+  message.success("图标已移除！请点击「保存所有设置」来保存更改");
 };
 
 const previewLogo = (file: any) => {
-  previewImage.value = file.url || file.preview;
-  previewVisible.value = true;
-};
-
-const previewFavicon = (file: any) => {
   previewImage.value = file.url || file.preview;
   previewVisible.value = true;
 };
@@ -473,7 +459,20 @@ const loadSettings = async () => {
       // 更新外观设置（appearance组）
       if (settings.appearance) {
         settings.appearance.forEach((setting: any) => {
-          if (setting.key in siteSettings) {
+          if (setting.key === "logoUrl" && setting.value) {
+            // 兼容处理旧的logoUrl字段
+            siteSettings.siteLogo = setting.value;
+            // 如果有logo数据，创建文件列表项用于显示
+            logoFileList.value = [
+              {
+                uid: "-1",
+                name: "logo.png",
+                status: "done",
+                url: setting.value,
+                preview: setting.value,
+              },
+            ];
+          } else if (setting.key in siteSettings) {
             siteSettings[setting.key] = setting.value;
           }
         });
@@ -551,11 +550,17 @@ onMounted(() => {
   font-size: 12px;
 }
 
-.logo-upload,
-.favicon-upload {
+.logo-upload {
   display: flex;
-  gap: 16px;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-tip {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 
 .backup-section {

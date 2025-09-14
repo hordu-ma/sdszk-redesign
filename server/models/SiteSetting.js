@@ -122,13 +122,6 @@ SiteSetting.initializeDefaultSettings = async function () {
     {
       key: "siteLogo",
       value: "",
-      description: "网站Logo",
-      group: "general",
-      type: "text",
-    },
-    {
-      key: "siteFavicon",
-      value: "",
       description: "网站图标",
       group: "general",
       type: "text",
