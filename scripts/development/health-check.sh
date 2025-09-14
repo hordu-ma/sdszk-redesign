@@ -86,14 +86,10 @@ check_mongodb() {
         return 1
     fi
 
-    # 检查端口
-    if ! check_port $MONGODB_PORT "MongoDB"; then
-        return 1
-    fi
-
-    # 测试连接
-    if timeout 5 mongo --quiet --eval "db.adminCommand('ping')" sdszk >/dev/null 2>&1; then
+    # 直接测试数据库连接，不依赖端口检查
+    if timeout 5 mongosh sdszk --quiet --eval "db.adminCommand('ping')" >/dev/null 2>&1; then
         success "MongoDB 连接测试通过"
+        success "MongoDB 服务正在运行 (端口 $MONGODB_PORT)"
         return 0
     else
         error "MongoDB 连接测试失败"

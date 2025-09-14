@@ -161,7 +161,7 @@ ps aux | grep mongod | grep -v grep || echo_warning "未找到MongoDB进程"
 echo ""
 
 echo_info "5.3 测试MongoDB连接:"
-mongo --quiet --eval "
+mongosh --quiet --eval "
 try {
     var result = db.adminCommand('ismaster');
     print('✅ MongoDB连接成功');
