@@ -3,9 +3,7 @@ import User from "../models/User.js";
 import News from "../models/News.js";
 import Resource from "../models/Resource.js";
 import ActivityLog from "../models/ActivityLog.js";
-import NewsCategory from "../models/NewsCategory.js";
-import ResourceCategory from "../models/ResourceCategory.js";
-import { AppError, BadRequestError, NotFoundError } from "../utils/appError.js";
+
 import os from "os";
 import fs from "fs";
 import path from "path";
@@ -14,7 +12,7 @@ import path from "path";
 export const getOverviewStats = async (req, res, next) => {
   try {
     // 获取当前时间和时间范围
-    const now = new Date();
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -119,17 +117,14 @@ export const getVisitTrends = async (req, res, next) => {
 
     // 获取所有新闻和资源的总访问量，生成模拟的趋势数据
     // 实际项目中应该有专门的访问记录表来跟踪每日访问量
-    const [totalNews, totalResources, totalNewsViews, totalResourceViews] =
-      await Promise.all([
-        News.countDocuments(),
-        Resource.countDocuments(),
-        News.aggregate([
-          { $group: { _id: null, totalViews: { $sum: "$viewCount" } } },
-        ]),
-        Resource.aggregate([
-          { $group: { _id: null, totalViews: { $sum: "$viewCount" } } },
-        ]),
-      ]);
+    const [totalNewsViews, totalResourceViews] = await Promise.all([
+      News.aggregate([
+        { $group: { _id: null, totalViews: { $sum: "$viewCount" } } },
+      ]),
+      Resource.aggregate([
+        { $group: { _id: null, totalViews: { $sum: "$viewCount" } } },
+      ]),
+    ]);
 
     const newsViewCount = totalNewsViews[0]?.totalViews || 0;
     const resourceViewCount = totalResourceViews[0]?.totalViews || 0;
@@ -142,9 +137,9 @@ export const getVisitTrends = async (req, res, next) => {
       // 基于总访问量生成合理的趋势数据
       const baseVisits = Math.floor(totalViews / period);
 
-      dateArray.forEach((date, index) => {
+      dateArray.forEach((date, dayIndex) => {
         // 生成有一定波动的访问量数据
-        const variation = Math.sin((index / period) * Math.PI * 2) * 0.3 + 1;
+        const variation = Math.sin((dayIndex / period) * Math.PI * 2) * 0.3 + 1;
         const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 - 1.2
         let visits = Math.floor(baseVisits * variation * randomFactor);
 
@@ -155,7 +150,7 @@ export const getVisitTrends = async (req, res, next) => {
       });
     } else {
       // 如果没有访问量数据，生成少量的模拟数据
-      dateArray.forEach((date, index) => {
+      dateArray.forEach((date) => {
         const visits = Math.floor(Math.random() * 20) + 5; // 5-24的随机访问量
         visitMap.set(date, visits);
       });
@@ -292,7 +287,7 @@ export const getContentDistribution = async (req, res, next) => {
 };
 
 // 获取最新动态
-export const getRecentActivity = async (req, res, next) => {
+export const getRecentActivity = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
 
@@ -573,7 +568,7 @@ export const getPerformanceMetrics = async (req, res, next) => {
 // 导出报告
 export const exportReport = async (req, res, next) => {
   try {
-    const { type, content, format } = req.body;
+    const { type, format } = req.body;
 
     // 这里应该实现实际的报告生成逻辑
     // 目前返回模拟的下载链接
@@ -662,7 +657,7 @@ const checkDatabaseStatus = async () => {
       status: "healthy",
       message: "连接正常",
     };
-  } catch (error) {
+  } catch {
     return {
       status: "error",
       message: "连接异常",
@@ -755,7 +750,7 @@ const checkMemoryStatus = async () => {
         message: `${Math.round(memoryUsage)}% (${(usedMemory / 1024 / 1024 / 1024).toFixed(1)}GB/${(totalMemory / 1024 / 1024 / 1024).toFixed(1)}GB)`,
       };
     }
-  } catch (error) {
+  } catch {
     return {
       status: "error",
       message: "检查失败",
