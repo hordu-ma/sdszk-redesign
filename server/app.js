@@ -295,43 +295,50 @@ app.use(errorMiddleware);
 
 // 启动服务器
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  logSystemStart({
-    port: PORT,
-    apiDocs: `http://localhost:${PORT}/api-docs`,
-    environment: process.env.NODE_ENV,
-    nodeVersion: process.version,
+
+if (process.env.NODE_ENV !== "test") {
+  const server = app.listen(PORT, () => {
+    logSystemStart({
+      port: PORT,
+      apiDocs: `http://localhost:${PORT}/api-docs`,
+      environment: process.env.NODE_ENV,
+      nodeVersion: process.version,
+    });
+    sysLogger.info({ port: PORT }, `服务运行在 http://localhost:${PORT}`);
+    sysLogger.info(
+      { url: `http://localhost:${PORT}/api-docs` },
+      "API文档已启用",
+    );
   });
-  sysLogger.info({ port: PORT }, `服务运行在 http://localhost:${PORT}`);
-  sysLogger.info({ url: `http://localhost:${PORT}/api-docs` }, "API文档已启用");
-});
 
-// 优雅地关闭应用程序
-const gracefulShutdown = async (signal) => {
-  sysLogger.info({ signal }, `接收到 ${signal} 信号，开始优雅关闭...`);
+  // 优雅地关闭应用程序
+  const gracefulShutdown = async (signal) => {
+    sysLogger.info({ signal }, `接收到 ${signal} 信号，开始优雅关闭...`);
 
-  // 停止接受新请求
-  server.close(async () => {
-    sysLogger.info("HTTP服务器已关闭");
+    server.close(async () => {
+      sysLogger.info("HTTP服务器已关闭");
 
-    try {
-      // 关闭数据库连接
-      await mongoose.connection.close();
-      dbLogger.info("MongoDB连接已关闭");
+      try {
+        // 关闭数据库连接
+        await mongoose.connection.close();
+        dbLogger.info("MongoDB连接已关闭");
 
-      // 关闭Redis连接
-      await closeRedis();
-      sysLogger.info("Redis连接已关闭");
+        // 关闭Redis连接
+        await closeRedis();
+        sysLogger.info("Redis连接已关闭");
 
-      logSystemShutdown(signal);
-      process.exit(0);
-    } catch (err) {
-      logError(err, { context: "graceful-shutdown" });
-      process.exit(1);
-    }
-  });
-};
+        logSystemShutdown(signal);
+        process.exit(0);
+      } catch (err) {
+        logError(err, { context: "graceful-shutdown" });
+        process.exit(1);
+      }
+    });
+  };
 
-// 监听关闭信号
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  // 监听关闭信号
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+}
+
+export default app;

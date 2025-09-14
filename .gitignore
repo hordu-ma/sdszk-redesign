@@ -207,3 +207,6 @@ ecosystem.config.js
 
 # Runtime artifacts
 .pids/
+
+# CMS health check reports
+.cms-reports/
