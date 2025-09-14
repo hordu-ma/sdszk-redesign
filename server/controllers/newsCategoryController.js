@@ -1,12 +1,6 @@
 import NewsCategory from "../models/NewsCategory.js";
 import ActivityLog from "../models/ActivityLog.js";
-import {
-  AppError,
-  BadRequestError,
-  NotFoundError,
-  ForbiddenError,
-} from "../utils/appError.js";
-import mongoose from "mongoose";
+import { AppError, NotFoundError, ForbiddenError } from "../utils/appError.js";
 import cacheService from "../services/cacheService.js";
 
 /**

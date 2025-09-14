@@ -57,6 +57,11 @@ const mapBackendToFrontend = (data) => {
 const buildAdvancedQuery = (queryParams) => {
   const query = {};
 
+  // 默认只查询已发布的新闻（除非明确指定其他状态）
+  if (!queryParams.status) {
+    query.status = "published";
+  }
+
   // 关键词搜索（标题和内容）
   if (queryParams.keyword) {
     query.$or = [

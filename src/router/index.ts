@@ -175,6 +175,15 @@ const routes: RouteRecordRaw[] = [
       keepAlive: true,
     },
   },
+  {
+    path: "/community",
+    name: "community",
+    component: () => import("../views/Community.vue"),
+    meta: {
+      title: "一体化共同体",
+      keepAlive: true,
+    },
+  },
   // 个人中心路由
   {
     path: "/user",

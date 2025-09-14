@@ -61,14 +61,14 @@
       </h3>
       <div class="school-logos">
         <a
-          v-for="school in schools"
-          :key="school.id"
-          :href="school.website"
+          v-for="bureau in displayedBureaus"
+          :key="bureau.id"
+          :href="bureau.website"
           target="_blank"
           class="school-logo"
         >
-          <img :src="school.logo" :alt="school.name" />
-          <p class="school-name">{{ school.name }}</p>
+          <img :src="bureau.logo" :alt="bureau.name" />
+          <p class="school-name">{{ bureau.name }}</p>
         </a>
       </div>
     </div>
@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 // import { useRouter } from "vue-router";
 // import { resourceApi } from "@/api";
 import { debouncedGetResources } from "@/utils/homeApiHandler.js";
@@ -118,12 +118,22 @@ import teacher3 from "../assets/images/teachers/teacher3.jpg";
 import teacher4 from "../assets/images/teachers/teacher4.jpg";
 import teacher5 from "../assets/images/teachers/teacher5.jpg";
 import teacher6 from "../assets/images/teachers/teacher6.jpg";
-import school1Logo from "../assets/images/schools/school1.png";
-import school2Logo from "../assets/images/schools/school2.png";
-import school3Logo from "../assets/images/schools/school3.png";
-import school4Logo from "../assets/images/schools/school4.png";
-import school5Logo from "../assets/images/schools/school5.png";
-import school6Logo from "../assets/images/schools/school6.png";
+import jinanLogo from "../assets/images/education-logos/jinan.jpeg";
+import qingdaoLogo from "../assets/images/education-logos/qingdao.jpeg";
+import ziboLogo from "../assets/images/education-logos/zibo.jpeg";
+import zaozhuangLogo from "../assets/images/education-logos/zaozhuang.jpeg";
+import dongyingLogo from "../assets/images/education-logos/dongying.jpeg";
+import yantaiLogo from "../assets/images/education-logos/yantai.jpeg";
+import weifangLogo from "../assets/images/education-logos/weifang.jpeg";
+import jiningLogo from "../assets/images/education-logos/jining.jpeg";
+import taianLogo from "../assets/images/education-logos/taian.jpeg";
+import weihaiLogo from "../assets/images/education-logos/weihai.png";
+import rizhaoLogo from "../assets/images/education-logos/rizhao.jpeg";
+import linyiLogo from "../assets/images/education-logos/linyi.jpeg";
+import dezhouLogo from "../assets/images/education-logos/dezhou.jpeg";
+import liaochengLogo from "../assets/images/education-logos/liaocheng.jpeg";
+import binzhouLogo from "../assets/images/education-logos/binzhou.jpeg";
+import hezeLogo from "../assets/images/education-logos/heze.jpeg";
 
 // const router = useRouter();
 
@@ -174,44 +184,107 @@ const teachers = ref([
   },
 ]);
 
-const schools = ref([
+const educationBureaus = ref([
   {
     id: 1,
-    name: "山东大学",
-    logo: school1Logo,
-    website: "http://www.sdu.edu.cn",
+    name: "济南市教育局",
+    logo: jinanLogo,
+    website: "http://jnedu.jinan.gov.cn",
   },
   {
     id: 2,
-    name: "中国海洋大学",
-    logo: school2Logo,
-    website: "http://www.ouc.edu.cn",
+    name: "青岛市教育局",
+    logo: qingdaoLogo,
+    website: "http://edu.qingdao.gov.cn",
   },
   {
     id: 3,
-    name: "山东师范大学",
-    logo: school3Logo,
-    website: "http://www.sdnu.edu.cn",
+    name: "淄博市教育和体育局",
+    logo: ziboLogo,
+    website: "http://edu.zibo.gov.cn",
   },
   {
     id: 4,
-    name: "济南大学",
-    logo: school4Logo,
-    website: "http://www.ujn.edu.cn",
+    name: "枣庄市教育和体育局",
+    logo: zaozhuangLogo,
+    website: "http://edu.zaozhuang.gov.cn",
   },
   {
     id: 5,
-    name: "青岛大学",
-    logo: school5Logo,
-    website: "http://www.qdu.edu.cn",
+    name: "东营市教育和体育局",
+    logo: dongyingLogo,
+    website: "http://dyjy.dongying.gov.cn",
   },
   {
     id: 6,
-    name: "山东理工大学",
-    logo: school6Logo,
-    website: "http://www.sdut.edu.cn",
+    name: "烟台市教育和体育局",
+    logo: yantaiLogo,
+    website: "http://jyj.yantai.gov.cn",
+  },
+  {
+    id: 7,
+    name: "潍坊市教育和体育局",
+    logo: weifangLogo,
+    website: "http://jyj.weifang.gov.cn",
+  },
+  {
+    id: 8,
+    name: "济宁市教育局",
+    logo: jiningLogo,
+    website: "https://jnjy.jining.gov.cn",
+  },
+  {
+    id: 9,
+    name: "泰安市教育局",
+    logo: taianLogo,
+    website: "http://jyj.taian.gov.cn",
+  },
+  {
+    id: 10,
+    name: "威海市教育和体育局",
+    logo: weihaiLogo,
+    website: "http://jyj.weihai.gov.cn",
+  },
+  {
+    id: 11,
+    name: "日照市教育和体育局",
+    logo: rizhaoLogo,
+    website: "http://jyj.rizhao.gov.cn",
+  },
+  {
+    id: 12,
+    name: "临沂市教育和体育局",
+    logo: linyiLogo,
+    website: "http://jyj.linyi.gov.cn",
+  },
+  {
+    id: 13,
+    name: "德州市教育和体育局",
+    logo: dezhouLogo,
+    website: "http://dzedu.dezhou.gov.cn",
+  },
+  {
+    id: 14,
+    name: "聊城市教育和体育局",
+    logo: liaochengLogo,
+    website: "http://jyty.liaocheng.gov.cn",
+  },
+  {
+    id: 15,
+    name: "滨州市教育和体育局",
+    logo: binzhouLogo,
+    website: "http://jy.binzhou.gov.cn",
+  },
+  {
+    id: 16,
+    name: "菏泽市教育和体育局",
+    logo: hezeLogo,
+    website: "http://hzjy.heze.gov.cn",
   },
 ]);
+
+// 计算属性：获取首页显示的前6个教体局
+const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
 
 // const relatedLinks = ref([
 //   { id: 1, name: "教育部", url: "http://www.moe.gov.cn" },

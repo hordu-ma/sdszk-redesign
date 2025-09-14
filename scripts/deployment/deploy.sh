@@ -134,10 +134,16 @@ preflight_check() {
     # 检查Git状态
     if ! git diff-index --quiet HEAD --; then
         echo_warning "检测到未提交的更改，建议先提交代码再部署"
-        read -p "是否继续部署? [y/N]: " CONTINUE_DEPLOY
-        if [[ ! "$CONTINUE_DEPLOY" =~ ^[Yy]$ ]]; then
-            echo_info "部署已取消"
-            exit 0
+
+        # 支持非交互式部署
+        if [[ -n "$CI" || -n "$FORCE_DEPLOY" || ! -t 0 ]]; then
+            echo_info "非交互式环境，自动继续部署"
+        else
+            read -p "是否继续部署? [y/N]: " CONTINUE_DEPLOY
+            if [[ ! "$CONTINUE_DEPLOY" =~ ^[Yy]$ ]]; then
+                echo_info "部署已取消"
+                exit 0
+            fi
         fi
     fi
 
