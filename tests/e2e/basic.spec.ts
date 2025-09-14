@@ -13,7 +13,7 @@ test.describe("基础功能测试", () => {
     // 检查页面标题
     const title = await page.title();
     console.log(`页面标题: ${title}`);
-    expect(title).toBe("首页 - 山东省思想政治理论课一体化平台");
+    expect(title).toBe("首页 - 山东省大中小学思政课一体化中心平台");
 
     // 检查主要元素存在
     const app = page.locator("#app");
@@ -33,10 +33,13 @@ test.describe("基础功能测试", () => {
     await expect(app).toBeVisible({ timeout: 10000 });
 
     // 等待页面完全渲染
-    await page.waitForFunction(() => {
-      const body = document.body;
-      return body && body.textContent && body.textContent.trim().length > 0;
-    }, { timeout: 10000 });
+    await page.waitForFunction(
+      () => {
+        const body = document.body;
+        return body && body.textContent && body.textContent.trim().length > 0;
+      },
+      { timeout: 10000 },
+    );
 
     // 检查页面内容不为空
     const bodyText = await page.locator("body").textContent();
@@ -72,7 +75,7 @@ test.describe("基础功能测试", () => {
 
     // 直接检查API端点
     const response = await page.request.get("http://localhost:3000", {
-      timeout: 10000
+      timeout: 10000,
     });
     expect(response.status()).toBeLessThan(500);
     console.log("✅ API连接测试通过");

@@ -10,7 +10,7 @@
     <div class="sidebar-header">
       <div class="logo-container">
         <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
-        <span v-if="!collapsed" class="logo-text">管理后台</span>
+        <span v-if="!collapsed" class="logo-text">山东省大中小学思政课一体化中心平台</span>
       </div>
     </div>
 
@@ -171,8 +171,8 @@ onUnmounted(() => {
 }
 
 .sidebar-header {
-  height: 64px;
-  padding: 16px;
+  min-height: 64px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   background-color: #002140;
@@ -182,6 +182,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .logo {
@@ -191,11 +192,18 @@ onUnmounted(() => {
 
 .logo-text {
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.2;
   opacity: 1;
   transition: opacity 0.3s;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .admin-sidebar--collapsed .logo-text {

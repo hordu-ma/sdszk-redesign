@@ -146,10 +146,10 @@ appDb.resourcecategories.insertMany([
 
 // 插入示例新闻
 appDb.news.insertOne({
-  title: "欢迎使用山东省思想政治理论课平台",
+  title: "欢迎使用山东省大中小学思政课一体化中心平台",
   summary: "平台正式上线，为思政教育提供全面支持",
   content: `
-    <p>山东省思想政治理论课平台正式上线！</p>
+    <p>山东省大中小学思政课一体化中心平台正式上线！</p>
     <p>本平台致力于为全省思政教育工作者提供:</p>
     <ul>
       <li>丰富的教学资源</li>
@@ -172,14 +172,15 @@ appDb.news.insertOne({
 appDb.sitesettings.insertMany([
   {
     key: "site_title",
-    value: "山东省思想政治理论课",
+    value: "山东省大中小学思政课一体化中心平台",
     description: "网站标题",
     type: "string",
     updatedAt: new Date(),
   },
   {
     key: "site_description",
-    value: "山东省思想政治理论课教育教学资源平台",
+    value:
+      "山东省大中小学思政课一体化中心平台，提供思政课程资源、教学案例、活动组织等服务",
     description: "网站描述",
     type: "string",
     updatedAt: new Date(),
