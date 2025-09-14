@@ -421,7 +421,7 @@ const saveAllSettings = async () => {
     const response =
       await settingsApi.instance.bulkUpdateSettings(settingsToUpdate);
 
-    if (response.success) {
+    if (response.success && response.data) {
       message.success("设置保存成功");
       console.log("Settings update results:", response.data.results);
     } else {

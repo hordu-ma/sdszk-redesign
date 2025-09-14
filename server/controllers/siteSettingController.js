@@ -34,7 +34,7 @@ export const getAllSettings = async (req, res, next) => {
     );
 
     res.json({
-      status: "success",
+      success: true,
       data: groupedSettings,
     });
   } catch (err) {
@@ -58,7 +58,7 @@ export const getSettingsByGroup = async (req, res, next) => {
     );
 
     res.json({
-      status: "success",
+      success: true,
       data: settings,
     });
   } catch (err) {
@@ -78,7 +78,7 @@ export const getSetting = async (req, res, next) => {
     }
 
     res.json({
-      status: "success",
+      success: true,
       data: setting,
     });
   } catch (err) {
@@ -142,7 +142,7 @@ export const updateSetting = async (req, res, next) => {
     console.log("已清除设置相关缓存");
 
     res.json({
-      status: "success",
+      success: true,
       data: setting,
     });
   } catch (err) {
@@ -226,8 +226,10 @@ export const bulkUpdateSettings = async (req, res, next) => {
     console.log("已清除设置相关缓存");
 
     res.json({
-      status: "success",
-      results,
+      success: true,
+      data: {
+        results,
+      },
     });
   } catch (err) {
     return next(new BadRequestError(err.message));
@@ -277,7 +279,7 @@ export const deleteSetting = async (req, res, next) => {
     console.log("已清除设置相关缓存");
 
     res.json({
-      status: "success",
+      success: true,
       message: "设置已删除",
     });
   } catch (err) {
@@ -314,7 +316,7 @@ export const resetToDefault = async (req, res, next) => {
     console.log("已清除设置相关缓存");
 
     res.json({
-      status: "success",
+      success: true,
       message: "设置已重置为默认值",
     });
   } catch (err) {
@@ -425,7 +427,7 @@ export const getPublicSettings = async (req, res, next) => {
     );
 
     res.json({
-      status: "success",
+      success: true,
       data: publicSettings,
     });
   } catch (err) {
