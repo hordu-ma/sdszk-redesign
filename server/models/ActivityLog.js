@@ -22,6 +22,8 @@ const activityLogSchema = new mongoose.Schema(
         "failed_login",
         "password_change",
         "settings_update",
+        "settings_delete",
+        "settings_reset",
         "export",
         "import",
         "archive",

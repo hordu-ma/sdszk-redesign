@@ -121,11 +121,11 @@ export const updateSetting = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
+      user: req.user._id,
       action: "settings_update",
       entityType: "setting",
       entityId: setting._id,
+      entityName: setting.key,
       details: {
         key: setting.key,
         group: setting.group,
@@ -198,11 +198,11 @@ export const bulkUpdateSettings = async (req, res, next) => {
 
       // 记录活动
       await ActivityLog.logActivity({
-        userId: req.user._id,
-        username: req.user.username,
+        user: req.user._id,
         action: "settings_update",
         entityType: "setting",
         entityId: updatedSetting._id,
+        entityName: updatedSetting.key,
         details: {
           key: updatedSetting.key,
           group: updatedSetting.group,
@@ -258,14 +258,14 @@ export const deleteSetting = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
-      action: "delete",
+      user: req.user._id,
+      action: "settings_delete",
       entityType: "setting",
       entityId: existingSetting._id,
+      entityName: existingSetting.key,
       details: {
         key: existingSetting.key,
-        group: existingSetting.group,
+        value: existingSetting.value,
       },
       ip: req.ip,
       userAgent: req.headers["user-agent"],
@@ -297,12 +297,12 @@ export const resetToDefault = async (req, res, next) => {
 
     // 记录活动
     await ActivityLog.logActivity({
-      userId: req.user._id,
-      username: req.user.username,
-      action: "settings_update",
+      user: req.user._id,
+      action: "settings_reset",
       entityType: "system",
+      entityName: "系统设置重置",
       details: {
-        action: "reset_settings",
+        message: "重置为默认设置",
       },
       ip: req.ip,
       userAgent: req.headers["user-agent"],
