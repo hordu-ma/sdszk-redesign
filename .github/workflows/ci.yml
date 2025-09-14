@@ -367,21 +367,33 @@ jobs:
       - name: 启动并验证服务
         run: |
           echo "🚀 启动应用服务..."
+
+          # 确保等待脚本可执行
+          chmod +x scripts/ci/wait-services-enhanced.sh
+
           # 启动后端服务器
+          echo "📦 启动后端服务..."
           cd server
-          npm start &
+          npm start > ../backend-startup.log 2>&1 &
           echo $! > /tmp/backend.pid
           cd ..
+          echo "✅ 后端服务已启动 (PID: $(cat /tmp/backend.pid))"
+
           # 启动前端服务器
-          npm run dev &
+          echo "📦 启动前端服务..."
+          npm run dev > frontend-startup.log 2>&1 &
           echo $! > /tmp/frontend.pid
-          echo "🔍 验证服务状态..."
-          # 使用wait-on等待所有服务就绪
-          npm run wait-on -- -t 180000 http://localhost:5173 http://localhost:3000/api/health
-          echo "✅ 前端和后端服务已就绪"
-          # 再次确认数据库服务
-          ./scripts/testing/test-mongodb.sh
-          ./scripts/testing/test-redis.sh
+          echo "✅ 前端服务已启动 (PID: $(cat /tmp/frontend.pid))"
+
+          # 等待服务启动（短暂延迟）
+          echo "⏳ 等待服务初始化..."
+          sleep 5
+
+          # 使用增强的等待脚本验证服务状态
+          echo "🔍 执行服务健康检查..."
+          ./scripts/ci/wait-services-enhanced.sh --timeout 180
+
+          echo "✅ 所有服务已验证就绪"
 
       - name: 运行E2E测试
         run: |
@@ -395,6 +407,17 @@ jobs:
         if: always()
         run: |
           echo "🛑 停止应用服务..."
+
+          # 显示服务日志（调试用）
+          if [ -f backend-startup.log ]; then
+            echo "📋 后端启动日志 (最后20行):"
+            tail -20 backend-startup.log || true
+          fi
+
+          if [ -f frontend-startup.log ]; then
+            echo "📋 前端启动日志 (最后10行):"
+            tail -10 frontend-startup.log || true
+          fi
 
           # 停止前后端服务
           if [ -f /tmp/backend.pid ]; then
@@ -419,6 +442,8 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            backend-startup.log
+            frontend-startup.log
           retention-days: 3
 
   # 部署准备（仅主分支）

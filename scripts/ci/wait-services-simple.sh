@@ -10,6 +10,13 @@ DEFAULT_TIMEOUT=120
 DEFAULT_INTERVAL=2
 VERBOSE=false
 
+# 健康检查端点优先级顺序
+HEALTH_ENDPOINTS=(
+    "/api/health/basic"
+    "/api/health/ready"
+    "/api/health"
+)
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -32,6 +39,7 @@ show_help() {
     mongo://host:port         - MongoDB服务
     redis://host:port         - Redis服务
     http://host:port/path     - HTTP服务
+    http://host:port/health   - 健康检查端点（自动尝试多个端点）
     tcp://host:port           - TCP端口检查
 
 示例:
@@ -110,6 +118,11 @@ check_redis() {
 check_http() {
     local url="$1"
 
+    # 如果是健康检查相关的URL，尝试多个端点
+    if [[ "$url" == *"/health"* ]] || [[ "$url" == *":3000"* ]]; then
+        return check_health_endpoints "$url"
+    fi
+
     if command -v curl >/dev/null 2>&1; then
         curl -s -f -m 5 "$url" >/dev/null 2>&1
     elif command -v wget >/dev/null 2>&1; then
@@ -118,6 +131,45 @@ check_http() {
         log_error "未找到curl或wget命令"
         return 1
     fi
+}
+
+# 检查健康端点（按优先级尝试多个端点）
+check_health_endpoints() {
+    local base_url="$1"
+
+    # 提取基础URL（去掉路径部分）
+    local protocol_and_host=$(echo "$base_url" | sed 's|/api/.*||' | sed 's|/health.*||')
+
+    # 如果没有协议，添加http://
+    if [[ "$protocol_and_host" != http* ]]; then
+        protocol_and_host="http://$protocol_and_host"
+    fi
+
+    log_info "尝试健康检查端点..."
+
+    # 按优先级尝试不同的健康检查端点
+    for endpoint in "${HEALTH_ENDPOINTS[@]}"; do
+        local test_url="${protocol_and_host}${endpoint}"
+        log_info "尝试: $test_url"
+
+        if command -v curl >/dev/null 2>&1; then
+            local response=$(curl -s -w "HTTPSTATUS:%{http_code}" -m 5 "$test_url" 2>/dev/null || echo "HTTPSTATUS:000")
+            local http_code=$(echo "$response" | grep -o "HTTPSTATUS:[0-9]*" | cut -d: -f2)
+
+            if [[ "$http_code" == "200" ]]; then
+                log_info "✓ $endpoint 响应正常 (状态码: $http_code)"
+                return 0
+            elif [[ "$http_code" == "503" ]]; then
+                log_info "- $endpoint 服务不可用 (状态码: $http_code)"
+                # 503表示服务在运行但依赖未就绪，继续尝试其他端点
+            else
+                log_info "- $endpoint 无响应 (状态码: $http_code)"
+            fi
+        fi
+    done
+
+    log_info "所有健康检查端点都无法访问"
+    return 1
 }
 
 # 检查TCP端口
@@ -209,6 +261,7 @@ main() {
 
     log_info "开始等待 ${#services[@]} 个服务就绪..."
     log_info "超时时间: ${timeout}秒，检查间隔: ${interval}秒"
+    log_info "健康检查端点: ${HEALTH_ENDPOINTS[*]}"
 
     local start_time=$(date +%s)
     local end_time=$((start_time + timeout))

@@ -3,7 +3,65 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-// 健康检查路由
+// 基础健康检查路由 - 用于CI环境快速验证服务启动
+router.get("/health/basic", (req, res) => {
+  try {
+    const uptime = process.uptime();
+
+    res.status(200).json({
+      status: "ok",
+      message: "Service is running",
+      timestamp: new Date().toISOString(),
+      uptime: Math.floor(uptime),
+      environment: process.env.NODE_ENV || "development",
+    });
+  } catch (error) {
+    console.error("Basic health check error:", error);
+    res.status(503).json({
+      status: "error",
+      message: "Basic health check failed",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// 就绪状态检查路由 - 检查所有依赖服务
+router.get("/health/ready", async (req, res) => {
+  try {
+    // 检查数据库连接
+    const dbStatus = mongoose.connection.readyState;
+    const dbStates = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting",
+    };
+
+    const isReady = dbStatus === 1;
+    const statusCode = isReady ? 200 : 503;
+
+    res.status(statusCode).json({
+      status: isReady ? "ready" : "not_ready",
+      timestamp: new Date().toISOString(),
+      checks: {
+        database: {
+          status: dbStates[dbStatus],
+          connected: dbStatus === 1,
+        },
+      },
+      environment: process.env.NODE_ENV || "development",
+    });
+  } catch (error) {
+    console.error("Ready check error:", error);
+    res.status(503).json({
+      status: "error",
+      message: "Ready check failed",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// 完整健康检查路由 - 包含详细的系统信息
 router.get("/health", async (req, res) => {
   try {
     // 检查数据库连接
