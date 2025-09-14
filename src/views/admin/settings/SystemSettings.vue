@@ -207,6 +207,7 @@ import { ref, reactive, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import { PlusOutlined } from "@ant-design/icons-vue";
 import { settingsApi } from "@/api";
+import { onLogoSettingChange } from "@/utils/favicon";
 
 // 设置类型定义
 interface SiteSettings {
@@ -348,6 +349,9 @@ const handleLogoChange = (info: any) => {
         logoFileList.value[0].url = result;
         logoFileList.value[0].preview = result;
       }
+
+      // 立即更新favicon预览
+      onLogoSettingChange(result);
     };
     reader.readAsDataURL(file.originFileObj || file);
 
@@ -358,6 +362,10 @@ const handleLogoChange = (info: any) => {
 const removeLogo = () => {
   logoFileList.value = [];
   siteSettings.siteLogo = "";
+
+  // 恢复默认favicon
+  onLogoSettingChange("");
+
   message.success("图标已移除！请点击「保存所有设置」来保存更改");
 };
 
@@ -410,6 +418,12 @@ const saveAllSettings = async () => {
     if (response.success && response.data) {
       message.success("设置保存成功");
       console.log("Settings update results:", response.data.results);
+
+      // 如果保存的设置中包含logo，更新favicon
+      const logoSetting = settingsToUpdate.find((s) => s.key === "siteLogo");
+      if (logoSetting) {
+        onLogoSettingChange(logoSetting.value);
+      }
     } else {
       message.error("设置保存失败");
     }

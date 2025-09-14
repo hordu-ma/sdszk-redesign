@@ -13,6 +13,7 @@ import "./styles/preview-fix.css"; // 添加预览模式修复样式
 
 import App from "./App.vue";
 import router from "./router";
+import { initFavicon } from "./utils/favicon";
 
 const app = createApp(App);
 
@@ -55,6 +56,9 @@ const initializeApp = async () => {
   }
 
   app.mount("#app");
+
+  // 初始化动态favicon
+  initFavicon();
 };
 
 // 启动应用
