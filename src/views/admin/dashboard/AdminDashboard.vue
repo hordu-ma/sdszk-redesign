@@ -101,42 +101,6 @@
           </div>
           <div ref="contentChartRef" class="chart-container" />
         </div>
-
-        <!-- 最新动态 -->
-        <div class="activity-card">
-          <div class="card-header">
-            <h3>最新动态</h3>
-            <a-button type="link" @click="viewAllActivities">
-              查看全部
-            </a-button>
-          </div>
-          <div class="activity-list">
-            <div
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              class="activity-item"
-            >
-              <div class="activity-avatar">
-                <a-avatar :src="activity.user.avatar" :size="32">
-                  {{ activity.user.username?.charAt(0)?.toUpperCase() }}
-                </a-avatar>
-              </div>
-              <div class="activity-content">
-                <div class="activity-text">
-                  <strong>{{ activity.user.username }}</strong>
-                  {{ activity.action }}
-                  <strong>{{ activity.target }}</strong>
-                </div>
-                <div class="activity-time">
-                  {{ formatTime(activity.createdAt) }}
-                </div>
-              </div>
-            </div>
-            <div v-if="recentActivities.length === 0" class="empty-state">
-              <a-empty description="暂无动态" />
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="content-right">
@@ -368,21 +332,6 @@ const quickActions = ref([
     icon: SettingOutlined,
   },
 ]);
-
-// 最新动态类型定义
-interface ActivityItem {
-  id: number | string;
-  user: {
-    username: string;
-    avatar: string;
-  };
-  action: string;
-  target: string;
-  createdAt: Date;
-}
-
-// 最新动态
-const recentActivities = ref<ActivityItem[]>([]);
 
 // 系统状态
 const systemStatus = ref({
@@ -636,48 +585,6 @@ const loadContentDistribution = async () => {
   }
 };
 
-// 加载最新动态
-const loadRecentActivities = async () => {
-  try {
-    const response = await dashboardApi.getRecentActivities();
-    if (isUnmounted) return;
-
-    if (response.success && response.data) {
-      const items = response.data.items || [];
-      recentActivities.value = items.map((item: any) => ({
-        id: typeof item.id === "number" ? item.id : Date.now(),
-        user: {
-          username: item.user?.username || "未知用户",
-          avatar: item.user?.avatar || "",
-        },
-        action: item.action || "未知操作",
-        target: item.target || "未知对象",
-        createdAt: new Date(item.createdAt || Date.now()),
-      }));
-    } else {
-      console.warn("最新动态API返回异常:", response);
-      recentActivities.value = [];
-    }
-  } catch (error) {
-    if (!isUnmounted) {
-      console.error("加载最新动态失败:", error);
-      // 设置默认动态而不是显示错误消息
-      recentActivities.value = [
-        {
-          id: "default-1",
-          user: {
-            username: "系统",
-            avatar: "",
-          },
-          action: "系统启动",
-          target: "CMS系统",
-          createdAt: new Date(),
-        },
-      ];
-    }
-  }
-};
-
 // 加载系统状态
 const loadSystemStatus = async () => {
   try {
@@ -783,15 +690,14 @@ const loadPerformanceMetrics = async () => {
 const refreshData = async () => {
   refreshing.value = true;
   try {
+    refreshing.value = true;
     await Promise.all([
       loadStats(),
       loadVisitTrends(),
       loadContentDistribution(),
-      loadRecentActivities(),
       loadSystemStatus(),
       loadPerformanceMetrics(),
     ]);
-    message.success("数据刷新成功");
   } catch (error) {
     message.error("数据刷新失败");
   } finally {
@@ -845,9 +751,6 @@ const handleQuickAction = (key: string) => {
 };
 
 // 查看全部动态
-const viewAllActivities = () => {
-  router.push("/admin/activities");
-};
 
 // 格式化时间
 const formatTime = (date: Date) => {
@@ -972,7 +875,6 @@ onMounted(async () => {
     loadStats(),
     loadVisitTrends(),
     loadContentDistribution(),
-    loadRecentActivities(),
     loadSystemStatus(),
     loadPerformanceMetrics(),
   ]);
@@ -1140,7 +1042,6 @@ const handleResize = () => {
 }
 
 .chart-card,
-.activity-card,
 .quick-actions-card,
 .system-status-card,
 .performance-card {
@@ -1177,45 +1078,6 @@ const handleResize = () => {
 
 .chart-container {
   height: 300px;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  .empty-state {
-    padding: 40px 0;
-    text-align: center;
-  }
-}
-
-.activity-item {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #fafafa;
-  }
-}
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-text {
-  color: #262626;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 4px;
-}
-
-.activity-time {
-  color: #8c8c8c;
-  font-size: 12px;
 }
 
 .quick-actions {
