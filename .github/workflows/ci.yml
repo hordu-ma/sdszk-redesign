@@ -354,6 +354,7 @@ jobs:
           echo "📝 设置后端环境变量..."
           cat > .env << EOF
           NODE_ENV=test
+          CI_E2E_TEST=true
           PORT=3000
           HOST=0.0.0.0
           MONGODB_URI=mongodb://localhost:27017/sdszk_test
@@ -487,6 +488,7 @@ jobs:
         env:
           CI: true
           NODE_ENV: test
+          CI_E2E_TEST: true
 
       - name: 停止服务
         if: always()

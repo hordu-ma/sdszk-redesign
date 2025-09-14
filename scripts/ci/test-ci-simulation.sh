@@ -133,6 +133,7 @@ EOF
     cd server
     cat > .env << EOF
 NODE_ENV=test
+CI_E2E_TEST=true
 PORT=3000
 HOST=0.0.0.0
 MONGODB_URI=mongodb://localhost:27017/sdszk_test

@@ -296,7 +296,12 @@ app.use(errorMiddleware);
 // 启动服务器
 const PORT = process.env.PORT || 3000;
 
-if (process.env.NODE_ENV !== "test") {
+// 启动服务器 - 区分单元测试和E2E测试环境
+// 单元测试时不启动服务器，但CI E2E测试时需要启动
+const shouldStartServer =
+  process.env.NODE_ENV !== "test" || process.env.CI_E2E_TEST === "true";
+
+if (shouldStartServer) {
   const server = app.listen(PORT, () => {
     logSystemStart({
       port: PORT,
