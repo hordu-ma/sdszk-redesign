@@ -15,9 +15,6 @@
         </div>
       </div>
       <div class="header-right">
-        <a-button :loading="saving" @click="handleSaveDraft">
-          保存草稿
-        </a-button>
         <a-button type="primary" @click="handlePublish" :loading="publishing">
           发布新闻
         </a-button>
@@ -196,7 +193,6 @@ const formRef = ref();
 const quillEditorRef = ref();
 
 // 状态管理
-const saving = ref(false);
 const publishing = ref(false);
 const categories = ref<NewsCategory[]>([]);
 const imageFileList = ref([]);
@@ -306,36 +302,6 @@ const handleImageUpload = async ({ file }: any) => {
 // 移除图片
 const handleRemoveImage = () => {
   formData.featuredImage = "";
-};
-
-// 保存草稿
-const handleSaveDraft = async () => {
-  try {
-    // 检查认证状态
-    if (!(await requireAuth())) {
-      return;
-    }
-
-    saving.value = true;
-    formData.status = "draft";
-
-    await formRef.value.validate();
-    await adminNewsApi.create(formData);
-
-    message.success("草稿保存成功");
-    router.push("/admin/news/list");
-  } catch (error: any) {
-    if (error.errorFields) {
-      message.error("请检查表单填写是否正确");
-    } else if (error.response?.status === 401) {
-      message.error("登录已过期，请重新登录");
-      router.push("/admin/login");
-    } else {
-      message.error(error.message || "保存草稿失败");
-    }
-  } finally {
-    saving.value = false;
-  }
 };
 
 // 发布新闻

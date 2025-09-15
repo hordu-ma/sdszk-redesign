@@ -15,7 +15,6 @@
         </div>
       </div>
       <div class="header-right">
-        <a-button :loading="saving" @click="handleSave"> 保存修改 </a-button>
         <a-button type="primary" @click="handlePublish" :loading="publishing">
           {{ formData.status === "published" ? "更新发布" : "发布新闻" }}
         </a-button>
@@ -224,7 +223,7 @@ const quillEditorRef = ref();
 
 // 状态管理
 const loading = ref(true);
-const saving = ref(false);
+
 const publishing = ref(false);
 const categories = ref<NewsCategory[]>([]);
 const newsData = ref<NewsItem>();
@@ -345,30 +344,9 @@ const handleRemoveImage = () => {
   formData.featuredImage = "";
 };
 
-// 保存修改
 // 处理字数统计
 const handleWordCount = (count: number) => {
   console.log("当前字数：", count);
-};
-
-const handleSave = async () => {
-  try {
-    saving.value = true;
-
-    await formRef.value.validate();
-    await adminNewsApi.update(props.id, formData);
-
-    message.success("保存成功");
-    router.push("/admin/news/list");
-  } catch (error: any) {
-    if (error.errorFields) {
-      message.error("请检查表单填写是否正确");
-    } else {
-      message.error(error.message || "保存失败");
-    }
-  } finally {
-    saving.value = false;
-  }
 };
 
 // 发布新闻
