@@ -1,7 +1,7 @@
 # 用户管理系统修复 - 回滚方案
 
-**文档创建时间**: 2025-09-13  
-**修复分支**: `fix/user-management-system`  
+**文档创建时间**: 2025-09-13
+**修复分支**: `fix/user-management-system`
 **基准分支**: `main`
 
 ## 🎯 概述
@@ -20,11 +20,11 @@
 
 ### 新增文档文件
 
-| 文件路径                     | 类型     | 说明         |
-| ---------------------------- | -------- | ------------ |
-| `docs/user-system-issues.md` | 诊断文档 | 问题分析清单 |
-| `docs/rollback-plan.md`      | 回滚文档 | 本文档       |
-| `backups/`                   | 备份目录 | 原始文件备份 |
+| 文件路径                             | 类型     | 说明         |
+| ------------------------------------ | -------- | ------------ |
+| `docs/archive/user-system-issues.md` | 诊断文档 | 问题分析清单 |
+| `docs/archive/rollback-plan.md`      | 回滚文档 | 本文档       |
+| `backups/`                           | 备份目录 | 原始文件备份 |
 
 ## 🔄 回滚策略
 
@@ -63,8 +63,8 @@ cp backups/controllers.backup/userController.js server/controllers/userControlle
 cp backups/routes.backup/users.js server/routes/users.js
 
 # 2. 删除新增的文档（可选）
-rm docs/user-system-issues.md
-rm docs/rollback-plan.md
+rm docs/archive/user-system-issues.md
+rm docs/archive/rollback-plan.md
 rm -rf backups/
 
 # 3. 检查语法

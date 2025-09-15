@@ -234,13 +234,10 @@ npm run format            # Prettier格式化
 
 ```bash
 # 数据库管理
-npm run db:sync           # 数据同步
 npm run db:tunnel         # SSH隧道连接生产库
 
 # 环境诊断
-./scripts/development/debug-services.sh      # 全面环境检查
 ./scripts/development/diagnose-backend.sh    # 后端服务诊断
-./scripts/kill-ports.sh                      # 清理端口占用
 
 # 项目维护
 ./scripts/development/cleanup-project.sh     # 完整项目清理
@@ -290,7 +287,7 @@ chore: 构建工具     perf: 性能优化
 
 ```bash
 # 端口冲突
-./scripts/kill-ports.sh
+./scripts/development/dev-stop.sh    # 优雅停止开发环境
 
 # 数据库连接
 brew services restart mongodb-community
@@ -316,6 +313,7 @@ curl https://horsduroot.com/api/health
 
 - 📂 [docs/](./docs/) - 详细架构文档
 - 🔧 [scripts/](./scripts/) - 自动化脚本
+- 📦 [docs/archive/](./docs/archive/) - 历史文档存档
 
 ## 📄 许可证
 
