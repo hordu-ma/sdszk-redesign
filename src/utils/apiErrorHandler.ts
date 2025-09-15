@@ -158,6 +158,17 @@ const handleValidationError = (error: ApiError) => {
 // 处理认证错误
 const handleAuthError = async (error: ApiError) => {
   const store = initStore();
+  const currentPath = router.currentRoute.value.path;
+
+  // 检查是否是管理后台路径
+  const isAdminRoute = currentPath.startsWith("/admin");
+
+  // 如果不是管理后台路径且用户未登录，不强制跳转
+  if (!isAdminRoute && !store.isAuthenticated) {
+    // 前台公共页面的API调用失败，仅显示警告，不跳转
+    console.warn("前台API调用认证失败，但不强制跳转登录页");
+    return;
+  }
 
   // 检查是否真的需要登出 - 避免误报
   if (store.isAuthenticated) {
@@ -178,16 +189,16 @@ const handleAuthError = async (error: ApiError) => {
   // 显示友好的登录提示
   message.error("登录已过期，请重新登录");
 
+  // 清理用户状态
+  await store.logout();
+
+  // 根据当前路径选择跳转目标
+  const loginPath = isAdminRoute ? "/admin/login" : "/auth";
+
   // 延迟跳转，让用户看到提示
   setTimeout(() => {
-    store.logout();
-    router.push("/auth");
+    router.push(loginPath);
   }, 1500);
-
-  // 只有在真正需要时才登出
-  await store.logout();
-  message.error(error.message || "登录已过期，请重新登录");
-  router.push("/admin/login");
 };
 
 // 处理权限错误

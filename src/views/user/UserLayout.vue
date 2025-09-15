@@ -1,6 +1,52 @@
 <template>
   <div class="user-layout">
-    <div class="user-layout-container">
+    <!-- 未登录状态：显示友好的登录引导 -->
+    <div v-if="!isAuthenticated" class="login-guide-container">
+      <div class="login-guide-card">
+        <div class="guide-icon">
+          <i class="fas fa-user-circle" />
+        </div>
+        <h2 class="guide-title">欢迎来到个人中心</h2>
+        <p class="guide-description">
+          登录后您可以管理个人资料、查看收藏内容、浏览历史记录等个性化功能
+        </p>
+        <div class="guide-features">
+          <div class="feature-item">
+            <i class="fas fa-heart" />
+            <span>收藏管理</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-history" />
+            <span>浏览历史</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-user" />
+            <span>个人资料</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-cog" />
+            <span>账户设置</span>
+          </div>
+        </div>
+        <div class="guide-actions">
+          <router-link to="/auth" class="login-btn">
+            <el-button type="primary" size="large">
+              <i class="fas fa-sign-in-alt" />
+              立即登录
+            </el-button>
+          </router-link>
+          <router-link to="/" class="back-btn">
+            <el-button size="large" plain>
+              <i class="fas fa-arrow-left" />
+              返回首页
+            </el-button>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- 已登录状态：显示正常的个人中心界面 -->
+    <div v-else class="user-layout-container">
       <!-- 左侧导航菜单 -->
       <aside class="user-sidebar">
         <div class="user-info">
@@ -66,6 +112,7 @@ const userStore = useUserStore();
 
 // 计算属性
 const userInfo = computed(() => userStore.userInfo);
+const isAuthenticated = computed(() => userStore.isAuthenticated);
 
 // 导航菜单项
 const menuItems = [
@@ -120,6 +167,107 @@ const currentPageTitle = computed(() => {
   padding: 20px 0;
 }
 
+/* 登录引导样式 */
+.login-guide-container {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.login-guide-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 60px 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.guide-icon {
+  margin-bottom: 24px;
+}
+
+.guide-icon i {
+  font-size: 64px;
+  color: #409eff;
+  opacity: 0.8;
+}
+
+.guide-title {
+  margin: 0 0 16px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.guide-description {
+  margin: 0 0 40px;
+  font-size: 16px;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.guide-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: #e8f4ff;
+  transform: translateY(-2px);
+}
+
+.feature-item i {
+  font-size: 24px;
+  color: #409eff;
+  margin-bottom: 8px;
+}
+
+.feature-item span {
+  font-size: 14px;
+  color: #303133;
+  font-weight: 500;
+}
+
+.guide-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.login-btn,
+.back-btn {
+  text-decoration: none;
+}
+
+.guide-actions .el-button {
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.guide-actions .el-button i {
+  margin-right: 8px;
+}
+
+/* 已登录状态的布局 */
 .user-layout-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -253,6 +401,28 @@ const currentPageTitle = computed(() => {
   .content-body {
     padding: 20px 15px;
   }
+
+  /* 登录引导响应式 */
+  .login-guide-card {
+    padding: 40px 24px;
+  }
+
+  .guide-title {
+    font-size: 24px;
+  }
+
+  .guide-features {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .guide-actions {
+    flex-direction: column;
+  }
+
+  .guide-actions .el-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -275,6 +445,27 @@ const currentPageTitle = computed(() => {
 
   .content-body {
     padding: 20px 15px;
+  }
+
+  /* 小屏幕登录引导 */
+  .login-guide-container {
+    padding: 20px 10px;
+  }
+
+  .login-guide-card {
+    padding: 30px 20px;
+  }
+
+  .guide-icon i {
+    font-size: 48px;
+  }
+
+  .guide-title {
+    font-size: 20px;
+  }
+
+  .guide-description {
+    font-size: 14px;
   }
 }
 </style>

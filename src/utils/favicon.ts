@@ -47,7 +47,11 @@ export async function applyFaviconFromSettings(
   settingsApi: any,
 ): Promise<void> {
   try {
-    const response = await settingsApi.getAllSettings();
+    // 使用静默错误处理，避免在未登录时影响用户体验
+    const response = await settingsApi.getAllSettings({
+      redirectOnAuth: false,
+      showNotification: false,
+    });
 
     if (response.success && response.data?.general) {
       // 查找siteLogo设置
@@ -75,10 +79,16 @@ export async function applyFaviconFromSettings(
         setDefaultFavicon();
       }
     } else {
+      // 如果设置为空或无效，使用默认favicon
       setDefaultFavicon();
     }
-  } catch (error) {
-    console.error("Failed to apply favicon from settings:", error);
+  } catch (error: any) {
+    // 如果是认证错误（401），静默处理
+    if (error?.status === 401) {
+      console.debug("favicon设置需要登录权限，使用默认图标");
+    } else {
+      console.warn("应用favicon设置失败:", error?.message || error);
+    }
     setDefaultFavicon();
   }
 }
@@ -95,8 +105,11 @@ export function initFavicon(): void {
       // 动态导入settingsApi以避免循环依赖
       const { settingsApi } = await import("@/api");
       await applyFaviconFromSettings(settingsApi.instance);
-    } catch (error) {
-      console.error("Failed to initialize favicon:", error);
+    } catch (error: any) {
+      // 初始化失败时静默使用默认图标，不影响用户体验
+      if (error?.status !== 401) {
+        console.warn("初始化favicon失败:", error);
+      }
       setDefaultFavicon();
     }
   }, 1000);

@@ -184,12 +184,12 @@ const routes: RouteRecordRaw[] = [
       keepAlive: true,
     },
   },
-  // 个人中心路由
+  // 个人中心路由 - 移除强制认证，改为组件内部处理
   {
     path: "/user",
     component: () => import("../views/user/UserLayout.vue"),
     meta: {
-      requiresAuth: true,
+      title: "个人中心",
     },
     children: [
       {
@@ -200,21 +200,33 @@ const routes: RouteRecordRaw[] = [
         path: "profile",
         name: "userProfile",
         component: () => import("../views/user/UserProfile.vue"),
+        meta: {
+          title: "个人资料",
+        },
       },
       {
         path: "favorites",
         name: "userFavorites",
         component: () => import("../views/user/UserFavorites.vue"),
+        meta: {
+          title: "我的收藏",
+        },
       },
       {
         path: "history",
         name: "userHistory",
         component: () => import("../views/user/UserHistory.vue"),
+        meta: {
+          title: "浏览历史",
+        },
       },
       {
         path: "settings",
         name: "userSettings",
         component: () => import("../views/user/UserSettings.vue"),
+        meta: {
+          title: "账户设置",
+        },
       },
     ],
   },

@@ -28,11 +28,17 @@ const getResources = async (category, limit = 10) => {
   try {
     console.log(`正在获取资源: category=${category}, limit=${limit}`);
 
-    const response = await resourceApi.instance.getList({
-      category: category,
-      limit: limit,
-      page: 1,
-    });
+    const response = await resourceApi.instance.getList(
+      {
+        category: category,
+        limit: limit,
+        page: 1,
+      },
+      {
+        redirectOnAuth: false, // 前台调用不重定向到登录页
+        showNotification: false, // 静默处理错误，避免干扰用户体验
+      },
+    );
 
     if (response.success && response.data) {
       // 处理URL格式，确保相对路径转换为完整URL
@@ -61,10 +67,11 @@ const getResources = async (category, limit = 10) => {
     }
   } catch (error) {
     console.error(`获取${category}资源时发生错误:`, error);
+    // 前台资源加载失败时不影响页面正常显示
     return {
       success: false,
       data: [],
-      message: error.message || "网络请求失败",
+      message: error.message || "资源加载失败，请稍后重试",
     };
   }
 };
