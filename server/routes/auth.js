@@ -9,6 +9,7 @@ import {
   getMe,
   updateProfile,
   changePassword,
+  refreshPermissions,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -44,5 +45,8 @@ router.put("/profile", updateProfile);
 
 // 修改密码
 router.put("/change-password", changePassword);
+
+// 刷新用户权限
+router.post("/refresh-permissions", refreshPermissions);
 
 export default router;

@@ -12,7 +12,8 @@ export interface UserProfile {
   avatar?: string;
   department?: string;
   position?: string;
-  role: "admin" | "editor" | "user";
+  role: "admin" | "co_admin" | "editor" | "user";
+  permissions?: string[];
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -137,6 +138,11 @@ export class UserApi extends BaseApi {
       url: "/users/delete-account",
       data: { password },
     });
+  }
+
+  // 刷新用户权限
+  refreshPermissions(): Promise<ApiResponse<{ user: UserProfile }>> {
+    return this.post("/auth/refresh-permissions");
   }
 }
 

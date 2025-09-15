@@ -539,6 +539,49 @@ export const sendVerificationCode = async (req, res, next) => {
   }
 };
 
+// 刷新当前用户权限
+export const refreshPermissions = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return next(new UnauthorizedError("用户未登录"));
+    }
+
+    // 重新从数据库获取用户信息（包括最新权限）
+    const user = await User.findById(currentUser._id).select("+permissions");
+
+    if (!user) {
+      return next(new NotFoundError("用户不存在"));
+    }
+
+    // 返回更新后的用户信息
+    res.status(200).json({
+      status: "success",
+      message: "权限已刷新",
+      data: {
+        user: {
+          id: user._id,
+          username: user.username,
+          name: user.name || user.username,
+          email: user.email,
+          role: user.role,
+          permissions: user.permissions,
+          avatar: user.avatar,
+        },
+      },
+    });
+
+    authLogger.info(
+      { userId: user._id, username: user.username },
+      "用户权限已刷新",
+    );
+  } catch (error) {
+    logError(error, { context: "refreshPermissions" });
+    next(error);
+  }
+};
+
 // 基于角色的访问控制中间件
 export const restrictTo = (...roles) => {
   return (req, res, next) => {

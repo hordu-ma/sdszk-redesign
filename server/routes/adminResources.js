@@ -11,6 +11,7 @@ import {
   batchDeleteAdminResources,
 } from "../controllers/adminResourceController.js";
 import { authenticateToken } from "../middleware/auth.js";
+import { checkPermission } from "../middleware/permissionMiddleware.js";
 
 const router = express.Router();
 
@@ -18,27 +19,47 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // 获取管理员资源列表（带分类信息填充）
-router.get("/", getAdminResourceList);
+router.get("/", checkPermission("resources", "read"), getAdminResourceList);
 
 // 获取管理员资源详情
-router.get("/:id", getAdminResourceDetail);
+router.get(
+  "/:id",
+  checkPermission("resources", "read"),
+  getAdminResourceDetail,
+);
 
 // 创建新资源
-router.post("/", createAdminResource);
+router.post("/", checkPermission("resources", "create"), createAdminResource);
 
 // 更新资源
-router.put("/:id", updateAdminResource);
+router.put("/:id", checkPermission("resources", "update"), updateAdminResource);
 
 // 更新资源状态
-router.patch("/:id/status", updateAdminResourceStatus);
+router.patch(
+  "/:id/status",
+  checkPermission("resources", "update"),
+  updateAdminResourceStatus,
+);
 
 // 批量更新资源状态
-router.post("/batch-status", batchUpdateAdminResourceStatus);
+router.post(
+  "/batch-status",
+  checkPermission("resources", "update"),
+  batchUpdateAdminResourceStatus,
+);
 
 // 删除单个资源
-router.delete("/:id", deleteAdminResource);
+router.delete(
+  "/:id",
+  checkPermission("resources", "delete"),
+  deleteAdminResource,
+);
 
 // 批量删除资源
-router.post("/batch-delete", batchDeleteAdminResources);
+router.post(
+  "/batch-delete",
+  checkPermission("resources", "delete"),
+  batchDeleteAdminResources,
+);
 
 export default router;

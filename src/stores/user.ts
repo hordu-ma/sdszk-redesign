@@ -6,6 +6,7 @@ import type { BackendPermissions, PermissionList } from "../types/permissions";
 import router from "@/router";
 import { message } from "ant-design-vue";
 import { AUTH_ENDPOINTS } from "../constants/api-endpoints";
+import { userApi } from "../api/modules/user";
 
 export interface UserInfo {
   id: string;
@@ -442,6 +443,38 @@ export const useUserStore = defineStore(
       await debouncedUserInfoInit();
     }
 
+    /**
+     * 刷新用户权限
+     */
+    async function refreshPermissions(): Promise<boolean> {
+      try {
+        loading.value = true;
+
+        // 调用后端API刷新权限
+        const response = await userApi.refreshPermissions();
+
+        if (response.success && response.data?.user) {
+          // 更新用户信息，包括最新的权限
+          const userData = response.data.user;
+          _setUserData({
+            ...userData,
+            name: userData.name || userData.username,
+            permissions: userData.permissions || [],
+          });
+          message.success("权限已刷新");
+          return true;
+        }
+
+        return false;
+      } catch (error: any) {
+        console.error("刷新权限失败:", error);
+        message.error("刷新权限失败，请重新登录");
+        return false;
+      } finally {
+        loading.value = false;
+      }
+    }
+
     // ========== 注册相关方法 ==========
 
     async function register(payload: RegisterPayload): Promise<boolean> {
@@ -532,6 +565,9 @@ export const useUserStore = defineStore(
 
       // 组合函数：用于组件中的认证检查
       useAuthGuard,
+
+      // 权限刷新
+      refreshPermissions,
     };
   },
   {

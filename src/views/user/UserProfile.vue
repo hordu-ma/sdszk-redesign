@@ -242,7 +242,7 @@ interface ExtendedUserInfo {
   name: string;
   avatar?: string;
   email?: string;
-  role: "admin" | "editor" | "user";
+  role: "admin" | "co_admin" | "editor" | "user";
   permissions: string[];
   // 添加 UserProfile 中的额外字段
   phone?: string;

@@ -126,13 +126,13 @@ export const getUser = async (req, res, next) => {
 // 创建用户 (管理员)
 export const createUser = async (req, res, next) => {
   try {
-    const { username, email, phone, password, role, status, permissions } =
-      req.body;
+    const { username, email, phone, password, role, status } = req.body;
 
     if (!username || !password) {
       return next(new BadRequestError("用户名和密码是必填项"));
     }
 
+    // 创建用户时不传递权限，让 pre-save hook 根据角色自动分配
     const doc = await User.create({
       username,
       email,
@@ -140,10 +140,15 @@ export const createUser = async (req, res, next) => {
       password, // 密码将在 pre-save hook 中自动哈希
       role: role || "user",
       status: status || "active",
-      ...(permissions ? { permissions } : {}),
+      // 移除手动权限设置，完全依赖角色的 pre-save hook 自动分配
     });
 
-    log.info("新用户已创建", { userId: doc._id, username: doc.username });
+    log.info("新用户已创建", {
+      userId: doc._id,
+      username: doc.username,
+      role: doc.role,
+      permissionsCount: doc.permissions?.length || 0,
+    });
 
     res.status(201).json({
       status: "success",

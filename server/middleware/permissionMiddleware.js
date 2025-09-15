@@ -1,6 +1,29 @@
 // permissionMiddleware.js - 权限中间件
 import { ForbiddenError } from "../utils/appError.js";
 
+// 权限检查辅助函数
+const hasPermission = (permissions, resource, action) => {
+  if (!permissions) return false;
+
+  // 支持字符串数组格式的权限（如 ['news:create', 'news:read']）
+  if (Array.isArray(permissions)) {
+    const permissionKey = `${resource}:${action}`;
+    const manageKey = `${resource}:manage`;
+    return (
+      permissions.includes(permissionKey) || permissions.includes(manageKey)
+    );
+  }
+
+  // 支持对象格式的权限（如 {news: {create: true, read: true}}）
+  if (typeof permissions === "object") {
+    return (
+      permissions?.[resource]?.[action] || permissions?.[resource]?.["manage"]
+    );
+  }
+
+  return false;
+};
+
 // 权限检查中间件
 export const checkPermission = (resource, action) => {
   return (req, res, next) => {
@@ -16,13 +39,8 @@ export const checkPermission = (resource, action) => {
 
       const { permissions } = req.user;
 
-      // 检查基本权限
-      if (permissions?.[resource]?.[action]) {
-        return next();
-      }
-
-      // 检查管理权限
-      if (permissions?.[resource]?.["manage"]) {
+      // 使用统一的权限检查函数
+      if (hasPermission(permissions, resource, action)) {
         return next();
       }
 
@@ -47,11 +65,11 @@ export const checkAnyPermission = (permissionChecks) => {
       }
 
       const { permissions } = req.user;
-      const hasPermission = permissionChecks.some(
-        ([resource, action]) => permissions?.[resource]?.[action],
+      const hasAnyPermission = permissionChecks.some(([resource, action]) =>
+        hasPermission(permissions, resource, action),
       );
 
-      if (!hasPermission) {
+      if (!hasAnyPermission) {
         throw new ForbiddenError("无权限执行此操作");
       }
 
@@ -76,8 +94,8 @@ export const checkAllPermissions = (permissionChecks) => {
       }
 
       const { permissions } = req.user;
-      const hasAllPermissions = permissionChecks.every(
-        ([resource, action]) => permissions?.[resource]?.[action],
+      const hasAllPermissions = permissionChecks.every(([resource, action]) =>
+        hasPermission(permissions, resource, action),
       );
 
       if (!hasAllPermissions) {
