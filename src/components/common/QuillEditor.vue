@@ -428,9 +428,9 @@ const handleImageUpload = async ({ file }: any) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    console.log("发送上传请求到 /api/upload/single");
+    console.log("发送上传请求到 /api/uploads/single");
 
-    const response = await api.post("/api/upload/single", formData, {
+    const response = await api.post("/api/uploads/single", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

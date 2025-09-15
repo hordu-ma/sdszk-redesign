@@ -382,7 +382,18 @@ export const createNews = async (req, res) => {
 // 更新新闻
 export const updateNews = async (req, res) => {
   try {
-    const news = await News.findByIdAndUpdate(req.params.id, req.body, {
+    // 过滤掉不应该被更新的系统字段
+    const updateData = { ...req.body };
+    delete updateData.author;
+    delete updateData.createdBy;
+    delete updateData.createdAt;
+    delete updateData._id;
+    delete updateData.__v;
+
+    // 添加更新者信息
+    updateData.updatedBy = req.user.id;
+
+    const news = await News.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -390,8 +401,9 @@ export const updateNews = async (req, res) => {
       return response.notFound(res, "新闻不存在");
     }
     return response.success(res, news, "更新新闻成功");
-  } catch {
-    return response.error(res, "更新新闻失败", 400);
+  } catch (error) {
+    console.error("更新新闻失败:", error);
+    return response.error(res, error.message || "更新新闻失败", 400);
   }
 };
 

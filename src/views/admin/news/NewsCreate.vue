@@ -278,7 +278,7 @@ const handleImageUpload = async ({ file }: any) => {
     uploadFormData.append("file", file);
 
     // 调用上传API
-    const response = await api.post("/api/upload/single", uploadFormData, {
+    const response = await api.post("/api/uploads/single", uploadFormData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

@@ -241,7 +241,9 @@
     <div v-if="selectedRowKeys.length > 0" class="batch-actions">
       <a-card size="small" :bordered="false">
         <div class="batch-header">
-          <span class="selected-info">已选择 {{ selectedRowKeys.length }} 项</span>
+          <span class="selected-info">
+            已选择 {{ selectedRowKeys.length }} 项
+          </span>
           <a-space>
             <a-button :loading="batchLoading" @click="handleBatchPublish">
               <template #icon>
@@ -345,21 +347,6 @@
               >
                 {{ record.isTop ? "取消置顶" : "置顶" }}
               </a-button>
-              <a-button
-                type="link"
-                size="small"
-                @click="handleTogglePublish(record)"
-              >
-                {{ record.status === "published" ? "下线" : "发布" }}
-              </a-button>
-              <a-popconfirm
-                title="确定要删除这条新闻吗？"
-                ok-text="确定"
-                cancel-text="取消"
-                @confirm="handleDelete(record)"
-              >
-                <a-button type="link" size="small" danger> 删除 </a-button>
-              </a-popconfirm>
             </a-space>
           </template>
         </template>
@@ -528,7 +515,7 @@ const columns: TableColumnsType = [
   {
     title: "操作",
     key: "actions",
-    width: 250,
+    width: 150,
     fixed: "right",
   },
 ];
@@ -720,24 +707,6 @@ const handleEdit = (record: NewsItem) => {
   router.push(`/admin/news/edit/${id}`);
 };
 
-// 处理删除
-const handleDelete = async (record: NewsItem) => {
-  try {
-    const id = record._id || record.id;
-    if (!id) {
-      message.error("获取新闻ID失败");
-      return;
-    }
-    await adminNewsApi.deleteNews(id);
-    message.success("删除成功");
-    fetchNewsList();
-  } catch (error: unknown) {
-    console.error("删除失败:", error);
-    const errorMessage = error instanceof Error ? error.message : "删除失败";
-    message.error(errorMessage);
-  }
-};
-
 // 处理批量删除
 const handleBatchDelete = async () => {
   try {
@@ -765,24 +734,6 @@ const handleToggleTop = async (record: NewsItem) => {
     fetchNewsList();
   } catch (error: unknown) {
     console.error("置顶操作失败:", error);
-    const errorMessage = error instanceof Error ? error.message : "操作失败";
-    message.error(errorMessage);
-  }
-};
-
-// 处理发布状态切换
-const handleTogglePublish = async (record: NewsItem) => {
-  try {
-    const id = record._id || record.id;
-    if (!id) {
-      message.error("获取新闻ID失败");
-      return;
-    }
-    await adminNewsApi.togglePublish(id);
-    message.success(record.status === "published" ? "下线成功" : "发布成功");
-    fetchNewsList();
-  } catch (error: unknown) {
-    console.error("发布状态切换失败:", error);
     const errorMessage = error instanceof Error ? error.message : "操作失败";
     message.error(errorMessage);
   }

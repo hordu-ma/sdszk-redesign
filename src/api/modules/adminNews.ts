@@ -18,7 +18,7 @@ export interface NewsFormData {
   status: "draft" | "published" | "archived";
   isTop?: boolean;
   isFeatured?: boolean;
-  publishTime?: string;
+  publishTime?: any; // 支持dayjs对象或字符串
 }
 
 // 新闻列表项接口
@@ -120,7 +120,16 @@ export class AdminNewsApi extends BaseApi {
     id: string,
     data: Partial<NewsFormData>,
   ): Promise<ApiResponse<NewsItem>> {
-    return this.put(`/${id}`, data);
+    // 处理字段名映射
+    const updateData: any = { ...data };
+    if (updateData.publishTime) {
+      // 如果是dayjs对象，转换为ISO字符串
+      updateData.publishDate = updateData.publishTime.toISOString
+        ? updateData.publishTime.toISOString()
+        : updateData.publishTime;
+      delete updateData.publishTime;
+    }
+    return this.put(`/${id}`, updateData);
   }
 
   // 删除新闻

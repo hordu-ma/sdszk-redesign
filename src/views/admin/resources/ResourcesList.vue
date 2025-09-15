@@ -160,43 +160,9 @@
               <a-button type="link" size="small" @click="handleEdit(record)">
                 编辑
               </a-button>
-              <a-dropdown>
-                <a-button type="link" size="small">
-                  更多
-                  <down-outlined />
-                </a-button>
-                <template #overlay>
-                  <a-menu @click="handleMenuClick($event, record)">
-                    <a-menu-item key="preview">
-                      <eye-outlined />
-                      预览
-                    </a-menu-item>
-                    <a-menu-item key="download">
-                      <download-outlined />
-                      下载
-                    </a-menu-item>
-                    <a-menu-item
-                      v-if="record.status !== 'published'"
-                      key="publish"
-                    >
-                      <check-outlined />
-                      发布
-                    </a-menu-item>
-                    <a-menu-item
-                      v-if="record.status === 'published'"
-                      key="archive"
-                    >
-                      <inbox-outlined />
-                      归档
-                    </a-menu-item>
-                    <a-menu-divider />
-                    <a-menu-item key="delete" class="danger-action">
-                      <delete-outlined />
-                      删除
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
+              <a-button type="link" size="small" @click="handlePreview(record)">
+                预览
+              </a-button>
             </a-space>
           </template>
         </template>
@@ -217,9 +183,9 @@
               {{ getTypeText(previewResource.type || "other") }}
             </a-tag>
             <span>作者：{{ previewResource.author?.name }}</span>
-            <span>发布时间：{{
-              formatDate(previewResource.publishDate || "")
-            }}</span>
+            <span>
+              发布时间：{{ formatDate(previewResource.publishDate || "") }}
+            </span>
           </a-space>
         </div>
         <div class="preview-content" v-html="previewResource.description" />
@@ -241,11 +207,6 @@ import {
   PlusOutlined,
   SearchOutlined,
   EyeOutlined,
-  DownloadOutlined,
-  DownOutlined,
-  CheckOutlined,
-  InboxOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons-vue";
 import {
   adminResourceApi,
@@ -482,86 +443,6 @@ const handleEdit = (record: ResourceItem) => {
 const handlePreview = (record: ResourceItem) => {
   previewResource.value = record;
   previewVisible.value = true;
-};
-
-// 下载资源
-const handleDownload = (record: ResourceItem) => {
-  if (!record.fileUrl) {
-    message.warning("该资源没有可下载的文件");
-    return;
-  }
-
-  try {
-    // 创建下载链接
-    const link = document.createElement("a");
-    link.href = record.fileUrl;
-    link.download = record.fileName || record.title;
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    message.success("下载开始");
-
-    // 调用API记录下载统计
-    adminResourceApi.incrementDownloadCount(record.id).catch(() => {
-      // 下载统计失败不影响用户体验，只是静默处理
-      console.warn("Failed to update download count");
-    });
-  } catch {
-    message.error("下载失败，请重试");
-  }
-};
-
-// 菜单点击处理
-const handleMenuClick = (e: { key: string }, record: ResourceItem) => {
-  handleAction(e.key, record);
-};
-
-// 操作处理
-const handleAction = async (action: string, record: ResourceItem) => {
-  switch (action) {
-    case "preview":
-      handlePreview(record);
-      break;
-    case "download":
-      handleDownload(record);
-      break;
-    case "publish":
-      await handleStatusChange(record.id, "published");
-      break;
-    case "archive":
-      await handleStatusChange(record.id, "archived");
-      break;
-    case "delete":
-      await handleDelete(record.id);
-      break;
-  }
-};
-
-// 状态变更
-const handleStatusChange = async (
-  id: string,
-  status: "draft" | "published" | "archived",
-) => {
-  try {
-    await adminResourceApi.updateStatus(id, status);
-    message.success("状态更新成功");
-    fetchResources();
-  } catch (error: any) {
-    message.error(error.message || "状态更新失败");
-  }
-};
-
-// 删除资源
-const handleDelete = async (id: string) => {
-  try {
-    await adminResourceApi.deleteResource(id);
-    message.success("删除成功");
-    fetchResources();
-  } catch (error: any) {
-    message.error(error.message || "删除失败");
-  }
 };
 
 // 批量操作

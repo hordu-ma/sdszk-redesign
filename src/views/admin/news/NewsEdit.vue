@@ -193,6 +193,7 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { message } from "ant-design-vue";
+import dayjs from "dayjs";
 import {
   ArrowLeftOutlined,
   PlusOutlined,
@@ -203,8 +204,8 @@ import {
   type NewsFormData,
   type NewsItem,
 } from "@/api/modules/adminNews";
+import QuillEditor from "@/components/common/QuillEditor.vue";
 import { NewsCategoryApi, type NewsCategory } from "@/api/modules/newsCategory";
-import QuillEditor from "@/components/common/QuillEditor.vue"; // 导入编辑器组件
 
 // 创建分类API实例
 const newsCategoryApi = new NewsCategoryApi();
@@ -239,7 +240,7 @@ const formData = reactive<NewsFormData>({
   status: "draft",
   isTop: false,
   isFeatured: false,
-  publishTime: undefined,
+  publishTime: undefined as any,
 });
 
 // 表单验证规则
@@ -292,17 +293,20 @@ const fetchNewsDetail = async () => {
 
     // 填充表单数据
     Object.assign(formData, {
-      title: response.data.title,
-      content: response.data.content,
-      summary: response.data.summary,
-      category: response.data.category,
-      featuredImage: response.data.featuredImage,
-      tags: response.data.tags,
-      status: response.data.status,
-      isTop: response.data.isTop,
-      isFeatured: response.data.isFeatured,
-      publishTime: response.data.publishTime
-        ? new Date(response.data.publishTime)
+      title: response.data.title || "",
+      content: response.data.content || "",
+      summary: response.data.summary || "",
+      category:
+        typeof response.data.category === "object"
+          ? response.data.category._id
+          : response.data.category,
+      featuredImage: response.data.featuredImage || "",
+      tags: Array.isArray(response.data.tags) ? response.data.tags : [],
+      status: response.data.status || "draft",
+      isTop: Boolean(response.data.isTop),
+      isFeatured: Boolean(response.data.isFeatured),
+      publishTime: response.data.publishDate
+        ? dayjs(response.data.publishDate)
         : undefined,
     });
   } catch (error: any) {
