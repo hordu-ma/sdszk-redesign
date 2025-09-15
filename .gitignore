@@ -210,3 +210,6 @@ ecosystem.config.js
 
 # CMS health check reports
 .cms-reports/
+
+# User uploaded files
+server/uploads/

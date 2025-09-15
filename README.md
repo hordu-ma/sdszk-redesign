@@ -139,22 +139,78 @@ sdszk-redesign/
 └── docs/                # 详细文档
 ```
 
-## 🚀 部署
+## 🚀 阿里云部署
 
 **总是使用scripts/deployment目录下的脚本进行部署，避免遗漏步骤。**
 
-### 前端部署(可选，不推荐)
+### 🎯 部署工具概览
+
+| 工具                  | 用途           | 特点                         |
+| --------------------- | -------------- | ---------------------------- |
+| `deploy-aliyun.sh`    | 统一部署管理器 | 功能完整、错误处理、回滚支持 |
+| `quick-deploy.sh`     | 快速部署工具   | 简化操作、快速迭代           |
+| `check-deployment.sh` | 部署状态检查   | 全面诊断、健康评分           |
+| `pm2-manager.sh`      | PM2服务管理    | 进程维护、日志监控           |
+
+### ⚡ 快速部署（推荐）
 
 ```bash
-npm run build:aliyun      # 构建生产版本
-npm run deploy:aliyun     # 部署到阿里云
+# 一键全栈部署
+npm run deploy:quick
+
+# 分别部署
+npm run deploy:quick:frontend    # 仅前端
+npm run deploy:quick:backend     # 仅后端
+
+# 服务管理
+npm run pm2:restart              # 重启服务
+npm run pm2:status               # 查看状态
+npm run pm2:logs                 # 查看日志
 ```
 
-### 后端部署(可选，不推荐)
+### 🔧 完整部署（生产环境）
 
 ```bash
-npm run deploy:backend    # 后端服务部署
+# 统一部署管理器
+npm run deploy:aliyun            # 全栈部署
+npm run deploy:aliyun:frontend   # 仅前端部署
+npm run deploy:aliyun:backend    # 仅后端部署
+npm run deploy:aliyun:fullstack  # 显式全栈部署
 ```
+
+### 📊 部署检查
+
+```bash
+# 全面健康检查
+./scripts/deployment/check-deployment.sh
+
+# 快速检查
+./scripts/deployment/check-deployment.sh --quick
+
+# PM2 健康检查
+npm run pm2:health
+```
+
+### 🛠️ 服务维护
+
+```bash
+# PM2 管理
+./scripts/deployment/pm2-manager.sh status      # 状态查看
+./scripts/deployment/pm2-manager.sh restart     # 安全重启
+./scripts/deployment/pm2-manager.sh clean       # 清理异常进程
+./scripts/deployment/pm2-manager.sh maintenance # 完整维护
+
+# 快速操作
+./scripts/deployment/quick-deploy.sh restart    # 快速重启
+./scripts/deployment/quick-deploy.sh status     # 快速状态检查
+```
+
+### 📋 部署最佳实践
+
+1. **部署前检查**：确保代码已提交、测试通过、配置文件完整
+2. **选择合适工具**：日常开发用快速部署，生产发布用统一管理器
+3. **部署后验证**：运行健康检查确保服务正常
+4. **监控维护**：定期检查服务状态和日志
 
 ### 环境配置
 

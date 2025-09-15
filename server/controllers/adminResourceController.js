@@ -170,7 +170,7 @@ export const updateAdminResourceStatus = async (req, res) => {
         updateData.isPublished = false;
         break;
       default:
-        return response.badRequest(res, "无效的状态值");
+        return response.error(res, "无效的状态值", 400);
     }
 
     const resource = await Resource.findByIdAndUpdate(id, updateData, {
@@ -207,7 +207,7 @@ export const batchUpdateAdminResourceStatus = async (req, res) => {
     const { ids, status } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return response.badRequest(res, "请选择要更新的资源");
+      return response.error(res, "请选择要更新的资源", 400);
     }
 
     const updateData = {};
@@ -220,7 +220,7 @@ export const batchUpdateAdminResourceStatus = async (req, res) => {
         updateData.isPublished = false;
         break;
       default:
-        return response.badRequest(res, "无效的状态值");
+        return response.error(res, "无效的状态值", 400);
     }
 
     await Resource.updateMany({ _id: { $in: ids } }, updateData);
@@ -238,7 +238,7 @@ export const deleteAdminResource = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return response.badRequest(res, "资源ID不能为空");
+      return response.error(res, "资源ID不能为空", 400);
     }
 
     const resource = await Resource.findById(id);
@@ -261,7 +261,7 @@ export const batchDeleteAdminResources = async (req, res) => {
     const { ids } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return response.badRequest(res, "请选择要删除的资源");
+      return response.error(res, "请选择要删除的资源", 400);
     }
 
     await Resource.deleteMany({ _id: { $in: ids } });
@@ -301,13 +301,13 @@ export const createAdminResource = async (req, res) => {
 
     // 验证必需字段
     if (!title || !description || !categoryId || !fileUrl) {
-      return response.badRequest(res, "标题、描述、分类和文件URL为必填项");
+      return response.error(res, "标题、描述、分类和文件URL为必填项", 400);
     }
 
     // 验证分类是否存在
     const category = await ResourceCategory.findById(categoryId);
     if (!category) {
-      return response.badRequest(res, "指定的分类不存在");
+      return response.error(res, "指定的分类不存在", 400);
     }
 
     // 创建资源数据
@@ -402,7 +402,7 @@ export const updateAdminResource = async (req, res) => {
     if (categoryId && categoryId !== resource.category?.toString()) {
       const category = await ResourceCategory.findById(categoryId);
       if (!category) {
-        return response.badRequest(res, "指定的分类不存在");
+        return response.error(res, "指定的分类不存在", 400);
       }
     }
 
