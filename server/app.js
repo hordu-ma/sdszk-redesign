@@ -249,7 +249,7 @@ app.use("/api/news-categories", newsCategoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes); // 用户自服务路由
 app.use("/api/admin/users", adminUserRoutes); // 管理员用户管理路由
-app.use("/api/upload", uploadRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/admin/resources", adminResourceRoutes); // 使用专门的管理员资源路由
 app.use("/api/resource-categories", resourceCategoryRoutes);
