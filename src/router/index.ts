@@ -441,14 +441,32 @@ router.beforeEach(async (to, _from, next) => {
     // 检查路由是否需要特定权限
     if (to.meta.permissions) {
       const requiredPermissions = to.meta.permissions as string[];
-      const hasPermission = requiredPermissions.some((permission) =>
-        userStore.hasPermission(permission),
-      );
+
+      // 添加详细的权限检查日志
+      console.log("🔍 [权限检查] 路由权限验证开始");
+      console.log("📍 [权限检查] 目标路由:", to.path);
+      console.log("📋 [权限检查] 需要权限:", requiredPermissions);
+      console.log("👤 [权限检查] 用户信息:", {
+        username: userStore.userInfo?.username,
+        role: userStore.userInfo?.role,
+        permissions: userStore.userInfo?.permissions,
+      });
+
+      const hasPermission = requiredPermissions.some((permission) => {
+        const result = userStore.hasPermission(permission);
+        console.log(`🎯 [权限检查] hasPermission('${permission}'):`, result);
+        return result;
+      });
+
+      console.log("✅ [权限检查] 最终结果:", hasPermission);
 
       if (!hasPermission) {
+        console.log("❌ [权限检查] 权限验证失败，显示错误消息");
         message.error("您没有访问该页面的权限");
         return next({ path: "/admin/dashboard" });
       }
+
+      console.log("🎉 [权限检查] 权限验证通过，允许访问");
     }
   }
 
