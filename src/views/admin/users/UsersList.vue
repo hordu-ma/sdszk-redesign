@@ -241,18 +241,42 @@
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="权限" name="permissions">
-          <a-tree
-            v-model:checked-keys="userForm.permissions"
-            :tree-data="permissionTree"
-            checkable
-            :default-expand-all="true"
-            :field-names="{
-              children: 'children',
-              title: 'displayName',
-              key: 'name',
-            }"
-          />
+        <a-form-item label="权限说明">
+          <div class="role-permissions-preview">
+            <a-alert
+              v-if="selectedRolePermissions.length > 0"
+              :message="`该角色拥有 ${selectedRolePermissions.length} 个权限`"
+              type="info"
+              show-icon
+            >
+              <template #description>
+                <div class="permissions-tags">
+                  <a-tag
+                    v-for="permission in selectedRolePermissions.slice(0, 8)"
+                    :key="permission"
+                    size="small"
+                    color="blue"
+                  >
+                    {{ getPermissionDisplayName(permission) }}
+                  </a-tag>
+                  <a-tag
+                    v-if="selectedRolePermissions.length > 8"
+                    size="small"
+                    color="default"
+                  >
+                    +{{ selectedRolePermissions.length - 8 }} 个权限
+                  </a-tag>
+                </div>
+              </template>
+            </a-alert>
+            <a-alert
+              v-else
+              message="请先选择角色"
+              description="权限将根据所选角色自动分配"
+              type="warning"
+              show-icon
+            />
+          </div>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -535,6 +559,14 @@ const passwordFormRules = {
   ],
 };
 
+// 计算属性 - 角色权限预览
+const selectedRolePermissions = computed(() => {
+  if (!userForm.role) return [];
+
+  const selectedRole = roles.value.find((role) => role.name === userForm.role);
+  return selectedRole?.permissions || [];
+});
+
 // 工具函数
 const formatDate = (date: string) => {
   return dayjs(date).format("YYYY-MM-DD HH:mm");
@@ -561,6 +593,34 @@ const getStatusText = (status: string) => {
 const getRoleDisplayName = (roleName: string) => {
   const role = roles.value.find((r) => r.name === roleName);
   return role?.displayName || roleName;
+};
+
+const getPermissionDisplayName = (permissionName: string) => {
+  // 从权限名称中提取模块和操作
+  const [module, action] = permissionName.split(":");
+
+  const moduleNames: Record<string, string> = {
+    news: "新闻",
+    resources: "资源",
+    activities: "活动",
+    users: "用户",
+    settings: "设置",
+    uploads: "文件",
+  };
+
+  const actionNames: Record<string, string> = {
+    read: "查看",
+    create: "创建",
+    update: "编辑",
+    delete: "删除",
+    publish: "发布",
+    manage: "管理",
+  };
+
+  const moduleName = moduleNames[module] || module;
+  const actionName = actionNames[action] || action;
+
+  return `${moduleName}${actionName}`;
 };
 
 // 数据加载
@@ -789,11 +849,20 @@ const handleSubmit = async () => {
     await userFormRef.value.validate();
     modalLoading.value = true;
 
+    // 基于角色自动分配权限，移除手动权限选择
+    const selectedRole = roles.value.find(
+      (role) => role.name === userForm.role,
+    );
+    const submitData = {
+      ...userForm,
+      permissions: selectedRole?.permissions || [], // 权限由角色决定
+    };
+
     if (isEditing.value && currentUserId.value) {
-      await adminUserApi.update(currentUserId.value, userForm);
+      await adminUserApi.update(currentUserId.value, submitData);
       message.success("更新成功");
     } else {
-      await adminUserApi.create(userForm);
+      await adminUserApi.create(submitData);
       message.success("创建成功");
     }
 
@@ -843,7 +912,7 @@ const resetForm = () => {
     password: "",
     status: "active",
     role: "",
-    permissions: [],
+    permissions: [], // 保留字段但不再手动设置
   });
   userFormRef.value?.resetFields();
 };

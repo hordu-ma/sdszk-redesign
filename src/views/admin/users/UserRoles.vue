@@ -402,8 +402,22 @@ const loadPermissions = async () => {
       treeData = treeData.data;
     }
 
-    // 转换权限树格式
-    if (treeData && typeof treeData === "object") {
+    // 转换权限树格式 - 修复数据解析逻辑
+    if (Array.isArray(treeData)) {
+      // 如果是数组格式（正确的权限树格式）
+      permissionTree.value = treeData.map((moduleItem) => ({
+        name: moduleItem.module,
+        displayName: moduleItem.displayName || moduleItem.module,
+        children: Array.isArray(moduleItem.permissions)
+          ? moduleItem.permissions.map((p: any) => ({
+              name: p.name,
+              displayName: p.displayName,
+              description: p.description,
+            }))
+          : [],
+      }));
+    } else if (treeData && typeof treeData === "object") {
+      // 向后兼容的对象格式处理
       permissionTree.value = Object.entries(treeData).map(
         ([module, perms]) => ({
           name: module,
@@ -417,6 +431,9 @@ const loadPermissions = async () => {
             : [],
         }),
       );
+    } else {
+      permissionTree.value = [];
+      console.warn("权限树数据格式异常:", treeData);
     }
   } catch (error) {
     console.error("权限加载错误:", error);

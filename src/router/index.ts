@@ -433,7 +433,7 @@ router.beforeEach(async (to, _from, next) => {
     }
 
     // 检查路由是否需要管理员权限
-    if (to.meta.adminOnly && !userStore.isAdmin) {
+    if (to.meta.adminOnly && !userStore.canAccessAdmin) {
       message.error("您没有访问该页面的权限");
       return next({ path: "/admin/dashboard" });
     }

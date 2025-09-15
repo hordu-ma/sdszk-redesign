@@ -237,6 +237,26 @@ userSchema.pre("save", function (next) {
         "uploads:create",
         "uploads:delete",
       ];
+    } else if (this.role === "co_admin") {
+      this.permissions = [
+        "news:create",
+        "news:read",
+        "news:update",
+        "news:delete",
+        "news:publish",
+        "resources:create",
+        "resources:read",
+        "resources:update",
+        "resources:delete",
+        "resources:publish",
+        "activities:create",
+        "activities:read",
+        "activities:update",
+        "activities:delete",
+        "activities:publish",
+        "users:read",
+        "uploads:create",
+      ];
     } else if (this.role === "editor") {
       this.permissions = [
         "news:create",

@@ -14,7 +14,7 @@ export interface UserInfo {
   avatar?: string;
   email?: string;
   phone?: string;
-  role: "admin" | "editor" | "user";
+  role: "admin" | "co_admin" | "editor" | "user";
   permissions: PermissionList;
   status?: "active" | "inactive" | "banned";
   active?: boolean;
@@ -82,6 +82,10 @@ export const useUserStore = defineStore(
     const isEditor = computed(
       () => userInfo.value?.role === "editor" || isAdmin.value,
     );
+    const canAccessAdmin = computed(() => {
+      const role = userInfo.value?.role;
+      return role === "admin" || role === "co_admin";
+    });
     const userPermissions = computed(() => userInfo.value?.permissions || []);
 
     // ========== 私有辅助方法 ==========
@@ -470,7 +474,21 @@ export const useUserStore = defineStore(
       if (userInfo.value?.role === "admin") {
         return true;
       }
-      return userPermissions.value.includes(permission);
+
+      const permissions = userInfo.value?.permissions || [];
+
+      // 支持字符串数组格式的权限检查
+      if (Array.isArray(permissions)) {
+        return permissions.includes(permission);
+      }
+
+      // 支持对象格式的权限检查（向后兼容）
+      if (typeof permissions === "object" && permissions !== null) {
+        const [module, action] = permission.split(":");
+        return permissions[module]?.[action] === true;
+      }
+
+      return false;
     }
 
     // ========== 公开方法（保持向后兼容） ==========
@@ -494,6 +512,7 @@ export const useUserStore = defineStore(
       isAuthenticated,
       isAdmin,
       isEditor,
+      canAccessAdmin,
       userPermissions,
 
       // 方法
