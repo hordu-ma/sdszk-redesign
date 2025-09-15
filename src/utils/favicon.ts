@@ -42,16 +42,17 @@ export function setDefaultFavicon(defaultPath: string = "/favicon.png"): void {
 /**
  * 从系统设置中获取并应用favicon
  * @param settingsApi 设置API实例
+ * @param usePublicApi 是否使用公开API，用于前台未登录状态
  */
 export async function applyFaviconFromSettings(
   settingsApi: any,
+  usePublicApi: boolean = false,
 ): Promise<void> {
   try {
-    // 使用静默错误处理，避免在未登录时影响用户体验
-    const response = await settingsApi.getAllSettings({
-      redirectOnAuth: false,
-      showNotification: false,
-    });
+    // 根据用户状态选择API调用方式
+    const response = usePublicApi
+      ? await settingsApi.getPublicSettings()
+      : await settingsApi.getAllSettings();
 
     if (response.success && response.data?.general) {
       // 查找siteLogo设置
@@ -64,18 +65,23 @@ export async function applyFaviconFromSettings(
         if (logoSetting.value.startsWith("data:image/")) {
           updateFavicon(logoSetting.value);
         }
-        // 如果是URL路径
+        // 如果是相对路径，转换为绝对路径
+        else if (logoSetting.value.startsWith("/")) {
+          updateFavicon(logoSetting.value);
+        }
+        // 如果是完整URL
         else if (
-          logoSetting.value.startsWith("http") ||
-          logoSetting.value.startsWith("/")
+          logoSetting.value.startsWith("http://") ||
+          logoSetting.value.startsWith("https://")
         ) {
           updateFavicon(logoSetting.value);
-        } else {
-          // 作为相对路径处理
-          updateFavicon(`/${logoSetting.value}`);
+        }
+        // 其他情况使用默认
+        else {
+          setDefaultFavicon();
         }
       } else {
-        // 没有设置logo时使用默认图标
+        // 如果设置为空或无效，使用默认favicon
         setDefaultFavicon();
       }
     } else {
@@ -83,12 +89,11 @@ export async function applyFaviconFromSettings(
       setDefaultFavicon();
     }
   } catch (error: any) {
-    // 如果是认证错误（401），静默处理
-    if (error?.status === 401) {
-      console.debug("favicon设置需要登录权限，使用默认图标");
-    } else {
-      console.warn("应用favicon设置失败:", error?.message || error);
-    }
+    // 静默处理所有错误，避免影响用户体验
+    console.debug(
+      "应用favicon设置失败，使用默认图标:",
+      error?.message || error,
+    );
     setDefaultFavicon();
   }
 }
@@ -102,14 +107,26 @@ export function initFavicon(): void {
   // 延迟执行以确保API已经准备好
   setTimeout(async () => {
     try {
-      // 动态导入settingsApi以避免循环依赖
+      // 检查用户登录状态
+      const { useUserStore } = await import("@/stores/user");
+      const userStore = useUserStore();
+
       const { settingsApi } = await import("@/api");
-      await applyFaviconFromSettings(settingsApi.instance);
+
+      // 根据用户登录状态选择合适的API
+      if (userStore.isAuthenticated) {
+        // 已登录用户可以访问完整设置
+        await applyFaviconFromSettings(settingsApi.instance, false);
+      } else {
+        // 未登录用户使用公开设置API
+        await applyFaviconFromSettings(settingsApi.instance, true);
+      }
     } catch (error: any) {
       // 初始化失败时静默使用默认图标，不影响用户体验
-      if (error?.status !== 401) {
-        console.warn("初始化favicon失败:", error);
-      }
+      console.debug(
+        "favicon初始化失败，使用默认图标:",
+        error?.message || error,
+      );
       setDefaultFavicon();
     }
   }, 1000);
