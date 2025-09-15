@@ -318,7 +318,7 @@ const routes: RouteRecordRaw[] = [
             component: () =>
               import("../views/admin/resources/ResourcesList.vue"),
             meta: {
-              permissions: ["resource:read"],
+              permissions: ["resources:read"],
             },
           },
           {
@@ -327,7 +327,7 @@ const routes: RouteRecordRaw[] = [
             component: () =>
               import("../views/admin/resources/ResourcesCreate.vue"),
             meta: {
-              permissions: ["resource:create"],
+              permissions: ["resources:create"],
             },
           },
           {
@@ -337,7 +337,7 @@ const routes: RouteRecordRaw[] = [
               import("../views/admin/resources/ResourcesEdit.vue"),
             props: true,
             meta: {
-              permissions: ["resource:update"],
+              permissions: ["resources:update"],
             },
           },
           {
@@ -346,7 +346,7 @@ const routes: RouteRecordRaw[] = [
             component: () =>
               import("../views/admin/resources/ResourcesCategories.vue"),
             meta: {
-              permissions: ["resource:category"],
+              permissions: ["resources:category"],
             },
           },
         ],
