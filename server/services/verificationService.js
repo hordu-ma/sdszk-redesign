@@ -1,5 +1,5 @@
 // verificationService.js - 验证码服务
-import { log, logSecurityEvent } from "../utils/logger.js";
+import { log } from "../utils/logger.js";
 
 /**
  * 验证码服务
@@ -235,7 +235,7 @@ class VerificationService {
     let activeCount = 0;
     let expiredCount = 0;
 
-    for (const [phone, record] of this.verificationCodes) {
+    for (const [, record] of this.verificationCodes) {
       if (now > record.expires) {
         expiredCount++;
       } else {
