@@ -18,7 +18,6 @@
 .platform-banner {
   width: 100%;
   margin-bottom: 20px;
-  overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }

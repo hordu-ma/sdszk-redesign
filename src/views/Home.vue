@@ -319,7 +319,6 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   margin: 0 auto;
   padding: 0;
   background-color: #f4f5f7;
-  overflow: hidden;
 }
 
 .header {
@@ -475,9 +474,9 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
   background-color: #fff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .banner-img {
@@ -511,7 +510,6 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
 
 .carousel-container {
   width: 100%;
-  overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
@@ -527,13 +525,11 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   max-width: 100%;
   margin: 0;
   padding: 0;
-
   display: flex;
   flex-direction: column;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .center-news .section-header {
@@ -636,7 +632,6 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .info-block .block-header {
@@ -818,7 +813,6 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
 .school-logo {
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
@@ -835,7 +829,6 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   position: relative;
   background: #fff;
   border-radius: 8px;
-  overflow: hidden;
   transition: all 0.3s ease;
 }
 
@@ -863,9 +856,7 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   align-items: center;
   background: #fff;
   position: relative;
-  overflow: hidden;
   height: auto; /* 确保高度自适应内容 */
-  min-height: 300px; /* 设置最小高度 */
 }
 
 .teacher-card::after {

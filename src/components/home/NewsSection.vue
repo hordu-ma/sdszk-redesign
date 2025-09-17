@@ -181,7 +181,6 @@ onMounted(() => {
 
 .carousel-container {
   width: 100%;
-  overflow: hidden;
   border-radius: 8px;
   box-shadow: var(--card-shadow);
 }

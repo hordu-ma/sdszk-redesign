@@ -54,25 +54,20 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  min-width: 100%;
+  height: auto;
 }
 
 /* 添加平滑滚动和边缘过渡效果 */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
-  overscroll-behavior-y: contain; /* 防止iOS上的弹性滚动 */
-  -webkit-overflow-scrolling: touch; /* 在iOS设备上平滑滚动 */
 }
 
 /* 主内容区域样式，为固定头部留出空间 */
 .main-content {
   margin-top: 74px; /* 与header初始高度一致 */
-  min-height: calc(100vh - 74px);
-  will-change: transform; /* 优化渲染性能 */
-  transform: translateZ(0); /* 触发硬件加速 */
-  overflow-x: hidden;
   background-color: #f4f5f7;
+  position: relative;
 }
 
 body {
@@ -83,17 +78,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #333;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .app-container {
-  min-height: 100vh;
   width: 100%;
-  display: flex;
-  flex-direction: column;
   margin: 0;
   padding: 0;
   background-color: #f4f5f7;
-  overflow-x: hidden; /* 防止水平滚动 */
 }
 
 /* 响应式布局基础设置 */
