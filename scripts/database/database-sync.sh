@@ -164,11 +164,17 @@ sync_prod_to_dev() {
     echo_warning "⚠️ 此操作将覆盖本地开发环境的数据库！"
     echo_info "建议先备份本地数据"
     echo
-    read -p "确认继续？(y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo_info "操作已取消"
-        return
+
+    # 检查是否有自动确认参数
+    if [ "${1:-}" != "--auto" ]; then
+        read -p "确认继续？(y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo_info "操作已取消"
+            return
+        fi
+    else
+        echo_info "自动确认模式，跳过用户确认"
     fi
 
     # 备份本地数据
@@ -409,10 +415,10 @@ main() {
     if [ $# -gt 0 ]; then
         case $1 in
             "prod-to-dev")
-                sync_prod_to_dev
+                sync_prod_to_dev $2
                 ;;
             "dev-to-prod")
-                sync_dev_to_prod
+                sync_dev_to_prod $2
                 ;;
             "backup-local")
                 backup_local_data
@@ -421,14 +427,14 @@ main() {
                 backup_prod_data
                 ;;
             "stats")
-                show_db_comparison
+                show_database_stats
                 ;;
             "tunnel")
-                start_ssh_tunnel
+                start_tunnel
                 ;;
             *)
                 echo_error "未知参数: $1"
-                echo_info "可用参数: prod-to-dev, dev-to-prod, backup-local, backup-prod, stats, tunnel"
+                echo_info "可用参数: prod-to-dev [--auto], dev-to-prod [--auto], backup-local, backup-prod, stats, tunnel"
                 exit 1
                 ;;
         esac
