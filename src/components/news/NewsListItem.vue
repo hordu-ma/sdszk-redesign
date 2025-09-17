@@ -35,7 +35,6 @@
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
-import type { News } from "@/types/news";
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, "");
