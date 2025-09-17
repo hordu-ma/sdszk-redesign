@@ -232,7 +232,6 @@ onMounted(() => {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  height: 400px;
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -292,26 +291,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   flex: 1;
-  overflow-y: auto;
   padding: 12px 20px 20px 20px;
-}
-
-.news-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.news-container::-webkit-scrollbar-track {
-  background: var(--scrollbar-track-color, #f1f1f1);
-  border-radius: 3px;
-}
-
-.news-container::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 3px;
-}
-
-.news-container::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color-dark);
 }
 
 .news-item {

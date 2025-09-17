@@ -527,7 +527,7 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   max-width: 100%;
   margin: 0;
   padding: 0;
-  height: 400px;
+
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -558,27 +558,8 @@ const displayedBureaus = computed(() => educationBureaus.value.slice(0, 6));
   flex-direction: column;
   gap: 15px;
   flex: 1;
-  overflow-y: auto;
-  padding-right: 10px;
+
   padding: 0 10px;
-}
-
-.news-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.news-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.news-container::-webkit-scrollbar-thumb {
-  background: #9a2314;
-  border-radius: 3px;
-}
-
-.news-container::-webkit-scrollbar-thumb:hover {
-  background: #7a1c10;
 }
 
 .news-item {
