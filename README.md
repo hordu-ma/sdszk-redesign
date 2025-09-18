@@ -203,6 +203,10 @@ npm run pm2:health
 # 快速操作
 ./scripts/deployment/quick-deploy.sh restart    # 快速重启
 ./scripts/deployment/quick-deploy.sh status     # 快速状态检查
+
+# 定期维护命令
+./scripts/deployment/check-deployment.sh        # 全面健康检查
+ssh root@60.205.124.67 "apt update && apt list --upgradable"  # 系统更新检查
 ```
 
 ### 📋 部署最佳实践
