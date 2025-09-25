@@ -313,11 +313,50 @@ curl http://localhost:3000/api/health
 curl https://horsduroot.com/api/health
 ```
 
+## 🤖 大模型协作指引
+
+### 环境变量访问最佳实践
+
+由于安全策略，大模型无法直接读取 `.env` 文件。当需要了解环境变量配置时，请参考：
+
+1. **📖 环境变量文档** - [`docs/environment-variables.md`](./docs/environment-variables.md)
+   - 包含完整的环境变量说明
+   - 前端和后端配置示例
+   - 安全最佳实践指南
+
+2. **🔧 模板文件** - 可通过以下方式查看配置结构：
+
+   ```bash
+   # 查看环境变量模板（去敏感化）
+   cat .env.example          # 前端环境变量模板
+   cat server/.env.example   # 后端环境变量模板
+   ```
+
+3. **📋 配置文件位置**：
+   - **前端**: `.env`, `.env.development`, `.env.aliyun`
+   - **后端**: `server/.env`, `server/.env.test`, `server/.env.ci`
+
+### 大模型工作流程建议
+
+1. **环境变量需求** → 查阅 `docs/environment-variables.md`
+2. **项目结构了解** → 参考上方"项目结构"章节
+3. **API接口信息** → 查看"API路由"章节
+4. **部署相关** → 使用 `scripts/deployment/` 目录下的脚本
+5. **开发环境** → 使用 `scripts/development/` 目录下的脚本
+
+### 安全注意事项
+
+- ✅ 所有真实的敏感信息（密码、密钥）都在 `.env` 文件中，已被安全过滤
+- ✅ 可安全讨论环境变量结构和配置方法
+- ✅ 模板文件 (`.env.example`) 仅包含示例值，可安全访问
+- ⚠️ 如需提供实际配置，请手动去敏感化后分享
+
 ## 📚 相关文档
 
 - 📂 [docs/](./docs/) - 详细架构文档
 - 🔧 [scripts/](./scripts/) - 自动化脚本
 - 📦 [docs/archive/](./docs/archive/) - 历史文档存档
+- 🤖 [docs/environment-variables.md](./docs/environment-variables.md) - 环境变量完整说明
 
 ## 📄 许可证
 
