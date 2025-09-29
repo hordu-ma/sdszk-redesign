@@ -1,4 +1,12 @@
-# 测试最佳实践指南
+> ⛳ 本文档已拆分重构：请转至
+>
+> - `quality/testing-strategy.md` （总体策略 / 金字塔 / 门禁）
+> - `quality/testing-baseline.md` （当前覆盖率基线）
+> - `quality/testing-roadmap.md` （演进路线与阶段里程碑）
+>
+> 下面保留历史全文供比对，后续可能归档至 `docs/archive/`。
+
+# （Legacy）测试最佳实践指南
 
 > **适用项目**: 山东省大中小学思政课一体化教育平台
 > **技术栈**: Vue 3 + TypeScript + Vitest + Pinia

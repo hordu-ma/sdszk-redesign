@@ -1,4 +1,10 @@
-# 测试改进行动清单
+> ⛳ 行动清单内容已被拆分为：
+>
+> - `quality/testing-baseline.md` 覆盖现状与差距
+> - `quality/testing-roadmap.md` 分阶段路线
+>   新规划请查看以上文件。本文件暂作为历史参考。
+
+# （Legacy）测试改进行动清单
 
 > **基于**: [测试覆盖率评估报告](./testing-coverage-assessment.md)
 > **目标**: 从 2.93% 提升到 85% 覆盖率
@@ -37,6 +43,7 @@
   - [ ] 验证所有用例通过
 
 - [ ] **修复 `performance.test.ts`** (1小时)
+
   ```bash
   # 问题: PerformanceResourceTiming 类型问题
   # 文件: __tests__/unit/utils/performance.test.ts
@@ -89,6 +96,7 @@
   - [ ] 资源分类管理测试
 
 - [ ] **用户 API 测试** (2小时)
+
   ```bash
   # 文件: __tests__/unit/api/user.test.ts
   # 覆盖: src/api/modules/user/
@@ -116,6 +124,7 @@
   - [ ] 权限更新响应测试
 
 - [ ] **useRecentlyViewed 测试** (3小时)
+
   ```bash
   # 文件: __tests__/unit/composables/useRecentlyViewed.test.ts
   # 覆盖: src/composables/useRecentlyViewed.ts
@@ -165,6 +174,7 @@
   - [ ] FilterPanel.vue 测试
 
 - [ ] **表单组件测试** (6小时)
+
   ```bash
   # 组件: src/components/forms/
   # 测试: __tests__/unit/components/forms/
@@ -201,6 +211,7 @@
   - [ ] 用户错误提示测试
 
 - [ ] **认证流程集成测试** (4小时)
+
   ```bash
   # 文件: __tests__/integration/auth-flow.test.ts
   ```
@@ -226,6 +237,7 @@
   - [ ] 通知服务测试
 
 - [ ] **数据处理服务测试** (4小时)
+
   ```bash
   # 覆盖: src/services/
   ```
@@ -274,6 +286,7 @@
   - [ ] ResourceCenter.vue 测试
 
 - [ ] **路由和导航测试** (4小时)
+
   ```bash
   # 文件: __tests__/unit/router/
   ```
@@ -309,6 +322,7 @@
   - [ ] 数据删除清理测试
 
 - [ ] **性能和错误边界测试** (4小时)
+
   ```bash
   # 文件: __tests__/e2e/performance/
   ```
