@@ -69,6 +69,14 @@
               />
             </el-form-item>
 
+            <el-form-item prop="fullName">
+              <el-input
+                v-model="registerForm.fullName"
+                :prefix-icon="User"
+                placeholder="请输入真实姓名"
+              />
+            </el-form-item>
+
             <el-form-item prop="password">
               <el-input
                 v-model="registerForm.password"
@@ -173,6 +181,7 @@ const loginForm = ref({
 // 注册表单数据
 const registerForm = ref({
   username: "",
+  fullName: "",
   password: "",
   confirmPassword: "",
   email: "",
@@ -191,6 +200,10 @@ const registerRules: FormRules = {
   username: [
     { required: true, message: "请输入用户名", trigger: "blur" },
     { min: 4, max: 16, message: "用户名长度为4-16位字符", trigger: "blur" },
+  ],
+  fullName: [
+    { required: true, message: "请输入真实姓名", trigger: "blur" },
+    { max: 50, message: "姓名长度不能超过50个字符", trigger: "blur" },
   ],
   password: [
     { required: true, message: "请输入密码", trigger: "blur" },
@@ -241,6 +254,7 @@ const handleTabClick = () => {
   };
   registerForm.value = {
     username: "",
+    fullName: "",
     password: "",
     confirmPassword: "",
     email: "",
@@ -288,6 +302,7 @@ const handleRegister = async () => {
       registerLoading.value = true;
       const success = await userStore.register({
         username: registerForm.value.username,
+        fullName: registerForm.value.fullName,
         password: registerForm.value.password,
         email: registerForm.value.email,
         phone: registerForm.value.phone,

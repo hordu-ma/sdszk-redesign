@@ -8,6 +8,7 @@ import {
   NotFoundError,
 } from "../utils/appError.js";
 import { authLogger, logAuthEvent, logError } from "../utils/logger.js";
+import verificationService from "../services/verificationService.js";
 
 // 生成JWT令牌
 const signToken = (id) => {
@@ -359,7 +360,7 @@ export const protect = async (req, res, next) => {
 // 用户注册
 export const register = async (req, res, next) => {
   try {
-    const { username, email, phone, password, verificationCode } = req.body;
+    const { username, email, phone, password, fullName, verificationCode } = req.body;
 
     authLogger.debug(
       {
@@ -368,6 +369,7 @@ export const register = async (req, res, next) => {
         phone: phone
           ? phone.substring(0, 3) + "****" + phone.substring(7)
           : undefined,
+        fullName,
         hasPassword: !!password,
         hasVerificationCode: !!verificationCode,
       },
@@ -375,8 +377,8 @@ export const register = async (req, res, next) => {
     );
 
     // 验证必填字段
-    if (!username || !password || !email) {
-      return next(new BadRequestError("用户名、密码和邮箱为必填项"));
+    if (!username || !password || !email || !phone) {
+      return next(new BadRequestError("用户名、密码、邮箱和手机号为必填项"));
     }
 
     // 验证密码长度
@@ -390,12 +392,25 @@ export const register = async (req, res, next) => {
       return next(new BadRequestError("邮箱格式不正确"));
     }
 
-    // 验证手机号格式（如果提供）
-    if (phone) {
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
-        return next(new BadRequestError("手机号格式不正确"));
-      }
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return next(new BadRequestError("手机号格式不正确"));
+    }
+
+    // 验证码校验
+    if (!verificationCode) {
+      return next(new BadRequestError("请输入验证码"));
+    }
+
+    if (verificationCode.length !== 6) {
+      return next(new BadRequestError("验证码格式不正确"));
+    }
+
+    // 验证手机验证码
+    const isCodeValid = verificationService.verifyCode(phone, verificationCode);
+    if (!isCodeValid) {
+      return next(new BadRequestError("验证码不正确或已过期"));
     }
 
     // 检查用户名是否已存在
@@ -410,16 +425,11 @@ export const register = async (req, res, next) => {
       return next(new BadRequestError("邮箱已被使用"));
     }
 
-    // 检查手机号是否已存在（如果提供）
-    if (phone) {
-      const existingPhone = await User.findOne({ phone });
-      if (existingPhone) {
-        return next(new BadRequestError("手机号已被使用"));
-      }
+    // 检查手机号是否已存在
+    const existingPhone = await User.findOne({ phone });
+    if (existingPhone) {
+      return next(new BadRequestError("手机号已被使用"));
     }
-
-    // TODO: 验证手机验证码
-    // 暂时跳过验证码验证，直接创建用户
 
     // 创建用户
     const newUser = await User.create({
@@ -427,6 +437,7 @@ export const register = async (req, res, next) => {
       email,
       phone,
       password, // 密码会在pre-save钩子中自动加密
+      name: fullName || username, // 使用fullName或fallback到username
       role: "user",
       status: "active",
       active: true,
@@ -489,36 +500,33 @@ export const sendVerificationCode = async (req, res, next) => {
       return next(new BadRequestError("请提供手机号"));
     }
 
-    // 验证手机号格式
-    const phoneRegex = /^1[3-9]\d{9}$/;
-    if (!phoneRegex.test(phone)) {
-      return next(new BadRequestError("手机号格式不正确"));
+    // 使用验证码服务发送验证码
+    const result = await verificationService.sendVerificationCode(phone);
+
+    if (!result.success) {
+      // 如果是频率限制错误，返回特定状态码
+      if (result.waitTime) {
+        return res.status(429).json({
+          status: "error",
+          message: result.message,
+          code: "TOO_MANY_REQUESTS",
+          waitTime: result.waitTime,
+        });
+      }
+      return next(new BadRequestError(result.message));
     }
 
-    // 生成6位随机验证码
-    const verificationCode = Math.floor(
-      100000 + Math.random() * 900000,
-    ).toString();
-
-    // TODO: 集成短信服务发送验证码
-    // 这里需要集成阿里云短信、腾讯云短信或其他短信服务
-    // 暂时记录到日志中，实际部署时需要替换为真实的短信发送
-    authLogger.info(
-      {
-        phone: phone.substring(0, 3) + "****" + phone.substring(7),
-        verificationCode, // 生产环境中不应该记录验证码
-      },
-      "验证码生成（需要集成短信服务发送）",
-    );
-
-    // TODO: 将验证码存储到Redis或内存缓存中，设置5分钟过期时间
-    // 格式：verification_code:{phone} = {code}
-    // 过期时间：300秒（5分钟）
-
-    res.status(200).json({
+    const responseData = {
       status: "success",
       message: "验证码已发送，请注意查收短信",
-    });
+    };
+
+    // 开发环境返回验证码便于测试
+    if (process.env.NODE_ENV === "development" && result.code) {
+      responseData.code = result.code;
+    }
+
+    res.status(200).json(responseData);
 
     authLogger.info(
       {

@@ -44,6 +44,7 @@ interface LoginPayload {
 
 interface RegisterPayload {
   username: string;
+  fullName: string;
   password: string;
   email: string;
   phone: string;
@@ -481,7 +482,16 @@ export const useUserStore = defineStore(
       try {
         loading.value = true;
         const response = await api.post(AUTH_ENDPOINTS.REGISTER, payload);
-        return response.data?.status === "success";
+        
+        if (response.data?.status === "success") {
+          // 注册成功后自动登录
+          if (response.data.token && response.data.data?.user) {
+            _setAuthToken(response.data.token, true);
+            _setUserData(response.data.data.user);
+          }
+          return true;
+        }
+        return false;
       } catch (error) {
         console.error("注册失败:", error);
         throw error;
@@ -493,9 +503,23 @@ export const useUserStore = defineStore(
     async function sendVerificationCode(phone: string): Promise<boolean> {
       try {
         const response = await api.post(AUTH_ENDPOINTS.SEND_CODE, { phone });
-        return response.data?.status === "success";
-      } catch (error) {
+        if (response.data?.status === "success") {
+          // 开发环境下，如果返回了验证码，在控制台显示
+          if (response.data.code && process.env.NODE_ENV === "development") {
+            console.log(`\n🔐 验证码: ${response.data.code}\n`);
+          }
+          return true;
+        }
+        return false;
+      } catch (error: any) {
         console.error("发送验证码失败:", error);
+        // 如果是频率限制错误，抛出包含等待时间的错误
+        if (error.response?.status === 429) {
+          const waitTime = error.response?.data?.waitTime;
+          if (waitTime) {
+            throw new Error(`请等待 ${waitTime} 秒后重试`);
+          }
+        }
         throw error;
       }
     }
