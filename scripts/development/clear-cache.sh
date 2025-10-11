@@ -34,7 +34,7 @@ echo "3/3: 验证缓存策略..."
 
 # 检查缓存头
 echo "检查主页缓存头:"
-curl -s -I https://horsduroot.com/ | grep -E "(cache-control|expires)"
+curl -s -I https://sdszk.cn/ | grep -E "(cache-control|expires)"
 
 echo ""
 echo "🎉 缓存清理完成！"

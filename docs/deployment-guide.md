@@ -318,7 +318,7 @@ ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
 1. 检查证书状态: ./scripts/deployment/check-deployment.sh | grep -i ssl
 2. 更新证书: ssh root@60.205.124.67 "certbot renew"
 3. 重载 Nginx: ssh root@60.205.124.67 "systemctl reload nginx"
-4. 验证访问: curl -I https://horsduroot.com
+4. 验证访问: curl -I https://sdszk.cn
 ```
 
 ### 🆘 紧急恢复流程
@@ -424,9 +424,9 @@ npm run pm2:status
 ### 🔗 相关链接
 
 - **项目仓库**: Git 仓库地址
-- **生产地址**: https://horsduroot.com
-- **管理后台**: https://horsduroot.com/admin
-- **API文档**: https://horsduroot.com/api/docs
+- **生产地址**: https://sdszk.cn
+- **管理后台**: https://sdszk.cn/admin
+- **API文档**: https://sdszk.cn/api/docs
 
 ### 📋 故障报告模板
 
