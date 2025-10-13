@@ -102,7 +102,7 @@ quick_frontend() {
     ssh "$SERVER_USER@$SERVER_IP" "nginx -t && systemctl reload nginx" &>/dev/null
 
     success "前端部署完成"
-    info "访问: https://sdszk.cn"
+    info "访问: https://horsduroot.com"
 }
 
 # 快速后端部署
@@ -153,7 +153,7 @@ quick_backend() {
     rm -rf "$temp_dir"
 
     success "后端部署完成"
-    info "API: https://sdszk.cn/api/health"
+    info "API: https://horsduroot.com/api/health"
 }
 
 # 全栈部署
@@ -183,7 +183,7 @@ show_status() {
 
     echo ""
     echo "🌐 网站检查:"
-    if curl -s https://sdszk.cn >/dev/null; then
+    if curl -s https://horsduroot.com >/dev/null; then
         success "前端访问正常"
     else
         warning "前端访问异常"
