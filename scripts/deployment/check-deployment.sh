@@ -17,9 +17,9 @@ readonly NC='\033[0m'
 
 # 配置
 readonly SERVER_USER="root"
-readonly SERVER_IP="60.205.124.67"
-readonly DOMAIN="horsduroot.com"
-readonly WWW_DOMAIN="www.horsduroot.com"
+readonly SERVER_IP="8.141.113.21"
+readonly DOMAIN="www.sdszk.cn"
+readonly WWW_DOMAIN="www.www.sdszk.cn"
 readonly PM2_APP_NAME="sdszk-backend"
 readonly SSH_TIMEOUT=10
 readonly HTTP_TIMEOUT=10

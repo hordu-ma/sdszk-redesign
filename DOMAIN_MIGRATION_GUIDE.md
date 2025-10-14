@@ -2,7 +2,7 @@
 
 ## 📋 迁移概述
 
-**旧域名**: `horsduroot.com` → **新域名**: `sdszk.cn`  
+**旧域名**: `horsduroot.com` → **新域名**: `www.sdszk.cn`  
 **迁移时间**: 2025年10月11日  
 **影响范围**: 前端、后端、Nginx、部署脚本
 
@@ -27,10 +27,10 @@
 sudo systemctl stop nginx
 
 # 2. 使用 certbot 申请新域名证书
-sudo certbot certonly --standalone -d sdszk.cn -d www.sdszk.cn
+sudo certbot certonly --standalone -d www.sdszk.cn -d www.www.sdszk.cn
 
 # 3. 验证证书是否成功生成
-ls -la /etc/letsencrypt/live/sdszk.cn/
+ls -la /etc/letsencrypt/live/www.sdszk.cn/
 
 # 应该看到以下文件:
 # - fullchain.pem
@@ -51,7 +51,7 @@ cd /Users/liguoma/my-devs/javascript/sdszk-redesign
 ./scripts/deployment/deploy-nginx.sh
 
 # 或者手动部署:
-scp nginx-ssl.conf root@60.205.124.67:/etc/nginx/sites-available/sdszk
+scp nginx-ssl.conf root@8.141.113.21:/etc/nginx/sites-available/sdszk
 ```
 
 ### 步骤 3: 更新服务器端环境变量
@@ -60,7 +60,7 @@ scp nginx-ssl.conf root@60.205.124.67:/etc/nginx/sites-available/sdszk
 
 ```bash
 # SSH 登录服务器
-ssh root@60.205.124.67
+ssh root@8.141.113.21
 
 # 进入后端目录
 cd /var/www/sdszk-backend
@@ -72,10 +72,10 @@ cp .env .env.backup.$(date +%Y%m%d)
 nano .env
 
 # 确保以下配置正确:
-FRONTEND_URL=https://sdszk.cn,https://www.sdszk.cn
-ALLOWED_ORIGINS=https://sdszk.cn,https://www.sdszk.cn
-SERVER_PUBLIC_URL=https://sdszk.cn
-BASE_URL=https://sdszk.cn
+FRONTEND_URL=https://www.sdszk.cn,https://www.www.sdszk.cn
+ALLOWED_ORIGINS=https://www.sdszk.cn,https://www.www.sdszk.cn
+SERVER_PUBLIC_URL=https://www.sdszk.cn
+BASE_URL=https://www.sdszk.cn
 ```
 
 ### 步骤 4: 重启服务
@@ -100,17 +100,17 @@ pm2 logs sdszk-backend --lines 50
 
 ```bash
 # 1. 检查网站可访问性
-curl -I https://sdszk.cn
 curl -I https://www.sdszk.cn
+curl -I https://www.www.sdszk.cn
 
 # 2. 检查 API 健康状态
-curl https://sdszk.cn/api/health
+curl https://www.sdszk.cn/api/health
 
 # 3. 检查 SSL 证书
-openssl s_client -connect sdszk.cn:443 -servername sdszk.cn < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect www.sdszk.cn:443 -servername www.sdszk.cn < /dev/null 2>/dev/null | openssl x509 -noout -dates
 
 # 4. 在浏览器测试登录
-# 访问: https://sdszk.cn/admin/login
+# 访问: https://www.sdszk.cn/admin/login
 ```
 
 ## 🔍 问题排查
@@ -137,10 +137,10 @@ pm2 restart sdszk-backend --update-env
 
 ```bash
 # 检查证书文件是否存在
-ls -la /etc/letsencrypt/live/sdszk.cn/
+ls -la /etc/letsencrypt/live/www.sdszk.cn/
 
 # 重新申请证书
-sudo certbot certonly --standalone -d sdszk.cn -d www.sdszk.cn --force-renewal
+sudo certbot certonly --standalone -d www.sdszk.cn -d www.www.sdszk.cn --force-renewal
 ```
 
 ### 问题 3: Nginx 配置测试失败
@@ -163,9 +163,9 @@ cat /etc/nginx/sites-available/sdszk
 
 - [ ] SSL 证书正确安装 (有效期 90 天)
 - [ ] HTTPS 自动重定向工作正常
-- [ ] 前端页面可正常访问 (`https://sdszk.cn`)
-- [ ] API 健康检查通过 (`https://sdszk.cn/api/health`)
-- [ ] CMS 登录功能正常 (`https://sdszk.cn/admin/login`)
+- [ ] 前端页面可正常访问 (`https://www.sdszk.cn`)
+- [ ] API 健康检查通过 (`https://www.sdszk.cn/api/health`)
+- [ ] CMS 登录功能正常 (`https://www.sdszk.cn/admin/login`)
 - [ ] 静态资源 (图片/CSS/JS) 正常加载
 - [ ] 没有 CORS 相关错误 (检查浏览器控制台)
 - [ ] 后端日志无异常 (`pm2 logs sdszk-backend`)
@@ -189,7 +189,7 @@ pm2 restart sdszk-backend
 
 ## 📝 注意事项
 
-1. **DNS 解析**: 确保 `sdszk.cn` 和 `www.sdszk.cn` 的 DNS A 记录都指向服务器 IP `60.205.124.67`
+1. **DNS 解析**: 确保 `www.sdszk.cn` 和 `www.www.sdszk.cn` 的 DNS A 记录都指向服务器 IP `8.141.113.21`
 2. **证书更新**: Let's Encrypt 证书有效期 90 天,建议设置自动续期
 3. **旧域名**: 如需保留旧域名访问,可以配置 301 重定向到新域名
 4. **缓存清理**: 部署后建议清理浏览器缓存和 CDN 缓存 (如有)

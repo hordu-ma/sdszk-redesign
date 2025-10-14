@@ -30,7 +30,7 @@ nano ~/.ssh/config# 阿里云部署指南
 ### 🏗️ 服务器架构
 
 ```
-阿里云服务器 (60.205.124.67)
+阿里云服务器 (8.141.113.21)
 ├── Nginx (80/443) → 前端静态文件 + API反向代理
 ├── PM2 → Node.js 后端服务 (3000端口)
 ├── MongoDB → 数据库服务
@@ -231,7 +231,7 @@ npm run pm2:logs
 ./scripts/deployment/check-deployment.sh
 
 # 查看服务器资源
-ssh root@60.205.124.67 "htop"
+ssh root@8.141.113.21 "htop"
 ```
 
 ### 🔧 维护任务
@@ -253,7 +253,7 @@ npm run pm2:logs | grep -i error
 ./scripts/deployment/check-deployment.sh
 
 # 清理旧备份
-ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
+ssh root@8.141.113.21 "find /var/www -name '*backup*' -mtime +7 -delete"
 ```
 
 #### 每月维护
@@ -294,7 +294,7 @@ ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
 # 诊断步骤
 1. 查看详细状态: npm run pm2:status
 2. 查看错误日志: npm run pm2:logs
-3. 检查配置文件: ssh root@60.205.124.67 "cat /var/www/sdszk-backend/.env"
+3. 检查配置文件: ssh root@8.141.113.21 "cat /var/www/sdszk-backend/.env"
 4. 手动重启: npm run pm2:restart
 5. 强制重启: ./scripts/deployment/pm2-manager.sh force-restart
 ```
@@ -305,8 +305,8 @@ ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
 
 ```bash
 # 解决方案
-1. 检查 MongoDB 状态: ssh root@60.205.124.67 "systemctl status mongod"
-2. 重启数据库: ssh root@60.205.124.67 "systemctl restart mongod"
+1. 检查 MongoDB 状态: ssh root@8.141.113.21 "systemctl status mongod"
+2. 重启数据库: ssh root@8.141.113.21 "systemctl restart mongod"
 3. 检查连接配置: 确认 .env.production 中的 MONGODB_URI
 4. 测试连接: ./scripts/deployment/check-deployment.sh
 ```
@@ -318,9 +318,9 @@ ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
 ```bash
 # 处理步骤
 1. 检查证书状态: ./scripts/deployment/check-deployment.sh | grep -i ssl
-2. 更新证书: ssh root@60.205.124.67 "certbot renew"
-3. 重载 Nginx: ssh root@60.205.124.67 "systemctl reload nginx"
-4. 验证访问: curl -I https://sdszk.cn
+2. 更新证书: ssh root@8.141.113.21 "certbot renew"
+3. 重载 Nginx: ssh root@8.141.113.21 "systemctl reload nginx"
+4. 验证访问: curl -I https://www.sdszk.cn
 ```
 
 ### 🆘 紧急恢复流程
@@ -333,10 +333,10 @@ ssh root@60.205.124.67 "find /var/www -name '*backup*' -mtime +7 -delete"
 
 # 2. 服务重启
 npm run pm2:restart
-ssh root@60.205.124.67 "systemctl restart nginx"
+ssh root@8.141.113.21 "systemctl restart nginx"
 
 # 3. 如仍有问题，回滚到备份
-ssh root@60.205.124.67 "
+ssh root@8.141.113.21 "
   cd /var/www
   ls -la *backup* | tail -1  # 找到最新备份
   # 手动恢复备份
@@ -394,7 +394,7 @@ npm run deploy:aliyun
 
 ```bash
 # 监控服务器资源
-ssh root@60.205.124.67 "
+ssh root@8.141.113.21 "
   echo '=== CPU和内存 ==='
   htop -n 1
   echo '=== 磁盘使用 ==='
@@ -426,9 +426,9 @@ npm run pm2:status
 ### 🔗 相关链接
 
 - **项目仓库**: Git 仓库地址
-- **生产地址**: https://sdszk.cn
-- **管理后台**: https://sdszk.cn/admin
-- **API文档**: https://sdszk.cn/api/docs
+- **生产地址**: https://www.sdszk.cn
+- **管理后台**: https://www.sdszk.cn/admin
+- **API文档**: https://www.sdszk.cn/api/docs
 
 ### 📋 故障报告模板
 

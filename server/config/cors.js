@@ -12,8 +12,8 @@ import { sysLogger } from "../utils/logger.js";
 const getProductionOrigins = () => {
   const origins = [
     "https://hordu-ma.github.io", // GitHub Pages域名
-    "https://sdszk.cn", // 主域名
-    "https://www.sdszk.cn", // 带www的域名
+    "https://www.sdszk.cn", // 主域名
+    "https://sdszk.cn", // 无www重定向域名
   ];
 
   // 从环境变量中添加额外的生产域名

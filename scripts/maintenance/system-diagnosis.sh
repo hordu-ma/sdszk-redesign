@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # 配置变量
-SERVER_IP="60.205.124.67"
+SERVER_IP="8.141.113.21"
 SERVER_USER="root"
 SSH_OPTS="-o ConnectTimeout=10 -o StrictHostKeyChecking=no"
 BACKUP_BASE_PATH="/var/www"

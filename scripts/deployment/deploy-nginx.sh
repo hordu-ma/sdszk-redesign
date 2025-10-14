@@ -14,12 +14,12 @@ NC='\033[0m' # No Color
 
 # 配置变量
 SERVER_USER="root"
-SERVER_IP="60.205.124.67"
+SERVER_IP="8.141.113.21"
 LOCAL_CONFIG_PATH="./nginx-ssl.conf"
 REMOTE_CONFIG_PATH="/etc/nginx/sites-available/sdszk"
 NGINX_ENABLED_PATH="/etc/nginx/sites-enabled/sdszk"
-DOMAIN="horsduroot.com"
-WWW_DOMAIN="www.horsduroot.com"
+DOMAIN="www.sdszk.cn"
+WWW_DOMAIN="www.www.sdszk.cn"
 SSH_TIMEOUT=15
 HEALTH_CHECK_TIMEOUT=10
 HEALTH_CHECK_RETRIES=3

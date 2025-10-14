@@ -6,7 +6,7 @@
 echo "🧹 开始清理缓存..."
 
 # 服务器信息
-SERVER="root@60.205.124.67"
+SERVER="root@8.141.113.21"
 FRONTEND_PATH="/var/www/frontend"
 
 echo "1/3: 清理服务器Nginx缓存..."

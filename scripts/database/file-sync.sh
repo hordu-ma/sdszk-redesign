@@ -53,7 +53,7 @@ PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 SERVER_DIR="$PROJECT_ROOT/server"
 
 # 生产环境配置
-PROD_HOST="60.205.124.67"
+PROD_HOST="8.141.113.21"
 PROD_USER="root"
 PROD_UPLOADS_PATH="/var/www/sdszk-backend/uploads"
 

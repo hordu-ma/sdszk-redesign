@@ -48,7 +48,7 @@ echo_header() {
 }
 
 # 配置变量
-PROD_SERVER="60.205.124.67"
+PROD_SERVER="8.141.113.21"
 PROD_USER="root"
 PROD_DB="sdszk"
 LOCAL_DB="sdszk"

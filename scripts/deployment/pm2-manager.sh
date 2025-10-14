@@ -40,7 +40,7 @@ echo_step() {
 }
 
 # 配置变量
-SERVER_IP="60.205.124.67"
+SERVER_IP="8.141.113.21"
 SERVER_USER="root"
 PM2_APP_NAME="sdszk-backend"
 DEPLOY_PATH="/var/www/sdszk-backend"
