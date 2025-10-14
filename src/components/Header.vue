@@ -465,7 +465,7 @@ onUnmounted(() => {
 }
 
 .center-name {
-  font-size: 18px;
+  font-size: 17px;
   color: #fff;
   font-weight: 500;
   white-space: nowrap;
