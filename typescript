@@ -1,132 +1,0 @@
-Script started on Tue Oct 14 09:51:24 2025
-]633;P;PromptType=starship]633;P;ContinuationPrompt=%{\\x1b[90m%}∙%{\\x1b[0m%} ]633;P;HasRichCommandDetection=True[1m[7m%[27m[1m[0m                                                                         ]633;D]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 80% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -n '280,295p' src/component [K[Kss/Header.vue | grep -A10 'handleOldVersion'"[A[40D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mn[33m [33m'[33m2[33m8[33m0[33m,[33m2[33m9[33m5[33mp[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m [33m|[33m [33mg[33mr[33me[33mp[33m [33m-[33mA[33m1[33m0[33m [33m'[33mh[33ma[33mn[33md[33ml[33me[33mO[33ml[33md[33mV[33me[33mr[33ms[33mi[33mo[33mn[33m'[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -n '280,295p' src/components/Header.vue | grep -A10 'handleOldVersion'";]633;C[1m[7m%[27m[1m[0m                                                                         ]633;D;1]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 80% [0m
-[1;90m╰─[31m✗[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && grep -n 'handleOldVersion' src/ [K[Kccomponents/Header.vue"[A[18D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33mg[33mr[33me[33mp[33m [33m-[33mn[33m [33m'[33mh[33ma[33mn[33md[33ml[33me[33mO[33ml[33md[33mV[33me[33mr[33ms[33mi[33mo[33mn[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && grep -n 'handleOldVersion' src/components/Header.vue";]633;C[1m[7m%[27m[1m[0m                                                                         ]633;D;1]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[31m✗[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -n '277,290p' src/component [K[Kss/Header.vue"[A[9D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mn[33m [33m'[33m2[33m7[33m7[33m,[33m2[33m9[33m0[33mp[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -n '277,290p' src/components/Header.vue";]633;Cconst handleCommand = (command: string) => {
-  switch (command) {
-    case "profile":
-      router.push("/user/profile");
-      break;
-    case "logout":
-      userStore.logout();
-      router.push("/");
-      break;
-  }
-};
-
-const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -i '287a\\n// 处理旧版入口[7m [27m跳[K转\\nconst handleOldVersionClick = (e: MouseEvent) => {\\n  e.preventDe [K[Kffault()\\n  setTimeout(() => {\\n    const newWindow = window.open(\"http [K[Kss://new.sdszk.cn\", \"_blank\")\\n    if (newWindow) {\\n      newWindow. [K[Kllocation.replace(\"https://new.sdszk.cn\")\\n    }\\n  }, 150)\\n}\\n' sr [K[Kcc/components/Header.vue && echo '✅ 函数添加成功'"[5A[46D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mi[33m [33m'[33m2[33m8[33m7[33ma[36m\[36m\[39m[33mn[33m/[33m/[33m [33m处[33m[33m理[33m[33m旧[33m[33m版[33m[33m入[33m[33m口[33m[7m[33m [27m[39m[33m跳[33m转[33m[36m\[36m\[39m[33mn[33mc[33mo[33mn[33ms[33mt[33m [33mh[33ma[33mn[33md[33ml[33me[33mO[33ml[33md[33mV[33me[33mr[33ms[33mi[33mo[33mn[33mC[33ml[33mi[33mc[33mk[33m [33m=[33m [33m([33me[33m:[33m [33mM[33mo[33mu[33ms[33me[33mE[33mv[33me[33mn[33mt[33m)[33m [33m=[33m>[33m [33m{[36m\[36m\[39m[33mn[33m [33m [33me[33m.[33mp[33mr[33me[33mv[33me[33mn[33mt[33mD[33me[33mf[33ma[33mu[33ml[33mt[33m([33m)[36m\[36m\[39m[33mn[33m [33m [33ms[33me[33mt[33mT[33mi[33mm[33me[33mo[33mu[33mt[33m([33m([33m)[33m [33m=[33m>[33m [33m{[36m\[36m\[39m[33mn[33m [33m [33m [33m [33mc[33mo[33mn[33ms[33mt[33m [33mn[33me[33mw[33mW[33mi[33mn[33md[33mo[33mw[33m [33m=[33m [33mw[33mi[33mn[33md[33mo[33mw[33m.[33mo[33mp[33me[33mn[33m([36m\[36m"[39m[33mh[33mt[33mt[33mp[33ms[33m:[33m/[33m/[33mn[33me[33mw[33m.[33ms[33md[33ms[33mz[33mk[33m.[33mc[33mn[36m\[36m"[39m[33m,[33m [36m\[36m"[39m[33m_[33mb[33ml[33ma[33mn[33mk[36m\[36m"[39m[33m)[36m\[36m\[39m[33mn[33m [33m [33m [33m [33mi[33mf[33m [33m([33mn[33me[33mw[33mW[33mi[33mn[33md[33mo[33mw[33m)[33m [33m{[36m\[36m\[39m[33mn[33m [33m [33m [33m [33m [33m [33mn[33me[33mw[33mW[33mi[33mn[33md[33mo[33mw[33m.[33ml[33mo[33mc[33ma[33mt[33mi[33mo[33mn[33m.[33mr[33me[33mp[33ml[33ma[33mc[33me[33m([36m\[36m"[39m[33mh[33mt[33mt[33mp[33ms[33m:[33m/[33m/[33mn[33me[33mw[33m.[33ms[33md[33ms[33mz[33mk[33m.[33mc[33mn[36m\[36m"[39m[33m)[36m\[36m\[39m[33mn[33m [33m [33m [33m [33m}[36m\[36m\[39m[33mn[33m [33m [33m}[33m,[33m [33m1[33m5[33m0[33m)[36m\[36m\[39m[33mn[33m}[36m\[36m\[39m[33mn[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m [33m&[33m&[33m [33me[33mc[33mh[33mo[33m [33m'[33m✅[33m[33m [33m函[33m[33m数[33m[33m添[33m[33m加[33m[33m成[33m[33m功[33m[33m'[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -i '287a\\\\n// 处理旧版入口跳转\\\\nconst handleOldVersionClick = (e: MouseEvent) => {\\\\n  e.preventDefault()\\\\n  setTimeout(() => {\\\\n    const newWindow = window.open(\\"https://new.sdszk.cn\\", \\"_blank\\")\\\\n    if (newWindow) {\\\\n      newWindow.location.replace(\\"https://new.sdszk.cn\\")\\\\n    }\\\\n  }, 150)\\\\n}\\\\n' src/components/Header.vue && echo '✅ 函数添加成功'";]633;C✅ 函数添加成功
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -n '287,300p' src/component [K[Kss/Header.vue"[A[9D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mn[33m [33m'[33m2[33m8[33m7[33m,[33m3[33m0[33m0[33mp[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -n '287,300p' src/components/Header.vue";]633;C};
-n// 处理旧版入口跳转
-const handleOldVersionClick = (e: MouseEvent) => {
-  e.preventDefault()
-  setTimeout(() => {
-    const newWindow = window.open("https://new.sdszk.cn", "_blank")
-    if (newWindow) {
-      newWindow.location.replace("https://new.sdszk.cn")
-    }
-  }, 150)
-}
-
-
-const handleSearch = () => {
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -i '288s/^n//' src/componen [K[Ktts/Header.vue && sed -n '83,94p' src/components/Header.vue"[A[55D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mi[33m [33m'[33m2[33m8[33m8[33ms[33m/[33m^[33mn[33m/[33m/[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mn[33m [33m'[33m8[33m3[33m,[33m9[33m4[33mp[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -i '288s/^n//' src/components/Header.vue && sed -n '83,94p' src/components/Header.vue";]633;C          href="https://www.sdszk.cn/"
-          target="_blank"
-          class="nav-item"
-          style="
-            font-size: 14px;
-            color: #e0e0e0;
-            opacity: 0.8;
-            text-decoration: none;
-          "
-        >
-          旧版入口
-        </a>
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -i '83,94c\          href=\ [K[K""https://new.sdszk.cn\"\n          target=\"_blank\"\n          rel=\"noo [K[Kppener noreferrer\"\n          class=\"nav-item\"\n          @click=\"hand [K[KlleOldVersionClick\"\n          style=\"\n            font-size: 14px;\n   [K[K[1C          color: #e0e0e0;\n            opacity: 0.8;\n            text-de [K[Kccoration: none;\n            cursor: pointer;\n          \"\n        >\n  [K[K[1C         旧版入口\n        </a>' src/components/Header.vue && echo '✅ 模 [K[K板更新完成'"[7A[8D[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mi[33m [33m'[33m8[33m3[33m,[33m9[33m4[33mc[33m\[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mh[33mr[33me[33mf[33m=[36m\[36m"[39m[33mh[33mt[33mt[33mp[33ms[33m:[33m/[33m/[33mn[33me[33mw[33m.[33ms[33md[33ms[33mz[33mk[33m.[33mc[33mn[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mt[33ma[33mr[33mg[33me[33mt[33m=[36m\[36m"[39m[33m_[33mb[33ml[33ma[33mn[33mk[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mr[33me[33ml[33m=[36m\[36m"[39m[33mn[33mo[33mo[33mp[33me[33mn[33me[33mr[33m [33mn[33mo[33mr[33me[33mf[33me[33mr[33mr[33me[33mr[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mc[33ml[33ma[33ms[33ms[33m=[36m\[36m"[39m[33mn[33ma[33mv[33m-[33mi[33mt[33me[33mm[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m@[33mc[33ml[33mi[33mc[33mk[33m=[36m\[36m"[39m[33mh[33ma[33mn[33md[33ml[33me[33mO[33ml[33md[33mV[33me[33mr[33ms[33mi[33mo[33mn[33mC[33ml[33mi[33mc[33mk[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33ms[33mt[33my[33ml[33me[33m=[36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mf[33mo[33mn[33mt[33m-[33ms[33mi[33mz[33me[33m:[33m [33m1[33m4[33mp[33mx[33m;[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mc[33mo[33ml[33mo[33mr[33m:[33m [33m#[33me[33m0[33me[33m0[33me[33m0[33m;[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mo[33mp[33ma[33mc[33mi[33mt[33my[33m:[33m [33m0[33m.[33m8[33m;[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mt[33me[33mx[33mt[33m-[33md[33me[33mc[33mo[33mr[33ma[33mt[33mi[33mo[33mn[33m:[33m [33mn[33mo[33mn[33me[33m;[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33mc[33mu[33mr[33ms[33mo[33mr[33m:[33m [33mp[33mo[33mi[33mn[33mt[33me[33mr[33m;[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [36m\[36m"[39m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m>[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m [33m [33m旧[33m[33m版[33m[33m入[33m[33m口[33m[33m\[33mn[33m [33m [33m [33m [33m [33m [33m [33m [33m<[33m/[33ma[33m>[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m [33m&[33m&[33m [33me[33mc[33mh[33mo[33m [33m'[33m✅[33m[33m [33m模[33m[33m板[33m更[33m[33m新[33m[33m完[33m[33m成[33m[33m'[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -i '83,94c\\          href=\\"https://new.sdszk.cn\\"\\n          target=\\"_blank\\"\\n          rel=\\"noopener noreferrer\\"\\n          class=\\"nav-item\\"\\n          @click=\\"handleOldVersionClick\\"\\n          style=\\"\\n            font-size: 14px\x3b\\n            color: #e0e0e0\x3b\\n            opacity: 0.8\x3b\\n            text-decoration: none\x3b\\n            cursor: pointer\x3b\\n          \\"\\n        >\\n          旧版入口\\n        </a>' src/components/Header.vue && echo '✅ 模板更新完成'";]633;C✅ 模板更新完成
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && sed -n '83,96p' src/components/ [K[KHHeader.vue"[A[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33ms[33me[33md[33m [33m-[33mn[33m [33m'[33m8[33m3[33m,[33m9[33m6[33mp[33m'[33m [33ms[33mr[33mc[33m/[33mc[33mo[33mm[33mp[33mo[33mn[33me[33mn[33mt[33ms[33m/[33mH[33me[33ma[33md[33me[33mr[33m.[33mv[33mu[33me[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && sed -n '83,96p' src/components/Header.vue";]633;C          href="https://new.sdszk.cn"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="nav-item"
-          @click="handleOldVersionClick"
-          style="
-            font-size: 14px;
-            color: #e0e0e0;
-            opacity: 0.8;
-            text-decoration: none;
-            cursor: pointer;
-          "
-        >
-          旧版入口
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "cd /var/www && npm run build:aliyun 2>&1 | tai [K[Kll -40"[A[32ms[32ms[32mh[39m[19C[33m"[33mc[33md[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m [33m&[33m&[33m [33mn[33mp[33mm[33m [33mr[33mu[33mn[33m [33mb[33mu[33mi[33ml[33md[33m:[33ma[33ml[33mi[33my[33mu[33mn[33m [33m2[33m>[33m&[33m1[33m [33m|[33m [33mt[33ma[33mi[33ml[33m [33m-[33m4[33m0[33m"[39m[?2004l
-]633;E;ssh root@8.141.113.21 "cd /var/www && npm run build:aliyun 2>&1 | tail -40";]633;Cdist//var/www/assets/js/UserPermissions-CIRPpEwB.js.gz    13.32kb / gzip: 4.88kb
-dist//var/www/assets/js/UserRoles-D5_83rY2.js.gz          10.95kb / gzip: 4.25kb
-dist//var/www/assets/js/UserSettings-B1d6yIm7.js.gz       13.81kb / gzip: 4.41kb
-dist//var/www/assets/js/UsersList-BV2DHZ6B.js.gz          16.95kb / gzip: 5.83kb
-dist//var/www/assets/js/vue-BJiDn6oD.js.gz                105.88kb / gzip: 40.27kb
-dist//var/www/assets/css/index-B6T4F5zO.css.gz            380.17kb / gzip: 53.85kb
-dist//var/www/assets/js/element-plus-CzXHYUbr.js.gz       976.89kb / gzip: 295.41kb
-dist//var/www/assets/js/AdminDashboard-DVSA6d8W.js.gz     1102.25kb / gzip: 356.29kb
-dist//var/www/assets/js/index-BSrGu7w_.js.gz              1421.26kb / gzip: 420.85kb
-
-
-
-✨ [vite-plugin-compression]:algorithm=brotliCompress - compressed file successfully: 
-dist//var/www/assets/css/ResourceDetail-DHmBXH-t.css.br   11.60kb / brotliCompress: 1.77kb
-dist//var/www/assets/css/AvatarCropper-aI5NxJTc.css.br    13.09kb / brotliCompress: 2.12kb
-dist//var/www/assets/css/UserProfile-D15r9neP.css.br      14.95kb / brotliCompress: 2.42kb
-dist//var/www/assets/css/UserHistory-q4pflsrL.css.br      27.71kb / brotliCompress: 3.94kb
-dist//var/www/assets/js/AdminLayout-C4EbuMkq.js.br        14.15kb / brotliCompress: 3.90kb
-dist//var/www/assets/css/el-date-picker-Db-ufUiu.css.br   25.82kb / brotliCompress: 3.37kb
-dist//var/www/assets/css/el-col-hq49aDx-.css.br           47.29kb / brotliCompress: 3.34kb
-dist//var/www/assets/js/QuillEditor-BtPyNEIs.js.br        14.03kb / brotliCompress: 3.91kb
-dist//var/www/assets/js/NewsList-BsC6Slr5.js.br           17.24kb / brotliCompress: 4.80kb
-dist//var/www/assets/js/ResourcesEdit-krMTQ9pC.js.br      14.54kb / brotliCompress: 4.34kb
-dist//var/www/assets/js/ResourcesCreate-BAVyJ5C1.js.br    12.49kb / brotliCompress: 3.72kb
-dist//var/www/assets/js/ResourceDetail-6FuJPZCR.js.br     16.75kb / brotliCompress: 5.31kb
-dist//var/www/assets/js/SystemSettings-BfxzxvqR.js.br     10.07kb / brotliCompress: 3.06kb
-dist//var/www/assets/js/UserFavorites-CZ9IaBke.js.br      12.99kb / brotliCompress: 3.86kb
-dist//var/www/assets/js/UserPermissions-CIRPpEwB.js.br    13.32kb / brotliCompress: 4.05kb
-dist//var/www/assets/js/UserProfile-DAMdMq-A.js.br        10.45kb / brotliCompress: 3.23kb
-dist//var/www/assets/js/UserRoles-D5_83rY2.js.br          10.95kb / brotliCompress: 3.59kb
-dist//var/www/assets/js/UserHistory-DYWCPxAB.js.br        13.71kb / brotliCompress: 3.98kb
-dist//var/www/assets/js/UserSettings-B1d6yIm7.js.br       13.81kb / brotliCompress: 3.51kb
-dist//var/www/assets/js/UsersList-BV2DHZ6B.js.br          16.95kb / brotliCompress: 4.83kb
-dist//var/www/assets/js/vue-BJiDn6oD.js.br                105.88kb / brotliCompress: 36.20kb
-dist//var/www/assets/css/index-B6T4F5zO.css.br            380.17kb / brotliCompress: 41.85kb
-dist//var/www/assets/js/element-plus-CzXHYUbr.js.br       976.89kb / brotliCompress: 240.86kb
-dist//var/www/assets/js/AdminDashboard-DVSA6d8W.js.br     1102.25kb / brotliCompress: 288.01kb
-dist//var/www/assets/js/index-BSrGu7w_.js.br              1421.26kb / brotliCompress: 330.73kb
-
-
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [43m  45s [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004hsssh root@8.141.113.21 "nginx -s reload && echo '✅ Nginx 已重新加载'" [K[K[A[4C[32ms[32ms[32mh[39m[19C[33m"[33mn[33mg[33mi[33mn[33mx[33m [33m-[33ms[33m [33mr[33me[33ml[33mo[33ma[33md[33m [33m&[33m&[33m [33me[33mc[33mh[33mo[33m [33m'[33m✅[33m[33m [33mN[33mg[33mi[33mn[33mx[33m [33m已[33m[33m重[33m[33m新[33m[33m加[33m[33m载[33m[33m'[33m"[39m [?2004l
-]633;E;ssh root@8.141.113.21 "nginx -s reload && echo '✅ Nginx 已重新加载'";]633;Cnginx: [warn] "ssl_stapling" ignored, no OCSP responder URL in the certificate "/etc/letsencrypt/live/www.sdszk.cn/fullchain.pem"
-✅ Nginx 已重新加载
-[1m[7m%[27m[1m[0m                                                                         ]633;D;0]633;P;Cwd=/Users/liguoma/my-devs/javascript/sdszk-redesign]633;EnvSingleStart;0;;]633;EnvSingleEnd;;[0m[27m[24m[J]633;A
-[1;90m╭─[37m  [46;30m …/sdszk-redesign [0m [1;45;30m main [41m[2!1?2⇡2][0m [1;42;30m v22.17.0 [0m[1;30m v1.0.0 [42m 79% [0m
-[1;90m╰─[32m➜[0m ]633;B[K[?2004h

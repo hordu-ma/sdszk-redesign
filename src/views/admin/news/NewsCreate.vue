@@ -278,6 +278,7 @@ const handleImageUpload = async ({ file }: any) => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 600000, // 10分钟超时，适合大文件上传
     });
 
     if (response.data && response.data.status === "success") {

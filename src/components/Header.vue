@@ -80,14 +80,17 @@
         </a>
         <router-link to="/ai" class="nav-item"> AI思政 </router-link>
         <a
-          href="https://www.sdszk.cn/"
+          href="https://new.sdszk.cn"
           target="_blank"
+          rel="noopener noreferrer"
           class="nav-item"
+          @click="handleOldVersionClick"
           style="
             font-size: 14px;
             color: #e0e0e0;
             opacity: 0.8;
             text-decoration: none;
+            cursor: pointer;
           "
         >
           旧版入口
@@ -270,7 +273,7 @@ const menuItems: MenuItem[] = [
   },
   { path: "http://show.sdszk.cn/#/", name: "萌新磨课", external: true },
   { path: "/ai", name: "AI思政" },
-  { path: "https://www.sdszk.cn/", name: "旧版入口", external: true },
+  { path: "https://new.sdszk.cn", name: "旧版入口", external: true },
 ];
 
 // 处理登录相关
@@ -301,6 +304,13 @@ const toggleSubMenu = (itemName: string) => {
   } else {
     openSubMenuName.value = itemName;
   }
+};
+
+// 处理旧版入口跳转
+const handleOldVersionClick = (e: MouseEvent) => {
+  e.preventDefault();
+  // 直接在新窗口打开目标URL，无需额外的replace操作
+  window.open("https://new.sdszk.cn", "_blank", "noopener,noreferrer");
 };
 
 const toggleMenu = () => {

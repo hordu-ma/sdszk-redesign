@@ -11,7 +11,7 @@ export const APP_CONFIG = {
 export const API_CONFIG = {
   prefix: import.meta.env.VITE_API_PREFIX || "/api",
   version: import.meta.env.VITE_API_VERSION || "",
-  timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 600000,
   baseURL: "", // 始终为空，让前端完全控制路径
   mock: import.meta.env.VITE_API_MOCK === "true",
   logger: import.meta.env.VITE_ENABLE_LOGGER === "true",

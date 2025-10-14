@@ -172,6 +172,7 @@ export class AdminResourceApi extends BaseApi {
         "Content-Type": "multipart/form-data",
       },
       onUploadProgress: onProgress,
+      timeout: 600000, // 10分钟超时，适合大文件上传
     });
 
     console.log("📡 Upload response:", response);
