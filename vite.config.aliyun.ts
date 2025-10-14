@@ -27,7 +27,9 @@ export default defineConfig(({ mode }) => {
         minify: true,
         inject: {
           data: {
-            title: env.VITE_APP_TITLE || "山东省大中小学思政课一体化中心平台",
+            title:
+              env.VITE_APP_TITLE ||
+              "山东省大中小学思政课一体化建设指导中心平台",
           },
         },
       }),

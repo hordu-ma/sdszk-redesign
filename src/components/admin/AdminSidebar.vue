@@ -10,7 +10,7 @@
     <div class="sidebar-header">
       <div class="logo-container">
         <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
-        <span v-if="!collapsed" class="logo-text">山东省大中小学思政课一体化中心平台</span>
+        <span v-if="!collapsed" class="logo-text">山东省大中小学思政课一体化建设指导中心平台</span>
       </div>
     </div>
 

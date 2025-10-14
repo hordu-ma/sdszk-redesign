@@ -463,9 +463,9 @@ router.afterEach((to) => {
   // 设置页面标题
   const title = to.meta?.title as string;
   if (title) {
-    document.title = `${title} - 山东省大中小学思政课一体化中心平台`;
+    document.title = `${title} - 山东省大中小学思政课一体化建设指导中心平台`;
   } else {
-    document.title = "山东省大中小学思政课一体化中心平台";
+    document.title = "山东省大中小学思政课一体化建设指导中心平台";
   }
 
   // 在开发环境下输出性能日志

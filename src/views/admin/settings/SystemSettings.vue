@@ -260,10 +260,10 @@ const systemFormRef = ref();
 
 // 网站设置
 const siteSettings: SiteSettings = reactive({
-  siteName: "山东省大中小学思政课一体化中心平台",
-  siteTitle: "思政课一体化中心平台 - 首页",
+  siteName: "山东省大中小学思政课一体化建设指导中心平台",
+  siteTitle: "思政课一体化建设指导中心平台 - 首页",
   siteDescription:
-    "山东省大中小学思政课一体化建设中心平台，提供思政课程资源、教学案例、活动组织等服务",
+    "山东省大中小学思政课一体化建设指导中心平台，提供思政课程资源、教学案例、活动组织等服务",
   siteKeywords: ["思政课", "一体化", "教育", "山东省"],
   siteLogo: "",
   contactEmail: "contact@sdszk.edu.cn",

@@ -7,7 +7,9 @@
             <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
             <div class="title-section">
               <h1 class="main-title">管理后台</h1>
-              <p class="sub-title">山东省大中小学思政课一体化中心平台</p>
+              <p class="sub-title">
+                山东省大中小学思政课一体化建设指导中心平台
+              </p>
             </div>
           </div>
         </div>
