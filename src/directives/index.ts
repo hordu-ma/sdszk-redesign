@@ -1,4 +1,4 @@
-import { App } from "vue";
+import type { App } from "vue";
 import permissionDirective from "./permission";
 import hasPermissionComponent from "../components/common/HasPermission.vue";
 

@@ -8,7 +8,12 @@ import type {
 } from "@/api/modules/resources/index";
 import { resourceApi } from "@/api";
 
-export { Resource, CreateResourceDTO, UpdateResourceDTO, ResourceQueryParams };
+export type {
+  Resource,
+  CreateResourceDTO,
+  UpdateResourceDTO,
+  ResourceQueryParams,
+};
 
 export class ResourceService extends BaseService<Resource> {
   constructor() {

@@ -76,9 +76,7 @@ const userSchema = new mongoose.Schema(
       ],
       default: [],
       validate: {
-        validator: function (arr) {
-          return arr.length <= 10;
-        },
+        validator: (arr) => arr.length <= 10,
         message: "登录历史记录不能超过10条",
       },
     },
@@ -118,10 +116,10 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // 添加 correctPassword 方法作为 comparePassword 的别名
-userSchema.methods.correctPassword = async function (
+userSchema.methods.correctPassword = async (
   candidatePassword,
   userPassword,
-) {
+) => {
   // 注意：userPassword 是已加密的密码，不需要再加密
   return await bcrypt.compare(candidatePassword, userPassword);
 };

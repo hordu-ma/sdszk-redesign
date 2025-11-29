@@ -87,7 +87,7 @@ siteSettingSchema.statics.setByKey = async function (
 const SiteSetting = mongoose.model("SiteSetting", siteSettingSchema);
 
 // 添加默认设置初始化方法
-SiteSetting.initializeDefaultSettings = async function () {
+SiteSetting.initializeDefaultSettings = async () => {
   const defaultSettings = [
     // 网站基本信息
     {

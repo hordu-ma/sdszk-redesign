@@ -21,8 +21,12 @@
             >
               {{ news.categoryName || "中心动态" }}
             </span>
-            <span v-if="displayAuthor" class="news-author">作者：{{ displayAuthor }}</span>
-            <span v-if="news.viewCount" class="news-views">阅读：{{ news.viewCount }}</span>
+            <span v-if="displayAuthor" class="news-author"
+              >作者：{{ displayAuthor }}</span
+            >
+            <span v-if="news.viewCount" class="news-views"
+              >阅读：{{ news.viewCount }}</span
+            >
           </div>
           <p class="news-summary">
             {{ displaySummary }}

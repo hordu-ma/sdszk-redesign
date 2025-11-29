@@ -151,7 +151,9 @@
                 {{ getTypeText(item.type) }}
               </el-tag>
               <span class="rec-reason">{{ item.reason }}</span>
-              <span class="rec-score">推荐度: {{ Math.round(item.score * 100) }}%</span>
+              <span class="rec-score"
+                >推荐度: {{ Math.round(item.score * 100) }}%</span
+              >
             </div>
           </div>
         </div>

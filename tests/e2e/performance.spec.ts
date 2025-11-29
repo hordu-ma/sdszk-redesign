@@ -30,7 +30,9 @@ test.describe("性能和稳定性测试", () => {
 
     // 等待网络空闲
     const networkStartTime = Date.now();
-    await page.waitForLoadState("networkidle", { timeout: isCI ? 45000 : 20000 });
+    await page.waitForLoadState("networkidle", {
+      timeout: isCI ? 45000 : 20000,
+    });
     const networkLoadTime = Date.now() - networkStartTime;
     const totalLoadTime = Date.now() - startTime;
 
@@ -42,7 +44,7 @@ test.describe("性能和稳定性测试", () => {
     let maxTotalLoad = isCI ? 60000 : 30000;
 
     // WebKit 需要更多时间
-    if (browserName === 'webkit') {
+    if (browserName === "webkit") {
       maxDomLoad *= 1.5;
       maxTotalLoad *= 1.8;
     }
@@ -51,17 +53,23 @@ test.describe("性能和稳定性测试", () => {
 
     // 软性断言 - 记录但不强制失败
     if (domLoadTime > maxDomLoad) {
-      console.warn(`⚠️ DOM 加载时间超出预期: ${domLoadTime}ms > ${maxDomLoad}ms`);
+      console.warn(
+        `⚠️ DOM 加载时间超出预期: ${domLoadTime}ms > ${maxDomLoad}ms`,
+      );
     }
 
     if (totalLoadTime > maxTotalLoad) {
-      console.warn(`⚠️ 总加载时间超出预期: ${totalLoadTime}ms > ${maxTotalLoad}ms`);
+      console.warn(
+        `⚠️ 总加载时间超出预期: ${totalLoadTime}ms > ${maxTotalLoad}ms`,
+      );
     }
 
     // 只有在严重超时时才失败测试
     const criticalTimeout = maxTotalLoad * 2;
     if (totalLoadTime > criticalTimeout) {
-      throw new Error(`严重性能问题: 加载时间 ${totalLoadTime}ms 超过临界值 ${criticalTimeout}ms`);
+      throw new Error(
+        `严重性能问题: 加载时间 ${totalLoadTime}ms 超过临界值 ${criticalTimeout}ms`,
+      );
     }
 
     console.log("✅ 基础性能测试完成");
@@ -85,7 +93,7 @@ test.describe("性能和稳定性测试", () => {
     const startTime = Date.now();
     await page.goto("/", {
       waitUntil: "networkidle",
-      timeout: isCI ? 90000 : 45000
+      timeout: isCI ? 90000 : 45000,
     });
     const loadTime = Date.now() - startTime;
 
@@ -93,18 +101,18 @@ test.describe("性能和稳定性测试", () => {
     console.log(`页面加载时间: ${loadTime}ms`);
 
     // 分析资源加载
-    const failedResources = resources.filter(r => r.status >= 400);
+    const failedResources = resources.filter((r) => r.status >= 400);
 
     if (failedResources.length > 0) {
       console.warn(`⚠️ 发现 ${failedResources.length} 个失败的资源请求`);
-      failedResources.forEach(r => {
+      failedResources.forEach((r) => {
         console.warn(`  - ${r.url} (状态: ${r.status})`);
       });
     }
 
     // 检查关键资源
-    const jsResources = resources.filter(r => r.url.includes('.js'));
-    const cssResources = resources.filter(r => r.url.includes('.css'));
+    const jsResources = resources.filter((r) => r.url.includes(".js"));
+    const cssResources = resources.filter((r) => r.url.includes(".css"));
 
     console.log(`JS 资源数: ${jsResources.length}`);
     console.log(`CSS 资源数: ${cssResources.length}`);
@@ -121,11 +129,13 @@ test.describe("性能和稳定性测试", () => {
     const isCI = !!process.env.CI;
     await page.goto("/", {
       waitUntil: "networkidle",
-      timeout: isCI ? 60000 : 30000
+      timeout: isCI ? 60000 : 30000,
     });
 
     // 测试点击响应时间
-    const clickableElements = await page.locator('button, a, [role="button"]').count();
+    const clickableElements = await page
+      .locator('button, a, [role="button"]')
+      .count();
     console.log(`可点击元素数量: ${clickableElements}`);
 
     if (clickableElements > 0) {
@@ -140,7 +150,9 @@ test.describe("性能和稳定性测试", () => {
         // 交互响应时间不应超过2秒
         const maxClickTime = isCI ? 3000 : 2000;
         if (clickResponseTime > maxClickTime) {
-          console.warn(`⚠️ 点击响应时间过长: ${clickResponseTime}ms > ${maxClickTime}ms`);
+          console.warn(
+            `⚠️ 点击响应时间过长: ${clickResponseTime}ms > ${maxClickTime}ms`,
+          );
         }
       }
     }
@@ -154,19 +166,30 @@ test.describe("性能和稳定性测试", () => {
     const isCI = !!process.env.CI;
     await page.goto("/", {
       waitUntil: "networkidle",
-      timeout: isCI ? 60000 : 30000
+      timeout: isCI ? 60000 : 30000,
     });
 
     // 获取性能指标
     const performanceMetrics = await page.evaluate(() => {
       const performance = window.performance;
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        "navigation",
+      )[0] as PerformanceNavigationTiming;
 
       return {
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        domContentLoaded:
+          navigation.domContentLoadedEventEnd -
+          navigation.domContentLoadedEventStart,
         loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
-        firstPaint: performance.getEntriesByType('paint').find(entry => entry.name === 'first-paint')?.startTime || 0,
-        firstContentfulPaint: performance.getEntriesByType('paint').find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+        firstPaint:
+          performance
+            .getEntriesByType("paint")
+            .find((entry) => entry.name === "first-paint")?.startTime || 0,
+        firstContentfulPaint:
+          performance
+            .getEntriesByType("paint")
+            .find((entry) => entry.name === "first-contentful-paint")
+            ?.startTime || 0,
       };
     });
 
@@ -179,7 +202,9 @@ test.describe("性能和稳定性测试", () => {
 
     // 检查是否有明显的性能问题
     if (performanceMetrics.firstContentfulPaint > (isCI ? 8000 : 4000)) {
-      console.warn(`⚠️ 首次内容绘制时间较长: ${performanceMetrics.firstContentfulPaint}ms`);
+      console.warn(
+        `⚠️ 首次内容绘制时间较长: ${performanceMetrics.firstContentfulPaint}ms`,
+      );
     }
 
     console.log("✅ 资源使用监控完成");
@@ -200,7 +225,7 @@ test.describe("稳定性测试", () => {
       const startTime = Date.now();
       await page.goto("/", {
         waitUntil: "domcontentloaded",
-        timeout: isCI ? 45000 : 20000
+        timeout: isCI ? 45000 : 20000,
       });
       await page.waitForSelector("#app", { timeout: isCI ? 15000 : 8000 });
       const loadTime = Date.now() - startTime;
@@ -213,7 +238,8 @@ test.describe("稳定性测试", () => {
     }
 
     // 计算统计信息
-    const avgLoadTime = loadTimes.reduce((a: number, b: number) => a + b, 0) / loadTimes.length;
+    const avgLoadTime =
+      loadTimes.reduce((a: number, b: number) => a + b, 0) / loadTimes.length;
     const maxLoadTime = Math.max(...loadTimes);
     const minLoadTime = Math.min(...loadTimes);
 
@@ -227,7 +253,9 @@ test.describe("稳定性测试", () => {
     console.log(`稳定性系数: ${stability.toFixed(2)}`);
 
     if (stability > 4) {
-      console.warn(`⚠️ 页面加载时间不稳定，波动较大 (系数: ${stability.toFixed(2)})`);
+      console.warn(
+        `⚠️ 页面加载时间不稳定，波动较大 (系数: ${stability.toFixed(2)})`,
+      );
     }
 
     console.log("✅ 稳定性测试完成");

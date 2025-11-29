@@ -1,5 +1,5 @@
 // api.ts - Axios API 配置
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 import { setupInterceptors } from "./interceptors";
 import { API_CONFIG, ERROR_CONFIG } from "@/config";
 import type { ApiResponse } from "@/services/api.types";
@@ -110,4 +110,4 @@ export function createApi() {
 const api = createApi();
 
 export default api;
-export { ApiResponse };
+export type { ApiResponse };

@@ -1,4 +1,4 @@
-import { type Directive, type DirectiveBinding } from "vue";
+import type { Directive, DirectiveBinding } from "vue";
 import { useUserStore } from "../stores/user";
 
 type PermissionValue = string | string[];

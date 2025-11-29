@@ -1,0 +1,42 @@
+# 依赖
+node_modules
+**/node_modules
+
+# 构建产物
+dist
+**/dist
+server-dist
+
+# 备份文件
+database-backups
+backups
+
+# 日志
+logs
+**/logs
+
+# 上传文件
+uploads
+**/uploads
+
+# 测试报告
+playwright-report
+test-results
+coverage
+
+# 自动生成的类型声明文件
+auto-imports.d.ts
+components.d.ts
+*.d.ts
+
+# 配置文件
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+
+# CSS 文件（包含 Vue 特殊语法 :deep() 等）
+src/assets/styles/components.css

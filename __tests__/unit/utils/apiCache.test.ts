@@ -80,7 +80,7 @@ describe("ApiCache", () => {
 
   it("应该在缓存满时清理旧项", () => {
     // 设置最大缓存项为1
-    // @ts-ignore - 访问私有属性用于测试
+    // @ts-expect-error - 访问私有属性用于测试
     apiCache.maxItems = 1;
 
     const testData1 = { id: 1, name: "Test1" };

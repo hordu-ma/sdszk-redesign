@@ -482,7 +482,7 @@ export const useUserStore = defineStore(
       try {
         loading.value = true;
         const response = await api.post(AUTH_ENDPOINTS.REGISTER, payload);
-        
+
         if (response.data?.status === "success") {
           // 注册成功后自动登录
           if (response.data.token && response.data.data?.user) {

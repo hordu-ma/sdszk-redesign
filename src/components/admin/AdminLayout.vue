@@ -35,7 +35,7 @@
 import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import AdminSidebar from "./AdminSidebar.vue";
+import type AdminSidebar from "./AdminSidebar.vue";
 import AdminHeader from "./AdminHeader.vue";
 
 const router = useRouter();

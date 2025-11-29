@@ -193,7 +193,7 @@ const connectDB = async (isReconnect = false) => {
 
       // 指数退避策略：1s, 2s, 4s, 8s, 16s, 32s, 最大60s
       const delay = Math.min(
-        INITIAL_RETRY_DELAY * Math.pow(2, reconnectAttempts - 1),
+        INITIAL_RETRY_DELAY * 2 ** (reconnectAttempts - 1),
         60000,
       );
       dbLogger.info(

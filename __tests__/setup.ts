@@ -98,9 +98,10 @@ export function createTestPinia() {
     createPersistedState({
       storage: {
         getItem: (key: string) => localStorageMock.getItem(key),
-        setItem: (key: string, value: string) => localStorageMock.setItem(key, value),
+        setItem: (key: string, value: string) =>
+          localStorageMock.setItem(key, value),
       },
-    })
+    }),
   );
 
   return pinia;

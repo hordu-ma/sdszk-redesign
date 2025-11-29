@@ -360,7 +360,8 @@ export const protect = async (req, res, next) => {
 // 用户注册
 export const register = async (req, res, next) => {
   try {
-    const { username, email, phone, password, fullName, verificationCode } = req.body;
+    const { username, email, phone, password, fullName, verificationCode } =
+      req.body;
 
     authLogger.debug(
       {

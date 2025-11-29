@@ -1,6 +1,6 @@
 // content.ts - 内容状态管理
 import { defineStore } from "pinia";
-import api, { ApiResponse } from "../utils/api";
+import api, { type ApiResponse } from "../utils/api";
 import { NEWS_ENDPOINTS, RESOURCE_ENDPOINTS } from "../constants/api-endpoints";
 
 interface NewsState {

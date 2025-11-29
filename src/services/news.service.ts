@@ -8,7 +8,7 @@ import type {
 } from "@/api/modules/news/index";
 import { newsApi } from "@/api";
 
-export { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams };
+export type { News, CreateNewsDTO, UpdateNewsDTO, NewsQueryParams };
 
 export class NewsService extends BaseService<News> {
   constructor() {

@@ -70,7 +70,7 @@ export function cacheMiddleware(options = {}) {
       const originalJson = res.json.bind(res);
 
       // 重写res.json方法以捕获响应数据
-      res.json = function (data) {
+      res.json = (data) => {
         // 只缓存成功的响应
         if (res.statusCode === 200) {
           // 异步缓存，不阻塞响应

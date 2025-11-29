@@ -213,7 +213,7 @@ export const createCategory = async (req, res, next) => {
       data: savedCategory,
     });
   } catch (err) {
-    let statusCode = 400;
+    const statusCode = 400;
     let errorMessage = err.message;
 
     // 处理MongoDB重复键错误

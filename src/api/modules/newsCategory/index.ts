@@ -1,5 +1,5 @@
 import { BaseApi } from "../../base";
-import { ApiResponse } from "../../types";
+import type { ApiResponse } from "../../types";
 import { withCache } from "@/utils/apiCache";
 
 export interface NewsCategory {

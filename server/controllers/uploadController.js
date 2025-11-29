@@ -20,7 +20,7 @@ if (!fs.existsSync(absoluteUploadPath)) {
 
 // 配置存储
 const storage = multer.diskStorage({
-  destination: function (_req, file, cb) {
+  destination: (_req, file, cb) => {
     let targetPath = absoluteUploadPath;
 
     // 根据不同类型存放到不同子目录
@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
 
     cb(null, targetPath);
   },
-  filename: function (_req, file, cb) {
+  filename: (_req, file, cb) => {
     // 获取文件扩展名
     const ext = path.extname(file.originalname);
     // 创建唯一的文件名: 时间戳-随机数-原始文件名

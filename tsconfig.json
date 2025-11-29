@@ -24,13 +24,7 @@
       "@/*": ["./src/*"]
     },
     "baseUrl": ".",
-    "types": [
-      "vite/client",
-      "vue",
-      "element-plus/global",
-      "node",
-      "vitest/globals"
-    ]
+    "types": ["vite/client", "vue", "element-plus/global", "node", "vitest/globals"]
   },
   "include": [
     "src/**/*.ts",

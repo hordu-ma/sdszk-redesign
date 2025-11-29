@@ -22,11 +22,10 @@ const shareSchema = new mongoose.Schema(
       type: String,
       trim: true,
       validate: {
-        validator: function (email) {
-          return email
+        validator: (email) =>
+          email
             ? /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
-            : true;
-        },
+            : true,
         message: "请提供有效的电子邮件地址",
       },
     },

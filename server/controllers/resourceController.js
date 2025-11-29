@@ -57,10 +57,7 @@ const mapBackendToFrontend = (data) => {
     // 如果序列化失败，返回简化的对象
     mapped = {};
     for (const key in data) {
-      if (
-        Object.prototype.hasOwnProperty.call(data, key) &&
-        typeof data[key] !== "function"
-      ) {
+      if (Object.hasOwn(data, key) && typeof data[key] !== "function") {
         try {
           mapped[key] = JSON.parse(JSON.stringify(data[key]));
         } catch {
@@ -136,7 +133,7 @@ const mapBackendToFrontend = (data) => {
 export const getResourceList = async (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query;
-    let query = { isPublished: true };
+    const query = { isPublished: true };
 
     if (category) {
       if (mongoose.Types.ObjectId.isValid(category)) {

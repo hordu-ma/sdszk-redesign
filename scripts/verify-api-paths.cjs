@@ -13,43 +13,53 @@
  * node scripts/verify-api-paths.js
  */
 
-const fs = require('fs');
+const fs = require("fs");
 // path module not used - removed to fix warning
-const glob = require('glob');
+const glob = require("glob");
 
 // 配置
 const CONFIG = {
-  srcDir: 'src',
+  srcDir: "src",
   excludePatterns: [
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/coverage/**',
-    '**/*.d.ts',
-    '**/constants/api-endpoints.ts' // 排除端点定义文件本身
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.d.ts",
+    "**/constants/api-endpoints.ts", // 排除端点定义文件本身
   ],
-  apiPrefix: '/api',
-  endpointsFile: 'src/constants/api-endpoints.ts'
+  apiPrefix: "/api",
+  endpointsFile: "src/constants/api-endpoints.ts",
 };
 
 // 颜色输出
 const colors = {
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  reset: '\x1b[0m',
-  bold: '\x1b[1m'
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
 };
 
 function colorLog(color, text) {
   console.log(`${color}${text}${colors.reset}`);
 }
 
-function success(text) { colorLog(colors.green, `✅ ${text}`); }
-function error(text) { colorLog(colors.red, `❌ ${text}`); }
-function warning(text) { colorLog(colors.yellow, `⚠️  ${text}`); }
-function info(text) { colorLog(colors.blue, `ℹ️  ${text}`); }
-function header(text) { colorLog(colors.bold, `\n📋 ${text}`); }
+function success(text) {
+  colorLog(colors.green, `✅ ${text}`);
+}
+function error(text) {
+  colorLog(colors.red, `❌ ${text}`);
+}
+function warning(text) {
+  colorLog(colors.yellow, `⚠️  ${text}`);
+}
+function info(text) {
+  colorLog(colors.blue, `ℹ️  ${text}`);
+}
+function header(text) {
+  colorLog(colors.bold, `\n📋 ${text}`);
+}
 
 // 验证结果收集器
 const results = {
@@ -59,24 +69,20 @@ const results = {
   unusedEndpoints: [],
   errors: [],
   warnings: [],
-  totalChecked: 0
+  totalChecked: 0,
 };
 
 /**
  * 获取所有需要检查的文件
  */
 function getFilesToCheck() {
-  const patterns = [
-    'src/**/*.ts',
-    'src/**/*.js',
-    'src/**/*.vue'
-  ];
+  const patterns = ["src/**/*.ts", "src/**/*.js", "src/**/*.vue"];
 
   let files = [];
-  patterns.forEach(pattern => {
+  patterns.forEach((pattern) => {
     const matched = glob.sync(pattern, {
       ignore: CONFIG.excludePatterns,
-      absolute: false
+      absolute: false,
     });
     files = files.concat(matched);
   });
@@ -95,7 +101,7 @@ function loadApiEndpoints() {
       return null;
     }
 
-    const content = fs.readFileSync(endpointsPath, 'utf8');
+    const content = fs.readFileSync(endpointsPath, "utf8");
 
     // 提取所有端点定义
     const endpoints = new Set();
@@ -125,15 +131,15 @@ function loadApiEndpoints() {
  */
 function checkFileApiCalls(filePath) {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
     const fileResults = {
       hardcodedPaths: [],
       missingPrefix: [],
-      lineNumbers: new Map()
+      lineNumbers: new Map(),
     };
 
     // 按行分割以获取行号
-    const lines = content.split('\n');
+    const lines = content.split("\n");
 
     lines.forEach((line, index) => {
       const lineNumber = index + 1;
@@ -142,15 +148,15 @@ function checkFileApiCalls(filePath) {
       const apiCallPatterns = [
         /api\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)['"`]/g,
         /axios\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)['"`]/g,
-        /fetch\s*\(\s*['"`]([^'"`]+)['"`]/g
+        /fetch\s*\(\s*['"`]([^'"`]+)['"`]/g,
       ];
 
-      apiCallPatterns.forEach(pattern => {
+      apiCallPatterns.forEach((pattern) => {
         let match;
         while ((match = pattern.exec(line)) !== null) {
           const path = match[2] || match[1]; // fetch只有一个路径参数
 
-          if (path.startsWith('/')) {
+          if (path.startsWith("/")) {
             // 记录行号
             if (!fileResults.lineNumbers.has(path)) {
               fileResults.lineNumbers.set(path, []);
@@ -199,10 +205,10 @@ function isUsingEndpointConstant(line) {
     /ROLE_ENDPOINTS/,
     /PERMISSION_ENDPOINTS/,
     /HEALTH_ENDPOINTS/,
-    /PERFORMANCE_ENDPOINTS/
+    /PERFORMANCE_ENDPOINTS/,
   ];
 
-  return constantPatterns.some(pattern => pattern.test(line));
+  return constantPatterns.some((pattern) => pattern.test(line));
 }
 
 /**
@@ -211,21 +217,24 @@ function isUsingEndpointConstant(line) {
 function checkEndpointUsage(apiEndpoints, allFiles) {
   const usedEndpoints = new Set();
 
-  allFiles.forEach(filePath => {
+  allFiles.forEach((filePath) => {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
 
       // 查找端点常量的使用
-      apiEndpoints.forEach(endpoint => {
-        const relativePath = endpoint.replace(CONFIG.apiPrefix, '');
+      apiEndpoints.forEach((endpoint) => {
+        const relativePath = endpoint.replace(CONFIG.apiPrefix, "");
 
         // 检查多种可能的使用模式
         const usagePatterns = [
-          new RegExp(`['"\`]${endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]`, 'g'),
-          new RegExp(`buildApiPath\\(['"\`]${relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]\\)`, 'g')
+          new RegExp(`['"\`]${endpoint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}['"\`]`, "g"),
+          new RegExp(
+            `buildApiPath\\(['"\`]${relativePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}['"\`]\\)`,
+            "g",
+          ),
         ];
 
-        usagePatterns.forEach(pattern => {
+        usagePatterns.forEach((pattern) => {
           if (pattern.test(content)) {
             usedEndpoints.add(endpoint);
           }
@@ -237,7 +246,7 @@ function checkEndpointUsage(apiEndpoints, allFiles) {
   });
 
   // 找出未使用的端点
-  apiEndpoints.forEach(endpoint => {
+  apiEndpoints.forEach((endpoint) => {
     if (!usedEndpoints.has(endpoint)) {
       results.unusedEndpoints.push(endpoint);
     }
@@ -248,53 +257,53 @@ function checkEndpointUsage(apiEndpoints, allFiles) {
  * 主验证函数
  */
 function validateApiPaths() {
-  header('API路径验证开始');
+  header("API路径验证开始");
 
   // 1. 加载API端点定义
-  info('加载API端点定义...');
+  info("加载API端点定义...");
   const apiEndpoints = loadApiEndpoints();
   if (!apiEndpoints) {
-    error('无法加载API端点定义，验证中止');
+    error("无法加载API端点定义，验证中止");
     return false;
   }
   success(`发现 ${apiEndpoints.size} 个API端点定义`);
 
   // 2. 获取要检查的文件
-  info('扫描项目文件...');
+  info("扫描项目文件...");
   const filesToCheck = getFilesToCheck();
   success(`找到 ${filesToCheck.length} 个文件需要检查`);
 
   // 3. 检查每个文件
-  header('检查API调用路径');
-  filesToCheck.forEach(filePath => {
+  header("检查API调用路径");
+  filesToCheck.forEach((filePath) => {
     const fileResults = checkFileApiCalls(filePath);
     if (fileResults) {
       results.totalChecked++;
 
       // 收集硬编码路径
-      fileResults.hardcodedPaths.forEach(path => {
+      fileResults.hardcodedPaths.forEach((path) => {
         const lines = fileResults.lineNumbers.get(path) || [];
         results.hardcodedPaths.push({
           file: filePath,
           path: path,
-          lines: lines
+          lines: lines,
         });
       });
 
       // 收集缺少前缀的路径
-      fileResults.missingPrefix.forEach(path => {
+      fileResults.missingPrefix.forEach((path) => {
         const lines = fileResults.lineNumbers.get(path) || [];
         results.missingPrefix.push({
           file: filePath,
           path: path,
-          lines: lines
+          lines: lines,
         });
       });
     }
   });
 
   // 4. 检查端点使用情况
-  header('检查端点常量使用情况');
+  header("检查端点常量使用情况");
   checkEndpointUsage(apiEndpoints, filesToCheck);
 
   return true;
@@ -304,7 +313,7 @@ function validateApiPaths() {
  * 生成验证报告
  */
 function generateReport() {
-  header('验证报告');
+  header("验证报告");
 
   console.log(`📊 检查统计:`);
   console.log(`  - 检查文件数: ${results.totalChecked}`);
@@ -313,32 +322,32 @@ function generateReport() {
 
   // 报告缺少API前缀的路径
   if (results.missingPrefix.length > 0) {
-    header('❌ 缺少 /api 前缀的路径');
-    results.missingPrefix.forEach(item => {
-      error(`${item.file}:${item.lines.join(',')} - "${item.path}"`);
+    header("❌ 缺少 /api 前缀的路径");
+    results.missingPrefix.forEach((item) => {
+      error(`${item.file}:${item.lines.join(",")} - "${item.path}"`);
     });
   }
 
   // 报告硬编码的API路径
   if (results.hardcodedPaths.length > 0) {
-    header('⚠️  硬编码的API路径 (建议使用端点常量)');
-    results.hardcodedPaths.forEach(item => {
-      warning(`${item.file}:${item.lines.join(',')} - "${item.path}"`);
+    header("⚠️  硬编码的API路径 (建议使用端点常量)");
+    results.hardcodedPaths.forEach((item) => {
+      warning(`${item.file}:${item.lines.join(",")} - "${item.path}"`);
     });
   }
 
   // 报告未使用的端点
   if (results.unusedEndpoints.length > 0) {
-    header('📝 未使用的端点常量');
-    results.unusedEndpoints.forEach(endpoint => {
+    header("📝 未使用的端点常量");
+    results.unusedEndpoints.forEach((endpoint) => {
       info(`${endpoint}`);
     });
   }
 
   // 报告错误
   if (results.errors.length > 0) {
-    header('💥 处理错误');
-    results.errors.forEach(error => {
+    header("💥 处理错误");
+    results.errors.forEach((error) => {
       error(error);
     });
   }
@@ -348,11 +357,11 @@ function generateReport() {
   const hasWarnings = results.hardcodedPaths.length > 0 || results.unusedEndpoints.length > 0;
 
   if (!hasErrors && !hasWarnings) {
-    success('\n🎉 所有API路径验证通过！');
+    success("\n🎉 所有API路径验证通过！");
   } else if (!hasErrors) {
-    warning('\n✨ API路径验证通过，但有一些建议优化的地方');
+    warning("\n✨ API路径验证通过，但有一些建议优化的地方");
   } else {
-    error('\n💥 API路径验证失败，需要修复错误');
+    error("\n💥 API路径验证失败，需要修复错误");
   }
 
   return !hasErrors;
@@ -363,12 +372,12 @@ function generateReport() {
  */
 function generateFixSuggestions() {
   if (results.missingPrefix.length > 0) {
-    header('🔧 修复建议');
+    header("🔧 修复建议");
 
-    console.log('对于缺少 /api 前缀的路径，请按以下方式修复：\n');
+    console.log("对于缺少 /api 前缀的路径，请按以下方式修复：\n");
 
     const pathFixes = new Map();
-    results.missingPrefix.forEach(item => {
+    results.missingPrefix.forEach((item) => {
       // Generate fixed path for tracking
       if (!pathFixes.has(item.path)) {
         pathFixes.set(item.path, []);
@@ -379,22 +388,22 @@ function generateFixSuggestions() {
     pathFixes.forEach((files, originalPath) => {
       const fixedPath = CONFIG.apiPrefix + originalPath;
       console.log(`  "${originalPath}" → "${fixedPath}"`);
-      files.forEach(file => {
+      files.forEach((file) => {
         console.log(`    - ${file}`);
       });
-      console.log('');
+      console.log("");
     });
 
-    console.log('建议使用API端点常量替代硬编码路径：');
-    console.log('  1. 从 src/constants/api-endpoints.ts 导入相应的端点常量');
-    console.log('  2. 使用常量替代硬编码的字符串路径');
-    console.log('  3. 如果需要新的端点，请在端点文件中添加定义\n');
+    console.log("建议使用API端点常量替代硬编码路径：");
+    console.log("  1. 从 src/constants/api-endpoints.ts 导入相应的端点常量");
+    console.log("  2. 使用常量替代硬编码的字符串路径");
+    console.log("  3. 如果需要新的端点，请在端点文件中添加定义\n");
   }
 }
 
 // 主程序
 function main() {
-  console.log('🔍 API路径一致性验证工具\n');
+  console.log("🔍 API路径一致性验证工具\n");
 
   try {
     validateApiPaths();
@@ -419,5 +428,5 @@ if (require.main === module) {
 module.exports = {
   validateApiPaths,
   generateReport,
-  CONFIG
+  CONFIG,
 };

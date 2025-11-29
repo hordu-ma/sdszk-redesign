@@ -17,7 +17,7 @@ export const getAdminResourceList = async (req, res) => {
       dateRange,
     } = req.query;
 
-    let query = {};
+    const query = {};
 
     // 处理分类筛选
     if (category) {
